@@ -1,0 +1,153 @@
+.login-page {
+  font-family: Arial, sans-serif;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-position: center;
+  overflow: hidden;
+}
+
+.login-page::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('pngtree-old-movie-posters-on-the-wall-image_2881318.jpg');
+  background-position: center;
+  opacity: 0.9;
+  z-index: -1;
+}
+
+.login-container {
+  background-color: rgba(0, 0, 0, 0.8);
+  padding: 40px;
+  border-radius: 10px;
+  color: white;
+  width: 500px;
+  z-index: 1;
+}
+
+.login-now {
+  display: flex;
+  justify-content: center;
+}
+
+h1 {
+  text-align: center;
+}
+
+.input-group {
+  margin-bottom: 15px;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 17px; /* Adjusted for better alignment */
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 18px;
+  bottom: 32px;
+}
+
+/* Modern Transparent Input Box Styling */
+input {
+  width: 100%;
+  padding: 22px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.4);
+  border-radius: 5px;
+  color: white;
+  font-size: 16px;
+  margin-bottom: 20px;
+  outline: none;
+  transition: border-bottom-color 0.3s ease-in-out;
+}
+
+input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+input:focus {
+  border-bottom-color: #3A5E49;
+}
+
+.login-input {
+  width: 100%;
+  padding: 12px 15px 12px 50px; /* Added more left padding for the input field */
+  background-color: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.4);
+  border-radius: 5px;
+  color: white;
+  font-size: 16px;
+  margin-bottom: 20px;
+  outline: none;
+  transition: border-bottom-color 0.3s ease-in-out;
+}
+
+.login-btn {
+  background-color: #b31200;
+  color: white;
+  padding: 15px 0px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 100%;
+  height: 50px;
+  font-size: 18px;
+  transition: background-color 0.3s ease-in-out;
+}
+
+.login-btn:hover {
+  background-color: #2e4c3b; /* Darken the button on hover */
+}
+
+
+.forgot-password {
+  text-align: right;
+  margin-bottom: 1rem;
+}
+
+.forgot-password-link {
+  color: white;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.forgot-password-link:hover {
+  text-decoration: underline;
+}
+
+.checkbox-group {
+  margin-bottom: 15px;
+}
+
+.social-login-buttons {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+.social-login-buttons button {
+  background-color: #fff;
+  color: #333;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 50%;
+  margin: 0 5px;
+}
+
+a {
+  color: #ccc;
+  text-decoration: none;
+}
