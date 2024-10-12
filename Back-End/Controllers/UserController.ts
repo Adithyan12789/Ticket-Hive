@@ -1,22 +1,22 @@
-// server/src/controllers/UserController.ts
 import bcrypt from "bcryptjs";
 import asyncHandler from "express-async-handler";
 import { Request, Response } from "express";
-import nodemailer from "nodemailer"; 
+import nodemailer from "nodemailer";
 import crypto from 'crypto';
 import User from "../Models/UserModel"; // Ensure the path is correct
 import generateToken from "../Utils/GenerateToken"; // Ensure the path is correct
 import dotenv from 'dotenv';
+import expressAsyncHandler from "express-async-handler";
 
 dotenv.config();
 
-// Send OTP email
+// Send OTP email utility
 const sendOtpEmail = async (email: string, otp: string): Promise<void> => {
     const transporter = nodemailer.createTransport({
         service: 'Gmail',
         auth: {
             user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS,   
+            pass: process.env.EMAIL_PASS,
         },
     });
 
@@ -40,39 +40,24 @@ const sendOtpEmail = async (email: string, otp: string): Promise<void> => {
 const authUser = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { email, password } = req.body;
 
-    // Check if email and password are provided
     if (!email || !password) {
         res.status(400).json({ message: "Email and password are required" });
         return;
     }
 
-    // Find the user by email
     const user = await User.findOne({ email });
 
-    console.log("User found:", user); // Log the found user for debugging
-
-    // If user exists and passwords match
-    if (user) {
-        const isPasswordValid = await user.matchPassword(password);
-        console.log("Password valid:", isPasswordValid); // Log if the password is valid
-
-        if (isPasswordValid) {
-            generateToken(res, user._id.toString()); // Generate token
-            res.status(200).json({
-                id: user._id,
-                name: user.name,
-                email: user.email,
-            });
-        } else {
-            // Password is incorrect
-            res.status(400).json({ message: "Invalid Email or Password" });
-        }
+    if (user && (await user.matchPassword(password))) {
+        generateToken(res, user._id.toString());
+        res.status(200).json({
+            id: user._id,
+            name: user.name,
+            email: user.email,
+        });
     } else {
-        // User not found
         res.status(400).json({ message: "Invalid Email or Password" });
     }
 });
-
 
 // Registration Controller
 const registerUser = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -81,33 +66,30 @@ const registerUser = asyncHandler(async (req: Request, res: Response): Promise<v
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
-        res.status(400).json({ message: 'Email already exists. Please use a different email.' });
+        res.status(400).json({ message: 'Email already exists.' });
         return;
     }
 
-    // Generate a new OTP for the new user
     const otp = crypto.randomInt(100000, 999999).toString();
 
-    // Create the new user
     const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt); // Hash the password
+    const hashedPassword = await bcrypt.hash(password, salt);
 
     const user = new User({
         name,
         email,
         phone,
-        password: hashedPassword, // Store the hashed password
+        password: hashedPassword,
         otp,
         otpVerified: false,
     });
 
-    await user.save(); // Save the user to the database
+    await user.save();
 
-    // Send OTP email to the newly registered user
     try {
         await sendOtpEmail(user.email, otp);
     } catch (error) {
-        res.status(500).json({ message: 'Failed to send OTP email. Please try again.' });
+        res.status(500).json({ message: 'Failed to send OTP email.' });
         return;
     }
 
@@ -116,13 +98,38 @@ const registerUser = asyncHandler(async (req: Request, res: Response): Promise<v
         name: user.name,
         email: user.email,
         otpSent: true,
-        message: 'User registered successfully. OTP has been sent to your email.',
+        message: 'User registered successfully. OTP sent.',
     });
 });
 
 // Verify OTP Controller
-const verifyOTP = asyncHandler(async (req: Request, res: Response): Promise<void> => { 
+const verifyOTP = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { email, otp } = req.body;
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+        res.status(404).json({ message: 'User not found' });
+        return;
+    }
+
+    if (String(user.otp) === String(otp)) {
+        user.otpVerified = true;
+        await user.save();
+        res.status(200).json({ message: 'OTP verified successfully' });
+    } else {
+        res.status(400).json({ message: 'Incorrect OTP' });
+    }
+});
+
+// Forgot Password Controller
+const forgotPasswordController = expressAsyncHandler(async (req: Request, res: Response) => {
+    const { email } = req.body;
+
+    if (!email) {
+        res.status(400).json({ message: 'Email is required' });
+        return;
+    }
 
     try {
         const user = await User.findOne({ email });
@@ -132,113 +139,55 @@ const verifyOTP = asyncHandler(async (req: Request, res: Response): Promise<void
             return;
         }
 
-        console.log('Stored OTP:', user.otp);
-        console.log('Provided OTP:', otp);
-
-        if (String(user.otp) === String(otp)) { // Ensure matching types
-            user.otpVerified = true; // Set user as verified
-            await user.save(); // Save user changes
-
-            res.status(200).json({ message: 'OTP verified successfully', otpVerified: user.otpVerified });
-        } else {
-            res.status(400).json({ message: 'Incorrect OTP. Please try again.', email });
-        }
-    } catch (error) {
-        console.error('Error verifying OTP:', error);
-        res.status(500).json({ message: 'Server error. Please try again later.' });
-    }
-});
-
-
-// Forgot Password Controller
-const forgotPassword = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const { email } = req.body;
-
-    // Check if email is provided
-    if (!email) {
-        res.status(400).json({ message: "Email is required" });
-        return;
-    }
-
-    try {
-        // Find the user by email
-        const user = await User.findOne({ email });
-
-        if (!user) {
-            res.status(404).json({ message: "User not found" });
-            return;
-        }
-
-        // Generate a reset token and set expiration (e.g., 1 hour)
         const resetToken = crypto.randomBytes(32).toString('hex');
         user.resetPasswordToken = resetToken;
-        const expirationTime = Date.now() + 3600000; // Token valid for 1 hour
-        user.resetPasswordExpires = new Date(expirationTime); // Store as a Date
+        user.resetPasswordExpires = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes from now
 
-        // Save user with the token and expiration
         await user.save();
 
-        // Initialize transporter inside the function
-        const transporter = nodemailer.createTransport({
-            service: 'Gmail',
-            auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS,
-            },
-        });
+        const resetUrl = `http://localhost:3000/reset-password/${resetToken}`;
+        const message = `Password reset link: ${resetUrl}`;
 
-        // Send reset link via email
-        const resetUrl = `http://reset-password/${resetToken}`;
-        const mailOptions = {
-            from: process.env.EMAIL_USER,
-            to: email,
-            subject: 'Password Reset',
-            text: `You requested a password reset. Click the link to reset your password: ${resetUrl}`,
-        };
-
-        await transporter.sendMail(mailOptions);
-
-        res.status(200).json({ message: 'Password reset link sent to your email' });
+        await sendOtpEmail(user.email, message);
+        res.status(200).json({ message: 'Password reset email sent' });
     } catch (error) {
-        res.status(500).json({ message: 'Error sending reset email. Please try again.' });
-        console.error('Error in forgotPassword:', error);
+        res.status(500).json({ message: 'Failed to send email' });
     }
 });
 
 
 // Reset Password Controller
-const resetPassword = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const { token } = req.params; // Get token from the URL
-    const { password } = req.body; // Get new password from the request body
+const resetPasswordController = expressAsyncHandler(async (req: Request, res: Response) => {
+    const { password } = req.body;
+    const resetToken = req.params.token;
+
+    if (!resetToken || !password) {
+        res.status(400).json({ message: 'Token and password are required' });
+        return;
+    }
 
     try {
-        // Find the user based on the reset token and ensure the token hasn't expired
         const user = await User.findOne({
-            resetPasswordToken: token,
-            resetPasswordExpires: { $gt: Date.now() }, // Token expiration check
+            resetPasswordToken: resetToken,
+            resetPasswordExpires: { $gt: Date.now() }, // Token not expired
         });
 
         if (!user) {
-            res.status(400).json({ message: "Invalid or expired reset token" });
+            res.status(400).json({ message: 'Invalid or expired token' });
             return;
         }
 
-        // Hash the new password
+        // Hash the new password and update the user's password
         const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
-
-        // Set the new password and clear the reset token fields
-        user.password = hashedPassword;
+        user.password = await bcrypt.hash(password, salt);
         user.resetPasswordToken = undefined;
         user.resetPasswordExpires = undefined;
 
-        // Save the updated user with the new password
         await user.save();
 
-        res.status(200).json({ message: "Password has been reset successfully" });
+        res.status(200).json({ message: 'Password reset successfully' });
     } catch (error) {
-        res.status(500).json({ message: "Server error. Please try again later." });
-        console.error("Error in resetPassword:", error);
+        res.status(500).json({ message: 'Failed to reset password' });
     }
 });
 
@@ -260,6 +209,6 @@ export {
     registerUser,
     verifyOTP,
     logoutUser,
-    forgotPassword,
-    resetPassword
+    forgotPasswordController,
+    resetPasswordController
 };

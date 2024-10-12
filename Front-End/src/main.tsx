@@ -6,9 +6,10 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 // import './index.css';
 import store from './Store';
 import { Provider } from 'react-redux';
-import LoginPage from './Pages/LoginPage';
-import RegisterPage from './Pages/RegisterPage';
-import ForgotPassword from './Pages/ForgetPasswordPage';
+import LoginPage from './Pages/USER/LoginPage';
+import RegisterPage from './Pages/USER/RegisterPage';
+import ForgotPassword from './Pages/USER/ForgetPasswordPage';
+import ResetPassword from './Pages/USER/ResetPasswordPage';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -16,8 +17,8 @@ const router = createBrowserRouter(
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<RegisterPage />} />
       <Route path="/verifyotp" element={<RegisterPage />} />
-      <Route path="/forget-password" element={<ForgotPassword />} />
-      <Route path="/reset-password" element={<RegisterPage />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password/:token" element={<ResetPassword />} />
     </Route>
   )
 );

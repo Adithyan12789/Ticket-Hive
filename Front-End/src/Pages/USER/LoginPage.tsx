@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { useLoginMutation } from '../Slices/UserApiSlice';
-import { setCredentials } from '../Slices/AuthSlice';
+import { useLoginMutation } from '../../Slices/UserApiSlice';
+import { setCredentials } from '../../Slices/AuthSlice';
 import { toast } from 'react-toastify';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelope, faLock } from '@fortawesome/free-solid-svg-icons';
 import './LoginPage.css';
-import { RootState, AppDispatch } from '../Store';
+import { RootState, AppDispatch } from '../../Store';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -106,10 +106,7 @@ const LoginPage = () => {
             {isLoading ? 'Signing In...' : 'Sign In'}
           </button>
 
-          <div className="social-login-buttons py-4">
-            <button type="button">G</button>
-          </div>
-          <div className="login-now">
+          <div className="login-now pt-5">
             <p>Already a User? <a href="/signup">Sign Up</a></p>
           </div>
         </form>

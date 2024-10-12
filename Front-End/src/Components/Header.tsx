@@ -31,7 +31,7 @@ const Header: React.FC = () => {
       <Navbar bg="dark" variant="dark" expand="lg" collapseOnSelect>
         <Container>
           <LinkContainer to="/">
-            <Navbar.Brand>MERN APP</Navbar.Brand>
+            <Navbar.Brand>Ticket Hive</Navbar.Brand>
           </LinkContainer>
 
           <Navbar.Toggle aria-controls="basic-navbar-nav" />

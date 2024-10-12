@@ -7,8 +7,12 @@ import Header from './Components/Header';
 const App: React.FC = () => {
   const location = useLocation();
 
-  // Check if the current path is login or signup
-  const hideHeader = location.pathname === '/login' || location.pathname === '/signup';
+// Use a regular expression to check for dynamic routes like `/reset-password/:token`
+  const hideHeader = location.pathname === '/login' 
+      || location.pathname === '/signup' 
+      || location.pathname === '/forgot-password' 
+      || /^\/reset-password\/.+$/.test(location.pathname); // This checks for '/reset-password/:token'
+
 
   return (
     <>

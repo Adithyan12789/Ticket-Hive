@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useRegisterMutation } from '../Slices/UserApiSlice';
-import { useVerifyOtpMutation } from '../Slices/UserApiSlice';
+import { useRegisterMutation } from '../../Slices/UserApiSlice';
+import { useVerifyOtpMutation } from '../../Slices/UserApiSlice';
 import { toast } from 'react-toastify';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelope, faLock, faUser, faPhone } from '@fortawesome/free-solid-svg-icons';
@@ -172,10 +172,8 @@ const SignUpPage = () => {
           <button className="signup-btn" type="submit" disabled={isLoading}>
             {isLoading ? 'Signing Up...' : 'Sign Up'}
           </button>
-          <div className="social-login-buttons py-4">
-            <button type="button">G</button>
-          </div>
-          <div className="login-now">
+
+          <div className="login-now pt-5">
             <p>Already have an account? <a href="/login">Log In</a></p>
           </div>
         </form>
