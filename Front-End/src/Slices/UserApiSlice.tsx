@@ -1,6 +1,5 @@
 import { apiSlice } from "./ApiSlice";
 
-// Define the type for the login, register, and update user payload
 interface UserCredentials {
   email: string;
   password: string;
@@ -22,16 +21,14 @@ interface UserProfile {
   id: string;
   name: string;
   email: string;
-  // Add any other fields required for the user profile
 }
 
-// Define the expected responses (optional but recommended)
 interface UserResponse {
+  isAdmin: UserResponse;
   id: string;
   name: string;
   email: string;
   token: string;
-  // Add any other fields returned by the API
 }
 
 const USERS_URL = '/api/users';

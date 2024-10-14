@@ -1,60 +1,42 @@
-import mongoose, { Document } from 'mongoose';
-import bcrypt from "bcryptjs";
+import mongoose, { Document, Schema, Model } from 'mongoose';
+import { ObjectId } from 'mongodb';
+import bcrypt from 'bcryptjs'
 
-// Define an interface for the User document
+// Interface to define the structure of the user document
 export interface IUser extends Document {
-    _id: mongoose.Types.ObjectId; 
+    _id: ObjectId;
     name: string;
     email: string;
     password: string;
-    profileImageName?: string; // Optional field
-    otp: number;
+    phone: string;
+    otp: string;
     otpVerified: boolean;
-    resetPasswordToken?: string; // Optional reset token field
-    resetPasswordExpires?: Date; // Optional reset token expiration field
-    matchPassword(password: string): Promise<boolean>; // Ensure Promise<boolean> return type
+    resetPasswordToken?: string;
+    resetPasswordExpires?: Date;
+    matchPassword: (password: string) => Promise<boolean>;
 }
 
-// Define the user schema
-const userSchema = new mongoose.Schema<IUser>({
-    name: {
-        type: String,
-        required: true,
+// Define the schema for the User model
+const userSchema: Schema<IUser> = new Schema(
+    {
+        name: { type: String, required: true },
+        email: { type: String, required: true, unique: true },
+        password: { type: String, required: true },
+        phone: { type: String, required: true },
+        otp: { type: String, required: true },
+        otpVerified: { type: Boolean, default: false },
+        resetPasswordToken: { type: String },
+        resetPasswordExpires: { type: Date },
     },
-    email: {
-        type: String,
-        required: true,
-        unique: true,
-    },
-    password: {
-        type: String,
-        required: true,
-    },
-    profileImageName: {
-        type: String,
-    },
-    otp: {
-        type: Number,
-    },
-    otpVerified: {
-        type: Boolean,
-        default: false,
-    },
-    resetPasswordToken: {
-        type: String,
-    },
-    resetPasswordExpires: {
-        type: Date,
-    },
-}, {
-    timestamps: true,
-});
+    { timestamps: true }
+);
 
-// Add the matchPassword method to the user schema
-userSchema.methods.matchPassword = async function (enteredPassword: string) {
-    return await bcrypt.compare(enteredPassword, this.password);
+// Method to match the provided password with the stored password
+userSchema.methods.matchPassword = async function (password: string): Promise<boolean> {
+    return bcrypt.compare(password, this.password);
 };
 
 // Create and export the User model
-const User = mongoose.model<IUser>('User', userSchema);
+const User: Model<IUser> = mongoose.model<IUser>('User', userSchema);
+
 export default User;

@@ -1,4 +1,3 @@
-// routes/UserRoutes.ts
 import express from 'express';
 import { authUser, registerUser, verifyOTP, logoutUser, forgotPasswordController, resetPasswordController } from '../Controllers/UserController';
 

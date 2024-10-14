@@ -1,4 +1,4 @@
-.login-page {
+.user-login-page {
   font-family: Arial, sans-serif;
   position: relative;
   display: flex;
@@ -9,20 +9,20 @@
   overflow: hidden;
 }
 
-.login-page::before {
+.user-login-page::before {
   content: "";
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: url('pngtree-old-movie-posters-on-the-wall-image_2881318.jpg');
+  background-image: url('/pngtree-old-movie-posters-on-the-wall-image_2881318.jpg');
   background-position: center;
   opacity: 0.9;
   z-index: -1;
 }
 
-.login-container {
+.user-login-container {
   background-color: rgba(0, 0, 0, 0.9);
   padding: 40px;
   border-radius: 10px;
@@ -31,7 +31,7 @@
   z-index: 1;
 }
 
-.login-now {
+.user-login-now {
   display: flex;
   justify-content: center;
 }
@@ -40,17 +40,17 @@ h1 {
   text-align: center;
 }
 
-.input-group {
+.user-input-group {
   margin-bottom: 15px;
 }
 
-.input-wrapper {
+.user-input-wrapper {
   position: relative;
   display: flex;
   align-items: center;
 }
 
-.input-icon {
+.user-input-icon {
   position: absolute;
   left: 17px; /* Adjusted for better alignment */
   color: rgba(255, 255, 255, 0.7);
@@ -59,7 +59,7 @@ h1 {
 }
 
 /* Modern Transparent Input Box Styling */
-input {
+.user-login-input {
   width: 100%;
   padding: 22px;
   background-color: rgba(255, 255, 255, 0.1);
@@ -73,7 +73,7 @@ input {
   transition: border-bottom-color 0.3s ease-in-out;
 }
 
-input::placeholder {
+.user-login-input::placeholder {
   color: rgba(255, 255, 255, 0.7);
 }
 
@@ -81,7 +81,7 @@ input:focus {
   border-bottom-color: #3A5E49;
 }
 
-.login-input {
+.user-login-input {
   width: 100%;
   padding: 12px 15px 12px 50px; /* Added more left padding for the input field */
   background-color: rgba(255, 255, 255, 0.1);
@@ -95,7 +95,7 @@ input:focus {
   transition: border-bottom-color 0.3s ease-in-out;
 }
 
-.login-btn {
+.user-login-btn {
   background-color: #b31200;
   color: white;
   padding: 15px 0px;
@@ -108,23 +108,23 @@ input:focus {
   transition: background-color 0.3s ease-in-out;
 }
 
-.login-btn:hover {
+.user-login-btn:hover {
   background-color: #2e4c3b; /* Darken the button on hover */
 }
 
 
-.forgot-password {
+.user-forgot-password {
   text-align: right;
   margin-bottom: 1rem;
 }
 
-.forgot-password-link {
+.user-forgot-password-link {
   color: white;
   text-decoration: none;
   font-size: 0.9rem;
 }
 
-.forgot-password-link:hover {
+.user-forgot-password-link:hover {
   text-decoration: underline;
 }
 

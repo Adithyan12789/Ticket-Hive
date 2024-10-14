@@ -6,12 +6,12 @@ import { LinkContainer } from 'react-router-bootstrap';
 import { useLogoutMutation } from '../Slices/UserApiSlice';
 import { logout } from '../Slices/AuthSlice';
 import { useNavigate } from 'react-router-dom';
-import { RootState, AppDispatch } from '../Store'; // Import the types for the state and dispatch
+import { RootState, AppDispatch } from '../Store';
 
 const Header: React.FC = () => {
-  const { userInfo } = useSelector((state: RootState) => state.auth); // Typed useSelector
+  const { userInfo } = useSelector((state: RootState) => state.auth);
 
-  const dispatch = useDispatch<AppDispatch>(); // Typed useDispatch
+  const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
 
   const [logoutApiCall] = useLogoutMutation();
@@ -27,7 +27,7 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header style={{backgroundColor: "#3A5E49"}}>
+    <header style={{ backgroundColor: '#3A5E49' }}>
       <Navbar bg="dark" variant="dark" expand="lg" collapseOnSelect>
         <Container>
           <LinkContainer to="/">
@@ -37,14 +37,21 @@ const Header: React.FC = () => {
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
 
           <Navbar.Collapse id="basic-navbar-nav">
+
+            <Nav className="mx-auto">
+              <LinkContainer to="/">
+                <Nav.Link>Home</Nav.Link>
+              </LinkContainer>
+
+              <LinkContainer to="/movies">
+                <Nav.Link>Movies</Nav.Link>
+              </LinkContainer>
+            </Nav>
+
             <Nav className="ms-auto">
               {userInfo ? (
                 <>
                   <NavDropdown title={userInfo.name} id="username">
-                    <LinkContainer to="/profile">
-                      <NavDropdown.Item>Profile</NavDropdown.Item>
-                    </LinkContainer>
-
                     <NavDropdown.Item onClick={logoutHandler}>
                       Logout
                     </NavDropdown.Item>
@@ -58,7 +65,7 @@ const Header: React.FC = () => {
                     </Nav.Link>
                   </LinkContainer>
 
-                  <LinkContainer to="/register">
+                  <LinkContainer to="/signup">
                     <Nav.Link>
                       <FaSignOutAlt /> Sign Up
                     </Nav.Link>

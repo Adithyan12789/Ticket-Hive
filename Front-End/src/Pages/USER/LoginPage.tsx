@@ -60,17 +60,17 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="login-page">
-      <div className="login-container">
+    <div className="user-login-page">
+      <div className="user-login-container">
         <h1 className="pb-5" style={{ fontSize: "40px" }}>Ticket Hive</h1>
         <form onSubmit={submitHandler}>
-          <div className="input">
-            <div className="input-wrapper">
-              <span className="input-icon">
+          <div className="user-input">
+            <div className="user-input-wrapper">
+              <span className="user-input-icon">
                 <FontAwesomeIcon icon={faEnvelope} />
               </span>
               <input
-                className="login-input"
+                className="user-login-input"
                 type="email"
                 placeholder="Email Address"
                 value={email}
@@ -79,13 +79,13 @@ const LoginPage = () => {
               />
             </div>
           </div>
-          <div className="input pb-3">
-            <div className="input-wrapper">
-              <span className="input-icon">
+          <div className="user-input pb-3">
+            <div className="user-input-wrapper">
+              <span className="user-input-icon">
                 <FontAwesomeIcon icon={faLock} />
               </span>
               <input
-                className="login-input"
+                className="user-login-input"
                 type="password"
                 placeholder="Password"
                 value={password}
@@ -96,17 +96,17 @@ const LoginPage = () => {
           </div>
 
           {/* Forgot Password Link */}
-          <div className="forgot-password">
-            <a href="/forgot-password" className="forgot-password-link">
+          <div className="user-forgot-password">
+            <a href="/forgot-password" className="user-forgot-password-link">
               Forgot Password?
             </a>
           </div>
 
-          <button className="login-btn" type="submit">
+          <button className="user-login-btn" type="submit">
             {isLoading ? 'Signing In...' : 'Sign In'}
           </button>
 
-          <div className="login-now pt-5">
+          <div className="user-login-now pt-5">
             <p>Already a User? <a href="/signup">Sign Up</a></p>
           </div>
         </form>

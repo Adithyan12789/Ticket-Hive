@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useResetPasswordMutation } from '../../Slices/UserApiSlice';
 import { toast } from 'react-toastify';
-import Loader from "../../Components/Loader"; // Use an overlay loader
+import Loader from "../../Components/Loader";
 import { useParams, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faLock, faUnlockAlt } from '@fortawesome/free-solid-svg-icons'; // Import lock/unlock icons
+import { faLock, faUnlockAlt } from '@fortawesome/free-solid-svg-icons';
 import './ResetPasswordPage.css';
 
 const ResetPasswordScreen = () => {
@@ -50,21 +50,21 @@ const ResetPasswordScreen = () => {
   };
 
   return (
-    <div className="reset-password-page">
-      {isLoading && <div className="loader-overlay"><Loader /></div>} {/* Loader overlay */}
-      <div className="reset-password-container">
+    <div className="user-reset-password-page">
+      {isLoading && <div className="user-loader-overlay"><Loader /></div>}
+      <div className="user-reset-password-container">
         <h1 className="pb-5" style={{ fontSize: "30px" }}>
           Reset Your Password
         </h1>
 
         <form onSubmit={submitHandler}>
-          <div className="reset-input">
-            <div className="reset-input-wrapper">
-              <span className="reset-input-icon">
-                <FontAwesomeIcon icon={faLock} /> {/* Lock icon */}
+          <div className="user-reset-input">
+            <div className="user-reset-input-wrapper">
+              <span className="user-reset-input-icon">
+                <FontAwesomeIcon icon={faLock} /> 
               </span>
               <input
-                className="reset-password-input"
+                className="user-reset-password-input"
                 type="password"
                 placeholder="Enter new password"
                 value={password}
@@ -74,13 +74,13 @@ const ResetPasswordScreen = () => {
             </div>
           </div>
 
-          <div className="reset-input">
-            <div className="reset-input-wrapper">
-              <span className="reset-input-icon">
-                <FontAwesomeIcon icon={faUnlockAlt} /> {/* Unlock icon */}
+          <div className="user-reset-input">
+            <div className="user-reset-input-wrapper">
+              <span className="user-reset-input-icon">
+                <FontAwesomeIcon icon={faUnlockAlt} />
               </span>
               <input
-                className="reset-password-input"
+                className="user-reset-password-input"
                 type="password"
                 placeholder="Confirm new password"
                 value={confirmPassword}
@@ -90,7 +90,7 @@ const ResetPasswordScreen = () => {
             </div>
           </div>
 
-          <button className="reset-btn" type="submit">
+          <button className="user-reset-btn" type="submit">
             Reset Password
           </button>
         </form>

@@ -1,0 +1,17 @@
+.user-image-section {
+    text-align: center;
+    margin: 20px 0;
+  }
+  
+  .user-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+  }
+  
+  /* CSS for fixing the height of the card images */
+  .card-img-top {
+    height: 400px; /* Adjust this value as needed */
+    object-fit: cover;
+  }
+  

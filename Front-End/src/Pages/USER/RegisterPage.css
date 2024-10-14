@@ -1,199 +1,164 @@
-.signup-page {
-    font-family: Arial, sans-serif;
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-position: center;
-    overflow: hidden;
-  }
-  
-  .signup-page::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: url('pngtree-old-movie-posters-on-the-wall-image_2881318.jpg');
-    background-position: center;
-    opacity: 0.9;
-    z-index: -1;
-  }
-  
-  .signup-container {
-    background-color: rgba(0, 0, 0, 0.9);
-    padding: 40px;
-    border-radius: 10px;
-    color: white;
-    width: 550px;
-    z-index: 1;
-  }
-  
-  .signup-now {
-    display: flex;
-    justify-content: center;
-  }
-  
-  h1 {
-    text-align: center;
-  }
-  
-  .input-group {
-    margin-bottom: 15px;
-  }
-  
-  .input-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-  }
-  
-  .input-icon {
-    position: absolute;
-    left: 15px;
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 18px;
-    bottom: 30px;
-  }
-  
-  /* Modern Transparent Input Box Styling */
-  input {
-    width: 100%;
-    padding: 22px;
-    background-color: rgba(255, 255, 255, 0.1);
-    border: none;
-    border-bottom: 2px solid rgba(255, 255, 255, 0.4);
-    border-radius: 5px;
-    color: white;
-    font-size: 16px;
-    margin-bottom: 20px;
-    outline: none;
-    transition: border-bottom-color 0.3s ease-in-out;
-  }
-  
-  input::placeholder {
-    color: rgba(255, 255, 255, 0.7);
-  }
-  
-  input:focus {
-    border-bottom-color: #3A5E49;
-  }
-  
-  .signup-input {
-    width: 100%;
-    padding: 15px 15px 12px 50px;
-    background-color: rgba(255, 255, 255, 0.1);
-    border: none;
-    border-bottom: 2px solid rgba(255, 255, 255, 0.4);
-    border-radius: 5px;
-    color: white;
-    font-size: 16px;
-    margin-bottom: 20px;
-    outline: none;
-    transition: border-bottom-color 0.3s ease-in-out;
-  }
-  
-  .signup-btn {
-    background-color: #b31200;
-    color: white;
-    padding: 15px 0px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    width: 100%;
-    height: 50px;
-    font-size: 18px;
-    transition: background-color 0.3s ease-in-out;
-  }
-  
-  .signup-btn:hover {
-    background-color: #2e4c3b;
-  }
-  
-  .checkbox-group {
-    margin-bottom: 15px;
-  }
-  
-  .social-login-buttons {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 15px;
-  }
-  
-  .social-login-buttons button {
-    background-color: #fff;
-    color: #333;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 50%;
-    margin: 0 5px;
-  }
-  
-  a {
-    color: #ccc;
-    text-decoration: none;
-  }
-  
+.user-signup-page {
+  font-family: Arial, sans-serif;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-position: center;
+  overflow: hidden;
+}
 
-
-/* Global form styles */
-.modern-input {
+.user-signup-page::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
-  padding: 12px;
-  border-radius: 8px;
-  border: 1px solid #ddd;
-  margin-bottom: 20px;
-  font-size: 16px;
-  transition: all 0.3s ease;
-  color: #000000;
+  height: 100%;
+  background-image: url('pngtree-old-movie-posters-on-the-wall-image_2881318.jpg');
+  background-position: center;
+  opacity: 0.9;
+  z-index: -1;
 }
 
-.modern-input:focus {
-  outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 10px rgba(0, 123, 255, 0.2);
-  color: #000000;
+.user-signup-container {
+  background-color: rgba(0, 0, 0, 0.9);
+  padding: 40px;
+  border-radius: 10px;
+  color: white;
+  width: 550px;
+  z-index: 1;
 }
 
-.input-wrapper {
+.user-signup-now {
+  display: flex;
+  justify-content: center;
+}
+
+h1 {
+  text-align: center;
+}
+
+.user-input-group,
+.checkbox-group,
+.user-otp-input-container {
+  margin-bottom: 15px;
+}
+
+.user-input-wrapper,
+.user-input-wrapper {
   position: relative;
   display: flex;
   align-items: center;
 }
 
-.input-icon {
+.user-input-icon,
+.user-input-icon {
   position: absolute;
-  left: 17px;
+  left: 15px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 18px;
+  bottom: 30px;
+}
+
+input,
+.user-signup-input,
+.user-otp-input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 5px;
   font-size: 16px;
-  color: #777;
-  bottom: 32px;
+  border: 1px solid #ddd;
+  outline: none;
+  transition: all 0.3s ease;
 }
 
-.signup-input {
+input::placeholder,
+.user-signup-input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+input:focus,
+.user-signup-input:focus,
+.user-otp-input:focus {
+  border-bottom-color: #3A5E49;
+  border-color: #007bff;
+  box-shadow: 0 0 10px rgba(0, 123, 255, 0.2);
+  color: #000000;
+}
+
+.user-signup-input {
   padding-left: 40px; /* Adjust for icon */
+  background-color: rgba(255, 255, 255, 0.1);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.4);
+  margin-bottom: 20px;
+  color: white;
 }
 
-/* Buttons */
-.modern-btn {
-  background-color: #007bff;
-  color: #fff;
+.user-signup-btn,
+.user-modern-btn,
+.user-otp-submit-btn {
   padding: 12px;
   border: none;
   border-radius: 8px;
   width: 100%;
-  font-size: 16px;
   cursor: pointer;
+  font-size: 16px;
   transition: background-color 0.3s ease;
 }
 
-.modern-btn:hover {
+.user-signup-btn {
+  background-color: #b31200;
+  height: 50px;
+  color: white;
+}
+
+.user-signup-btn:hover,
+.user-otp-submit-btn:hover {
+  background-color: #2e4c3b;
+}
+
+.user-modern-btn {
+  background-color: #007bff;
+  color: #fff;
+}
+
+.user-modern-btn:hover {
   background-color: #0056b3;
 }
 
+.user-otp-submit-btn {
+  background-color: #28a745;
+  color: white;
+}
+
+.user-otp-submit-btn:hover {
+  background-color: #218838;
+}
+
+.social-login-buttons {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+.social-login-buttons button {
+  background-color: #fff;
+  color: #333;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 50%;
+  margin: 0 5px;
+}
+
+a {
+  color: #ccc;
+  text-decoration: none;
+}
+
 /* OTP Modal Styles */
-.otp-modal {
+.user-otp-modal {
   position: fixed;
   top: 0;
   left: 0;
@@ -205,7 +170,7 @@
   justify-content: center;
 }
 
-.otp-modal-content {
+.user-otp-modal-content {
   background-color: #fff;
   padding: 40px;
   border-radius: 16px;
@@ -214,43 +179,17 @@
   box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
 }
 
-.otp-title {
+.user-otp-title {
   font-size: 24px;
   font-weight: 600;
   margin-bottom: 20px;
   color: #333;
 }
 
-.otp-text {
+.user-otp-text {
   font-size: 16px;
   margin-bottom: 30px;
   color: #666;
-}
-
-.otp-input-container {
-  margin-bottom: 30px;
-}
-
-.otp-input {
-  width: 100%;
-  padding: 12px;
-  border-radius: 8px;
-  border: 1px solid #ddd;
-  font-size: 16px;
-  text-align: center;
-}
-
-.otp-submit-btn {
-  padding: 12px;
-  background-color: #28a745;
-  color: white;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-}
-
-.otp-submit-btn:hover {
-  background-color: #218838;
 }
 
 /* Title style */
@@ -259,5 +198,3 @@
   color: #333;
   font-weight: 700;
 }
-
-

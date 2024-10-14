@@ -1,0 +1,19 @@
+/* TheaterOwnerDashboard.css */
+
+.theater-owner-dashboard {
+    display: flex;
+    min-height: 100vh;
+  }
+  
+  .dashboard-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: #f7f7f7;
+  }
+  
+  .dashboard-main-content {
+    padding: 20px;
+    flex-grow: 1;
+  }
+  

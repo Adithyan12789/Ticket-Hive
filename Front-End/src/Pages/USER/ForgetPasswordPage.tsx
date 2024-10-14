@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useSendPasswordResetEmailMutation } from '../../Slices/UserApiSlice';
 import { toast } from 'react-toastify';
-import Loader from "../../Components/Loader"; // Use an overlay loader instead of a full-page loader
+import Loader from "../../Components/Loader";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelope } from '@fortawesome/free-solid-svg-icons';
 import './ForgetPasswordPage.css';
 
 const ForgotPasswordScreen = () => {
   const [email, setEmail] = useState('');
-  const [emailSent, setEmailSent] = useState(false); // Track if email is sent
+  const [emailSent, setEmailSent] = useState(false);
   const [sendPasswordResetEmail, { isLoading }] = useSendPasswordResetEmailMutation();
 
   useEffect(() => {
@@ -20,7 +20,7 @@ const ForgotPasswordScreen = () => {
     try {
       await sendPasswordResetEmail({ email }).unwrap();
       toast.success('Password reset email sent successfully');
-      setEmailSent(true); // Update state to show confirmation message
+      setEmailSent(true); 
     } catch (err: unknown) {
       if (typeof err === 'object' && err !== null && 'data' in err) {
         const error = err as { data?: { message?: string } };
@@ -32,14 +32,14 @@ const ForgotPasswordScreen = () => {
   };
 
   return (
-    <div className="forgot-password-page">
-      {isLoading && <div className="loader-overlay"><Loader /></div>} {/* Add loader overlay */}
-      <div className="forgot-password-container">
+    <div className="user-forgot-password-page">
+      {isLoading && <div className="user-loader-overlay"><Loader /></div>}
+      <div className="user-forgot-password-container">
         <h1 className="pb-5" style={{ fontSize: "30px" }}>
           {emailSent ? 'Check Your Email' : 'Forgot Password'}
         </h1>
         {emailSent ? (
-          <p className="confirmation-message">
+          <p className="user-confirmation-message">
             We have sent a password reset link to <strong>{email}</strong>. Please check your email and follow the instructions to reset your password.
           </p>
         ) : (
@@ -50,7 +50,7 @@ const ForgotPasswordScreen = () => {
                   <FontAwesomeIcon icon={faEnvelope} />
                 </span>
                 <input
-                  className="forgot-input"
+                  className="user-forgot-input"
                   type="email"
                   placeholder="Enter your email"
                   value={email}
@@ -60,15 +60,15 @@ const ForgotPasswordScreen = () => {
               </div>
             </div>
 
-            <button className="forgot-btn" type="submit">
+            <button className="user-forgot-btn" type="submit">
               Send Reset Link
             </button>
           </form>
         )}
 
         {emailSent && (
-          <div className="resend-message">
-            <p>Didn't receive the email? <button className="resend-btn" onClick={() => setEmailSent(false)}>Resend</button></p>
+          <div className="user-resend-message">
+            <p>Didn't receive the email? <button className="user-resend-btn" onClick={() => setEmailSent(false)}>Resend</button></p>
           </div>
         )}
       </div>

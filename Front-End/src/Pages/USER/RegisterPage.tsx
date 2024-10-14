@@ -50,10 +50,9 @@ const SignUpPage = () => {
 
     try {
       const response = await register({ name, email, password, phone: Number(phone) }).unwrap();
-      console.log(response); // Check the response here
+      console.log(response);
       toast.success('Registration successful, please verify your OTP');
 
-      // Show OTP modal only after successful registration
       setShowOtpModal(true);
     } catch (err: unknown) {
       if (typeof err === 'object' && err !== null && 'data' in err) {
@@ -85,17 +84,17 @@ const SignUpPage = () => {
   };
 
   return (
-    <div className="signup-page">
-      <div className="signup-container">
+    <div className="user-signup-page">
+      <div className="user-signup-container">
         <h1 className="pb-5" style={{ fontSize: '40px' }}>Ticket Hive</h1>
         <form onSubmit={submitHandler}>
-          <div className="input">
-            <div className="input-wrapper">
-              <span className="input-icon">
+          <div className="user-input">
+            <div className="user-input-wrapper">
+              <span className="user-input-icon">
                 <FontAwesomeIcon icon={faUser} />
               </span>
               <input
-                className="signup-input"
+                className="user-signup-input"
                 type="text"
                 placeholder="Full Name"
                 value={name}
@@ -105,13 +104,13 @@ const SignUpPage = () => {
             </div>
           </div>
 
-          <div className="input">
-            <div className="input-wrapper">
-              <span className="input-icon">
+          <div className="user-input">
+            <div className="user-input-wrapper">
+              <span className="user-input-icon">
                 <FontAwesomeIcon icon={faEnvelope} />
               </span>
               <input
-                className="signup-input"
+                className="user-signup-input"
                 type="email"
                 placeholder="Email Address"
                 value={email}
@@ -121,13 +120,13 @@ const SignUpPage = () => {
             </div>
           </div>
 
-          <div className="input">
-            <div className="input-wrapper">
-              <span className="input-icon">
+          <div className="user-input">
+            <div className="user-input-wrapper">
+              <span className="user-input-icon">
                 <FontAwesomeIcon icon={faPhone} />
               </span>
               <input
-                className="signup-input"
+                className="user-signup-input"
                 type="tel"
                 placeholder="Phone Number"
                 value={phone}
@@ -137,13 +136,13 @@ const SignUpPage = () => {
             </div>
           </div>
 
-          <div className="input">
-            <div className="input-wrapper">
-              <span className="input-icon">
+          <div className="user-input">
+            <div className="user-input-wrapper">
+              <span className="user-input-icon">
                 <FontAwesomeIcon icon={faLock} />
               </span>
               <input
-                className="signup-input"
+                className="user-signup-input"
                 type="password"
                 placeholder="Password"
                 value={password}
@@ -153,13 +152,13 @@ const SignUpPage = () => {
             </div>
           </div>
 
-          <div className="input">
-            <div className="input-wrapper">
-              <span className="input-icon">
+          <div className="user-input">
+            <div className="user-input-wrapper">
+              <span className="user-input-icon">
                 <FontAwesomeIcon icon={faLock} />
               </span>
               <input
-                className="signup-input"
+                className="user-signup-input"
                 type="password"
                 placeholder="Confirm Password"
                 value={confirmPassword}
@@ -169,23 +168,23 @@ const SignUpPage = () => {
             </div>
           </div>
 
-          <button className="signup-btn" type="submit" disabled={isLoading}>
+          <button className="user-signup-btn" type="submit" disabled={isLoading}>
             {isLoading ? 'Signing Up...' : 'Sign Up'}
           </button>
 
-          <div className="login-now pt-5">
+          <div className="user-login-now pt-5">
             <p>Already have an account? <a href="/login">Log In</a></p>
           </div>
         </form>
 
         {showOtpModal && (
-          <div className="otp-modal">
-            <div className="otp-modal-content">
-              <h2 className="otp-title">OTP Verification</h2>
-              <p className="otp-text">Enter the OTP sent to your phone number</p>
-              <div className="otp-input-container">
+          <div className="user-otp-modal">
+            <div className="user-otp-modal-content">
+              <h2 className="user-otp-title">OTP Verification</h2>
+              <p className="user-otp-text">Enter the OTP sent to your phone number</p>
+              <div className="user-otp-input-container">
                 <input
-                  className="otp-input modern-input"
+                  className="user-otp-input user-modern-input"
                   type="text"
                   value={otp}
                   onChange={(e) => setOtp(e.target.value)}
@@ -193,7 +192,7 @@ const SignUpPage = () => {
                   maxLength={6}
                 />
               </div>
-              <button className="modern-btn otp-submit-btn" onClick={handleOtpSubmit} disabled={isVerifying}>
+              <button className="user-modern-btn user-otp-submit-btn" onClick={handleOtpSubmit} disabled={isVerifying}>
                 {isVerifying ? 'Verifying...' : 'Verify OTP'}
               </button>
             </div>
