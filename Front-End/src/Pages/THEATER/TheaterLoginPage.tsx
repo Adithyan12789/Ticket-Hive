@@ -18,13 +18,13 @@ const TheaterOwnerLoginPage = () => {
 
   const [login, { isLoading }] = useLoginTheaterMutation();
 
-  const { userInfo } = useSelector((state: RootState) => state.auth);
+  const { theaterInfo } = useSelector((state: RootState) => state.theaterAuth);
 
   useEffect(() => {
-    if (userInfo) {
+    if (theaterInfo) {
       navigate('/theater');
     }
-  }, [navigate, userInfo]);
+  }, [navigate, theaterInfo]);
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

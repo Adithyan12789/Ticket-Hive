@@ -3,7 +3,6 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-// Send OTP email utility
 export const sendOtpEmail = async (email: string, otp: string): Promise<void> => {
     const transporter = nodemailer.createTransport({
         service: 'Gmail',

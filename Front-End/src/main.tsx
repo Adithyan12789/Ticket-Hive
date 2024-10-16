@@ -19,6 +19,8 @@ import TheaterRegisterPage from "./Pages/THEATER/TheaterRegisterPage";
 import TheaterHomePage from "./Pages/THEATER/TheaterDashboardPage.js";
 import TheaterForgotPasswordPage from "./Pages/THEATER/TheaterForgetPassword";
 import TheaterResetPassword from "./Pages/THEATER/TheaterResetPassword";
+import "slick-carousel/slick/slick.css"; 
+import "slick-carousel/slick/slick-theme.css";
 
 const router = createBrowserRouter(
   createRoutesFromElements(

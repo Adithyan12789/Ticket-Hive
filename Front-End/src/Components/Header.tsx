@@ -1,12 +1,12 @@
-import React from 'react';
-import { Navbar, Nav, Container, NavDropdown } from 'react-bootstrap';
-import { FaSignInAlt, FaSignOutAlt } from 'react-icons/fa';
-import { useSelector, useDispatch } from 'react-redux';
-import { LinkContainer } from 'react-router-bootstrap';
-import { useLogoutMutation } from '../Slices/UserApiSlice';
-import { logout } from '../Slices/AuthSlice';
-import { useNavigate } from 'react-router-dom';
-import { RootState, AppDispatch } from '../Store';
+import React from "react";
+import { Navbar, Nav, Container, NavDropdown } from "react-bootstrap";
+import { FaSignInAlt, FaSignOutAlt } from "react-icons/fa";
+import { useSelector, useDispatch } from "react-redux";
+import { LinkContainer } from "react-router-bootstrap";
+import { useLogoutMutation } from "../Slices/UserApiSlice";
+import { logout } from "../Slices/AuthSlice";
+import { useNavigate } from "react-router-dom";
+import { RootState, AppDispatch } from "../Store";
 
 const Header: React.FC = () => {
   const { userInfo } = useSelector((state: RootState) => state.auth);
@@ -20,15 +20,15 @@ const Header: React.FC = () => {
     try {
       await logoutApiCall().unwrap();
       dispatch(logout());
-      navigate('/');
+      navigate("/");
     } catch (err) {
       console.error(err);
     }
   };
 
   return (
-    <header style={{ backgroundColor: '#3A5E49' }}>
-      <Navbar bg="dark" variant="dark" expand="lg" collapseOnSelect>
+    <header style={{ backgroundColor: "#3A5E49" }}>
+      <Navbar collapseOnSelect>
         <Container>
           <LinkContainer to="/">
             <Navbar.Brand>Ticket Hive</Navbar.Brand>
@@ -37,14 +37,13 @@ const Header: React.FC = () => {
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
 
           <Navbar.Collapse id="basic-navbar-nav">
-
             <Nav className="mx-auto">
               <LinkContainer to="/">
-                <Nav.Link>Home</Nav.Link>
+                <Nav.Link className="nav-home">Home</Nav.Link>
               </LinkContainer>
 
               <LinkContainer to="/movies">
-                <Nav.Link>Movies</Nav.Link>
+                <Nav.Link className="nav-movies">Movies</Nav.Link>
               </LinkContainer>
             </Nav>
 
@@ -60,13 +59,13 @@ const Header: React.FC = () => {
               ) : (
                 <>
                   <LinkContainer to="/login">
-                    <Nav.Link>
+                    <Nav.Link className="sign-in">
                       <FaSignInAlt /> Sign In
                     </Nav.Link>
                   </LinkContainer>
 
                   <LinkContainer to="/signup">
-                    <Nav.Link>
+                    <Nav.Link className="sign-up">
                       <FaSignOutAlt /> Sign Up
                     </Nav.Link>
                   </LinkContainer>

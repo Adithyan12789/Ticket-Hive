@@ -44,9 +44,9 @@ const ForgotPasswordScreen = () => {
           </p>
         ) : (
           <form onSubmit={submitHandler}>
-            <div className="fp-input">
-              <div className="fp-input-wrapper">
-                <span className="fp-input-icon">
+            <div className="user-fp-input">
+              <div className="user-fp-input-wrapper">
+                <span className="user-fp-input-icon">
                   <FontAwesomeIcon icon={faEnvelope} />
                 </span>
                 <input

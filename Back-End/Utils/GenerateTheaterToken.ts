@@ -1,6 +1,6 @@
 // utils/GenerateTheaterToken.ts
 
-import { Response } from 'express'; // Add this import
+import { Response } from 'express';
 import jwt from 'jsonwebtoken';
 
 const generateTheaterToken = (res: Response, theaterOwnerId: string): void => {

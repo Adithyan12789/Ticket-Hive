@@ -2,10 +2,10 @@
 
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
-import { sendOtpEmail } from '../Utils/EmailUtil'; // Import utility for sending OTP email
+import { sendOtpEmail } from '../Utils/EmailUtil'; 
 import theaterOwnerRepo from '../Repositories/TheaterRepo';
 import generateTheaterToken from '../Utils/GenerateTheaterToken';
-import { Response } from 'express'; // Import Response from express
+import { Response } from 'express';
 
 const authTheaterOwner = async (email: string, password: string, res: Response) => {
     const theaterOwner = await theaterOwnerRepo.findTheaterOwnerByEmail(email);
@@ -43,7 +43,6 @@ const verifyOtp = async (email: string, otp: string) => {
     if (String(theaterOwner.otp) === String(otp)) {
         theaterOwner.otpVerified = true;
         
-        // Convert _id to string before passing it
         await theaterOwnerRepo.updateTheaterOwner(theaterOwner._id.toString(), { otpVerified: true });
         
         return theaterOwner;

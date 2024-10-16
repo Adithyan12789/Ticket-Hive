@@ -2,10 +2,9 @@
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { findUserByEmail, saveUser, findUserByResetToken, updateUser } from "../Repositories/UserRepo";
-import { sendOtpEmail } from "../Utils/EmailUtil";  // Keeping the email utility here
+import { sendOtpEmail } from "../Utils/EmailUtil";
 import User from "../Models/UserModel";
 
-// Service to authenticate user
 export const authenticateUser = async (email: string, password: string) => {
     const user = await findUserByEmail(email);
     if (user && (await user.matchPassword(password))) {
@@ -20,20 +19,16 @@ export const registerUserService = async (
     password: string, 
     phone: string
 ) => {
-    // Check if the email already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
         throw new Error('Email already exists.');
     }
 
-    // Generate OTP
     const otp = crypto.randomInt(100000, 999999).toString();
 
-    // Hash the password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Create a new user
     const newUser = new User({
         name,
         email,
@@ -43,16 +38,13 @@ export const registerUserService = async (
         otpVerified: false,
     });
 
-    // Save the new user
-    await newUser.save();  // Save the user using the `.save()` method
+    await newUser.save(); 
 
-    // Send OTP email
     await sendOtpEmail(newUser.email, otp);
 
-    return newUser; // Return the saved user object
+    return newUser;
 };
 
-// Service to verify OTP
 export const verifyOtpService = async (email: string, otp: string) => {
     const user = await findUserByEmail(email);
     if (!user) {
@@ -67,7 +59,6 @@ export const verifyOtpService = async (email: string, otp: string) => {
     throw new Error('Incorrect OTP');
 };
 
-// Service for forgot password
 export const forgotPasswordService = async (email: string) => {
     const user = await findUserByEmail(email);
     if (!user) {
@@ -76,14 +67,12 @@ export const forgotPasswordService = async (email: string) => {
 
     const resetToken = crypto.randomBytes(32).toString('hex');
     user.resetPasswordToken = resetToken;
-    user.resetPasswordExpires = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes from now
-
+    user.resetPasswordExpires = new Date(Date.now() + 30 * 60 * 1000); 
     await user.save();
 
     return resetToken;
 };
 
-// Service for resetting the password
 export const resetPasswordService = async (resetToken: string, password: string) => {
     const user = await findUserByResetToken(resetToken);
     if (!user) {
@@ -100,8 +89,6 @@ export const resetPasswordService = async (resetToken: string, password: string)
     return true;
 };
 
-// Service to logout a user
 export const logoutUserService = () => {
-    // Logic for logging out a user if needed (optional, typically handled by cookies)
     return true;
 };

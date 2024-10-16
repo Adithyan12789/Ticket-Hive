@@ -1,17 +1,223 @@
+.image-slider {
+  margin-bottom: 20px;
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+}
+
+.slider-image {
+  height: 500px;
+  object-fit: cover;
+}
+
+.movie-card {
+  height: 100%;
+}
+
+.book-now-btn {
+  background-color: #007bff;
+  border: none;
+}
+
 .user-image-section {
-    text-align: center;
-    margin: 20px 0;
-  }
-  
-  .user-image {
-    max-width: 100%;
-    height: auto;
-    border-radius: 10px;
-  }
-  
-  /* CSS for fixing the height of the card images */
-  .card-img-top {
-    height: 400px; /* Adjust this value as needed */
-    object-fit: cover;
-  }
-  
+  display: none; /* Hide the previous static image */
+}
+
+
+.user-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease-in-out;
+}
+
+.user-image:hover {
+  transform: scale(1.05);
+}
+
+/* CSS for fixing the height of the card images */
+.card-img-top {
+  height: 300px; /* Fixed height for card image */
+  object-fit: cover; /* Ensures the image covers the area without distorting */
+  border-radius: 10px 10px 0 0; /* Rounded top corners */
+  transition: transform 0.3s ease;
+}
+
+.card-img-top:hover {
+  transform: scale(1.05); /* Slight zoom effect on hover */
+}
+
+/* General styling for the card */
+.movie-card {
+  border-radius: 15px; /* Rounded corners for the card */
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2); /* Enhanced shadow for a modern look */
+  overflow: hidden; /* To prevent content overflow */
+  transition: all 0.3s ease-in-out;
+  background-color: #ffffff; /* Clean background for the card */
+  height: 620px; /* Fixed height for cards */
+}
+
+.movie-card:hover {
+  transform: translateY(-5px) scale(1.05); /* Slight lift and zoom on hover */
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2); /* Stronger shadow on hover */
+}
+
+/* Styling for the movie poster */
+.movie-poster {
+  height: 420px; /* Same as card-img-top height */
+  object-fit: cover;
+  width: 100%; /* Ensure the image covers the entire card */
+}
+
+/* Movie title */
+.movie-title {
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: #333; /* Dark text for better readability */
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+/* Styling for card body */
+.card-body {
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 160px; /* Adjusted height for card body */
+  overflow: hidden; /* Remove scroll in card body */
+}
+
+/* Truncate overview text */
+.card-body .overview-text {
+  font-size: 0.9rem;
+  color: #666; /* Subtle text color */
+  display: -webkit-box;
+  -webkit-line-clamp: 3; /* Limit to 3 lines of text */
+  -webkit-box-orient: vertical;
+  overflow: hidden; /* Hide excess text */
+  text-overflow: ellipsis;
+}
+
+/* Rating and Release Date Styling */
+.card-body .text-muted {
+  font-size: 0.9rem;
+  color: #999; /* Lighter gray for secondary text */
+}
+
+/* Button styling */
+.book-now-btn {
+  background: linear-gradient(90deg, #000000, #2b8d1a); /* Gradient background */
+  border: none;
+  font-size: 1.1rem;
+  padding: 12px 25px;
+  border-radius: 25px; /* More rounded edges for modern look */
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  outline: none;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15); /* Subtle shadow */
+  transition: all 0.3s ease;
+  margin-top: 10px;
+}
+
+.book-now-btn:hover {
+  background: linear-gradient(90deg, #45a049, #218838); /* Darker gradient on hover */
+  transform: translateY(-3px); /* Slight lift on hover */
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); /* Stronger shadow on hover */
+}
+
+.book-now-btn:active {
+  transform: translateY(1px); /* Button click effect */
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15); /* Reduced shadow when clicked */
+}
+
+/* Navbar (Header) styling */
+.navbar {
+  background: linear-gradient(90deg, #000000, #16410e); /* Gradient matching button styling */
+  padding: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
+.navbar .navbar-brand {
+  font-size: 28px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: bold;
+  color: white; /* White text for contrast */
+  text-decoration: none !important; /* Ensure no underline */
+}
+
+.navbar .navbar-brand:hover {
+  color: black; /* Hover effect to match the button style */
+}
+
+/* Remove underline from nav links */
+.navbar .navbar-nav .nav-link.nav-home {
+  font-weight: 600;
+  color: white; /* White text for contrast */
+  text-decoration: none; /* Remove underline */
+}
+
+.navbar .navbar-nav .nav-link.nav-movies {
+  font-weight: 600;
+  color: white; /* White text for contrast */
+  text-decoration: none; /* Remove underline */
+  padding-left: 25px;
+}
+
+.navbar .navbar-nav .nav-link.nav-home:hover,
+.navbar .navbar-nav .nav-link.nav-movies:hover {
+  color: black; /* Hover effect to match buttons */
+}
+
+/* Remove focus and active state underlines */
+.navbar .navbar-nav .nav-link.nav-home:focus,
+.navbar .navbar-nav .nav-link.nav-movies:focus,
+.navbar .navbar-nav .nav-link.nav-home:active,
+.navbar .navbar-nav .nav-link.nav-movies:active {
+  text-decoration: none !important; /* No underline on focus or active */
+}
+
+/* Sign In and Sign Up buttons styling */
+.navbar .navbar-nav .nav-link.sign-in{
+  display: flex;
+  align-items: center;
+  padding: 4px 18px;
+  border-radius: 7px;
+  background-color: #007bff;
+  color: white;
+  font-weight: bold;
+  transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out;
+}
+.navbar .navbar-nav .nav-link.sign-up {
+  display: flex;
+  align-items: center;
+  padding: 4px 18px;
+  border-radius: 7px;
+  background-color: #007bff;
+  color: white;
+  font-weight: bold;
+  transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out;
+  margin-left: 20px;
+}
+
+.navbar .navbar-nav .nav-link.sign-in:hover,
+.navbar .navbar-nav .nav-link.sign-up:hover {
+  background-color: #0056b3; /* Darker blue on hover */
+  transform: translateY(-3px); /* Slight lift effect on hover */
+}
+
+.navbar .navbar-nav .nav-link.sign-in:active,
+.navbar .navbar-nav .nav-link.sign-up:active {
+  transform: translateY(1px); /* Click effect */
+}
+
+/* Username styling */
+#username {
+  font-weight: 600;
+  color: white; /* Consistent with other text */
+}
