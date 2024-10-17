@@ -3,11 +3,13 @@ import adminRepository from '../Repositories/AdminRepo';
 import generateAdminToken from '../Utils/GenerateAdminToken';
 import { Response } from 'express';
 
+// Service for handling admin login
 const adminLoginService = (email: string, password: string, res: Response) => {
     const { adminEmail, adminPassword } = adminRepository.getAdminCredentials();
 
+    // Check if the provided email and password match the admin credentials
     if (email === adminEmail && password === adminPassword) {
-        const token = generateAdminToken(res, "admin");
+        const token = generateAdminToken(res, "admin"); // Generate token
         return {
             id: "admin",
             name: "Admin User",
@@ -17,9 +19,16 @@ const adminLoginService = (email: string, password: string, res: Response) => {
         };
     }
 
+    // Return a structured error response if credentials are invalid
     throw new Error("Invalid Admin Email or Password");
 };
 
+// Get all users - Call repository method directly (no need for asyncHandler here)
+const getAllUsers = async () => {
+    return await adminRepository.getAllUsers(); // Direct call to the repository method
+};
+
+// Service to handle admin logout
 const adminLogoutService = (res: Response) => {
     res.cookie("token", "", {
         httpOnly: true,
@@ -30,4 +39,4 @@ const adminLogoutService = (res: Response) => {
     return { message: "Admin logged out successfully" };
 };
 
-export default { adminLoginService, adminLogoutService };
+export default { adminLoginService, getAllUsers, adminLogoutService };

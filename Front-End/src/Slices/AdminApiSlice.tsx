@@ -25,6 +25,17 @@ export const adminApiSlice = apiSlice.injectEndpoints({
       }),
     }),
 
+    getUserData: builder.mutation({
+      query: () => ({
+        url: `${ADMIN_URL}/admin-get-user`,
+        method: 'POST',
+        headers: {
+          // Add any required headers (e.g., authorization token)
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+      }),
+    }),
+
     adminLogout: builder.mutation<void, void>({
       query: () => ({
         url: `${ADMIN_URL}/admin-logout`,
@@ -36,5 +47,6 @@ export const adminApiSlice = apiSlice.injectEndpoints({
 
 export const {
   useAdminLoginMutation,
+  useGetUserDataMutation,
   useAdminLogoutMutation,
 } = adminApiSlice;

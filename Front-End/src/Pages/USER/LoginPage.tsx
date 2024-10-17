@@ -37,20 +37,33 @@ const LoginPage = () => {
 
   const submitHandler = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
-
+  
+    // Check if email is empty
+    if (email.trim() === '') {
+      toast.error('Email is required');
+      return;
+    }
+  
+    // Check if email format is invalid
     if (!validateEmail(email)) {
       toast.error('Invalid email format');
       return;
     }
-
+  
+    // Check if password is empty
+    if (password.trim() === '') {
+      toast.error('Password is required');
+      return;
+    }
+  
+    // Check if password length is less than 6 characters
     if (!validatePassword(password)) {
       toast.error('Password must be at least 6 characters');
       return;
     }
-
+  
     try {
       const res = await login({ email, password }).unwrap();
-      console.log(res);
       dispatch(setCredentials({ ...res }));
       navigate('/');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -75,7 +88,6 @@ const LoginPage = () => {
                 placeholder="Email Address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                required
               />
             </div>
           </div>
@@ -90,22 +102,21 @@ const LoginPage = () => {
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                required
               />
             </div>
           </div>
-
+  
           {/* Forgot Password Link */}
           <div className="user-forgot-password">
             <a href="/forgot-password" className="user-forgot-password-link">
               Forgot Password?
             </a>
           </div>
-
+  
           <button className="user-login-btn" type="submit">
             {isLoading ? 'Signing In...' : 'Sign In'}
           </button>
-
+  
           <div className="user-login-now pt-5">
             <p>Already a User? <a href="/signup">Sign Up</a></p>
           </div>

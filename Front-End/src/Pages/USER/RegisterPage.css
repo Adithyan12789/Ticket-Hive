@@ -156,39 +156,63 @@ a {
   text-decoration: none;
 }
 
-/* OTP Modal Styles */
-.user-otp-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
 
-.user-otp-modal-content {
-  background-color: #fff;
-  padding: 40px;
-  border-radius: 16px;
+
+.otp-modal-content {
+  background-color: white;
+  padding: 30px;
+  border-radius: 10px;
+  max-width: 400px;
   text-align: center;
-  width: 350px;
-  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
 }
 
-.user-otp-title {
-  font-size: 24px;
-  font-weight: 600;
+.otp-modal-title {
+  font-size: 20px;
   margin-bottom: 20px;
-  color: #333;
 }
 
-.user-otp-text {
+.otp-input-wrapper {
+  margin-bottom: 20px;
+}
+
+.otp-input {
+  width: 100%;
+  padding: 10px;
   font-size: 16px;
-  margin-bottom: 30px;
-  color: #666;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  outline: none;
+}
+
+.otp-btn {
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+.primary-btn {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+}
+
+.secondary-btn {
+  background-color: #f1f1f1;
+  color: #4CAF50;
+  border: none;
+}
+
+.otp-btn.disabled {
+  cursor: not-allowed;
+  background-color: #b5b5b5;
+}
+
+.otp-time-left {
+  font-size: 14px;
+  margin-top: 10px;
+  color: #ff0000;
 }
 
 /* Title style */
@@ -197,3 +221,6 @@ a {
   color: #333;
   font-weight: 700;
 }
+
+
+

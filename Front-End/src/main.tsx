@@ -19,12 +19,14 @@ import TheaterRegisterPage from "./Pages/THEATER/TheaterRegisterPage";
 import TheaterHomePage from "./Pages/THEATER/TheaterDashboardPage.js";
 import TheaterForgotPasswordPage from "./Pages/THEATER/TheaterForgetPassword";
 import TheaterResetPassword from "./Pages/THEATER/TheaterResetPassword";
+import AdminUser from "./Pages/ADMIN/AdminUserManagement.js"
 import "slick-carousel/slick/slick.css"; 
 import "slick-carousel/slick/slick-theme.css";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
-    <Route path="/" element={<App />}>
+    <Route path="/" element={<App />}> 
+
       {/* User Routes */}
       <Route path="/" element={<HomePage />} />
       <Route path="/login" element={<LoginPage />} />
@@ -36,9 +38,10 @@ const router = createBrowserRouter(
       {/* Admin Routes */}
       <Route path="/admin-dashboard" element={<AdminPrivateRoute />}>
         <Route index element={<AdminDashboard />} />
+        {/* Adjust this path to be relative */}
+        <Route path="admin-get-user" element={<AdminUser />} />
       </Route>
       <Route path="/admin-login" element={<AdminLoginPage />} />
-
 
       {/* Theater Owner Routes */}
       <Route path="/theater" element={<TheaterHomePage />} />
@@ -50,6 +53,7 @@ const router = createBrowserRouter(
     </Route>
   )
 );
+
 
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(

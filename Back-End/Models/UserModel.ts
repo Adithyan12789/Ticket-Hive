@@ -10,7 +10,9 @@ export interface IUser extends Document {
     password: string;
     phone: string;
     otp: string;
+    otpExpires: Date;
     otpVerified: boolean;
+    otpGeneratedAt: Date;  
     resetPasswordToken?: string;
     resetPasswordExpires?: Date;
     matchPassword: (password: string) => Promise<boolean>;
@@ -25,6 +27,7 @@ const userSchema: Schema<IUser> = new Schema(
         phone: { type: String, required: true },
         otp: { type: String, required: true },
         otpVerified: { type: Boolean, default: false },
+        otpGeneratedAt: { type: Date, default: Date.now }, 
         resetPasswordToken: { type: String },
         resetPasswordExpires: { type: Date },
     },

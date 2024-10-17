@@ -19,11 +19,33 @@ export const registerUserService = async (
     password: string, 
     phone: string
 ) => {
-    const existingUser = await User.findOne({ email });
+    // Check if the user already exists
+    const existingUser = await User.findOne({ 
+        email 
+    });
+
     if (existingUser) {
+        // If the user exists but OTP is not verified, allow them to proceed to OTP verification
+        if (!existingUser.otpVerified) {
+            // You can resend OTP to the user if they exist and haven't verified
+            const otp = crypto.randomInt(100000, 999999).toString();
+            existingUser.otp = otp;
+            existingUser.otpVerified = false;  // Reset OTP verification to false
+            existingUser.otpGeneratedAt = new Date();  // Update OTP generation time
+            await existingUser.save();
+
+            // Send OTP email again
+            await sendOtpEmail(existingUser.email, otp);
+
+            // Return the user so that the front-end can proceed with OTP modal
+            return existingUser;
+        }
+
+        // If the user exists and has already verified their OTP, throw an error
         throw new Error('Email already exists.');
     }
 
+    // If no existing user, create a new one
     const otp = crypto.randomInt(100000, 999999).toString();
 
     const salt = await bcrypt.genSalt(10);
@@ -45,10 +67,18 @@ export const registerUserService = async (
     return newUser;
 };
 
+
 export const verifyOtpService = async (email: string, otp: string) => {
     const user = await findUserByEmail(email);
     if (!user) {
         throw new Error('User not found');
+    }
+
+    const OTP_EXPIRATION_TIME = 5 * 60 * 1000; // 5 minutes
+
+    // Check if OTP has expired
+    if (new Date().getTime() - new Date(user.otpGeneratedAt).getTime() > OTP_EXPIRATION_TIME) {
+        throw new Error('OTP expired');
     }
 
     if (String(user.otp) === String(otp)) {
@@ -58,6 +88,38 @@ export const verifyOtpService = async (email: string, otp: string) => {
     }
     throw new Error('Incorrect OTP');
 };
+
+
+export const resendOtpService = async (email: string) => {
+    const user = await findUserByEmail(email);
+
+    if (!user) {
+        throw new Error('User not found');
+    }
+
+    // Generate OTP as a string
+    const otp = crypto.randomInt(100000, 999999).toString(); // Convert number to string
+
+    user.otp = otp; // Now the OTP is a string
+    user.otpExpires = new Date(Date.now() + 1 * 60 * 1000 + 59 * 1000); // OTP expiration time (1 minute 59 seconds)
+
+    try {
+        await saveUser(user); // Save user with new OTP
+    } catch (err) {
+        throw new Error('Failed to save user with new OTP');
+    }
+
+    try {
+        await sendOtpEmail(user.email, otp); // Send OTP email
+    } catch (err) {
+        throw new Error('Failed to send OTP email');
+    }
+
+    return user; // Optionally return user if needed
+};
+
+
+
 
 export const forgotPasswordService = async (email: string) => {
     const user = await findUserByEmail(email);

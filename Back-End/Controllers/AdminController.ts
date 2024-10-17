@@ -2,6 +2,7 @@
 import asyncHandler from "express-async-handler";
 import { Request, Response } from "express";
 import adminService from "../Services/AdminService";
+import expressAsyncHandler from "express-async-handler";
 
 // Admin Login Controller
 const adminLogin = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -20,6 +21,11 @@ const adminLogin = asyncHandler(async (req: Request, res: Response): Promise<voi
     }
 });
 
+const getAllUsers = expressAsyncHandler(async (req, res) => {
+    const users = await adminService.getAllUsers();
+    res.status(200).json(users);
+});
+
 // Admin Logout Controller
 const adminLogout = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const result = adminService.adminLogoutService(res);
@@ -28,5 +34,6 @@ const adminLogout = asyncHandler(async (req: Request, res: Response): Promise<vo
 
 export {
     adminLogin,
+    getAllUsers,
     adminLogout
 };

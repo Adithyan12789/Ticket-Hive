@@ -138,7 +138,7 @@
 
 /* Navbar (Header) styling */
 .navbar {
-  background: linear-gradient(90deg, #000000, #16410e); /* Gradient matching button styling */
+  background: linear-gradient(90deg, #000000, #000000); /* Gradient matching button styling */
   padding: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
 }
