@@ -21,7 +21,7 @@ const getAdminCredentials = () => {
 const getAllUsers = async () => {
     try {
         // Query to find all users
-        const users = await User.find({}, { name: 1, email: 1});
+        const users = await User.find({}, { name: 1, email: 1, phone: 1});
         return users;
     } catch (error) {
         throw new Error("Error fetching users");

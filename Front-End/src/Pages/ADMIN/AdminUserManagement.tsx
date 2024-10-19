@@ -1,20 +1,22 @@
 import React, { useState, useEffect } from "react";
-import { UsersTable } from "../../Components/AdminComponents/UserTable";
+import UserTable from "../../Components/AdminComponents/UserTable";
 import { useGetUserDataMutation } from "../../Slices/AdminApiSlice";
 import AdminLayout from "../../Components/AdminComponents/AdminLayout";
-import { Container } from "react-bootstrap";
+import { Container, Row, Col } from "react-bootstrap";
 import { toast } from "react-toastify";
+import Loader from "../../Components/Loader";
+import SearchBar from "../../Components/SearchBar"; // Import the Ant Design SearchBar component
 
 interface User {
   _id: string;
   name: string;
   email: string;
-  phoneNumber: string;
-  otp: string;
+  phone: number;
 }
 
 const AdminUser: React.FC = () => {
   const [usersData, setUsersData] = useState<User[]>([]);
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
   const [userDataFromApi, { isLoading, isError, error }] = useGetUserDataMutation();
 
@@ -26,7 +28,6 @@ const AdminUser: React.FC = () => {
         const responseFromApiCall = await userDataFromApi({}).unwrap();
         console.log("Full API response: ", responseFromApiCall);
 
-        // If the API response is an array of users
         if (Array.isArray(responseFromApiCall)) {
           setUsersData(responseFromApiCall);
         } else {
@@ -36,17 +37,23 @@ const AdminUser: React.FC = () => {
       } catch (err: unknown) {
         let errorMessage = "Error fetching users";
 
-        // Handle FetchBaseQueryError
-        if (err && typeof err === "object" && "status" in err && "data" in err) {
+        if (
+          err &&
+          typeof err === "object" &&
+          "status" in err &&
+          "data" in err
+        ) {
           const fetchError = err as { status: number; data: unknown };
-          if (fetchError.data && typeof fetchError.data === "object" && "message" in fetchError.data) {
+          if (
+            fetchError.data &&
+            typeof fetchError.data === "object" &&
+            "message" in fetchError.data
+          ) {
             errorMessage = (fetchError.data as { message: string }).message;
           } else {
             errorMessage = `Error status: ${fetchError.status}`;
           }
-        }
-        // Handle SerializedError
-        else if (err && typeof err === "object" && "message" in err) {
+        } else if (err && typeof err === "object" && "message" in err) {
           errorMessage = (err as { message: string }).message;
         }
 
@@ -58,13 +65,36 @@ const AdminUser: React.FC = () => {
     fetchData();
   }, [userDataFromApi]);
 
-  if (isLoading) return <p>Loading...</p>; // You could replace this with a spinner for better UX
-  if (isError) return <p>Error: {error instanceof Error ? error.message : "An unknown error occurred"}</p>;
+  // Filter the users based on search term
+  const filteredUsers = usersData.filter((user) =>
+    user.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  if (isLoading) return <Loader />;
+
+  if (isError) {
+    return (
+      <div className="text-center">
+        <p className="text-danger">
+          Error:{" "}
+          {error instanceof Error ? error.message : "An unknown error occurred"}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <AdminLayout adminName={"Adithyan"}>
       <Container>
-        <UsersTable users={usersData} />
+        <Row className="align-items-center mb-4 mt-5">
+          <Col md={6}>
+            <h2 className="admin-userManagement-title">User Management</h2>
+          </Col>
+          <Col md={6} className="text-md-right text-center">
+            <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+          </Col>
+        </Row>
+        <UserTable users={filteredUsers} />
       </Container>
     </AdminLayout>
   );

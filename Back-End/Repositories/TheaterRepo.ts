@@ -1,31 +1,22 @@
-// repos/theaterOwnerRepo.ts
+// repositories/UserRepository.ts
+import Theater, { ITheater } from "../Models/TheaterModel";
 
-import TheaterOwner from '../Models/TheaterModel';
-
-const findTheaterOwnerByEmail = async (email: string) => {
-    return TheaterOwner.findOne({ email });
+export const findTheaterOwnerByEmail = async (email: string) => {
+    return await Theater.findOne({ email });
 };
 
-const createTheaterOwner = async (theaterOwnerData: any) => {
-    const theaterOwner = new TheaterOwner(theaterOwnerData);
-    await theaterOwner.save();
-    return theaterOwner;
+export const saveTheaterOwner = async (theaterOwnerData: ITheater) => {
+    const theater = new Theater(theaterOwnerData);
+    return await theater.save();
 };
 
-const updateTheaterOwner = async (id: string, updateData: any) => {
-    return TheaterOwner.findByIdAndUpdate(id, updateData, { new: true });
-};
-
-const findTheaterOwnerByResetToken = async (resetToken: string) => {
-    return TheaterOwner.findOne({ 
+export const findTheaterOwnerByResetToken = async (resetToken: string) => {
+    return await Theater.findOne({
         resetPasswordToken: resetToken,
-        resetPasswordExpires: { $gt: Date.now() }, // Token not expired
+        resetPasswordExpires: { $gt: Date.now() },
     });
 };
 
-export default {
-    findTheaterOwnerByEmail,
-    createTheaterOwner,
-    updateTheaterOwner,
-    findTheaterOwnerByResetToken,
+export const updateTheaterOwner = async (theaterOwnerId: string, updates: object) => {
+    return await Theater.findByIdAndUpdate(theaterOwnerId, updates, { new: true });
 };

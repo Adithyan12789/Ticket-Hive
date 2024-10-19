@@ -3,7 +3,7 @@ import { Navbar, Nav, Container, NavDropdown } from "react-bootstrap";
 import { FaSignInAlt, FaSignOutAlt } from "react-icons/fa";
 import { useSelector, useDispatch } from "react-redux";
 import { LinkContainer } from "react-router-bootstrap";
-import { useLogoutMutation } from "../Slices/UserApiSlice";
+import { useUpdateUserMutation, useLogoutMutation } from "../Slices/UserApiSlice";
 import { logout } from "../Slices/AuthSlice";
 import { useNavigate } from "react-router-dom";
 import { RootState, AppDispatch } from "../Store";
@@ -14,8 +14,23 @@ const Header: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
 
+  const [profileApiCall] = useUpdateUserMutation();
   const [logoutApiCall] = useLogoutMutation();
 
+  const profileHandler = async () => {
+    try {
+      await profileApiCall({
+        id: "",
+        name: "",
+        email: ""
+      }).unwrap();
+      dispatch(logout());
+      navigate("/profile");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  
   const logoutHandler = async () => {
     try {
       await logoutApiCall().unwrap();
@@ -51,6 +66,10 @@ const Header: React.FC = () => {
               {userInfo ? (
                 <>
                   <NavDropdown title={userInfo.name} id="username">
+                    <NavDropdown.Item onClick={profileHandler}>
+                      Profile
+                    </NavDropdown.Item>
+                    
                     <NavDropdown.Item onClick={logoutHandler}>
                       Logout
                     </NavDropdown.Item>

@@ -1,117 +1,181 @@
-// controllers/theaterOwnerController.ts
+// controllers/UserController.ts
+import { Request, Response } from "express";
+import asyncHandler from "express-async-handler";
+import { authTheaterOwnerService, registerTheaterOwnerService, verifyTheaterOwnerOtpService, resendTheaterOwnerOtpService, forgotTheaterOwnerPasswordService, resetTheaterOwnerPasswordService, logoutTheaterOwnerService } from "../Services/TheaterService";
+import { sendOtpEmail } from "../Utils/EmailUtil";
+import expressAsyncHandler from "express-async-handler";
 
-import asyncHandler from 'express-async-handler';
-import theaterOwnerService from '../Services/TheaterService';
-import { Request, Response } from 'express';
-
-// Authentication Controller
-const authTheaterOwner = asyncHandler(async (req: Request, res: Response) => {
+const authTheaterOwner = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { email, password } = req.body;
-    try {
-        const token = await theaterOwnerService.authTheaterOwner(email, password, res);
-        res.status(200).json({ token });
-    } catch (err: unknown) {
-        if (typeof err === 'object' && err !== null && 'data' in err) {
-            const error = err as { data?: { message?: string } };
-            res.status(400).json({ message: error.data?.message || 'An error occurred' });
-        } else {
-            res.status(400).json({ message: 'An error occurred' });
-        }
-    }
-});
 
-// Registration Controller
-const registerTheaterOwner = asyncHandler(async (req: Request, res: Response) => {
-    const { name, email, password, phone } = req.body;
+    if (!email || !password) {
+        res.status(400).json({ message: "Email and password are required" });
+        return;
+    }
+
     try {
-        const theaterOwner = await theaterOwnerService.registerTheaterOwner(name, email, password, phone);
-        res.status(201).json({
-            id: theaterOwner._id,
-            name: theaterOwner.name,
-            email: theaterOwner.email,
-            otpSent: true,
-            message: 'Theater owner registered successfully. OTP sent.',
+        const theater = await authTheaterOwnerService(email, password);
+        res.status(200).json({
+            id: theater._id,
+            name: theater.name,
+            email: theater.email,
         });
     } catch (err: unknown) {
-        if (typeof err === 'object' && err !== null && 'data' in err) {
-            const error = err as { data?: { message?: string } };
-            res.status(400).json({ message: error.data?.message || 'An error occurred' });
+        if (err instanceof Error) {
+            if (err.message === "Invalid Email or Password") {
+                // Return the specific error message for invalid email or password
+                res.status(401).json({ message: "Invalid email or password" });
+            } else {
+                // General error handling for other cases
+                res.status(500).json({ message: "An error occurred during authentication" });
+            }
         } else {
-            res.status(400).json({ message: 'An error occurred' });
+            // Fallback if the error is not an instance of Error
+            res.status(500).json({ message: "An error occurred during authentication" });
         }
     }
 });
 
-// Verify OTP Controller
-const verifyTheaterOwnerOTP = asyncHandler(async (req: Request, res: Response) => {
-    const { email, otp } = req.body;
+
+const registerTheaterOwner = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const { name, email, password, phone } = req.body;
+
     try {
-        const theaterOwner = await theaterOwnerService.verifyOtp(email, otp);
+        const theater = await registerTheaterOwnerService(name, email, password, phone);
+        
+        // Check if the user is newly created or if OTP was sent again for an existing user
+        const otpSent = !theater.otpVerified; // OTP is sent only if the user hasn't verified their OTP
+
+        res.status(201).json({
+            id: theater._id.toString(),
+            name: theater.name,
+            email: theater.email,
+            otpSent,
+            message: otpSent ? 'Theater Owner registered successfully. OTP sent.' : 'Theater Owner already registered but OTP not verified.',
+        });
+    } catch (err: unknown) {
+        if (err instanceof Error) {
+            if (err.message === 'Email already exists.') {
+                res.status(400).json({ message: 'Theater Owner with this email already exists' });
+            } else if (err.message === 'Email exists but OTP is not verified.') {
+                res.status(400).json({ message: 'Email exists but OTP is not verified.' });
+            } else {
+                res.status(500).json({ message: 'An error occurred during registration' });
+            }
+        } else {
+            res.status(500).json({ message: 'An unexpected error occurred' });
+        }
+    }
+});
+
+
+
+
+const verifyTheaterOwnerOTP = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const { email, otp } = req.body;
+
+    try {
+        await verifyTheaterOwnerOtpService(email, otp);
+        
         res.status(200).json({ message: 'OTP verified successfully' });
     } catch (err: unknown) {
-        if (typeof err === 'object' && err !== null && 'data' in err) {
-            const error = err as { data?: { message?: string } };
-            res.status(400).json({ message: error.data?.message || 'An error occurred' });
+        if (err instanceof Error && err.message === 'Incorrect OTP') {
+            res.status(400).json({ message: 'Incorrect OTP' });
+        } else if (err instanceof Error && err.message === 'OTP expired') {
+            res.status(400).json({ message: 'OTP has expired. Please request a new one' });
         } else {
-            res.status(400).json({ message: 'An error occurred' });
+            res.status(500).json({ message: 'An error occurred during OTP verification' });
         }
     }
 });
 
-// Forgot Password Controller
-const forgotTheaterOwnerPasswordController = asyncHandler(async (req: Request, res: Response) => {
+
+
+const resendTheaterOwnerOtp = expressAsyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { email } = req.body;
+
     try {
-        const response = await theaterOwnerService.forgotPassword(email);
-        res.status(200).json(response);
+        await resendTheaterOwnerOtpService(email);
+        res.status(200).json({ message: 'OTP resent successfully' });
     } catch (err: unknown) {
-        if (typeof err === 'object' && err !== null && 'data' in err) {
-            const error = err as { data?: { message?: string } };
-            res.status(400).json({ message: error.data?.message || 'An error occurred' });
+        if (err instanceof Error && err.message === 'Theater Owner not found') {
+            res.status(404).json({ message: 'Theater Owner with this email not found' });
+        } else if (err instanceof Error && err.message === 'Failed to send OTP') {
+            res.status(500).json({ message: 'Failed to resend OTP. Please try again' });
         } else {
-            res.status(400).json({ message: 'An error occurred' });
+            res.status(500).json({ message: 'An unexpected error occurred' });
         }
     }
 });
 
-// Reset Password Controller
-const resetTheaterOwnerPasswordController = asyncHandler(async (req: Request, res: Response) => {
+
+const forgotTheaterOwnerPassword = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const { email } = req.body;
+
+    if (!email) {
+        res.status(400).json({ message: 'Email is required' });
+        return;
+    }
+
+    try {
+        const resetToken = await forgotTheaterOwnerPasswordService(email);
+        const resetUrl = `http://localhost:3000/theater-reset-password/${resetToken}`;
+        const message = `Password reset link: ${resetUrl}`;
+
+        await sendOtpEmail(email, message);
+        res.status(200).json({ message: 'Password reset email sent' });
+    } catch (err: unknown) {
+        if (err instanceof Error && err.message === 'Theater Owner not found') {
+            res.status(404).json({ message: 'Theater Owner with this email not found' });
+        } else if (err instanceof Error && err.message === 'Failed to send email') {
+            res.status(500).json({ message: 'Failed to send reset email. Please try again' });
+        } else {
+            res.status(500).json({ message: 'An error occurred during password reset request' });
+        }
+    }
+});
+
+
+const resetTheaterOwnerPassword = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { password } = req.body;
     const resetToken = req.params.token;
+
+    if (!resetToken || !password) {
+        res.status(400).json({ message: 'Token and password are required' });
+        return;
+    }
+
     try {
-        const response = await theaterOwnerService.resetPassword(resetToken, password);
-        res.status(200).json(response);
+        await resetTheaterOwnerPasswordService(resetToken, password);
+        res.status(200).json({ message: 'Password reset successfully' });
     } catch (err: unknown) {
-        if (typeof err === 'object' && err !== null && 'data' in err) {
-            const error = err as { data?: { message?: string } };
-            res.status(400).json({ message: error.data?.message || 'An error occurred' });
-        } else {
-            res.status(400).json({ message: 'An error occurred' });
+        if (err instanceof Error && err.message === 'Invalid or expired token') {
+            res.status(400).json({ message: 'Invalid or expired token' });
+        } else { 
+            res.status(500).json({ message: 'An error occurred during password reset' });
         }
     }
 });
 
+
 // Logout Controller
-const logoutTheaterOwner = asyncHandler(async (req: Request, res: Response) => {
-    try {
-        const response = theaterOwnerService.logoutTheaterOwner();
-        res.cookie('theaterOwnerJwt', '', {
-            httpOnly: true,
-            secure: process.env.NODE_ENV !== 'development',
-            sameSite: 'strict',
-            expires: new Date(0),
-        });
-        res.status(200).json(response);
-    } catch (error) {
-        res.status(500).json({ message: 'Error during logout' });
-    }
+const logoutTheaterOwner = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    await logoutTheaterOwnerService();
+    res.cookie('theaterOwnerJwt', '', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV !== 'development',
+        sameSite: 'strict',
+        expires: new Date(0),
+    });
+    res.status(200).json({ message: "Theater Owner Logged out" });
 });
 
 export {
     authTheaterOwner,
-    registerTheaterOwner,
+    registerTheaterOwner, 
     verifyTheaterOwnerOTP,
-    forgotTheaterOwnerPasswordController,
-    resetTheaterOwnerPasswordController,
-    logoutTheaterOwner,
-};
+    resendTheaterOwnerOtp, 
+    forgotTheaterOwnerPassword, 
+    resetTheaterOwnerPassword, 
+    logoutTheaterOwner 
+}

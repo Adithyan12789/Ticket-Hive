@@ -5,6 +5,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import Header from './Components/Header';
 import TheaterHeader from "./Components/TheaterComponents/TheaterHeader";
 import AdminHeader from "./Components/AdminComponents/AdminHeader";
+import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css'; 
 
 const App: React.FC = () => {
@@ -14,7 +15,12 @@ const App: React.FC = () => {
   const isSignUpPage = location.pathname === "/signup";
   const isAdminSignInPage = location.pathname === "/admin-login";
   const isForgotPasswordPage = location.pathname === "/forgot-password"; // Corrected typo
-  const isResetPasswordPage = /^\/reset-password\/.+$/.test(location.pathname); // Corrected typo and retained regex
+  const isResetPasswordPage = /^\/reset-password\/.+$/.test(location.pathname);
+
+  const isTheaterSignInPage = location.pathname === "/theater-login";
+  const isTheaterSignUpPage = location.pathname === "/theater-signup";
+  const isTheaterForgotPasswordPage = location.pathname === "/theater-forgot-password"; // Corrected typo
+  const isTheaterResetPasswordPage = /^\/theater-reset-password\/.+$/.test(location.pathname); // Corrected typo and retained regex
 
   const isOtpPage = location.pathname === "/verifyotp" || location.pathname === "/theater-verify-otp";
 
@@ -22,7 +28,9 @@ const App: React.FC = () => {
   const isTheaterPage = location.pathname.startsWith("/theater");
 
   // Show only the Outlet for authentication-related pages
-  if (isSignInPage || isSignUpPage || isOtpPage || isForgotPasswordPage || isResetPasswordPage || isAdminSignInPage) {
+  if (isSignInPage || isSignUpPage || isOtpPage || isForgotPasswordPage 
+         || isResetPasswordPage || isAdminSignInPage || isTheaterSignInPage 
+         || isTheaterSignUpPage || isTheaterForgotPasswordPage || isTheaterResetPasswordPage) {
     return (
       <>
         <ToastContainer />

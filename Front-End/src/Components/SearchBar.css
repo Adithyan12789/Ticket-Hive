@@ -1,0 +1,23 @@
+.ant-input-search {
+    border-radius: 25px !important;
+    border: 1px solid #a9a9a9;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  .ant-input-search .ant-input {
+    border-radius: 25px !important;
+  }
+  
+  .ant-input-search-button {
+    border-radius: 25px !important;
+  }
+  
+  .ant-input-search-large .ant-input {
+    padding: 10px 20px;
+    font-size: 1.1rem;
+  }
+  
+  .ant-input-affix-wrapper {
+    border-radius: 25px !important;
+  }
+  

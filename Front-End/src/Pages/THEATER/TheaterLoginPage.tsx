@@ -9,7 +9,7 @@ import { faEnvelope, faLock } from '@fortawesome/free-solid-svg-icons';
 import './TheaterLoginPage.css';
 import { RootState, AppDispatch } from '../../Store';
 
-const TheaterOwnerLoginPage = () => {
+const TheaterLoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -37,24 +37,37 @@ const TheaterOwnerLoginPage = () => {
 
   const submitHandler = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
-
+  
+    // Check if email is empty
+    if (email.trim() === '') {
+      toast.error('Email is required');
+      return;
+    }
+  
+    // Check if email format is invalid
     if (!validateEmail(email)) {
       toast.error('Invalid email format');
       return;
     }
-
+  
+    // Check if password is empty
+    if (password.trim() === '') {
+      toast.error('Password is required');
+      return;
+    }
+  
+    // Check if password length is less than 6 characters
     if (!validatePassword(password)) {
       toast.error('Password must be at least 6 characters');
       return;
     }
-
+  
     try {
       const res = await login({ email, password }).unwrap();
-      console.log(res);
       dispatch(setTheaterDetails({
-          ...res,
-          location: '',
-          capacity: 0
+        ...res,
+        location: '',
+        capacity: 0
       }));
       navigate('/theater');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -64,54 +77,52 @@ const TheaterOwnerLoginPage = () => {
   };
 
   return (
-    <div className="login-page">
-      <div className="login-container">
-        <h1 className="pb-5" style={{ fontSize: "30px" }}>Theater Owner Login</h1>
+    <div className="theater-login-page">
+      <div className="theater-login-container">
+        <h1 className="pb-5" style={{ fontSize: "25px" }}>Ticket Hive - Theater Owner</h1>
         <form onSubmit={submitHandler}>
-          <div className="input">
-            <div className="input-wrapper">
-              <span className="input-icon">
+          <div className="theater-input">
+            <div className="theater-input-wrapper">
+              <span className="theater-input-icon">
                 <FontAwesomeIcon icon={faEnvelope} />
               </span>
               <input
-                className="login-input"
+                className="theater-login-input"
                 type="email"
-                placeholder="Owner Email Address"
+                placeholder="Email Address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                required
               />
             </div>
           </div>
-          <div className="input pb-3">
-            <div className="input-wrapper">
-              <span className="input-icon">
+          <div className="theater-input pb-3">
+            <div className="theater-input-wrapper">
+              <span className="theater-input-icon">
                 <FontAwesomeIcon icon={faLock} />
               </span>
               <input
-                className="login-input"
+                className="theater-login-input"
                 type="password"
-                placeholder="Owner Password"
+                placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                required
               />
             </div>
           </div>
-
+  
           {/* Forgot Password Link */}
-          <div className="forgot-password">
-            <a href="/theater-forgot-password" className="forgot-password-link">
+          <div className="theater-forgot-password">
+            <a href="/theater-forgot-password" className="theater-forgot-password-link">
               Forgot Password?
             </a>
           </div>
-
-          <button className="login-btn" type="submit">
+  
+          <button className="theater-login-btn" type="submit">
             {isLoading ? 'Signing In...' : 'Sign In'}
           </button>
-
-          <div className="login-now pt-5">
-            <p>New Owner? <a href="/theater-signup">Sign Up</a></p>
+  
+          <div className="theater-login-now pt-5">
+            <p>Already a User? <a href="/theater-signup">Sign Up</a></p>
           </div>
         </form>
       </div>
@@ -119,4 +130,4 @@ const TheaterOwnerLoginPage = () => {
   );
 };
 
-export default TheaterOwnerLoginPage;
+export default TheaterLoginPage;

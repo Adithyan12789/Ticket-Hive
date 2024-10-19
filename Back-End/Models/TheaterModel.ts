@@ -1,60 +1,45 @@
-import mongoose, { Document } from 'mongoose';
-import bcrypt from "bcryptjs";
+import mongoose, { Document, Model, Schema } from 'mongoose';
+import bcrypt from 'bcryptjs';
 
 export interface ITheater extends Document {
-    _id: mongoose.Types.ObjectId; 
+    _id: mongoose.Types.ObjectId;
     name: string;
     email: string;
     password: string;
     profileImageName?: string;
-    otp: number;
+    otp: string;
+    otpExpires: Date;
     otpVerified: boolean;
-    favoriteGenres?: string[];
+    otpGeneratedAt: Date;
     resetPasswordToken?: string;
     resetPasswordExpires?: Date;
+    favoriteGenres?: string[];
     matchPassword(password: string): Promise<boolean>;
 }
 
-const theaterSchema = new mongoose.Schema<ITheater>({
-    name: {
-        type: String,
-        required: true,
-    },
-    email: {
-        type: String,
-        required: true,
-        unique: true,
-    },
-    password: {
-        type: String,
-        required: true,
-    },
-    profileImageName: {
-        type: String,
-    },
-    otp: {
-        type: Number,
-    },
-    otpVerified: {
-        type: Boolean,
-        default: false,
-    },
-    favoriteGenres: {
-        type: [String],
-    },
-    resetPasswordToken: {
-        type: String,
-    },
-    resetPasswordExpires: {
-        type: Date,
-    },
-}, {
-    timestamps: true,
-});
+const theaterSchema: Schema<ITheater> = new Schema(
+    {
+        name: { type: String, required: true },
+        email: { type: String, required: true, unique: true },
+        password: { type: String, required: true },
+        profileImageName: { type: String },
+        otp: { type: String, required: true },
+        otpVerified: { type: Boolean, default: false },
+        otpGeneratedAt: { type: Date, default: Date.now },
+        resetPasswordToken: { type: String },
+        resetPasswordExpires: { type: Date },
+        favoriteGenres: { type: [String] },
+    }, {
+        timestamps: true,
+    }
+)
 
-theaterSchema.methods.matchPassword = async function (enteredPassword: string) {
-    return await bcrypt.compare(enteredPassword, this.password);
+
+// Method to match entered password with hashed password
+theaterSchema.methods.matchPassword = async function (password: string): Promise<boolean> {
+    return bcrypt.compare(password, this.password);
 };
 
-const Theater = mongoose.model<ITheater>('Theater', theaterSchema);
+const Theater: Model<ITheater> = mongoose.model<ITheater>('Theater', theaterSchema);
+
 export default Theater;

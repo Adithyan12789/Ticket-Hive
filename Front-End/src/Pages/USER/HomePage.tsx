@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Card, Button, Carousel } from "react-bootstrap";
 import axios from "axios";
 import "./HomePage.css";
+import Footer from "../../Components/Footer";
 
 // Define the type for the movie
 interface Movie {
@@ -85,7 +86,7 @@ const HomePage: React.FC = () => {
         <p>Loading slider...</p>
       ) : (
         <Carousel className="image-slider">
-          {sliderMovies.slice(0, 5).map((movie) => (
+          {sliderMovies.slice(10, 15).map((movie) => (
             <Carousel.Item key={movie.id}>
               <img
                 className="d-block w-100 slider-image"
@@ -107,13 +108,13 @@ const HomePage: React.FC = () => {
 
       <Container>
         {/* Trending Movies Section */}
-        <h1 className="text-center my-4" style={{color:"black"}}>Trending Movies</h1>
+        <h1 className="text-center my-5" style={{color:"black"}}>Trending Movies</h1>
         {loading ? (
           <p>Loading trending movies...</p>
         ) : (
           <Row>
             {trendingMovies.slice(0, 8).map((movie) => (
-              <Col key={movie.id} md={3} className="mb-4">
+              <Col key={movie.id} md={3} className="mb-5">
                 <Card className="movie-card">
                   <Card.Img
                     variant="top"
@@ -143,14 +144,23 @@ const HomePage: React.FC = () => {
           </Row>
         )}
 
+        {/* Image Banner before Recommended Movies Section */}
+        <div className="banner-container">
+          <img
+            src="/tickets-stickers-badges-decorative-design-600w-2451487379-transformed.png" // Replace with your banner image URL or path
+            alt="Banner"
+            className="banner-image"
+          />
+        </div>
+
         {/* Recommended Movies Section */}
-        <h1 className="text-center my-4" style={{color:"black"}}>Recommended Movies</h1>
+        <h1 className="text-center my-5" style={{color:"black"}}>Recommended Movies</h1>
         {loading ? (
           <p>Loading recommended movies...</p>
         ) : (
           <Row>
             {recommendedMovies.slice(0, 8).map((movie) => (
-              <Col key={movie.id} md={3} className="mb-4">
+              <Col key={movie.id} md={3} className="mb-5">
                 <Card className="movie-card">
                   <Card.Img
                     variant="top"
@@ -180,6 +190,8 @@ const HomePage: React.FC = () => {
           </Row>
         )}
       </Container>
+
+      <Footer />
     </div>
   );
 };

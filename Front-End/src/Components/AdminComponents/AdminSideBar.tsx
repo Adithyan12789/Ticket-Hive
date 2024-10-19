@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { FaFilm, FaUsers, FaCogs } from "react-icons/fa"; // Import modern icons
+import { FaHome, FaFilm, FaUsers, FaTicketAlt, FaTag, FaCogs } from "react-icons/fa"; // Updated icons
 import "./AdminSidebar.css";
 
 interface AdminSidebarProps {
@@ -9,9 +9,13 @@ interface AdminSidebarProps {
 const AdminSidebar: React.FC<AdminSidebarProps> = ({ adminName }) => {
   return (
     <div className="sidebar">
-      <h2 className="sidebar-title">Welcome, {adminName}</h2>{" "}
-      {/* Display admin's name */}
+      <h2 className="sidebar-title">Welcome, {adminName}</h2> {/* Display admin's name */}
       <ul className="sidebar-links">
+        <li>
+          <Link to="/admin-dashboard">
+            <FaHome className="sidebar-icon" /> Admin Dashboard
+          </Link>
+        </li>
         <li>
           <Link to="/admin-dashboard/admin-get-user">
             <FaUsers className="sidebar-icon" /> User Management
@@ -19,26 +23,20 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ adminName }) => {
         </li>
         <li>
           <Link to="/admin/movies">
-            <FaFilm className="sidebar-icon" /> Movies Management
+            <FaFilm className="sidebar-icon" /> Theater Management
           </Link>
         </li>
         <li>
-          <Link to="/admin/settings">
-            <FaCogs className="sidebar-icon" /> Settings
+          <Link to="/admin/bookings">
+            <FaTicketAlt className="sidebar-icon" /> Bookings
           </Link>
-        </li><li>
-          <Link to="/admin/settings">
-            <FaCogs className="sidebar-icon" /> Settings
+        </li>
+        <li>
+          <Link to="/admin/coupons">
+            <FaTag className="sidebar-icon" /> Coupon Management
           </Link>
-        </li><li>
-          <Link to="/admin/settings">
-            <FaCogs className="sidebar-icon" /> Settings
-          </Link>
-        </li><li>
-          <Link to="/admin/settings">
-            <FaCogs className="sidebar-icon" /> Settings
-          </Link>
-        </li><li>
+        </li>
+        <li>
           <Link to="/admin/settings">
             <FaCogs className="sidebar-icon" /> Settings
           </Link>

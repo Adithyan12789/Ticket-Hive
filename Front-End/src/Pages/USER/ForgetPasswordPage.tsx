@@ -15,8 +15,26 @@ const ForgotPasswordScreen = () => {
     document.title = "Forgot Password - Ticket Hive";
   }, []);
 
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const submitHandler = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
+    
+    // Check if email is empty
+    if (email.trim() === '') {
+      toast.error('Email is required');
+      return;
+    }
+
+    // Check if email format is invalid
+    if (!validateEmail(email)) {
+      toast.error('Invalid email format');
+      return;
+    }
+
     try {
       await sendPasswordResetEmail({ email }).unwrap();
       toast.success('Password reset email sent successfully');
@@ -51,11 +69,10 @@ const ForgotPasswordScreen = () => {
                 </span>
                 <input
                   className="user-forgot-input"
-                  type="email"
+                  type="text"
                   placeholder="Enter your email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  required
                 />
               </div>
             </div>

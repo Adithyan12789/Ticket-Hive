@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
+
 // import './index.css';
 import store from './Store';
 import { Provider } from 'react-redux';
@@ -27,6 +28,15 @@ const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<App />}> 
 
+
+    {/* Admin Routes */}
+    <Route path="/admin-dashboard" element={<AdminPrivateRoute />}>
+        <Route index element={<AdminDashboard />} />
+        {/* Adjust this path to be relative */}
+        <Route path="admin-get-user" element={<AdminUser />} />
+      </Route>
+    <Route path="/admin-login" element={<AdminLoginPage />} />
+
       {/* User Routes */}
       <Route path="/" element={<HomePage />} />
       <Route path="/login" element={<LoginPage />} />
@@ -34,14 +44,6 @@ const router = createBrowserRouter(
       <Route path="/verifyotp" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password/:token" element={<ResetPassword />} />
-
-      {/* Admin Routes */}
-      <Route path="/admin-dashboard" element={<AdminPrivateRoute />}>
-        <Route index element={<AdminDashboard />} />
-        {/* Adjust this path to be relative */}
-        <Route path="admin-get-user" element={<AdminUser />} />
-      </Route>
-      <Route path="/admin-login" element={<AdminLoginPage />} />
 
       {/* Theater Owner Routes */}
       <Route path="/theater" element={<TheaterHomePage />} />

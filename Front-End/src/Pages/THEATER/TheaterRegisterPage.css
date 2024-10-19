@@ -1,205 +1,276 @@
-/* The CSS remains mostly unchanged from your original login page. */
-.login-page {
-    font-family: 'Poppins', sans-serif;
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background: linear-gradient(135deg, #282c34 0%, #3e4a61 100%);
-    overflow: hidden;
-  }
-  
-  .login-page::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: url('/images/theater-background.jpg');
-    background-size: cover;
-    background-position: center;
-    filter: brightness(60%);
-    z-index: -1;
-  }
-  
-  .login-container {
-    background-color: rgba(255, 255, 255, 0.1);
-    padding: 40px;
-    border-radius: 12px;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-    color: white;
-    width: 520px;
-    z-index: 1;
-    transition: all 0.3s ease-in-out;
-  }
-  
-  .login-container:hover {
-    transform: scale(1.02);
-  }
-  
-  h1 {
-    text-align: center;
-    font-size: 28px;
-    font-weight: bold;
-    color: #fff;
-    margin-bottom: 30px;
-    letter-spacing: 1px;
-  }
-  
-  .input-group {
-    margin-bottom: 20px;
-  }
-  
-  .input-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-  }
-  
-  .input-icon {
-    position: absolute;
-    left: 15px;
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 20px;
-    bottom: 32px;
-  }
-  
-  .login-input {
-    width: 100%;
-    padding: 16px 16px 16px 50px;
-    background-color: rgba(255, 255, 255, 0.2);
-    border: none;
-    border-radius: 8px;
-    color: white;
-    font-size: 16px;
-    outline: none;
-    transition: all 0.3s ease-in-out;
-    backdrop-filter: blur(4px);
-  }
-  
-  .login-input::placeholder {
-    color: rgba(255, 255, 255, 0.7);
-  }
-  
-  .login-input:focus {
-    background-color: rgba(255, 255, 255, 0.3);
-    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
-    border: 1px solid #3A5E49;
-  }
-  
-  .login-btn {
-    background-color: #ff4f5a;
-    color: white;
-    padding: 15px 0px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    width: 100%;
-    font-size: 18px;
-    font-weight: bold;
-    letter-spacing: 1px;
-    transition: all 0.3s ease-in-out;
-  }
-  
-  .login-btn:hover {
-    background-color: #ff6f74;
-    box-shadow: 0 4px 12px rgba(255, 79, 90, 0.4);
-  }
-  
-  .login-now {
-    text-align: center;
-    margin-top: 20px;
-  }
-  
-  .login-now a {
-    color: #fff;
-    text-decoration: underline;
-  }
-  
-  .login-now a:hover {
-    color: #ff4f5a;
-  }
+.theater-signup-page {
+  font-family: Arial, sans-serif;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-position: center;
+  overflow: hidden;
+}
 
-  /* OTP Modal Styles */
+.theater-signup-page::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('pngtree-old-movie-posters-on-the-wall-image_2881318.jpg');
+  background-position: center;
+  opacity: 0.9;
+  z-index: -1;
+}
+
+.theater-signup-container {
+  background-color: rgba(0, 0, 0, 0.9);
+  padding: 40px;
+  border-radius: 10px;
+  color: white;
+  width: 550px;
+  z-index: 1;
+}
+
+.theater-signup-now {
+  display: flex;
+  justify-content: center;
+}
+
+h1 {
+  text-align: center;
+}
+
+.theater-input-group,
+.checkbox-group,
+.theater-otp-input-container {
+  margin-bottom: 15px;
+}
+
+.theater-input-wrapper,
+.theater-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.theater-input-icon,
+.theater-input-icon {
+  position: absolute;
+  left: 15px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 18px;
+  bottom: 30px;
+}
+
+input,
+.theater-signup-input,
+.theater-otp-input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 5px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+input::placeholder,
+.theater-signup-input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+input:focus,
+.theater-signup-input:focus,
+.theater-otp-input:focus {
+  border-bottom-color: #3A5E49;
+  border-color: #007bff;
+  box-shadow: 0 0 10px rgba(0, 123, 255, 0.2);
+}
+
+.theater-signup-input {
+  padding-left: 40px; /* Adjust for icon */
+  background-color: rgba(255, 255, 255, 0.1);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.4);
+  margin-bottom: 20px;
+  color: white;
+}
+
+.theater-signup-btn,
+.theater-modern-btn,
+.theater-otp-submit-btn {
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  width: 100%;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+.theater-signup-btn {
+  background-color: #b31200;
+  height: 50px;
+  color: white;
+}
+
+.theater-signup-btn:hover,
+.theater-otp-submit-btn:hover {
+  background-color: #2e4c3b;
+}
+
+.theater-modern-btn {
+  background-color: #007bff;
+  color: #fff;
+}
+
+.theater-modern-btn:hover {
+  background-color: #0056b3;
+}
+
+.theater-otp-submit-btn {
+  background-color: #28a745;
+  color: white;
+}
+
+.theater-otp-submit-btn:hover {
+  background-color: #218838;
+}
+
+.social-login-buttons {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+.social-login-buttons button {
+  background-color: #fff;
+  color: #333;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 50%;
+  margin: 0 5px;
+}
+
+a {
+  color: #ccc;
+  text-decoration: none;
+}
+
 .otp-modal {
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.7);
+  width: 100%;
+  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+  z-index: 9999; /* Ensure it shows up on top of other elements */
 }
 
 .otp-modal-content {
-  background-color: rgba(255, 255, 255, 0.1);
-  padding: 40px;
-  border-radius: 12px;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-  color: white;
-  width: 400px;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
   text-align: center;
-  position: relative;
+  max-width: 400px;
+  width: 100%;
 }
 
-.otp-title {
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 15px;
-  color: #fff;
-}
-
-.otp-text {
+.otp-modal-title {
+  font-size: 20px;
   margin-bottom: 20px;
-  font-size: 16px;
-  color: #fff;
 }
 
-.otp-input-container {
+.otp-input-wrapper {
+  margin-bottom: 20px;
   display: flex;
   justify-content: center;
-  margin-bottom: 20px;
 }
 
 .otp-input {
-  width: 80%;
-  padding: 15px;
+  width: 50%; /* Adjust size of the input */
+  padding: 12px;
   font-size: 16px;
-  color: #000;
-  background-color: rgba(255, 255, 255, 0.9);
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  outline: none;
+  text-align: center;  /* Center the OTP inside the input field */
+  transition: border-color 0.3s ease;
+  color: #333;
+  background-color: rgba(255, 255, 255, 0.7); /* Slightly transparent background */
+}
+
+.otp-input:focus {
+  border-color: #3A5E49; /* Focus border color */
+  box-shadow: 0 0 8px rgba(58, 94, 73, 0.3); /* Slight glow effect on focus */
+}
+
+.otp-input::placeholder {
+  color: rgba(0, 0, 0, 0.5); /* Placeholder color */
+  font-size: 14px;
+}
+
+.otp-btn {
+  padding: 12px 20px;
+  font-size: 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-right: 10px;
   border: none;
-  border-radius: 8px;
+  outline: none;
+  transition: background-color 0.3s ease;
+}
+
+.primary-btn {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.primary-btn:hover {
+  background-color: #45a049;
+}
+
+.secondary-btn {
+  background-color: #f1f1f1;
+  color: #4CAF50;
+  border: 1px solid #4CAF50;
+}
+
+.secondary-btn:hover {
+  background-color: #e0e0e0;
+}
+
+.otp-btn.disabled {
+  cursor: not-allowed;
+  background-color: #b5b5b5;
+}
+
+.otp-time-left {
+  font-size: 14px;
+  margin-top: 10px;
+  color: #ff0000;
   text-align: center;
 }
 
-.otp-submit-btn {
-  background-color: #ff4f5a;
-  color: white;
-  padding: 12px 20px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 16px;
-  font-weight: bold;
-  letter-spacing: 1px;
-  transition: all 0.3s ease-in-out;
+.otp-modal-content {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
 }
 
-.otp-submit-btn:hover {
-  background-color: #ff6f74;
-  box-shadow: 0 4px 12px rgba(255, 79, 90, 0.4);
+/* Title style */
+.title {
+  font-size: 42px;
+  color: #333;
+  font-weight: 700;
 }
 
-.otp-submit-btn:disabled {
-  background-color: rgba(255, 79, 90, 0.7);
-  cursor: not-allowed;
-}
 
-  
+

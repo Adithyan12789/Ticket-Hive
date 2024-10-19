@@ -1,24 +1,42 @@
 import { useEffect, useState } from 'react';
-import { useSendPasswordResetEmailTheaterMutation } from '../../Slices/TheaterApiSlice'; 
+import { useSendPasswordResetEmailTheaterMutation } from '../../Slices/TheaterApiSlice';
 import { toast } from 'react-toastify';
-import Loader from "../../Components/Loader"; 
+import Loader from "../../Components/Loader";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelope } from '@fortawesome/free-solid-svg-icons';
-import './TheaterForgotPassword.css'; 
+import './TheaterForgotPassword.css';
 
-const TheaterOwnerForgetPasswordPage = () => {
+const ForgotPasswordScreen = () => {
   const [email, setEmail] = useState('');
-  const [emailSent, setEmailSent] = useState(false); 
-  const [sendPasswordResetEmail, { isLoading }] = useSendPasswordResetEmailTheaterMutation(); 
+  const [emailSent, setEmailSent] = useState(false);
+  const [sendPasswordResetEmailTheater, { isLoading }] = useSendPasswordResetEmailTheaterMutation();
 
   useEffect(() => {
-    document.title = "Theater Owner Forgot Password - Ticket Hive";
+    document.title = "Theater Forgot Password - Ticket Hive";
   }, []);
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
 
   const submitHandler = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
+    
+    // Check if email is empty
+    if (email.trim() === '') {
+      toast.error('Email is required');
+      return;
+    }
+
+    // Check if email format is invalid
+    if (!validateEmail(email)) {
+      toast.error('Invalid email format');
+      return;
+    }
+
     try {
-      await sendPasswordResetEmail({ email }).unwrap();
+      await sendPasswordResetEmailTheater({ email }).unwrap();
       toast.success('Password reset email sent successfully');
       setEmailSent(true); 
     } catch (err: unknown) {
@@ -32,43 +50,42 @@ const TheaterOwnerForgetPasswordPage = () => {
   };
 
   return (
-    <div className="forgot-password-page">
-      {isLoading && <div className="loader-overlay"><Loader /></div>} 
-      <div className="forgot-password-container">
+    <div className="theater-forgot-password-page">
+      {isLoading && <div className="theater-loader-overlay"><Loader /></div>}
+      <div className="theater-forgot-password-container">
         <h1 className="pb-5" style={{ fontSize: "25px" }}>
-          {emailSent ? 'Check Your Email' : 'Theater Forgot Password'}
+          {emailSent ? 'Check Your Email' : 'Theater - Forgot Password'}
         </h1>
         {emailSent ? (
-          <p className="confirmation-message">
+          <p className="theater-confirmation-message">
             We have sent a password reset link to <strong>{email}</strong>. Please check your email and follow the instructions to reset your password.
           </p>
         ) : (
           <form onSubmit={submitHandler}>
-            <div className="fp-input">
-              <div className="fp-input-wrapper">
-                <span className="fp-input-icon">
+            <div className="theater-fp-input">
+              <div className="theater-fp-input-wrapper">
+                <span className="theater-fp-input-icon">
                   <FontAwesomeIcon icon={faEnvelope} />
                 </span>
                 <input
-                  className="forgot-input"
-                  type="email"
+                  className="theater-forgot-input"
+                  type="text"
                   placeholder="Enter your email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  required
                 />
               </div>
             </div>
 
-            <button className="forgot-btn" type="submit">
+            <button className="theater-forgot-btn" type="submit">
               Send Reset Link
             </button>
           </form>
         )}
 
         {emailSent && (
-          <div className="resend-message">
-            <p>Didn't receive the email? <button className="resend-btn" onClick={() => setEmailSent(false)}>Resend</button></p>
+          <div className="theater-resend-message">
+            <p>Didn't receive the email? <button className="theater-resend-btn" onClick={() => setEmailSent(false)}>Resend</button></p>
           </div>
         )}
       </div>
@@ -76,4 +93,4 @@ const TheaterOwnerForgetPasswordPage = () => {
   );
 };
 
-export default TheaterOwnerForgetPasswordPage;
+export default ForgotPasswordScreen;

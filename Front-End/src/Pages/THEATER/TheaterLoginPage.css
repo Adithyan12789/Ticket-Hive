@@ -1,170 +1,153 @@
-.login-page {
-  font-family: 'Poppins', sans-serif; /* Modern font family */
+.theater-login-page {
+  font-family: Arial, sans-serif;
   position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background: linear-gradient(135deg, #282c34 0%, #3e4a61 100%);
+  background-position: center;
   overflow: hidden;
 }
 
-.login-page::before {
+.theater-login-page::before {
   content: "";
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: url('/images/theater-background.jpg');
-  background-size: cover;
+  background-image: url('/pngtree-old-movie-posters-on-the-wall-image_2881318.jpg');
   background-position: center;
-  filter: brightness(60%);
+  opacity: 0.9;
   z-index: -1;
 }
 
-.login-container {
-  background-color: rgba(255, 255, 255, 0.1); /* Subtle transparency for modern feel */
+.theater-login-container {
+  background-color: rgba(0, 0, 0, 0.9);
   padding: 40px;
-  border-radius: 12px;
-  backdrop-filter: blur(10px); /* Adds modern glass effect */
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); /* Softer shadows */
+  border-radius: 10px;
   color: white;
-  width: 450px;
+  width: 500px;
   z-index: 1;
-  transition: all 0.3s ease-in-out;
 }
 
-.login-container:hover {
-  transform: scale(1.02); /* Subtle zoom effect */
+.theater-login-now {
+  display: flex;
+  justify-content: center;
 }
 
 h1 {
   text-align: center;
-  font-size: 28px;
-  font-weight: bold;
-  color: #fff;
-  margin-bottom: 30px;
-  letter-spacing: 1px;
 }
 
-.input-group {
-  margin-bottom: 20px;
+.theater-input-group {
+  margin-bottom: 15px;
 }
 
-.input-wrapper {
+.theater-input-wrapper {
   position: relative;
   display: flex;
   align-items: center;
 }
 
-.input-icon {
+.theater-input-icon {
   position: absolute;
-  left: 15px;
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 20px;
+  left: 17px; /* Adjusted for better alignment */
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 18px;
   bottom: 32px;
 }
 
-.login-input {
+/* Modern Transparent Input Box Styling */
+.theater-login-input {
   width: 100%;
-  padding: 16px 16px 16px 50px;
-  background-color: rgba(255, 255, 255, 0.2);
+  padding: 22px;
+  background-color: rgba(255, 255, 255, 0.1);
   border: none;
-  border-radius: 8px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.4);
+  border-radius: 5px;
   color: white;
   font-size: 16px;
+  margin-bottom: 20px;
   outline: none;
-  transition: all 0.3s ease-in-out;
-  backdrop-filter: blur(4px);
+  transition: border-bottom-color 0.3s ease-in-out;
 }
 
-.login-input::placeholder {
+.theater-login-input::placeholder {
   color: rgba(255, 255, 255, 0.7);
 }
 
-.login-input:focus {
-  background-color: rgba(255, 255, 255, 0.3);
-  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2); /* Glow effect on focus */
-  border: 1px solid #3A5E49;
+.theater-login-input:focus {
+  border-bottom-color: #3A5E49;
 }
 
-.login-btn {
-  background-color: #ff4f5a;
+.theater-login-input {
+  width: 100%;
+  padding: 12px 15px 12px 50px; /* Added more left padding for the input field */
+  background-color: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.4);
+  border-radius: 5px;
+  color: white;
+  font-size: 16px;
+  margin-bottom: 20px;
+  outline: none;
+  transition: border-bottom-color 0.3s ease-in-out;
+}
+
+.theater-login-btn {
+  background-color: #b31200;
   color: white;
   padding: 15px 0px;
   border: none;
-  border-radius: 8px;
+  border-radius: 5px;
   cursor: pointer;
   width: 100%;
+  height: 50px;
   font-size: 18px;
-  font-weight: bold;
-  letter-spacing: 1px;
-  transition: all 0.3s ease-in-out;
+  transition: background-color 0.3s ease-in-out;
 }
 
-.login-btn:hover {
-  background-color: #ff6f74;
-  box-shadow: 0 4px 12px rgba(255, 79, 90, 0.4); /* Soft shadow effect on hover */
+.theater-login-btn:hover {
+  background-color: #2e4c3b; /* Darken the button on hover */
 }
 
-.forgot-password {
+
+.theater-forgot-password {
   text-align: right;
   margin-bottom: 1rem;
 }
 
-.forgot-password-link {
-  color: #fff;
+.theater-forgot-password-link {
+  color: white;
+  text-decoration: none;
   font-size: 0.9rem;
-  text-decoration: underline;
-  transition: all 0.2s ease-in-out;
 }
 
-.forgot-password-link:hover {
-  color: #ff4f5a;
+.theater-forgot-password-link:hover {
+  text-decoration: underline;
 }
 
 .checkbox-group {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
-}
-
-.checkbox-group label {
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 0.9rem;
+  margin-bottom: 15px;
 }
 
 .social-login-buttons {
   display: flex;
-  justify-content: space-around;
-  margin-bottom: 20px;
+  justify-content: center;
+  margin-bottom: 15px;
 }
 
 .social-login-buttons button {
-  background-color: transparent;
-  color: #fff;
-  border: 2px solid rgba(255, 255, 255, 0.4);
+  background-color: #fff;
+  color: #333;
+  padding: 10px;
+  border: 1px solid #ccc;
   border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  font-size: 20px;
-  cursor: pointer;
-  transition: all 0.3s ease-in-out;
-}
-
-.social-login-buttons button:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.7);
-  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
+  margin: 0 5px;
 }
 
 a {
-  color: rgba(255, 255, 255, 0.8);
+  color: #ccc;
   text-decoration: none;
-}
-
-a:hover {
-  color: #ff4f5a;
 }

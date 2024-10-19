@@ -59,6 +59,15 @@ export const theaterApiSlice = apiSlice.injectEndpoints({
       }),
     }),
 
+    
+    resendOtpTheater: builder.mutation({
+      query: (data) => ({
+        url: `${THEATER_URL}/theater-resend-otp`,
+        method: 'POST',
+        body: data,
+      }),
+    }),
+
     logoutTheater: builder.mutation<void, void>({
       query: () => ({
         url: `${THEATER_URL}/theater-logout`,
@@ -76,11 +85,11 @@ export const theaterApiSlice = apiSlice.injectEndpoints({
 
     resetPasswordTheater: builder.mutation({
       query: (data) => ({
-        url: `${THEATER_URL}/theater-reset-password/${data.token}`,
+        url: `${THEATER_URL}/theater-reset-password/${data.token}`,  // Use the token in URL
         method: 'PUT',
         body: { password: data.password },
       }),
-    }),
+    }),    
 
     updateTheater: builder.mutation<TheaterResponse, TheaterProfile>({
       query: (data) => ({
@@ -97,6 +106,7 @@ export const {
   useLogoutTheaterMutation,
   useRegisterTheaterMutation,
   useVerifyOtpTheaterMutation,
+  useResendOtpTheaterMutation,
   useSendPasswordResetEmailTheaterMutation,
   useResetPasswordTheaterMutation,
   useUpdateTheaterMutation,

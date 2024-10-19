@@ -9,7 +9,7 @@
 }
 
 .slider-image {
-  height: 500px;
+  height: 550px;
   object-fit: cover;
 }
 
@@ -152,7 +152,7 @@
 }
 
 .navbar .navbar-brand:hover {
-  color: black; /* Hover effect to match the button style */
+  color: #14e92a; /* Hover effect to match the button style */
 }
 
 /* Remove underline from nav links */
@@ -171,7 +171,7 @@
 
 .navbar .navbar-nav .nav-link.nav-home:hover,
 .navbar .navbar-nav .nav-link.nav-movies:hover {
-  color: black; /* Hover effect to match buttons */
+  color: #14e92a; /* Hover effect to match buttons */
 }
 
 /* Remove focus and active state underlines */
@@ -220,4 +220,19 @@
 #username {
   font-weight: 600;
   color: white; /* Consistent with other text */
+}
+
+
+/* HomePage.css */
+.banner-container {
+  text-align: center;
+  margin: 80px 0;
+}
+
+.banner-image {
+  width: 100%;
+  height: auto;
+  max-height: 300px; /* Adjust the height to fit your design */
+  object-fit: cover;
+  border-radius: 50px;
 }
