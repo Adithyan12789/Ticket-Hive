@@ -1,35 +1,5 @@
 import { apiSlice } from "./ApiSlice";
-
-interface UserCredentials {
-  email: string;
-  password: string;
-}
-
-interface RegisterCredentials {
-  name: string;
-  email: string;
-  phone: number;
-  password: string;
-}
-
-interface otpCredentials {
-  email: string;
-  otp: string;
-}
-
-interface UserProfile {
-  id: string;
-  name: string;
-  email: string;
-}
-
-interface UserResponse {
-  isAdmin: UserResponse;
-  id: string;
-  name: string;
-  email: string;
-  token: string;
-}
+import { UserResponse, UserCredentials, RegisterCredentials, OtpCredentials } from "../Types";
 
 const USERS_URL = '/api/users';
 
@@ -43,6 +13,14 @@ export const usersApiSlice = apiSlice.injectEndpoints({
       }),
     }),
 
+    googleLogin:builder.mutation({
+      query:(data)=>({
+         url:`${USERS_URL}/googleLogin`,
+         method:'POST',
+         body:data
+      })
+  }),
+
     register: builder.mutation<UserResponse, RegisterCredentials>({
       query: (data) => ({
         url: `${USERS_URL}/signup`,
@@ -51,7 +29,7 @@ export const usersApiSlice = apiSlice.injectEndpoints({
       }),
     }),
 
-    verifyOtp: builder.mutation<UserResponse, otpCredentials>({
+    verifyOtp: builder.mutation<UserResponse, OtpCredentials>({
       query: (data) => ({
         url: `${USERS_URL}/verifyotp`,
         method: 'POST',
@@ -90,23 +68,31 @@ export const usersApiSlice = apiSlice.injectEndpoints({
       }),
     }),
 
-    updateUser: builder.mutation<UserResponse, UserProfile>({
-      query: (data) => ({
+    getUserProfile: builder.query({
+      query: () => ({
+        url: `${USERS_URL}/profile`, 
+        method: 'GET',
+      }),
+    }),
+    updateUser: builder.mutation({
+      query: (data)=>({
         url: `${USERS_URL}/profile`,
         method: 'PUT',
-        body: data,
-      }),
+        body: data
+      })
     }),
   }),
 });
 
 export const {
   useLoginMutation,
+  useGoogleLoginMutation,
   useLogoutMutation,
   useRegisterMutation,
   useVerifyOtpMutation,
   useResendOtpMutation,
   useSendPasswordResetEmailMutation,
   useResetPasswordMutation,
+  useGetUserProfileQuery,
   useUpdateUserMutation,
 } = usersApiSlice;

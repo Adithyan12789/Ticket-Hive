@@ -6,10 +6,11 @@ export interface ITheater extends Document {
     name: string;
     email: string;
     password: string;
+    phone?: string;
     profileImageName?: string;
-    otp: string;
-    otpExpires: Date;
-    otpVerified: boolean;
+    otp?: string;
+    otpExpires?: Date;
+    otpVerified?: boolean;
     otpGeneratedAt: Date;
     resetPasswordToken?: string;
     resetPasswordExpires?: Date;
@@ -21,9 +22,10 @@ const theaterSchema: Schema<ITheater> = new Schema(
     {
         name: { type: String, required: true },
         email: { type: String, required: true, unique: true },
-        password: { type: String, required: true },
+        password: { type: String, required: false },
         profileImageName: { type: String },
-        otp: { type: String, required: true },
+        phone: { type: String, required: false },
+        otp: { type: String, required: false },
         otpVerified: { type: Boolean, default: false },
         otpGeneratedAt: { type: Date, default: Date.now },
         resetPasswordToken: { type: String },
@@ -34,8 +36,6 @@ const theaterSchema: Schema<ITheater> = new Schema(
     }
 )
 
-
-// Method to match entered password with hashed password
 theaterSchema.methods.matchPassword = async function (password: string): Promise<boolean> {
     return bcrypt.compare(password, this.password);
 };

@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { FaHome, FaFilm, FaUsers, FaTicketAlt, FaTag, FaCogs } from "react-icons/fa"; // Updated icons
+import { FaHome, FaFilm, FaUsers, FaTicketAlt, FaTag, FaCogs } from "react-icons/fa";
 import "./TheaterSidebar.css";
 
 interface TheaterOwnerSidebarProps {
@@ -9,7 +9,7 @@ interface TheaterOwnerSidebarProps {
 const TheaterOwnerSidebar: React.FC<TheaterOwnerSidebarProps> = ({ theaterOwnerName }) => {
   return (
     <div className="sidebar">
-      <h2 className="sidebar-title">Welcome, {theaterOwnerName}</h2> {/* Display admin's name */}
+      <h2 className="sidebar-title">Welcome, {theaterOwnerName}</h2>
       <ul className="sidebar-links">
         <li>
           <Link to="/theater">

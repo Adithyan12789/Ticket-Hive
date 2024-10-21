@@ -1,9 +1,10 @@
 import express from 'express';
-import { authTheaterOwner, registerTheaterOwner, verifyTheaterOwnerOTP, resendTheaterOwnerOtp, logoutTheaterOwner, forgotTheaterOwnerPassword, resetTheaterOwnerPassword } from '../Controllers/TheaterController';
+import { authTheaterOwner, googleLoginTheaterOwner, registerTheaterOwner, verifyTheaterOwnerOTP, resendTheaterOwnerOtp, logoutTheaterOwner, forgotTheaterOwnerPassword, resetTheaterOwnerPassword } from '../Controllers/TheaterController';
 
 const router = express.Router();
 
 router.post('/theater-login', authTheaterOwner);
+router.post('/theater-GoogleLogin', googleLoginTheaterOwner);
 router.post('/theater-signup', registerTheaterOwner);
 router.post('/theater-verifyotp', verifyTheaterOwnerOTP);
 router.post('/theater-resend-otp', resendTheaterOwnerOtp);

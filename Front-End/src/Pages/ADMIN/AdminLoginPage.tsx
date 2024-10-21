@@ -68,7 +68,10 @@ const AdminLoginPage = () => {
   
       
       if (res && res.isAdmin) {
-        dispatch(setCredentials({ ...res }));
+        dispatch(setCredentials({
+          ...res,
+          data: undefined
+        }));
         navigate('/admin-dashboard'); 
       } else {
         toast.error('You do not have admin access');

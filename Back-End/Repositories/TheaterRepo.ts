@@ -1,4 +1,3 @@
-// repositories/UserRepository.ts
 import Theater, { ITheater } from "../Models/TheaterModel";
 
 export const findTheaterOwnerByEmail = async (email: string) => {

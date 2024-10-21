@@ -19,33 +19,25 @@ export const registerTheaterOwnerService = async (
     password: string, 
     phone: string
 ) => {
-    // Check if the user already exists
     const existingTheaterOwner = await Theater.findOne({ 
         email 
     });
 
     if (existingTheaterOwner) {
-        // If the user exists but OTP is not verified, allow them to proceed to OTP verification
         if (!existingTheaterOwner.otpVerified) {
-            // You can resend OTP to the user if they exist and haven't verified
             const otp = crypto.randomInt(100000, 999999).toString();
             existingTheaterOwner.otp = otp;
-            existingTheaterOwner.otpVerified = false;  // Reset OTP verification to false
-            existingTheaterOwner.otpGeneratedAt = new Date();  // Update OTP generation time
+            existingTheaterOwner.otpVerified = false;
+            existingTheaterOwner.otpGeneratedAt = new Date();
             await existingTheaterOwner.save();
 
-            // Send OTP email again
             await sendOtpEmail(existingTheaterOwner.email, otp);
-
-            // Return the user so that the front-end can proceed with OTP modal
             return existingTheaterOwner;
         }
 
-        // If the user exists and has already verified their OTP, throw an error
         throw new Error('Email already exists.');
     }
 
-    // If no existing user, create a new one
     const otp = crypto.randomInt(100000, 999999).toString();
 
     const salt = await bcrypt.genSalt(10);
@@ -74,7 +66,7 @@ export const verifyTheaterOwnerOtpService = async (email: string, otp: string) =
         throw new Error('theater owner not found');
     }
 
-    const OTP_EXPIRATION_TIME = 5 * 60 * 1000; // 5 minutes
+    const OTP_EXPIRATION_TIME = 5 * 60 * 1000;
 
     // Check if OTP has expired
     if (new Date().getTime() - new Date(theater.otpGeneratedAt).getTime() > OTP_EXPIRATION_TIME) {
@@ -97,25 +89,24 @@ export const resendTheaterOwnerOtpService = async (email: string) => {
         throw new Error('User not found');
     }
 
-    // Generate OTP as a string
-    const otp = crypto.randomInt(100000, 999999).toString(); // Convert number to string
+    const otp = crypto.randomInt(100000, 999999).toString();
 
-    theater.otp = otp; // Now the OTP is a string
-    theater.otpExpires = new Date(Date.now() + 1 * 60 * 1000 + 59 * 1000); // OTP expiration time (1 minute 59 seconds)
+    theater.otp = otp;
+    theater.otpExpires = new Date(Date.now() + 1 * 60 * 1000 + 59 * 1000);
 
     try {
-        await saveTheaterOwner(theater); // Save user with new OTP
+        await saveTheaterOwner(theater);
     } catch (err) {
         throw new Error('Failed to save user with new OTP');
     }
 
     try {
-        await sendOtpEmail(theater.email, otp); // Send OTP email
+        await sendOtpEmail(theater.email, otp);
     } catch (err) {
         throw new Error('Failed to send OTP email');
     }
 
-    return theater; // Optionally return user if needed
+    return theater;
 };
 
 

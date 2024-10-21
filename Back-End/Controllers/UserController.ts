@@ -4,6 +4,8 @@ import asyncHandler from "express-async-handler";
 import { authenticateUser, registerUserService, verifyOtpService, resendOtpService, forgotPasswordService, resetPasswordService, logoutUserService } from "../Services/UserService";
 import { sendOtpEmail } from "../Utils/EmailUtil";
 import expressAsyncHandler from "express-async-handler";
+import User from "../Models/UserModel";
+import generateToken from "../Utils/GenerateToken";
 
 const authUser = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { email, password } = req.body;
@@ -22,19 +24,73 @@ const authUser = asyncHandler(async (req: Request, res: Response): Promise<void>
         });
     } catch (err: unknown) {
         if (err instanceof Error) {
-            if (err.message === "Invalid Email or Password") {
-                // Return the specific error message for invalid email or password
+            if(err.message === "your account is blocked"){
+                res.status(401).json({ message: "your account is blocked. Please contact support." });
+            }else if (err.message === "Invalid Email or Password") {
+
                 res.status(401).json({ message: "Invalid email or password" });
             } else {
-                // General error handling for other cases
                 res.status(500).json({ message: "An error occurred during authentication" });
             }
         } else {
-            // Fallback if the error is not an instance of Error
             res.status(500).json({ message: "An error occurred during authentication" });
         }
     }
 });
+
+const googleLogin = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const { googleName: name, googleEmail: email } = req.body;
+
+    if (!email || !name) {
+        res.status(400).json({ message: "Google Name and Email are required" });
+        return;
+    }
+
+    try {
+        let user = await User.findOne({ email });
+
+        if (user) {
+            generateToken(res, user._id.toString());
+            res.status(200).json({
+                success: true,
+                data: {
+                    _id: user._id,
+                    name: user.name,
+                    email: user.email,
+                },
+            });
+        } else {
+            console.log("Creating a new user...");
+            user = await User.create({
+                name,
+                email,
+                otp: "",
+                phone: "",
+                password: "",
+            });
+            console.log("User created:", user);
+
+            if (user) {
+                generateToken(res, user._id.toString());
+                res.status(201).json({
+                    success: true,
+                    data: {
+                        _id: user._id,
+                        name: user.name,
+                        email: user.email,
+                    },
+                });
+            } else {
+                res.status(400).json({ message: "Invalid user data" });
+            }
+        }
+    } catch (error: any) {
+        console.error("Error in googleLogin:", error.message);
+        res.status(500).json({ message: "Internal server error", error: error.message });
+    }
+});
+
+
 
 
 const registerUser = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -43,8 +99,7 @@ const registerUser = asyncHandler(async (req: Request, res: Response): Promise<v
     try {
         const user = await registerUserService(name, email, password, phone);
         
-        // Check if the user is newly created or if OTP was sent again for an existing user
-        const otpSent = !user.otpVerified; // OTP is sent only if the user hasn't verified their OTP
+        const otpSent = !user.otpVerified;
 
         res.status(201).json({
             id: user._id.toString(),
@@ -67,6 +122,7 @@ const registerUser = asyncHandler(async (req: Request, res: Response): Promise<v
         }
     }
 });
+
 
 
 
@@ -157,8 +213,6 @@ const resetPasswordController = asyncHandler(async (req: Request, res: Response)
     }
 });
 
-
-// Logout Controller
 const logoutUser = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     await logoutUserService();
     res.cookie('jwt', '', {
@@ -172,6 +226,7 @@ const logoutUser = asyncHandler(async (req: Request, res: Response): Promise<voi
 
 export {
     authUser,
+    googleLogin,
     registerUser,
     verifyOTP,
     resendOtp,

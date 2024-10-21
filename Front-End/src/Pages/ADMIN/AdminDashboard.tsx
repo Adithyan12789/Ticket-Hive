@@ -10,8 +10,6 @@ const AdminDashboard: React.FC = () => {
       <Sidebar adminName={'Adithyan'} />
 
       <div className="dashboard-content" style={{padding: "0px"}}>
-
-
         <div className="dashboard-main-content">
           
           <Outlet />

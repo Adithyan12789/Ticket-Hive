@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useResetPasswordTheaterMutation } from '../../Slices/TheaterApiSlice';
 import { toast } from 'react-toastify';
-import Loader from "../../Components/Loader"; 
+import Loader from "../../Components/UserComponents/Loader"; 
 import { useParams, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLock, faUnlockAlt } from '@fortawesome/free-solid-svg-icons';

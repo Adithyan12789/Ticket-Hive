@@ -1,35 +1,6 @@
 import { apiSlice } from "./ApiSlice";
+import { TheaterResponse, TheaterCredentials, TheaterProfile, RegisterCredentials,OtpCredentials } from "../Types";
 
-interface TheaterCredentials {
-  email: string;
-  password: string;
-}
-
-interface RegisterCredentials {
-  name: string;
-  email: string;
-  phone: number;
-  password: string;
-}
-
-interface OtpCredentials {
-  email: string;
-  otp: string;
-}
-
-interface TheaterProfile {
-  id: string;
-  name: string;
-  email: string;
-}
-
-interface TheaterResponse {
-  isAdmin: boolean;
-  id: string;
-  name: string;
-  email: string;
-  token: string;
-}
 
 const THEATER_URL = '/api/theater';
 
@@ -42,6 +13,14 @@ export const theaterApiSlice = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
+
+    googleLoginTheater:builder.mutation({
+      query:(data)=>({
+         url:`${THEATER_URL}/theater-GoogleLogin`,
+         method:'POST',
+         body:data
+      })
+  }),
 
     registerTheater: builder.mutation<TheaterResponse, RegisterCredentials>({
       query: (data) => ({
@@ -85,7 +64,7 @@ export const theaterApiSlice = apiSlice.injectEndpoints({
 
     resetPasswordTheater: builder.mutation({
       query: (data) => ({
-        url: `${THEATER_URL}/theater-reset-password/${data.token}`,  // Use the token in URL
+        url: `${THEATER_URL}/theater-reset-password/${data.token}`,
         method: 'PUT',
         body: { password: data.password },
       }),
@@ -103,6 +82,7 @@ export const theaterApiSlice = apiSlice.injectEndpoints({
 
 export const {
   useLoginTheaterMutation,
+  useGoogleLoginTheaterMutation,
   useLogoutTheaterMutation,
   useRegisterTheaterMutation,
   useVerifyOtpTheaterMutation,

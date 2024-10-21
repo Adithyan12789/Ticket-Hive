@@ -15,8 +15,8 @@ const SearchBar: React.FC<SearchBarProps> = ({ searchTerm, setSearchTerm }) => {
     <Search
       placeholder="Search users"
       value={searchTerm}
-      onChange={(e) => setSearchTerm(e.target.value)} // Update searchTerm on input change
-      onSearch={(value) => setSearchTerm(value)} // Handle search button click
+      onChange={(e) => setSearchTerm(e.target.value)}
+      onSearch={(value) => setSearchTerm(value)}
       enterButton={<SearchOutlined />}
       size="large"
       style={{ borderRadius: "25px", boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)" }}

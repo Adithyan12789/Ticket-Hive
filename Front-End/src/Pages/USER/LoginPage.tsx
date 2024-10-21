@@ -1,28 +1,33 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { useLoginMutation } from '../../Slices/UserApiSlice';
-import { setCredentials } from '../../Slices/AuthSlice';
-import { toast } from 'react-toastify';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEnvelope, faLock } from '@fortawesome/free-solid-svg-icons';
-import './LoginPage.css';
-import { RootState, AppDispatch } from '../../Store';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { setCredentials } from "../../Slices/AuthSlice";
+import { toast } from "react-toastify";
+import { jwtDecode } from 'jwt-decode';
+import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEnvelope, faLock } from "@fortawesome/free-solid-svg-icons";
+import "./LoginPage.css";
+import { RootState, AppDispatch } from "../../Store";
+import { useGoogleLoginMutation, useLoginMutation } from "../../Slices/UserApiSlice";
+import { CredentialResponse } from '@react-oauth/google';
+import { GoogleJwtPayload } from "../../Types";
 
 const LoginPage = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const navigate = useNavigate();
   const dispatch: AppDispatch = useDispatch();
 
   const [login, { isLoading }] = useLoginMutation();
+  const [googleLogin] = useGoogleLoginMutation();
 
   const { userInfo } = useSelector((state: RootState) => state.auth);
 
   useEffect(() => {
     if (userInfo) {
-      navigate('/');
+      navigate("/");
     }
   }, [navigate, userInfo]);
 
@@ -37,45 +42,77 @@ const LoginPage = () => {
 
   const submitHandler = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
-  
-    // Check if email is empty
-    if (email.trim() === '') {
-      toast.error('Email is required');
+
+    if (email.trim() === "") {
+      toast.error("Email is required");
       return;
     }
-  
-    // Check if email format is invalid
+
     if (!validateEmail(email)) {
-      toast.error('Invalid email format');
+      toast.error("Invalid email format");
       return;
     }
-  
-    // Check if password is empty
-    if (password.trim() === '') {
-      toast.error('Password is required');
+
+    if (password.trim() === "") {
+      toast.error("Password is required");
       return;
     }
-  
-    // Check if password length is less than 6 characters
+
     if (!validatePassword(password)) {
-      toast.error('Password must be at least 6 characters');
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
+
+    try {
+      const res = await login({ email, password }).unwrap();
+      dispatch(setCredentials({
+        ...res,
+        data: undefined
+      }));
+      navigate("/");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      toast.error(err?.data?.message || err?.message || "An error occurred");
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse: CredentialResponse) => {
+    if (!credentialResponse.credential) {
+      toast.error("Google login failed. No credential received.");
       return;
     }
   
     try {
-      const res = await login({ email, password }).unwrap();
-      dispatch(setCredentials({ ...res }));
-      navigate('/');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
-      toast.error(err?.data?.message || err?.message || 'An error occurred');
+      const decoded = jwtDecode<GoogleJwtPayload>(credentialResponse.credential);
+      if (!decoded.email || !decoded.name) {
+        throw new Error("Invalid token payload");
+      }
+      
+      const { name: googleName, email: googleEmail } = decoded;
+  
+      const responseFromApiCall = await googleLogin({ googleName, googleEmail }).unwrap();
+      dispatch(setCredentials({ ...responseFromApiCall }));
+      navigate("/");
+    } catch (error: unknown) {
+      toast.error(
+        error instanceof Error ? error.message : "An error occurred during Google login"
+      );
     }
   };
 
   return (
     <div className="user-login-page">
       <div className="user-login-container">
-        <h1 className="pb-5" style={{ fontSize: "40px" }}>Ticket Hive</h1>
+        <div className="header-container">
+          <img
+            src="/stock-vector-icon-logo-illustration-for-digital-business-ticket-services-720686734-removebg-preview.png"
+            alt="Ticket Hive Icon"
+            className="header-icon pb-5"
+          />
+          <h1 className="pb-4" style={{ fontSize: "40px" }}>
+            Ticket Hive
+          </h1>
+        </div>
         <form onSubmit={submitHandler}>
           <div className="user-input">
             <div className="user-input-wrapper">
@@ -105,22 +142,35 @@ const LoginPage = () => {
               />
             </div>
           </div>
-  
-          {/* Forgot Password Link */}
+
           <div className="user-forgot-password">
             <a href="/forgot-password" className="user-forgot-password-link">
               Forgot Password?
             </a>
           </div>
-  
+
           <button className="user-login-btn" type="submit">
-            {isLoading ? 'Signing In...' : 'Sign In'}
+            {isLoading ? "Signing In..." : "Sign In"}
           </button>
-  
+
           <div className="user-login-now pt-5">
-            <p>Already a User? <a href="/signup">Sign Up</a></p>
+            <p>
+              Already a User? <a href="/signup">Sign Up</a>
+            </p>
           </div>
         </form>
+
+        <div
+          className="text-center my-4"
+          style={{ display: "flex", justifyContent: "center" }}
+        >
+          <GoogleOAuthProvider clientId="677515594917-egtbr0hasoe3pf9j7npt2sk1s3v0e5e2.apps.googleusercontent.com">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => toast.error("Google login failed.")}
+            />
+          </GoogleOAuthProvider>
+        </div>
       </div>
     </div>
   );

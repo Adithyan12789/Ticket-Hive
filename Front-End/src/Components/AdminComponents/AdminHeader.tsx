@@ -11,6 +11,7 @@ import "./AdminHeader.css"
 
 const AdminHeader: React.FC = () => {
   const { adminInfo } = useSelector((state: RootState) => state.adminAuth);
+  
 
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
@@ -39,7 +40,6 @@ const AdminHeader: React.FC = () => {
 
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="d-flex w-100 justify-content-between">
-              {/* This div positions the Admin Dashboard in the center */}
               <div className="d-flex justify-content-start w-50">
                 {adminInfo && (
                   <Nav.Link
@@ -50,8 +50,7 @@ const AdminHeader: React.FC = () => {
                   </Nav.Link>
                 )}
               </div>
-
-              {/* Navigation Links */}
+              
               <Nav className="ms-auto">
                 {adminInfo ? (
                   <NavDropdown title={adminInfo.name} id="admin-username">

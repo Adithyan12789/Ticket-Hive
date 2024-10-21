@@ -4,6 +4,8 @@ import asyncHandler from "express-async-handler";
 import { authTheaterOwnerService, registerTheaterOwnerService, verifyTheaterOwnerOtpService, resendTheaterOwnerOtpService, forgotTheaterOwnerPasswordService, resetTheaterOwnerPasswordService, logoutTheaterOwnerService } from "../Services/TheaterService";
 import { sendOtpEmail } from "../Utils/EmailUtil";
 import expressAsyncHandler from "express-async-handler";
+import Theater from "../Models/TheaterModel";
+import generateTheaterToken from "../Utils/GenerateTheaterToken";
 
 const authTheaterOwner = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { email, password } = req.body;
@@ -23,16 +25,65 @@ const authTheaterOwner = asyncHandler(async (req: Request, res: Response): Promi
     } catch (err: unknown) {
         if (err instanceof Error) {
             if (err.message === "Invalid Email or Password") {
-                // Return the specific error message for invalid email or password
                 res.status(401).json({ message: "Invalid email or password" });
             } else {
-                // General error handling for other cases
                 res.status(500).json({ message: "An error occurred during authentication" });
             }
         } else {
-            // Fallback if the error is not an instance of Error
             res.status(500).json({ message: "An error occurred during authentication" });
         }
+    }
+});
+
+const googleLoginTheaterOwner = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const { googleName: name, googleEmail: email } = req.body;
+
+    if (!email || !name) {
+        res.status(400).json({ message: "Google Name and Email are required" });
+        return;
+    }
+
+    try {
+        let theaterOwner = await Theater.findOne({ email });
+
+        if (theaterOwner) {
+            generateTheaterToken(res, theaterOwner._id.toString());
+            res.status(200).json({
+                success: true,
+                data: {
+                    _id: theaterOwner._id,
+                    name: theaterOwner.name,
+                    email: theaterOwner.email,
+                },
+            });
+        } else {
+            console.log("Creating a new Theater Owner...");
+            theaterOwner = await Theater.create({
+                name,
+                email,
+                otp: "",
+                phone: "",
+                password: "",
+            });
+            console.log("Theater Owner created:", theaterOwner);
+
+            if (theaterOwner) {
+                generateTheaterToken(res, theaterOwner._id.toString());
+                res.status(201).json({
+                    success: true,
+                    data: {
+                        _id: theaterOwner._id,
+                        name: theaterOwner.name,
+                        email: theaterOwner.email,
+                    },
+                });
+            } else {
+                res.status(400).json({ message: "Invalid theater Owner data" });
+            }
+        }
+    } catch (error: any) {
+        console.error("Error in google Login:", error.message);
+        res.status(500).json({ message: "Internal server error", error: error.message });
     }
 });
 
@@ -43,8 +94,7 @@ const registerTheaterOwner = asyncHandler(async (req: Request, res: Response): P
     try {
         const theater = await registerTheaterOwnerService(name, email, password, phone);
         
-        // Check if the user is newly created or if OTP was sent again for an existing user
-        const otpSent = !theater.otpVerified; // OTP is sent only if the user hasn't verified their OTP
+        const otpSent = !theater.otpVerified;
 
         res.status(201).json({
             id: theater._id.toString(),
@@ -158,7 +208,6 @@ const resetTheaterOwnerPassword = asyncHandler(async (req: Request, res: Respons
 });
 
 
-// Logout Controller
 const logoutTheaterOwner = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     await logoutTheaterOwnerService();
     res.cookie('theaterOwnerJwt', '', {
@@ -172,6 +221,7 @@ const logoutTheaterOwner = asyncHandler(async (req: Request, res: Response): Pro
 
 export {
     authTheaterOwner,
+    googleLoginTheaterOwner,
     registerTheaterOwner, 
     verifyTheaterOwnerOTP,
     resendTheaterOwnerOtp, 

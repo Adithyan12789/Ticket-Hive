@@ -2,7 +2,7 @@ import React from 'react';
 import { Outlet, useLocation } from 'react-router-dom'; 
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Header from './Components/Header';
+import Header from './Components/UserComponents/Header';
 import TheaterHeader from "./Components/TheaterComponents/TheaterHeader";
 import AdminHeader from "./Components/AdminComponents/AdminHeader";
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -14,20 +14,19 @@ const App: React.FC = () => {
   const isSignInPage = location.pathname === "/login";
   const isSignUpPage = location.pathname === "/signup";
   const isAdminSignInPage = location.pathname === "/admin-login";
-  const isForgotPasswordPage = location.pathname === "/forgot-password"; // Corrected typo
+  const isForgotPasswordPage = location.pathname === "/forgot-password";
   const isResetPasswordPage = /^\/reset-password\/.+$/.test(location.pathname);
 
   const isTheaterSignInPage = location.pathname === "/theater-login";
   const isTheaterSignUpPage = location.pathname === "/theater-signup";
-  const isTheaterForgotPasswordPage = location.pathname === "/theater-forgot-password"; // Corrected typo
-  const isTheaterResetPasswordPage = /^\/theater-reset-password\/.+$/.test(location.pathname); // Corrected typo and retained regex
+  const isTheaterForgotPasswordPage = location.pathname === "/theater-forgot-password";
+  const isTheaterResetPasswordPage = /^\/theater-reset-password\/.+$/.test(location.pathname); 
 
   const isOtpPage = location.pathname === "/verifyotp" || location.pathname === "/theater-verify-otp";
 
   const isAdminPage = location.pathname.startsWith("/admin");
   const isTheaterPage = location.pathname.startsWith("/theater");
 
-  // Show only the Outlet for authentication-related pages
   if (isSignInPage || isSignUpPage || isOtpPage || isForgotPasswordPage 
          || isResetPasswordPage || isAdminSignInPage || isTheaterSignInPage 
          || isTheaterSignUpPage || isTheaterForgotPasswordPage || isTheaterResetPasswordPage) {
@@ -39,7 +38,6 @@ const App: React.FC = () => {
     );
   }
 
-  // Show different headers based on the route
   return (
     <>
       {isAdminPage ? (

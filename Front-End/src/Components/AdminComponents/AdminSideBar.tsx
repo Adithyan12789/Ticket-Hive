@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { FaHome, FaFilm, FaUsers, FaTicketAlt, FaTag, FaCogs } from "react-icons/fa"; // Updated icons
+import { FaHome, FaFilm, FaUsers, FaTicketAlt, FaTag, FaCogs } from "react-icons/fa";
 import "./AdminSidebar.css";
 
 interface AdminSidebarProps {
@@ -9,7 +9,7 @@ interface AdminSidebarProps {
 const AdminSidebar: React.FC<AdminSidebarProps> = ({ adminName }) => {
   return (
     <div className="sidebar">
-      <h2 className="sidebar-title">Welcome, {adminName}</h2> {/* Display admin's name */}
+      <h2 className="sidebar-title">Welcome, {adminName}</h2>
       <ul className="sidebar-links">
         <li>
           <Link to="/admin-dashboard">
@@ -17,7 +17,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ adminName }) => {
           </Link>
         </li>
         <li>
-          <Link to="/admin-dashboard/admin-get-user">
+          <Link to="/admin-dashboard/get-user">
             <FaUsers className="sidebar-icon" /> User Management
           </Link>
         </li>

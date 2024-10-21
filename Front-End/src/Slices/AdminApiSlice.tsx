@@ -1,17 +1,6 @@
 import { apiSlice } from "./ApiSlice";
+import { AdminResponse, AdminCredentials } from "../Types";
 
-interface AdminCredentials {
-  email: string;
-  password: string;
-}
-
-interface AdminResponse {
-  id: string;
-  name: string;
-  email: string;
-  token: string;
-  isAdmin: boolean;
-}
 
 const ADMIN_URL = '/api/admin';
 
@@ -25,14 +14,26 @@ export const adminApiSlice = apiSlice.injectEndpoints({
       }),
     }),
 
-    getUserData: builder.mutation({
-      query: () => ({
-        url: `${ADMIN_URL}/admin-get-user`,
-        method: 'POST',
-        headers: {
-          // Add any required headers (e.g., authorization token)
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
+    getUserData:builder.mutation({
+      query:()=>({
+         url:`${ADMIN_URL}/get-user` ,
+         method:'POST',
+      })
+    }),
+
+    adminBlockUser: builder.mutation({
+      query: (body) => ({
+        url: `${ADMIN_URL}/block-user`,
+        method: 'PATCH',
+        body,
+      }),
+    }),
+
+    adminUnblockUser: builder.mutation({
+      query: (body) => ({
+        url: `${ADMIN_URL}/unblock-user`,
+        method: 'PATCH',
+        body,
       }),
     }),
 
@@ -48,5 +49,7 @@ export const adminApiSlice = apiSlice.injectEndpoints({
 export const {
   useAdminLoginMutation,
   useGetUserDataMutation,
+  useAdminBlockUserMutation,
+  useAdminUnblockUserMutation,
   useAdminLogoutMutation,
 } = adminApiSlice;

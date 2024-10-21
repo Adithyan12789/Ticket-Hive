@@ -2,91 +2,76 @@ import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Card, Button, Carousel } from "react-bootstrap";
 import axios from "axios";
 import "./HomePage.css";
-import Footer from "../../Components/Footer";
+import Footer from "../../Components/UserComponents/Footer";
+import { Movie } from "../../Types";
 
-// Define the type for the movie
-interface Movie {
-  id: number;
-  title: string;
-  overview: string;
-  vote_average: number;
-  release_date: string;
-  poster_path?: string;
-  backdrop_path?: string; // Added for slider banner images
-}
-
-const API_KEY = "0ffb386a852dbf070ac6b977313d8039"; // Replace with your TMDb API key
+const API_KEY = "0ffb386a852dbf070ac6b977313d8039";
 const TRENDING_API_URL = `https://api.themoviedb.org/3/movie/popular?api_key=${API_KEY}&language=en-US&page=1`;
 const RECOMMENDED_API_URL = `https://api.themoviedb.org/3/movie/top_rated?api_key=${API_KEY}&language=en-US&page=1`;
 const SLIDER_API_URL = `https://api.themoviedb.org/3/movie/now_playing?api_key=${API_KEY}&language=en-US&page=1`;
 
 const HomePage: React.FC = () => {
-  const [trendingMovies, setTrendingMovies] = useState<Movie[]>([]); // Trending Movies
-  const [recommendedMovies, setRecommendedMovies] = useState<Movie[]>([]); // Recommended Movies
-  const [sliderMovies, setSliderMovies] = useState<Movie[]>([]); // Banner Movies
-  const [loading, setLoading] = useState<boolean>(true); // State to handle loading for movies
-  const [loadingSlider, setLoadingSlider] = useState<boolean>(true); // Loading for slider
+  const [trendingMovies, setTrendingMovies] = useState<Movie[]>([]);
+  const [recommendedMovies, setRecommendedMovies] = useState<Movie[]>([]);
+  const [sliderMovies, setSliderMovies] = useState<Movie[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [loadingSlider, setLoadingSlider] = useState<boolean>(true);
 
-  // Fetch movies for slider from the API
   useEffect(() => {
     const fetchSliderMovies = async () => {
       try {
         const response = await axios.get(SLIDER_API_URL);
-        setSliderMovies(response.data.results); // Set the movies for slider in state
-        setLoadingSlider(false); // Stop loading after data is fetched
+        setSliderMovies(response.data.results);
+        setLoadingSlider(false);
       } catch (error) {
         console.error("Error fetching slider movies: ", error);
-        setLoadingSlider(false); // Stop loading even if there is an error
+        setLoadingSlider(false);
       }
     };
 
     fetchSliderMovies();
   }, []);
 
-  // Fetch Trending Movies
   useEffect(() => {
     const fetchTrendingMovies = async () => {
       try {
         const response = await axios.get(TRENDING_API_URL);
-        setTrendingMovies(response.data.results); // Set the trending movies in state
-        setLoading(false); // Stop loading after data is fetched
+        setTrendingMovies(response.data.results);
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching trending movies: ", error);
-        setLoading(false); // Stop loading even if there is an error
+        setLoading(false);
       }
     };
 
     fetchTrendingMovies();
   }, []);
 
-  // Fetch Recommended Movies
   useEffect(() => {
     const fetchRecommendedMovies = async () => {
       try {
         const response = await axios.get(RECOMMENDED_API_URL);
-        setRecommendedMovies(response.data.results); // Set the recommended movies in state
-        setLoading(false); // Stop loading after data is fetched
+        setRecommendedMovies(response.data.results);
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching recommended movies: ", error);
-        setLoading(false); // Stop loading even if there is an error
+        setLoading(false);
       }
     };
 
     fetchRecommendedMovies();
   }, []);
 
-  // Base URLs for TMDb images
   const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500/";
-  const BACKDROP_BASE_URL = "https://image.tmdb.org/t/p/w1280/"; // For slider images
+  const BACKDROP_BASE_URL = "https://image.tmdb.org/t/p/w1280/";
 
   return (
     <div>
-      {/* Image slider (Carousel) */}
       {loadingSlider ? (
         <p>Loading slider...</p>
       ) : (
         <Carousel className="image-slider">
-          {sliderMovies.slice(10, 15).map((movie) => (
+          {sliderMovies.slice(0, 5).map((movie) => (
             <Carousel.Item key={movie.id}>
               <img
                 className="d-block w-100 slider-image"
@@ -107,7 +92,6 @@ const HomePage: React.FC = () => {
       )}
 
       <Container>
-        {/* Trending Movies Section */}
         <h1 className="text-center my-5" style={{color:"black"}}>Trending Movies</h1>
         {loading ? (
           <p>Loading trending movies...</p>
@@ -144,16 +128,14 @@ const HomePage: React.FC = () => {
           </Row>
         )}
 
-        {/* Image Banner before Recommended Movies Section */}
         <div className="banner-container">
           <img
-            src="/tickets-stickers-badges-decorative-design-600w-2451487379-transformed.png" // Replace with your banner image URL or path
+            src="/tickets-stickers-badges-decorative-design-600w-2451487379-transformed.png"
             alt="Banner"
             className="banner-image"
           />
         </div>
 
-        {/* Recommended Movies Section */}
         <h1 className="text-center my-5" style={{color:"black"}}>Recommended Movies</h1>
         {loading ? (
           <p>Loading recommended movies...</p>

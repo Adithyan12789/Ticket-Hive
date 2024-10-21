@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSendPasswordResetEmailTheaterMutation } from '../../Slices/TheaterApiSlice';
 import { toast } from 'react-toastify';
-import Loader from "../../Components/Loader";
+import Loader from "../../Components/UserComponents/Loader";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelope } from '@fortawesome/free-solid-svg-icons';
 import './TheaterForgotPassword.css';
@@ -23,13 +23,11 @@ const ForgotPasswordScreen = () => {
   const submitHandler = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
     
-    // Check if email is empty
     if (email.trim() === '') {
       toast.error('Email is required');
       return;
     }
 
-    // Check if email format is invalid
     if (!validateEmail(email)) {
       toast.error('Invalid email format');
       return;

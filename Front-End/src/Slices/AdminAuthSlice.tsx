@@ -1,15 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { AdminInfo, AdminAuthState } from "../Types";
 
-interface AdminInfo {
-  id: string;
-  name: string;
-  email: string;
-  token: string;
-}
-
-interface AdminAuthState {
-  adminInfo: AdminInfo | null;
-}
 
 const adminInfoString = localStorage.getItem('adminInfo');
 let initialAdminInfo: AdminInfo | null = null;

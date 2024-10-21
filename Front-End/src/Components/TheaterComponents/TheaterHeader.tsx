@@ -36,7 +36,7 @@ const TheaterOwnerHeader: React.FC = () => {
 
             <Nav className="ms-auto">
               {theaterInfo ? (
-                <NavDropdown title={theaterInfo.email} id="owner-username">
+                <NavDropdown title={theaterInfo.name || theaterInfo.data.name} id="owner-username">
                   <NavDropdown.Item onClick={logoutHandler}>
                     <FaSignOutAlt /> Logout
                   </NavDropdown.Item>

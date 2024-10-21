@@ -236,3 +236,25 @@
   object-fit: cover;
   border-radius: 50px;
 }
+
+
+.dropdown-title {
+  display: flex;
+  align-items: center; /* Center the icon and text vertically */
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center; /* Center the icon and text vertically */
+  padding: 10px 15px; /* Add padding to each item */
+  text-decoration: none !important; 
+}
+
+.dropdown-item:hover {
+  background-color: #bdcf32; /* Change background color on hover */
+  cursor: pointer; /* Change cursor to pointer */
+}
+
+.dropdown-item > svg {
+  color: #007bff; /* Set icon color */
+}

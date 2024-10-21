@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useRegisterMutation } from "../../Slices/UserApiSlice";
+import { useGoogleLoginMutation, useRegisterMutation } from "../../Slices/UserApiSlice";
 import {
   useVerifyOtpMutation,
   useResendOtpMutation,
@@ -14,6 +14,15 @@ import {
   faPhone,
 } from "@fortawesome/free-solid-svg-icons";
 import "./RegisterPage.css";
+import Loader from "../../Components/UserComponents/Loader";
+import { jwtDecode } from 'jwt-decode';
+import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
+import { CredentialResponse } from '@react-oauth/google';
+import { setCredentials } from "../../Slices/AuthSlice";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../../Store";
+import { GoogleJwtPayload } from "../../Types";
+
 
 const SignUpPage = () => {
   const [name, setName] = useState("");
@@ -23,95 +32,69 @@ const SignUpPage = () => {
   const [phone, setPhone] = useState("");
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [otp, setOtp] = useState("");
-  const [otpExpires, setOtpExpires] = useState<Date | null>(null); // OTP expiration time
+  const [otpExpires, setOtpExpires] = useState<Date | null>(null);
   const [isVerifying, setIsVerifying] = useState(false);
   const [isResending, setIsResending] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(0); // Track remaining time in seconds
+  const [timeLeft, setTimeLeft] = useState(0);
 
   const navigate = useNavigate();
+  const dispatch: AppDispatch = useDispatch();
+  
   const [register, { isLoading }] = useRegisterMutation();
   const [verifyOtp] = useVerifyOtpMutation();
   const [resendOtp] = useResendOtpMutation();
+  
+  const [googleLogin] = useGoogleLoginMutation(); // Updated Hook
 
-  // Validation functions
   const validateEmail = (email: string) =>
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  const validatePassword = (password: string) => password.length >= 6;
+  const validatePassword = (password: string) =>
+    password.length >= 8 &&
+    /[a-zA-Z]/.test(password) &&
+    /\d/.test(password) &&
+    /[!@#$%^&*(),.?":{}|<>]/.test(password);
   const validatePhone = (phone: string) => /^[0-9]{10}$/.test(phone);
   const validateName = (name: string) => name.trim().length >= 3;
 
   const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Check if any field is empty and show error messages using Toastify
-    if (!name) {
-      toast.error("Name is required");
-      return;
-    }
-    if (!email) {
-      toast.error("Email is required");
-      return;
-    }
-    if (!password) {
-      toast.error("Password is required");
-      return;
-    }
-    if (!confirmPassword) {
-      toast.error("Confirm Password is required");
-      return;
-    }
-    if (!phone) {
-      toast.error("Phone number is required");
-      return;
-    }
+    const errors = [];
 
-    // Name validation
-    if (!validateName(name)) {
-      toast.error("Name must be at least 3 characters");
-      return;
-    }
-
-    // Email validation
-    if (!validateEmail(email)) {
-      toast.error("Invalid email format");
-      return;
-    }
-
-    // Password validation
+    if (!name) errors.push("Name is required.");
+    if (!email) errors.push("Email is required.");
+    if (!password) errors.push("Password is required.");
+    if (!confirmPassword) errors.push("Please confirm your password.");
+    if (!phone) errors.push("Phone number is required.");
+    if (!validateName(name)) errors.push("Please enter a valid name.");
+    if (!validateEmail(email)) errors.push("Please enter a valid email address.");
+    
+    // Enhanced password validation messages
     if (!validatePassword(password)) {
-      toast.error("Password must be at least 6 characters");
-      return;
+      errors.push("Password must be at least 8 characters long, contain at least one letter, one number, and one special character.");
     }
-
-    // Confirm password validation
-    if (password !== confirmPassword) {
-      toast.error("Passwords do not match");
-      return;
+    if (password !== confirmPassword) errors.push("Passwords do not match.");
+    if (!validatePhone(phone)) errors.push("Please enter a valid phone number.");
+    
+    if (errors.length > 0) {
+        toast.error(errors.join(' '));
+        return;
     }
-
-    // Phone validation
-    if (!validatePhone(phone)) {
-      toast.error("Invalid phone number (must be 10 digits)");
-      return;
-    }
-
+    
     try {
-      const response = await register({
+      await register({
         name,
         email,
         password,
         phone: Number(phone),
       }).unwrap();
 
-      console.log(response);
       toast.success("Registration successful, please verify your OTP");
 
-      // Set OTP expiration time to 1 minute and 59 seconds
       const expiresAt = new Date(Date.now() + 1 * 60 * 1000 + 59 * 1000);
       setOtpExpires(expiresAt);
       setTimeLeft(Math.floor((expiresAt.getTime() - Date.now()) / 1000));
 
-      // Show OTP modal after registration
       setShowOtpModal(true);
     } catch (err: unknown) {
       if (typeof err === "object" && err !== null && "data" in err) {
@@ -123,12 +106,36 @@ const SignUpPage = () => {
     }
   };
 
+  const handleGoogleSuccess = async (credentialResponse: CredentialResponse) => {
+    if (!credentialResponse.credential) {
+      toast.error("Google login failed. No credential received.");
+      return;
+    }
+
+    try {
+      const decoded = jwtDecode<GoogleJwtPayload>(credentialResponse.credential);
+      if (!decoded.email || !decoded.name) {
+        throw new Error("Invalid token payload");
+      }
+      
+      const { name: googleName, email: googleEmail } = decoded;
+  
+      const responseFromApiCall = await googleLogin({ googleName, googleEmail }).unwrap();
+      dispatch(setCredentials({ ...responseFromApiCall }));
+      
+      toast.success("Google login successful!");
+      navigate("/");
+    } catch (error: unknown) {
+      toast.error(
+        error instanceof Error ? error.message : "An error occurred during Google login"
+      );
+    }
+  };
+
   useEffect(() => {
     if (otpExpires) {
       const interval = setInterval(() => {
-        const timeRemaining = Math.floor(
-          (otpExpires.getTime() - Date.now()) / 1000
-        );
+        const timeRemaining = Math.floor((otpExpires.getTime() - Date.now()) / 1000);
         setTimeLeft(timeRemaining);
 
         if (timeRemaining <= 0) {
@@ -142,13 +149,7 @@ const SignUpPage = () => {
   }, [otpExpires]);
 
   const handleOtpSubmit = async () => {
-    if (!otp) {
-      toast.error("OTP is required");
-      return;
-    }
-
-    // Check if OTP is exactly 6 digits (you can adjust this based on your OTP structure)
-    if (!/^\d{6}$/.test(otp)) {
+    if (!otp || !/^\d{6}$/.test(otp)) {
       toast.error("OTP must be exactly 6 digits");
       return;
     }
@@ -176,14 +177,12 @@ const SignUpPage = () => {
       toast.error("You can only resend OTP after the previous one expires.");
       return;
     }
-  
+
     setIsResending(true);
-  
     try {
       await resendOtp({ email }).unwrap();
       toast.success("OTP resent successfully");
-  
-      // Set the expiration time for OTP
+
       const expiresAt = new Date(Date.now() + 1 * 60 * 1000 + 59 * 1000);
       setOtpExpires(expiresAt);
       setTimeLeft(Math.floor((expiresAt.getTime() - Date.now()) / 1000));
@@ -198,15 +197,15 @@ const SignUpPage = () => {
       setIsResending(false);
     }
   };
-  
 
   const formatTimeLeft = () => {
     const minutes = Math.floor(timeLeft / 60);
     const seconds = timeLeft % 60;
-    return `${minutes.toString().padStart(2, "0")}:${seconds
-      .toString()
-      .padStart(2, "0")}`;
+    return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
   };
+
+  if (isLoading || isVerifying || isResending) return <Loader />;
+
 
   return (
     <div className="user-signup-page">
@@ -304,6 +303,18 @@ const SignUpPage = () => {
             </p>
           </div>
         </form>
+
+        <div
+          className="text-center"
+          style={{ display: "flex", justifyContent: "center" }}
+        >
+          <GoogleOAuthProvider clientId="677515594917-egtbr0hasoe3pf9j7npt2sk1s3v0e5e2.apps.googleusercontent.com">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => toast.error("Google login failed.")}
+            />
+          </GoogleOAuthProvider>
+        </div>
       </div>
 
       {showOtpModal && (
@@ -335,7 +346,6 @@ const SignUpPage = () => {
                 Verify OTP
               </button>
 
-              {/* Only show "Resend OTP" button if OTP has expired (timeLeft <= 0) */}
               {timeLeft <= 0 && (
                 <button
                   onClick={handleOtpResend}
@@ -362,3 +372,4 @@ const SignUpPage = () => {
 };
 
 export default SignUpPage;
+

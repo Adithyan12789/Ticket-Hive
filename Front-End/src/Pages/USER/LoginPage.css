@@ -151,3 +151,16 @@ a {
   color: #ccc;
   text-decoration: none;
 }
+
+
+.header-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px; /* Adjust spacing as needed */
+  margin-left: 50px;
+}
+
+.header-icon {
+  margin-right: 8px; /* Space between icon and text */
+  width: 60px; /* Set the icon size */
+}

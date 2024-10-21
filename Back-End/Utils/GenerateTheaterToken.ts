@@ -4,7 +4,7 @@ import { Response } from 'express';
 import jwt from 'jsonwebtoken';
 
 const generateTheaterToken = (res: Response, theaterOwnerId: string): void => {
-    const token = jwt.sign({ id: theaterOwnerId }, process.env.JWT_SECRET!, { expiresIn: '30d' });
+    const token = jwt.sign({ id: theaterOwnerId }, process.env.JWT_SECRET_THEATER!, { expiresIn: '30d' });
 
     res.cookie('theaterOwnerJwt', token, {
         httpOnly: true,

@@ -1,13 +1,22 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { useLoginTheaterMutation } from '../../Slices/TheaterApiSlice';
+import { useGoogleLoginTheaterMutation, useLoginTheaterMutation } from '../../Slices/TheaterApiSlice';
 import { setTheaterDetails } from '../../Slices/TheaterAuthSlice';
 import { toast } from 'react-toastify';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelope, faLock } from '@fortawesome/free-solid-svg-icons';
 import './TheaterLoginPage.css';
 import { RootState, AppDispatch } from '../../Store';
+import {jwtDecode, JwtPayload } from 'jwt-decode';
+import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
+import { CredentialResponse } from '@react-oauth/google';
+
+interface GoogleJwtPayload extends JwtPayload {
+  name: string;
+  email: string;
+  picture?: string;
+}
 
 const TheaterLoginPage = () => {
   const [email, setEmail] = useState('');
@@ -17,6 +26,7 @@ const TheaterLoginPage = () => {
   const dispatch: AppDispatch = useDispatch();
 
   const [login, { isLoading }] = useLoginTheaterMutation();
+  const [googleLoginTheater] = useGoogleLoginTheaterMutation();
 
   const { theaterInfo } = useSelector((state: RootState) => state.theaterAuth);
 
@@ -38,25 +48,21 @@ const TheaterLoginPage = () => {
   const submitHandler = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
   
-    // Check if email is empty
     if (email.trim() === '') {
       toast.error('Email is required');
       return;
     }
   
-    // Check if email format is invalid
     if (!validateEmail(email)) {
       toast.error('Invalid email format');
       return;
     }
   
-    // Check if password is empty
     if (password.trim() === '') {
       toast.error('Password is required');
       return;
     }
   
-    // Check if password length is less than 6 characters
     if (!validatePassword(password)) {
       toast.error('Password must be at least 6 characters');
       return;
@@ -67,12 +73,37 @@ const TheaterLoginPage = () => {
       dispatch(setTheaterDetails({
         ...res,
         location: '',
-        capacity: 0
+        capacity: 0,
+        data: undefined
       }));
       navigate('/theater');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       toast.error(err?.data?.message || err?.message || 'An error occurred');
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse: CredentialResponse) => {
+    if (!credentialResponse.credential) {
+      toast.error("Google login failed. No credential received.");
+      return;
+    }
+  
+    try {
+      const decoded = jwtDecode<GoogleJwtPayload>(credentialResponse.credential);
+      if (!decoded.email || !decoded.name) {
+        throw new Error("Invalid token payload");
+      }
+      
+      const { name: googleName, email: googleEmail } = decoded;
+  
+      const responseFromApiCall = await googleLoginTheater({ googleName, googleEmail }).unwrap();
+      dispatch(setTheaterDetails({ ...responseFromApiCall }));
+      navigate("/theater");
+    } catch (error: unknown) {
+      toast.error(
+        error instanceof Error ? error.message : "An error occurred during Google login"
+      );
     }
   };
 
@@ -110,7 +141,6 @@ const TheaterLoginPage = () => {
             </div>
           </div>
   
-          {/* Forgot Password Link */}
           <div className="theater-forgot-password">
             <a href="/theater-forgot-password" className="theater-forgot-password-link">
               Forgot Password?
@@ -125,6 +155,18 @@ const TheaterLoginPage = () => {
             <p>Already a User? <a href="/theater-signup">Sign Up</a></p>
           </div>
         </form>
+
+        <div
+          className="text-center my-4"
+          style={{ display: "flex", justifyContent: "center" }}
+        >
+          <GoogleOAuthProvider clientId="677515594917-egtbr0hasoe3pf9j7npt2sk1s3v0e5e2.apps.googleusercontent.com">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => toast.error("Google login failed.")}
+            />
+          </GoogleOAuthProvider>
+        </div>
       </div>
     </div>
   );

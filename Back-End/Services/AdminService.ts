@@ -1,15 +1,14 @@
 // adminService.ts
-import adminRepository from '../Repositories/AdminRepo';
+import mongoose from "mongoose";
+import adminRepository from "../Repositories/AdminRepo";
 import generateAdminToken from '../Utils/GenerateAdminToken';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 
-// Service for handling admin login
 const adminLoginService = (email: string, password: string, res: Response) => {
     const { adminEmail, adminPassword } = adminRepository.getAdminCredentials();
 
-    // Check if the provided email and password match the admin credentials
     if (email === adminEmail && password === adminPassword) {
-        const token = generateAdminToken(res, "admin"); // Generate token
+        const token = generateAdminToken(res, "admin");
         return {
             id: "admin",
             name: "Admin User",
@@ -19,16 +18,52 @@ const adminLoginService = (email: string, password: string, res: Response) => {
         };
     }
 
-    // Return a structured error response if credentials are invalid
     throw new Error("Invalid Admin Email or Password");
 };
 
-// Get all users - Call repository method directly (no need for asyncHandler here)
 const getAllUsers = async () => {
-    return await adminRepository.getAllUsers(); // Direct call to the repository method
+    return await adminRepository.getAllUsers();
 };
 
-// Service to handle admin logout
+const blockUser = async (req: Request): Promise<any> => {
+    const userId = req.body.userId;
+    console.log("User Id: ", userId);
+
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+        throw new Error('Invalid userId format');
+    }
+
+    try {
+        console.log(`Updating user with ID: ${userId}`);
+        const updatedUser = await adminRepository.updateUser(userId, { isBlocked: true });
+
+        return updatedUser;
+    } catch (error) {
+        console.error(`Error updating user: ${error}`);
+        throw new Error('Error updating user');
+    }
+};
+
+
+const unblockUser = async (req: Request): Promise<any> => {
+    const userId = req.body.userId;
+    console.log("User Id: ", userId);
+
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+        throw new Error('Invalid userId format');
+    }
+
+    try {
+        console.log(`Updating user with ID: ${userId}`);
+        const updatedUser = await adminRepository.updateUser(userId, { isBlocked: false });
+
+        return updatedUser;
+    } catch (error) {
+        console.error(`Error updating user: ${error}`);
+        throw new Error('Error updating user');
+    }
+};
+
 const adminLogoutService = (res: Response) => {
     res.cookie("token", "", {
         httpOnly: true,
@@ -39,4 +74,4 @@ const adminLogoutService = (res: Response) => {
     return { message: "Admin logged out successfully" };
 };
 
-export default { adminLoginService, getAllUsers, adminLogoutService };
+export default { adminLoginService, getAllUsers, blockUser, unblockUser, adminLogoutService };

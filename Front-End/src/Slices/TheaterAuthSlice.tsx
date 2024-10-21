@@ -1,17 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { ReactNode } from "react";
+import { TheaterInfo, TheaterState } from "../Types";
 
-interface TheaterInfo {
-  email: ReactNode;
-  id: string;
-  name: string;
-  location: string;
-  capacity: number;
-}
-
-interface TheaterState {
-  theaterInfo: TheaterInfo | null;
-}
 
 const initialState: TheaterState = {
   theaterInfo: localStorage.getItem('theaterInfo') 

@@ -1,9 +1,10 @@
 import express from 'express';
-import { authUser, registerUser, verifyOTP, resendOtp, logoutUser, forgotPasswordController, resetPasswordController } from '../Controllers/UserController';
+import { authUser, googleLogin, registerUser, verifyOTP, resendOtp, logoutUser, forgotPasswordController, resetPasswordController } from '../Controllers/UserController';
 
 const router = express.Router();
 
 router.post('/auth', authUser);
+router.post('/googleLogin',googleLogin)
 router.post('/signup', registerUser);
 router.post('/verifyotp', verifyOTP);
 router.post('/resend-otp', resendOtp);
