@@ -24,7 +24,10 @@ const authTheaterOwner = asyncHandler(async (req: Request, res: Response): Promi
         });
     } catch (err: unknown) {
         if (err instanceof Error) {
-            if (err.message === "Invalid Email or Password") {
+            if(err.message === "Your account has been blocked"){
+                res.status(401).json({ message: "Your account has been blocked. Please contact support." });
+            }
+            else if (err.message === "Invalid Email or Password") {
                 res.status(401).json({ message: "Invalid email or password" });
             } else {
                 res.status(500).json({ message: "An error occurred during authentication" });

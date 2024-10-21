@@ -21,6 +21,7 @@ import TheaterHomePage from "./Pages/THEATER/TheaterDashboardPage.js";
 import TheaterForgotPasswordPage from "./Pages/THEATER/TheaterForgetPassword";
 import TheaterResetPassword from "./Pages/THEATER/TheaterResetPassword";
 import AdminUser from "./Pages/ADMIN/AdminUserManagement.js"
+import TheaterOwners from "./Pages/ADMIN/TheaterOwnerManagement.js"
 import "slick-carousel/slick/slick.css"; 
 import "slick-carousel/slick/slick-theme.css";
 import PrivateRoute from './Components/UserComponents/PrivateRoute.js';
@@ -35,6 +36,7 @@ const router = createBrowserRouter(
     <Route path="/admin-dashboard" element={<AdminPrivateRoute />}>
         <Route index element={<AdminDashboard />} />
         <Route path="get-user" element={<AdminUser />} />
+        <Route path="get-theaterOwner" element={<TheaterOwners />} />
       </Route>
     <Route path="/admin-login" element={<AdminLoginPage />} />
 

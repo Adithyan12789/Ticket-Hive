@@ -12,6 +12,7 @@ export interface ITheater extends Document {
     otpExpires?: Date;
     otpVerified?: boolean;
     otpGeneratedAt: Date;
+    isBlocked?: boolean;
     resetPasswordToken?: string;
     resetPasswordExpires?: Date;
     favoriteGenres?: string[];
@@ -28,6 +29,7 @@ const theaterSchema: Schema<ITheater> = new Schema(
         otp: { type: String, required: false },
         otpVerified: { type: Boolean, default: false },
         otpGeneratedAt: { type: Date, default: Date.now },
+        isBlocked: {type: Boolean, default: false, },
         resetPasswordToken: { type: String },
         resetPasswordExpires: { type: Date },
         favoriteGenres: { type: [String] },

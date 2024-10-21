@@ -35,7 +35,7 @@ export interface GoogleJwtPayload extends JwtPayload {
 /** General user information */
 export interface UserInfo {
   id: string;
-  profileImage: string;
+  profileImage?: string;
   name: string;
   email: string;
 }
@@ -76,6 +76,14 @@ export interface UserResponse {
 
 
 /**  Theater Information */
+export interface Theater {
+  _id: string;
+  name: string;
+  email: string;
+  phone: number;
+  isBlocked?: boolean;
+}
+
 export interface TheaterInfo {
   data: unknown;
   email: string;

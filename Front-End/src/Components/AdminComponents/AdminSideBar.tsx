@@ -22,7 +22,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ adminName }) => {
           </Link>
         </li>
         <li>
-          <Link to="/admin/movies">
+          <Link to="/admin-dashboard/get-theaterOwner">
             <FaFilm className="sidebar-icon" /> Theater Management
           </Link>
         </li>

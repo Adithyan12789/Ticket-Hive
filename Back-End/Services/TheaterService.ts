@@ -7,11 +7,17 @@ import Theater from "../Models/TheaterModel";
 
 export const authTheaterOwnerService = async (email: string, password: string) => {
     const theater = await findTheaterOwnerByEmail(email);
+    
     if (theater && (await theater.matchPassword(password))) {
+        if (theater.isBlocked) {
+            throw new Error("Your account has been blocked");
+        }
         return theater;
     }
+
     throw new Error("Invalid Email or Password");
 };
+
 
 export const registerTheaterOwnerService = async (
     name: string, 

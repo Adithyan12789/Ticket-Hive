@@ -210,9 +210,16 @@ const SignUpPage = () => {
   return (
     <div className="user-signup-page">
       <div className="user-signup-container">
-        <h1 className="pb-5" style={{ fontSize: "40px" }}>
-          Ticket Hive
-        </h1>
+      <div className="signup-header-container">
+          <img
+            src="/stock-vector-icon-logo-illustration-for-digital-business-ticket-services-720686734-removebg-preview.png"
+            alt="Ticket Hive Icon"
+            className="signup-header-icon pb-5"
+          />
+          <h1 className="pb-4" style={{ fontSize: "40px" }}>
+            Ticket Hive
+          </h1>
+        </div>
         <form onSubmit={submitHandler}>
           <div className="user-input">
             <div className="user-input-wrapper">

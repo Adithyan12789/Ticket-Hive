@@ -252,3 +252,14 @@ a {
 
 
 
+.signup-header-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px; /* Adjust spacing as needed */
+  margin-left: 70px;
+}
+
+.signup-header-icon {
+  margin-right: 8px; /* Space between icon and text */
+  width: 60px; /* Set the icon size */
+}
