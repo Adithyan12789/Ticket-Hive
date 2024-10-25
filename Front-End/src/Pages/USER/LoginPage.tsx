@@ -66,7 +66,8 @@ const LoginPage = () => {
     try {
       const res = await login({ email, password }).unwrap();
       dispatch(setCredentials({
-        ...res
+        ...res,
+        data: undefined
       }));
       navigate("/");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

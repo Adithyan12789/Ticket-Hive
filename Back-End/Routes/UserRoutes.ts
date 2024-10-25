@@ -1,15 +1,22 @@
 import express from 'express';
-import { authUser, googleLogin, registerUser, verifyOTP, resendOtp, logoutUser, forgotPasswordController, resetPasswordController } from '../Controllers/UserController';
+import UserController from '../Controllers/UserController';
+import { AuthMiddleware } from '../Middlewares/AuthMiddleware';
+import MulterConfig from '../Config/Multer';
 
 const router = express.Router();
 
-router.post('/auth', authUser);
-router.post('/googleLogin',googleLogin)
-router.post('/signup', registerUser);
-router.post('/verifyotp', verifyOTP);
-router.post('/resend-otp', resendOtp);
-router.post('/forgot-password', forgotPasswordController);
-router.put('/reset-password/:token', resetPasswordController);
-router.post('/logout', logoutUser);
+router.post('/auth', UserController.authUser);
+router.post('/googleLogin', UserController.googleLogin);
+router.post('/signup', UserController.registerUser);
+router.post('/verifyotp', UserController.verifyOTP);
+router.post('/resend-otp', UserController.resendOtp);
+router.post('/forgot-password', UserController.forgotPassword);
+router.put('/reset-password/:token', UserController.resetPassword);
+
+router.route('/profile')
+.get( AuthMiddleware.protect, UserController.getUserProfile )
+.put( AuthMiddleware.protect, MulterConfig.multerUploadUserProfile.single('profileImage'), UserController.updateUserProfile);
+
+router.post('/logout', UserController.logoutUser);
 
 export default router;

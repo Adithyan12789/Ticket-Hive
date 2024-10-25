@@ -1,0 +1,71 @@
+.user-sidebar {
+    width: 250px; /* Set a fixed width for the sidebar */
+    background-color: #000000; /* Light background color */
+    border-right: 1px solid #000000; /* Border to separate sidebar */
+    padding: 20px; /* Padding around the content */
+    height: 89vh; /* Full height of the viewport */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: fixed;
+    top: 89px; /* Align to top */
+    left: 0; /* Align to left */
+    overflow-y: auto; /* Allow scrolling if content overflows */
+  }
+  
+  .user-sidebar-title {
+    font-size: 1.5rem; /* Larger font for title */
+    margin-bottom: 20px; /* Space below the title */
+    color: #343a40; /* Dark color for title */
+  }
+  
+  .user-sidebar-links {
+    list-style-type: none; /* Remove bullet points */
+    padding: 0; /* Remove default padding */
+    margin-top: 60px;
+  }
+  
+  .user-sidebar-links li {
+    margin: 10px 10px 30px; /* Space between links */
+  }
+  
+  .user-sidebar-links a {
+    text-decoration: none; /* Remove underline */
+    color: #007bff; /* Bootstrap primary color */
+    display: flex; /* Flexbox for alignment */
+    align-items: center; /* Center icons and text */
+    padding: 10px;
+    border-radius: 5px; /* Rounded corners */
+    transition: background-color 0.3s; /* Smooth background transition */
+  }
+  
+  .user-sidebar-links a:hover {
+    background-color: #e9ecef; /* Change background on hover */
+  }
+  
+  .user-sidebar-icon {
+    margin-right: 10px; /* Space between icon and text */
+    font-size: 1.2rem; /* Icon size */
+  }
+  
+  .user-sidebar-footer {
+    margin-top: auto; /* Push footer to the bottom */
+    text-align: center; /* Center footer text */
+    font-size: 0.9rem; /* Smaller font for footer */
+    color: #6c757d; /* Muted color for footer text */
+  }
+  
+  .user-sidebar-link {
+    color: #333;
+    text-decoration: none;
+  }
+  
+  .user-sidebar-link.active {
+    background-color: #ffffff; /* Highlight active link */
+    font-weight: bold;
+  }
+  
+  .user-sidebar-icon {
+    margin-right: 8px;
+  }
+  

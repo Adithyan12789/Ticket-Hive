@@ -3,112 +3,102 @@ import { NextFunction, Request, Response } from "express";
 import adminService from "../Services/AdminService";
 import expressAsyncHandler from "express-async-handler";
 
-const adminLogin = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const { email, password } = req.body;
+class AdminController {
+    
+    adminLogin = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+        const { email, password } = req.body;
 
-    if (!email || !password) {
-        res.status(400).json({ message: "Email and password are required" });
-        return;
-    }
-
-    try {
-        const adminData = adminService.adminLoginService(email, password, res);
-        res.status(200).json(adminData);
-    } catch (error: any) {
-        res.status(400).json({ message: error.message });
-    }
-});
-
-const getAllUsers = expressAsyncHandler(async (req, res) => {
-    const users = await adminService.getAllUsers();
-    res.status(200).json(users);
-});
-
-const getAllTheaterOwners = expressAsyncHandler(async (req, res) => {
-    const theaterOwners = await adminService.getAllTheaterOwners();
-    res.status(200).json(theaterOwners);
-});
-
-const blockUserController = expressAsyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-        const user = await adminService.blockUser(req);
-        console.log("Blocked User", user);
-
-        if (user) {
-            res.status(200).json({ message: 'User blocked successfully', user });
-        } else {
-            res.status(404).json({ message: 'User not found' });
+        if (!email || !password) {
+            res.status(400).json({ message: "Email and password are required" });
+            return;
         }
-    } catch (error) {
-        console.error('Error blocking user:', error);
-        res.status(500).json({ message: 'Error blocking user' });
-    }
-});
 
-
-const unblockUserController = expressAsyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-        const user = await adminService.unblockUser(req);
-        console.log("Unblocked User", user);
-
-        if (user) {
-            res.status(200).json({ message: 'User unblocked successfully', user });
-        } else {
-            res.status(404).json({ message: 'User not found' });
+        try {
+            const adminData = await adminService.adminLoginService(email, password, res);
+            res.status(200).json(adminData);
+        } catch (error: any) {
+            res.status(400).json({ message: error.message });
         }
-    } catch (error) {
-        console.error('Error unblocking user:', error);
-        res.status(500).json({ message: 'Error unblocking user' });
-    }
-});
+    });
 
+    getAllUsers = expressAsyncHandler(async (req: Request, res: Response): Promise<void> => {
+        const users = await adminService.getAllUsers();
+        res.status(200).json(users);
+    });
 
-const blockTheaterOwnerController = expressAsyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-        const theaterOwner = await adminService.blockTheaterOwner(req);
-        console.log("Blocked Theater Owner", theaterOwner);
+    getAllTheaterOwners = expressAsyncHandler(async (req: Request, res: Response): Promise<void> => {
+        const theaterOwners = await adminService.getAllTheaterOwners();
+        res.status(200).json(theaterOwners);
+    });
 
-        if (theaterOwner) {
-            res.status(200).json({ message: 'theater Owner blocked successfully', theaterOwner });
-        } else {
-            res.status(404).json({ message: 'theater Owner not found' });
+    blockUserController = expressAsyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const user = await adminService.blockUser(req);
+            console.log("Blocked User", user);
+
+            if (user) {
+                res.status(200).json({ message: 'User blocked successfully', user });
+            } else {
+                res.status(404).json({ message: 'User not found' });
+            }
+        } catch (error) {
+            console.error('Error blocking user:', error);
+            res.status(500).json({ message: 'Error blocking user' });
         }
-    } catch (error) {
-        console.error('Error blocking theater Owner:', error);
-        res.status(500).json({ message: 'Error blocking theater Owner' });
-    }
-});
+    });
 
+    unblockUserController = expressAsyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const user = await adminService.unblockUser(req);
+            console.log("Unblocked User", user);
 
-const unblockTheaterOwnerController = expressAsyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-        const theaterOwner = await adminService.unblockTheaterOwner(req);
-        console.log("Unblocked User", theaterOwner);
-
-        if (theaterOwner) {
-            res.status(200).json({ message: 'Theater Owner unblocked successfully', theaterOwner });
-        } else {
-            res.status(404).json({ message: 'Theater Owner not found' });
+            if (user) {
+                res.status(200).json({ message: 'User unblocked successfully', user });
+            } else {
+                res.status(404).json({ message: 'User not found' });
+            }
+        } catch (error) {
+            console.error('Error unblocking user:', error);
+            res.status(500).json({ message: 'Error unblocking user' });
         }
-    } catch (error) {
-        console.error('Error unblocking theater Owner:', error);
-        res.status(500).json({ message: 'Error unblocking theater Owner' });
-    }
-});
+    });
 
+    blockTheaterOwnerController = expressAsyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const theaterOwner = await adminService.blockTheaterOwner(req);
+            console.log("Blocked Theater Owner", theaterOwner);
 
-const adminLogout = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const result = adminService.adminLogoutService(res);
-    res.status(200).json(result);
-});
+            if (theaterOwner) {
+                res.status(200).json({ message: 'Theater Owner blocked successfully', theaterOwner });
+            } else {
+                res.status(404).json({ message: 'Theater Owner not found' });
+            }
+        } catch (error) {
+            console.error('Error blocking theater owner:', error);
+            res.status(500).json({ message: 'Error blocking theater owner' });
+        }
+    });
 
-export {
-    adminLogin,
-    getAllUsers,
-    getAllTheaterOwners,
-    blockUserController,
-    unblockUserController,
-    blockTheaterOwnerController,
-    unblockTheaterOwnerController,
-    adminLogout
-};
+    unblockTheaterOwnerController = expressAsyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const theaterOwner = await adminService.unblockTheaterOwner(req);
+            console.log("Unblocked Theater Owner", theaterOwner);
+
+            if (theaterOwner) {
+                res.status(200).json({ message: 'Theater Owner unblocked successfully', theaterOwner });
+            } else {
+                res.status(404).json({ message: 'Theater Owner not found' });
+            }
+        } catch (error) {
+            console.error('Error unblocking theater owner:', error);
+            res.status(500).json({ message: 'Error unblocking theater owner' });
+        }
+    });
+
+    adminLogout = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+        const result = adminService.adminLogoutService(res);
+        res.status(200).json(result);
+    });
+}
+
+export default new AdminController();

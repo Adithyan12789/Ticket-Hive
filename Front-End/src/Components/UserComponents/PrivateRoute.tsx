@@ -10,9 +10,7 @@ const PrivateRoute: React.FC = () => {
   const dispatch = useDispatch();
 
   const userId = userInfo?.id;
-  const { error } = useGetUserProfileQuery(userId, {
-    skip: !userId,
-  });
+  const { error } = useGetUserProfileQuery(userId);
 
   useEffect(() => {
     if (error) {

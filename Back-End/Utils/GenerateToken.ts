@@ -1,17 +1,28 @@
 import jwt from 'jsonwebtoken';
 import { Response } from 'express';
 
-const generateToken = (res: Response, userId: string): void => {
-    const token = jwt.sign({ userId }, process.env.JWT_SECRET as string, {
-        expiresIn: '30d'
-    });
+class TokenService {
+    private jwtSecret: string;
 
-    res.cookie('jwt', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV !== 'development',
-        sameSite: 'strict',
-        maxAge: 30 * 24 * 60 * 60 * 1000,
-    });
-};
+    constructor() {
+        if (!process.env.JWT_SECRET) {
+            throw new Error('JWT_SECRET is not defined');
+        }
+        this.jwtSecret = process.env.JWT_SECRET;
+    }
 
-export default generateToken;
+    public generateToken(res: Response, userId: string): void {
+        const token = jwt.sign({ userId }, this.jwtSecret, {
+            expiresIn: '30d',
+        });
+
+        res.cookie('jwt', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV !== 'development',
+            sameSite: 'strict',
+            maxAge: 30 * 24 * 60 * 60 * 1000, 
+        });
+    }
+}
+
+export default new TokenService();

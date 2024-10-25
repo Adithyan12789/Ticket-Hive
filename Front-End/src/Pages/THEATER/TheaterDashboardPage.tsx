@@ -7,7 +7,7 @@ const TheaterDashboard: React.FC = () => {
   return (
     <div className="theater-dashboard">
 
-      <TheaterSidebar theaterOwnerName={'Adithyan'} />
+      <TheaterSidebar/>
 
       <div className="dashboard-content" style={{padding: "0px"}}>
 

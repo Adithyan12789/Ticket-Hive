@@ -7,12 +7,12 @@ interface TheaterOwnerLayoutProps {
   theaterOwnerName: string;
 }
 
-const TheaterOwnerLayout: React.FC<TheaterOwnerLayoutProps> = ({ children, theaterOwnerName }) => {
+const TheaterOwnerLayout: React.FC<TheaterOwnerLayoutProps> = ({ children }) => {
   return (
     <Container fluid>
       <Row>
         <Col md={2} className="theaterOwnersidecol">
-          <TheaterSidebar theaterOwnerName={theaterOwnerName} />
+          <TheaterSidebar />
         </Col>
         <Col md={10}>
           {children}

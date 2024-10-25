@@ -1,158 +1,199 @@
-// services/UserService.ts
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
-import { findUserByEmail, saveUser, findUserByResetToken, updateUser } from "../Repositories/UserRepo";
-import { sendOtpEmail } from "../Utils/EmailUtil";
-import User from "../Models/UserModel";
+import UserRepository from "../Repositories/UserRepo";
+import EmailUtil from "../Utils/EmailUtil";
+import User, { IUser } from "../Models/UserModel";
 
-export const authenticateUser = async (email: string, password: string) => {
-    const user = await findUserByEmail(email);
+class UserService {
+    public async authenticateUser(email: string, password: string) {
+        const user = await UserRepository.findUserByEmail(email);
 
-    if (user) {
-        if (user.isBlocked) {
-            throw new Error("your account is blocked");
+        if (user) {
+            if (user.isBlocked) {
+                throw new Error("Your account is blocked");
+            }
+            if (await user.matchPassword(password)) {
+                return user;
+            }
         }
-        if (await user.matchPassword(password)) {
-            return user;
-        }
+        
+        throw new Error("Invalid Email or Password");
     }
-    
-    throw new Error("Invalid Email or Password");
-};
 
+    public async registerUserService(
+        name: string, 
+        email: string, 
+        password: string, 
+        phone: string
+    ) {
+        const existingUser = await User.findOne({ email });
 
-export const registerUserService = async (
-    name: string, 
-    email: string, 
-    password: string, 
-    phone: string
-) => {
-    const existingUser = await User.findOne({ 
-        email 
-    });
+        if (existingUser) {
+            if (!existingUser.otpVerified) {
+                const otp = crypto.randomInt(100000, 999999).toString();
+                existingUser.otp = otp;
+                existingUser.otpVerified = false;
+                existingUser.otpGeneratedAt = new Date();
+                await existingUser.save();
 
-    if (existingUser) {
-        if (!existingUser.otpVerified) {
-            const otp = crypto.randomInt(100000, 999999).toString();
-            existingUser.otp = otp;
-            existingUser.otpVerified = false;
-            existingUser.otpGeneratedAt = new Date();
-            await existingUser.save();
+                await EmailUtil.sendOtpEmail(existingUser.email, otp);
+                return existingUser;
+            }
 
-            await sendOtpEmail(existingUser.email, otp);
-
-            return existingUser;
+            throw new Error('Email already exists.');
         }
 
-        throw new Error('Email already exists.');
+        const otp = crypto.randomInt(100000, 999999).toString();
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        const newUser = new User({
+            name,
+            email,
+            phone,
+            password: hashedPassword,
+            otp,
+            otpVerified: false,
+        });
+
+        await newUser.save(); 
+        await EmailUtil.sendOtpEmail(newUser.email, otp);
+        return newUser;
     }
 
-    const otp = crypto.randomInt(100000, 999999).toString();
+    public async verifyOtpService(email: string, otp: string) {
+        const user = await UserRepository.findUserByEmail(email);
+        if (!user) {
+            throw new Error('User not found');
+        }
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+        const OTP_EXPIRATION_TIME = 5 * 60 * 1000;
 
-    const newUser = new User({
-        name,
-        email,
-        phone,
-        password: hashedPassword,
-        otp,
-        otpVerified: false,
-    });
+        if (!user.otpGeneratedAt) {
+            throw new Error('OTP generation time is missing');
+        }
 
-    await newUser.save(); 
+        const otpGeneratedAt = user.otpGeneratedAt || new Date(0);
+        if (new Date().getTime() - otpGeneratedAt.getTime() > OTP_EXPIRATION_TIME) {
+            throw new Error('OTP expired');
+        }
 
-    await sendOtpEmail(newUser.email, otp);
-
-    return newUser;
-};
-
-
-export const verifyOtpService = async (email: string, otp: string) => {
-    const user = await findUserByEmail(email);
-    if (!user) {
-        throw new Error('User not found');
+        if (String(user.otp) === String(otp)) {
+            user.otpVerified = true;
+            await user.save();
+            return true;
+        }
+        throw new Error('Incorrect OTP');
     }
 
-    const OTP_EXPIRATION_TIME = 5 * 60 * 1000;
+    public async resendOtpService(email: string) {
+        const user = await UserRepository.findUserByEmail(email);
 
-    if (!user.otpGeneratedAt) {
-        throw new Error('OTP generation time is missing');
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        const otp = crypto.randomInt(100000, 999999).toString();
+        user.otp = otp; 
+        user.otpExpires = new Date(Date.now() + 1 * 60 * 1000 + 59 * 1000);
+
+        try {
+            await UserRepository.saveUser(user);
+        } catch (err) {
+            throw new Error('Failed to save user with new OTP');
+        }
+
+        try {
+            await EmailUtil.sendOtpEmail(user.email, otp);
+        } catch (err) {
+            throw new Error('Failed to send OTP email');
+        }
+
+        return user;
     }
 
-    const otpGeneratedAt = user.otpGeneratedAt || new Date(0);
-    if (new Date().getTime() - otpGeneratedAt.getTime() > OTP_EXPIRATION_TIME) {
-        throw new Error('OTP expired');
-    }
+    public async forgotPasswordService(email: string) {
+        const user = await UserRepository.findUserByEmail(email);
+        if (!user) {
+            throw new Error('User not found');
+        }
 
-    if (String(user.otp) === String(otp)) {
-        user.otpVerified = true;
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        user.resetPasswordToken = resetToken;
+        user.resetPasswordExpires = new Date(Date.now() + 30 * 60 * 1000); 
         await user.save();
+
+        return resetToken;
+    }
+
+    public async resetPasswordService(resetToken: string, password: string) {
+        const user = await UserRepository.findUserByResetToken(resetToken);
+        if (!user) {
+            throw new Error('Invalid or expired token');
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(password, salt);
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = undefined;
+
+        await user.save();
+
         return true;
     }
-    throw new Error('Incorrect OTP');
-};
+
+    public getUserProfile = async (userId: any) => {
+        const user = await UserRepository.findUserById(userId);
+
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        return {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          phone: user.phone,
+          profileImageName:user.profileImageName
+        };
+    };
+
+    public updateUserProfileService = async (
+        userId: string, 
+        updateData: { currentPassword: string; name: string; phone: string; password: string; }, 
+        profileImage: { filename: string | undefined; }
+      ) => {
+          const user = await UserRepository.findUserById(userId);
+          if (!user) {
+            throw new Error("User not found");
+          }
+        
+          if (updateData.currentPassword) {
+            const isMatch = await user.matchPassword(updateData.currentPassword);
+            if (!isMatch) {
+              throw new Error("Current password is incorrect");
+            }
+          }
+      
+          user.name = updateData.name || user.name;
+          user.phone = updateData.phone || user.phone;
+      
+          if (updateData.password) {
+            const salt = await bcrypt.genSalt(10);
+            user.password = await bcrypt.hash(updateData.password, salt);
+          }
+      
+          if (profileImage) {
+            user.profileImageName = profileImage.filename || user.profileImageName;
+          }
+        
+          return await UserRepository.saveUser(user);
+      };
 
 
-export const resendOtpService = async (email: string) => {
-    const user = await findUserByEmail(email);
-
-    if (!user) {
-        throw new Error('User not found');
+    public logoutUserService() {
+        return true;
     }
+}
 
-    const otp = crypto.randomInt(100000, 999999).toString();
-
-    user.otp = otp; // Now the OTP is a string
-    user.otpExpires = new Date(Date.now() + 1 * 60 * 1000 + 59 * 1000);
-
-    try {
-        await saveUser(user);
-    } catch (err) {
-        throw new Error('Failed to save user with new OTP');
-    }
-
-    try {
-        await sendOtpEmail(user.email, otp);
-    } catch (err) {
-        throw new Error('Failed to send OTP email');
-    }
-
-    return user;
-};
-
-
-export const forgotPasswordService = async (email: string) => {
-    const user = await findUserByEmail(email);
-    if (!user) {
-        throw new Error('User not found');
-    }
-
-    const resetToken = crypto.randomBytes(32).toString('hex');
-    user.resetPasswordToken = resetToken;
-    user.resetPasswordExpires = new Date(Date.now() + 30 * 60 * 1000); 
-    await user.save();
-
-    return resetToken;
-};
-
-export const resetPasswordService = async (resetToken: string, password: string) => {
-    const user = await findUserByResetToken(resetToken);
-    if (!user) {
-        throw new Error('Invalid or expired token');
-    }
-
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(password, salt);
-    user.resetPasswordToken = undefined;
-    user.resetPasswordExpires = undefined;
-
-    await user.save();
-
-    return true;
-};
-
-export const logoutUserService = () => {
-    return true;
-};
+export default new UserService();

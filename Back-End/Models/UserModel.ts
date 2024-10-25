@@ -8,6 +8,7 @@ export interface IUser extends Document {
     email: string;
     password: string;
     phone?: string;
+    profileImageName?: string;
     otp?: string;
     otpExpires?: Date;
     otpVerified?: boolean;
@@ -30,6 +31,7 @@ const userSchema: Schema<IUser> = new Schema(
         isBlocked: {type: Boolean, default: false, },
         resetPasswordToken: { type: String },
         resetPasswordExpires: { type: Date },
+        profileImageName: { type: String },
     },
     { timestamps: true }
 );

@@ -1,55 +1,74 @@
 import { useState, useEffect } from "react";
 import {
-  Form,
-  Button,
   Card,
   Container,
   Row,
   Col,
+  Image,
+  Button,
+  Form,
+  Modal,
 } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
-import { toast } from "react-toastify";
 import Loader from "../../Components/UserComponents/Loader";
+import { toast } from "react-toastify";
 import { setCredentials } from "../../Slices/AuthSlice";
 import {
   useGetUserProfileQuery,
   useUpdateUserMutation,
 } from "../../Slices/UserApiSlice";
-import Footer from '../../Components/UserComponents/Footer';
 import { UserInfo } from "../../Types";
+import UserProfileSidebar from "../../Components/UserComponents/UserSideBar";
+import "./UserProfilePage.css";
+import { useNavigate } from "react-router-dom";
+
+const PROFILE_IMAGE_DIR_PATH = "http://localhost:5000/UserProfileImages/";
+const DEFAULT_PROFILE_IMAGE = "/profileImage_1729749713837.jpg";
 
 const ProfileScreen: React.FC = () => {
+  const [showModal, setShowModal] = useState<boolean>(false);
   const [name, setName] = useState<string>("");
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [phone, setPhone] = useState<string>("");
   const [currentPassword, setCurrentPassword] = useState<string>(""); 
+  const [newPassword, setNewPassword] = useState<string>(""); 
+  const [confirmPassword, setConfirmPassword] = useState<string>(""); 
+  const [profileImage, setProfileImage] = useState<File | null>(null);
 
   const dispatch = useDispatch();
-  const { userInfo } = useSelector((state: { auth: { userInfo: UserInfo } }) => state.auth);
-  const userId = userInfo?.id; 
+  const navigate = useNavigate(); // Add this line
+
+  const { userInfo } = useSelector(
+    (state: { auth: { userInfo: UserInfo } }) => state.auth
+  );
+  const userId = userInfo?.id;
   const {
     data: userProfile,
     isLoading: profileLoading,
     refetch,
   } = useGetUserProfileQuery(userId);
-  const [updateProfile] = useUpdateUserMutation();
+  const [updateProfile, { isLoading }] = useUpdateUserMutation();
 
   useEffect(() => {
-    document.title = "Profile - Celebrate Spaces";
+    document.title = "Ticket Hive - Profile";
     if (userProfile) {
       setName(userProfile.name);
-      setEmail(userProfile.email);
+      setPhone(userProfile.phone || "");
+      setProfileImage(userProfile.profileImageName);
     }
   }, [userProfile]);
 
-  useEffect(() => {
-    if (userInfo) {
-      refetch();
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith("image")) {
+        toast.error("Please select an image file.");
+        return;
+      }
+      setProfileImage(file);
     }
-  }, [userInfo, refetch]);
+  };
 
-  const validateName = (name: string): boolean => {
+  const validateName = (name: string) => {
     if (name.trim() === "") {
       toast.error("Name is required");
       return false;
@@ -57,20 +76,20 @@ const ProfileScreen: React.FC = () => {
     return true;
   };
 
-  const validateEmail = (email: string): boolean => {
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (email.trim() === "") {
-      toast.error("Email is required");
+  const validatePhone = (phone: string) => {
+    const phoneRegex = /^[0-9]{10}$/;
+    if (phone.trim() === "") {
+      toast.error("Phone number is required");
       return false;
     }
-    if (!emailRegex.test(email)) {
-      toast.error("Email is not valid");
+    if (!phoneRegex.test(phone)) {
+      toast.error("Phone number is not valid");
       return false;
     }
     return true;
   };
 
-  const validatePassword = (password: string): boolean => {
+  const validatePassword = (password: string) => {
     if (
       password.length < 8 ||
       !/[a-zA-Z]/.test(password) ||
@@ -85,125 +104,140 @@ const ProfileScreen: React.FC = () => {
     return true;
   };
 
-  const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
+  const submitHandler = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateName(name) || !validateEmail(email)) {
+    if (!validateName(name) || !validatePhone(phone)) {
+      toast.error("Invalid name or phone number");
       return;
     }
 
-    if (
-      password &&
-      (password !== confirmPassword || !validatePassword(password))
-    ) {
-      toast.error(
-        "Passwords do not match or do not meet the required criteria"
-      );
+    if (newPassword && (newPassword !== confirmPassword || !validatePassword(newPassword))) {
+      toast.error("Passwords do not match or do not meet the required criteria");
       return;
     }
 
     try {
       const formData = new FormData();
       formData.append("name", name);
-      formData.append("email", email);
-      if (password) formData.append("password", password);
-      formData.append("currentPassword", currentPassword); 
+      formData.append("phone", phone);
+      if (newPassword) formData.append("password", newPassword);
+      formData.append("currentPassword", currentPassword);
+      if (profileImage) formData.append("profileImage", profileImage);
 
       const responseFromApiCall = await updateProfile(formData).unwrap();
+
       await refetch();
+
       dispatch(setCredentials(responseFromApiCall));
+
       toast.success("Profile Updated Successfully");
+      
+      navigate("/profile");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-      toast.error(
-        error?.data?.message || error?.message || "An error occurred"
-      );
+      toast.error(error?.data?.message || error?.message || "An error occurred");
     }
   };
 
   if (profileLoading) return <Loader />;
 
   return (
-    <div>
-      <div className="position-relative">
-        <img src="/pngtree-old-movie-posters-on-the-wall-image_2881318.jpg" alt="background" className="background-image" />
-        <div className="overlay-text">
-          <h1>My Profile</h1>
-        </div>
-      </div>
-      <Container className="profile-container">
-        <Row className="my-4">
+    <div className="profile-screen">
+      <Container fluid className="profile-container mt-4">
+        <Row className="my-4 justify-content-center">
+          <Col md={3} className="sidebar-column">
+            <UserProfileSidebar />
+          </Col>
           <Col md={8}>
-            <Card className="profile-card">
-              <Card.Header className="profile-card-header">
-                My Account
-              </Card.Header>
-              <Card.Body>
-                <Form onSubmit={submitHandler}>
-                  <Form.Group className="my-3" controlId="name">
-                    <Form.Label>Name</Form.Label>
-                    <Form.Control
-                      type="text"
-                      placeholder="Enter name"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="profile-input"
-                    />
-                  </Form.Group>
-                  <Form.Group className="my-3" controlId="email">
-                    <Form.Label>Email Address</Form.Label>
-                    <Form.Control
-                      type="email"
-                      placeholder="Enter email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="profile-input"
-                    />
-                  </Form.Group>
-                  <Form.Group className="my-3" controlId="currentPassword">
-                    <Form.Label>Current Password</Form.Label>
-                    <Form.Control
-                      type="password"
-                      placeholder="Enter current password"
-                      value={currentPassword}
-                      onChange={(e) => setCurrentPassword(e.target.value)}
-                      className="profile-input"
-                    />
-                  </Form.Group>
-                  <Form.Group className="my-3" controlId="password">
-                    <Form.Label>New Password</Form.Label>
-                    <Form.Control
-                      type="password"
-                      placeholder="Enter new password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="profile-input"
-                    />
-                  </Form.Group>
-                  <Form.Group className="my-3" controlId="confirmPassword">
-                    <Form.Label>Confirm Password</Form.Label>
-                    <Form.Control
-                      type="password"
-                      placeholder="Confirm password"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="profile-input"
-                    />
-                  </Form.Group>
+            <Card className="profile-card-modern shadow-sm">
+              <Card.Body className="text-center">
+                <div className="profile-photo-container text-center mb-4">
+                  <Image
+                    src={
+                      userProfile.profileImageName
+                        ? `${PROFILE_IMAGE_DIR_PATH}${userProfile.profileImageName}`
+                        : DEFAULT_PROFILE_IMAGE
+                    }
+                    alt="Profile"
+                    roundedCircle
+                    className="profile-photo-modern"
+                  />
+                </div>
+                <div className="profile-details-modern text-center">
+                  <h4 className="profile-name-modern">{userProfile?.name}</h4>
+                  <p className="profile-email-modern">
+                    {userProfile?.email}
+                  </p>
+                  <p className="profile-phone-modern">
+                    {userProfile?.phone || "N/A"}
+                  </p>
+                </div>
+                <div className="text-center mt-4">
                   <Button
-                    type="submit"
-                    className="profile-button"
-                    style={{ backgroundColor: "#082b43" }}
+                    onClick={() => setShowModal(true)}
+                    className="profile-edit-button-modern"
                   >
-                    Update
+                    Edit Profile
                   </Button>
-                </Form>
+                </div>
               </Card.Body>
             </Card>
           </Col>
         </Row>
       </Container>
-      <Footer />
+
+      {/* Edit Profile Modal */}
+      <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Edit Profile</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form onSubmit={submitHandler}>
+            <Form.Group className="mb-3" controlId="name">
+              <Form.Control
+                type="text"
+                placeholder={userProfile?.name || "Enter name"}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3" controlId="phone">
+              <Form.Control
+                type="text"
+                placeholder={userProfile?.phone || "Enter phone number"}
+                onChange={(e) => setPhone(e.target.value)}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3" controlId="currentPassword">
+              <Form.Control
+                type="password"
+                placeholder="Enter current password"
+                onChange={(e) => setCurrentPassword(e.target.value)}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3" controlId="newPassword">
+              <Form.Control
+                type="password"
+                placeholder="Enter new password"
+                onChange={(e) => setNewPassword(e.target.value)}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3" controlId="confirmPassword">
+              <Form.Control
+                type="password"
+                placeholder="Confirm new password"
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3" controlId="profileImage">
+              <Form.Control type="file" onChange={handleImageChange} />
+            </Form.Group>
+            <Button type="submit" className="profile-button-modern">
+              {isLoading ? <Loader /> : "Update Profile"}
+            </Button>
+          </Form>
+        </Modal.Body>
+      </Modal>
     </div>
   );
 };

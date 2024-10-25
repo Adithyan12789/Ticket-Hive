@@ -1,7 +1,7 @@
 import mongoose, { Document, Model, Schema } from 'mongoose';
 import bcrypt from 'bcryptjs';
 
-export interface ITheater extends Document {
+export interface ITheaterOwner extends Document {
     _id: mongoose.Types.ObjectId;
     name: string;
     email: string;
@@ -19,7 +19,9 @@ export interface ITheater extends Document {
     matchPassword(password: string): Promise<boolean>;
 }
 
-const theaterSchema: Schema<ITheater> = new Schema(
+
+
+const theaterOwnerSchema: Schema<ITheaterOwner> = new Schema(
     {
         name: { type: String, required: true },
         email: { type: String, required: true, unique: true },
@@ -38,10 +40,10 @@ const theaterSchema: Schema<ITheater> = new Schema(
     }
 )
 
-theaterSchema.methods.matchPassword = async function (password: string): Promise<boolean> {
+theaterOwnerSchema.methods.matchPassword = async function (password: string): Promise<boolean> {
     return bcrypt.compare(password, this.password);
 };
 
-const Theater: Model<ITheater> = mongoose.model<ITheater>('Theater', theaterSchema);
+const TheaterOwner: Model<ITheaterOwner> = mongoose.model<ITheaterOwner>('TheaterOwner', theaterOwnerSchema);
 
-export default Theater;
+export default TheaterOwner;

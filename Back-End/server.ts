@@ -1,22 +1,22 @@
-import connectDB from "./Config/DB";
+import Database from "./Config/DB";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import UserRoutes from "./Routes/UserRoutes";
 import AdminRoutes from "./Routes/AdminRoutes";
 import TheaterRoutes from "./Routes/TheaterRoutes";
-const express = require("express");
+import express from "express";
 
 dotenv.config();
-connectDB();
+Database.connectDB();
 
-const port = process.env.PORT || 6000;
+const port = process.env.PORT || 5000;
 
 const app = express();
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }))
-
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
 app.use(express.static('Back-End/public'));
 
 app.use("/api/users", UserRoutes);

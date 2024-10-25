@@ -1,5 +1,5 @@
 import { apiSlice } from "./ApiSlice";
-import { TheaterResponse, TheaterCredentials, TheaterProfile, RegisterCredentials,OtpCredentials } from "../Types";
+import { TheaterResponse, TheaterCredentials, RegisterCredentials,OtpCredentials } from "../Types";
 
 
 const THEATER_URL = '/api/theater';
@@ -70,13 +70,37 @@ export const theaterApiSlice = apiSlice.injectEndpoints({
       }),
     }),    
 
-    updateTheater: builder.mutation<TheaterResponse, TheaterProfile>({
-      query: (data) => ({
-        url: `${THEATER_URL}/profile`,
+    getTheaterOwnerProfile: builder.query({
+      query: () => ({
+        url: `${THEATER_URL}/theater-profile`, 
+        method: 'GET',
+      }),
+    }),
+
+    updateTheaterOwner: builder.mutation({
+      query: (data)=>({ 
+        url: `${THEATER_URL}/theater-profile`,
         method: 'PUT',
+        body: data
+      })
+    }),
+
+    addTheater: builder.mutation({
+      query: (data) => ({
+        url: `${THEATER_URL}/add-theater`,
+        method: 'POST',
         body: data,
       }),
     }),
+
+    getTheaters: builder.mutation({
+      query: () => ({
+        url: `${THEATER_URL}/get-theater`,
+        method: 'GET',
+      }),
+    }),
+    
+
   }),
 });
 
@@ -89,5 +113,8 @@ export const {
   useResendOtpTheaterMutation,
   useSendPasswordResetEmailTheaterMutation,
   useResetPasswordTheaterMutation,
-  useUpdateTheaterMutation,
+  useGetTheaterOwnerProfileQuery,
+  useUpdateTheaterOwnerMutation,
+  useAddTheaterMutation,
+  useGetTheatersMutation, 
 } = theaterApiSlice;

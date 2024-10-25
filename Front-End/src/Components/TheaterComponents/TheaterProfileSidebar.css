@@ -1,0 +1,73 @@
+.theater-sidebar {
+    width: 250px; /* Set a fixed width for the sidebar */
+    background-color: #000000; /* Light background color */
+    border-right: 1px solid #000000; /* Border to separate sidebar */
+    padding: 20px; /* Padding around the content */
+    height: 93vh; /* Full height of the viewport */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: fixed;
+    top: 56px; /* Align to top */
+    left: 0; /* Align to left */
+    overflow-y: auto; /* Allow scrolling if content overflows */
+  }
+  
+  .theater-sidebar-title {
+    font-size: 1.5rem; /* Larger font for title */
+    margin-bottom: 20px; /* Space below the title */
+    color: #343a40; /* Dark color for title */
+  }
+  
+  .theater-sidebar-links {
+    list-style-type: none; /* Remove bullet points */
+    padding: 0; /* Remove default padding */
+    margin-top: 60px;
+  }
+  
+  .theater-sidebar-links li {
+    margin: 10px 10px 30px; /* Space between links */
+  }
+  
+  .theater-sidebar-links a {
+    text-decoration: none; /* Remove underline */
+    color: #007bff; /* Bootstrap primary color */
+    display: flex; /* Flexbox for alignment */
+    align-items: center; /* Center icons and text */
+    padding: 10px;
+    border-radius: 5px; /* Rounded corners */
+    transition: background-color 0.3s; /* Smooth background transition */
+  }
+  
+  .theater-sidebar-links a:hover {
+    background-color: #e9ecef; /* Change background on hover */
+  }
+  
+  .theater-sidebar-icon {
+    margin-right: 10px; /* Space between icon and text */
+    font-size: 1.2rem; /* Icon size */
+  }
+  
+  .theater-sidebar-footer {
+    margin-top: auto; /* Push footer to the bottom */
+    text-align: center; /* Center footer text */
+    font-size: 0.9rem; /* Smaller font for footer */
+    color: #6c757d; /* Muted color for footer text */
+  }
+  
+
+  .theater-sidebar-link {
+    color: #333;
+    text-decoration: none;
+  }
+  
+  .theater-sidebar-link.active {
+    background-color: #ffffff; /* Highlight active link */
+    color: #000000;
+    font-weight: bold;
+  }
+  
+  .theater-sidebar-icon {
+    margin-right: 8px;
+  }
+  

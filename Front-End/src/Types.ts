@@ -1,4 +1,5 @@
 import { JwtPayload } from "jwt-decode";
+import { Key } from "react";
 
 /** User Informations */
 export interface User {
@@ -34,6 +35,8 @@ export interface GoogleJwtPayload extends JwtPayload {
 
 /** General user information */
 export interface UserInfo {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  data: any;
   id: string;
   profileImage?: string;
   name: string;
@@ -84,8 +87,21 @@ export interface Theater {
   isBlocked?: boolean;
 }
 
+export interface TheaterManagement {
+  _id: Key | null | undefined;
+  id: string;
+  name: string;
+  city: string;
+  address: string;
+  description: string;
+  amenities: string;
+  latitude: string;
+  longitude: string;
+}
+
 export interface TheaterInfo {
-  data: unknown;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  data: any;
   email: string;
   id: string;
   name: string;

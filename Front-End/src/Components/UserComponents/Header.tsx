@@ -4,7 +4,7 @@ import { FaSignInAlt, FaSignOutAlt } from "react-icons/fa";
 import { useSelector, useDispatch } from "react-redux";
 import { LinkContainer } from "react-router-bootstrap";
 import {
-  useUpdateUserMutation,
+  useGetUserProfileQuery,
   useLogoutMutation,
 } from "../../Slices/UserApiSlice";
 import { logout } from "../../Slices/AuthSlice";
@@ -20,20 +20,17 @@ const Header: React.FC = () => {
 
   console.log("userInfo: ", userInfo);
 
-  const [profileApiCall] = useUpdateUserMutation();
+  const { data: profileData } = useGetUserProfileQuery(
+    userInfo?.id
+  );
+
   const [logoutApiCall] = useLogoutMutation();
 
-  const profileHandler = async () => {
-    try {
-      await profileApiCall({
-        id: "",
-        name: "",
-        email: "",
-      }).unwrap();
-      dispatch(logout());
+  const profileHandler = () => {
+    if (userInfo && profileData) {
       navigate("/profile");
-    } catch (err) {
-      console.error(err);
+    } else {
+      console.error("Profile data not available");
     }
   };
 

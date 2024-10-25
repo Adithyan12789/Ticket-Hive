@@ -61,3 +61,12 @@
   color: #bdc3c7;
   border-top: 1px solid #34495e;
 }
+
+.sidebar-link {
+  color: #333;
+  text-decoration: none;
+}
+
+.sidebar-link.active {
+  background-color: #ffffff; /* Highlight active link */
+}

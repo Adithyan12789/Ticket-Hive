@@ -1,22 +1,29 @@
-// repositories/UserRepository.ts
 import User, { IUser } from "../Models/UserModel";
 
-export const findUserByEmail = async (email: string) => {
-    return await User.findOne({ email });
-};
+class UserRepository {
+    public async findUserByEmail(email: string): Promise<IUser | null> {
+        return await User.findOne({ email });
+    }
 
-export const saveUser = async (userData: IUser) => {
-    const user = new User(userData);
-    return await user.save();
-};
+    public async saveUser(userData: IUser): Promise<IUser> {
+        const user = new User(userData);
+        return await user.save();
+    }
 
-export const findUserByResetToken = async (resetToken: string) => {
-    return await User.findOne({
-        resetPasswordToken: resetToken,
-        resetPasswordExpires: { $gt: Date.now() },
-    });
-};
+    public async findUserByResetToken(resetToken: string): Promise<IUser | null> {
+        return await User.findOne({
+            resetPasswordToken: resetToken,
+            resetPasswordExpires: { $gt: Date.now() },
+        });
+    }
 
-export const updateUser = async (userId: string, updates: object) => {
-    return await User.findByIdAndUpdate(userId, updates, { new: true });
-};
+    public async updateUser(userId: string, updates: Partial<IUser>): Promise<IUser | null> {
+        return await User.findByIdAndUpdate(userId, updates, { new: true });
+    }
+
+    public async findUserById(userId: string): Promise<IUser | null> {
+        return await User.findById(userId);
+    }
+}
+
+export default new UserRepository();
