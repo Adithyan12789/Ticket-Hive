@@ -7,6 +7,7 @@ import TheaterResetPassword from '../Pages/THEATER/TheaterResetPassword';
 import TheaterProfilePage from '../Pages/THEATER/TheaterProfilePage';
 import TheaterManagement from '../Pages/THEATER/TheaterManagement';
 import TheaterPrivateRoute from '../Components/TheaterComponents/TheaterPrivateRoute';
+import TheaterDetailPage from '../Pages/THEATER/TheaterDetailPage';
 
 export const TheaterRoutes = (
   <>
@@ -20,6 +21,8 @@ export const TheaterRoutes = (
     <Route path="" element={<TheaterPrivateRoute />}>
       <Route path="/theater-profile" element={<TheaterProfilePage />} />
       <Route path="/theater/management" element={<TheaterManagement />} />
+      <Route path="/theater/details/:id" element={<TheaterDetailPage />} />
+      <Route path="/theater/edit/:id" element={<TheaterManagement />} />
     </Route>
   </>
 );

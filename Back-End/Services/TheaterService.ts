@@ -3,8 +3,8 @@ import crypto from "crypto";
 import TheaterRepository from "../Repositories/TheaterRepo";
 import EmailUtil from "../Utils/EmailUtil";
 import TheaterOwner from "../Models/TheaterOwnerModel";
-import { ITheaterDetails } from "../Models/TheaterDetailsModel";
-  
+import TheaterDetails, { ITheaterDetails } from "../Models/TheaterDetailsModel";
+
 class TheaterOwnerService {
     public async authTheaterOwnerService(email: string, password: string) {
         const theater = await TheaterRepository.findTheaterOwnerByEmail(email);
@@ -56,7 +56,7 @@ class TheaterOwnerService {
             otpVerified: false,
         });
 
-        await newTheaterOwner.save(); 
+        await newTheaterOwner.save();
         await EmailUtil.sendOtpEmail(newTheaterOwner.email, otp);
 
         return newTheaterOwner;
@@ -118,7 +118,7 @@ class TheaterOwnerService {
 
         const resetToken = crypto.randomBytes(32).toString('hex');
         theater.resetPasswordToken = resetToken;
-        theater.resetPasswordExpires = new Date(Date.now() + 30 * 60 * 1000); 
+        theater.resetPasswordExpires = new Date(Date.now() + 30 * 60 * 1000);
         await theater.save();
 
         return resetToken;
@@ -150,44 +150,44 @@ class TheaterOwnerService {
         }
 
         return {
-          _id: theaterOwner._id,
-          name: theaterOwner.name,
-          email: theaterOwner.email,
-          phone: theaterOwner.phone,
-          profileImageName:theaterOwner.profileImageName
+            _id: theaterOwner._id,
+            name: theaterOwner.name,
+            email: theaterOwner.email,
+            phone: theaterOwner.phone,
+            profileImageName: theaterOwner.profileImageName
         };
     };
 
     public updateTheaterOwnerProfileService = async (
-        theaterOwnerId: string, 
-        updateData: { currentPassword: string; name: string; phone: string; password: string; }, 
+        theaterOwnerId: string,
+        updateData: { currentPassword: string; name: string; phone: string; password: string; },
         profileImage: { filename: string | undefined; }
-      ) => {
-          const theaterOwner = await TheaterRepository.findTheaterOwnerById(theaterOwnerId);
-          if (!theaterOwner) {
+    ) => {
+        const theaterOwner = await TheaterRepository.findTheaterOwnerById(theaterOwnerId);
+        if (!theaterOwner) {
             throw new Error("theater Owner not found");
-          }
-        
-          if (updateData.currentPassword) {
+        }
+
+        if (updateData.currentPassword) {
             const isMatch = await theaterOwner.matchPassword(updateData.currentPassword);
             if (!isMatch) {
-              throw new Error("Current password is incorrect");
+                throw new Error("Current password is incorrect");
             }
-          }
-      
-          theaterOwner.name = updateData.name || theaterOwner.name;
-          theaterOwner.phone = updateData.phone || theaterOwner.phone;
-      
-          if (updateData.password) {
+        }
+
+        theaterOwner.name = updateData.name || theaterOwner.name;
+        theaterOwner.phone = updateData.phone || theaterOwner.phone;
+
+        if (updateData.password) {
             const salt = await bcrypt.genSalt(10);
             theaterOwner.password = await bcrypt.hash(updateData.password, salt);
-          }
-      
-          if (profileImage) {
+        }
+
+        if (profileImage) {
             theaterOwner.profileImageName = profileImage.filename || theaterOwner.profileImageName;
-          }
-        
-          return await TheaterRepository.saveTheaterOwner(theaterOwner);
+        }
+
+        return await TheaterRepository.saveTheaterOwner(theaterOwner);
     };
 
 
@@ -196,6 +196,77 @@ class TheaterOwnerService {
         return { status: 201, data: createdTheater };
     };
 
+    public async getAllTheaters() {
+        return await TheaterRepository.getAllTheaters();
+    }
+
+    public async getTheaterById(theaterId: string) {
+        try {
+            const theater = await TheaterRepository.findTheaterById(theaterId);
+            if (!theater) {
+                return { status: 404, data: { message: 'Theater not found' } };
+            }
+
+            return { status: 200, data: theater.toObject() };
+        } catch (error) {
+            console.error('Error fetching theater details:', error);
+            return { status: 500, data: { message: 'Server error' } };
+        }
+    }
+
+
+    public async updateTheaterData(
+        theaterId: any,
+        updateData: Partial<ITheaterDetails>,
+        files: any
+    ) {
+        try {
+            const theater = await TheaterRepository.findTheaterById(theaterId);
+    
+            if (!theater) {
+                throw new Error("Theater not found");
+            }
+    
+            // Update theater properties
+            theater.name = updateData.name || theater.name;
+            theater.city = updateData.city || theater.city;
+            theater.address = updateData.address || theater.address;
+            theater.description = updateData.description || theater.description;
+            theater.amenities = updateData.amenities
+                ? updateData.amenities.map((item: string) => item.trim())
+                : theater.amenities;
+            theater.latitude = updateData.latitude || theater.latitude;
+            theater.longitude = updateData.longitude || theater.longitude;
+    
+            // Replace existing images with new ones if files are provided
+            if (files && files.length > 0) {
+                const newImages = files.map((file: { path: string; }) => {
+                    return file.path.split('\\').pop()?.split('/').pop();
+                }).filter((image: string | undefined) => image !== undefined);
+    
+                // Replace existing images
+                theater.images = newImages; // Replace with new images
+            }
+    
+            // Remove images if specified
+            if (Array.isArray(updateData.removeImages) && updateData.removeImages.length > 0) {
+                theater.images = theater.images.filter(
+                    (image: string) => !updateData.removeImages!.includes(image)
+                );
+            }
+    
+            const updatedTheater = await theater.save();
+            return updatedTheater;
+        } catch (error) {
+            throw error;
+        }
+    }
+    
+
+    public async deleteTheaterService(id: string): Promise<ITheaterDetails | null> {
+        const deletedTheater = await TheaterDetails.findByIdAndDelete(id);
+        return deletedTheater;
+    }
 
     public logoutTheaterOwnerService() {
         return true;

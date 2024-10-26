@@ -163,3 +163,100 @@
   border-radius: 8px;
   margin-top: 10px;
 }
+
+
+/* TheaterManagement.css */
+
+/* Card styles */
+.card {
+  border: 1px solid #ddd; /* Light border for definition */
+  border-radius: 10px; /* Rounded corners */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow effect */
+  transition: transform 0.3s, box-shadow 0.3s; /* Smooth transition */
+}
+
+.card:hover {
+  transform: translateY(-5px); /* Slight lift on hover */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Deeper shadow on hover */
+}
+
+.card-img-top {
+  border-radius: 10px 10px 0 0; /* Round top corners of image */
+  object-fit: cover; /* Ensures image covers area without distortion */
+  height: 200px; /* Fixed height for uniformity */
+}
+
+.card-title {
+  font-size: 19px; /* Increased title size for prominence */
+  font-weight: 600; /* Bold title */
+  color: #333; /* Dark color for readability */
+  margin-top: 0.7rem; /* Space below the title */
+}
+
+.card-text {
+  font-size: 1rem; /* Standard text size */
+  color: #3d3d3d; /* Slightly lighter color for contrast */
+  line-height: 1.5; /* Increased line height for readability */
+}
+
+.theater-card-body {
+  padding: 1.5rem; /* Increased padding for spaciousness */
+  height: 180px;
+}
+
+.card:hover .card-title {
+  color: #007bff; /* Change color on hover */
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+  .card-title {
+    font-size: 1.25rem; /* Smaller title on smaller screens */
+  }
+}
+
+@media (min-width: 768px) {
+  .card {
+    margin: 1rem; /* Margin for better spacing on larger screens */
+  }
+}
+
+.pagination{
+  justify-content: center;
+  padding-top: 10px;
+}
+
+.search-input-group-text{
+  display: flex;
+    align-items: center;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    height: 50px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--bs-body-color);
+    text-align: center;
+    white-space: nowrap;
+    background-color: var(--bs-tertiary-bg);
+    border: var(--bs-border-width) solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius);
+}
+
+.button-group {
+  display: flex;
+  justify-content: space-evenly;
+}
+
+.icon-button {
+  background: whitesmoke;
+  border: 2px solid rgb(148, 148, 148);
+  border-radius: 25px;
+  cursor: pointer;
+  padding: 10px 12px;
+  color: #007bff; /* Bootstrap primary color */
+}
+
+.icon-button:hover {
+  background-color: #0056b3;
+  color: white; /* Darker shade on hover */
+}

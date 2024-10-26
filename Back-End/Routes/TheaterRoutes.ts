@@ -17,7 +17,13 @@ router.route('/theater-profile')
 .get( TheaterAuthMiddleware.protect, TheaterController.getTheaterProfile )
 .put( TheaterAuthMiddleware.protect, MulterConfig.multerUploadTheaterProfile.single('profileImage'), TheaterController.updateTheaterProfile);
 
-router.post("/add-theater",TheaterAuthMiddleware.protect, MulterConfig.multerUploadTheaterImages.array("images", 3),TheaterController.addTheaterController); 
+router.post("/add-theaters",TheaterAuthMiddleware.protect, MulterConfig.multerUploadTheaterImages.array("images", 3),TheaterController.addTheaterController);
+router.get('/get-theaters',TheaterAuthMiddleware.protect, TheaterController.getTheaters);
+
+router.route('/theaters/:id')
+    .get(TheaterAuthMiddleware.protect, TheaterController.getTheaterByIdHandler)
+    .put(TheaterAuthMiddleware.protect, MulterConfig.multerUploadTheaterImages.array("images", 3), TheaterController.updateTheaterHandler)
+    .delete(TheaterAuthMiddleware.protect, TheaterController.deleteTheaterHandler);
 
 router.post('/theater-logout', TheaterController.logoutTheaterOwner);
 

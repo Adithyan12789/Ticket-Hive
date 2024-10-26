@@ -87,7 +87,7 @@ export const theaterApiSlice = apiSlice.injectEndpoints({
 
     addTheater: builder.mutation({
       query: (data) => ({
-        url: `${THEATER_URL}/add-theater`,
+        url: `${THEATER_URL}/add-theaters`,
         method: 'POST',
         body: data,
       }),
@@ -95,12 +95,32 @@ export const theaterApiSlice = apiSlice.injectEndpoints({
 
     getTheaters: builder.mutation({
       query: () => ({
-        url: `${THEATER_URL}/get-theater`,
+        url: `${THEATER_URL}/get-theaters`,
+        method: 'GET',
+      }),
+    }),
+
+    getTheaterByTheaterId: builder.query({
+      query: (id) => ({
+        url: `${THEATER_URL}/theaters/${id}`,
         method: 'GET',
       }),
     }),
     
-
+    updateTheater: builder.mutation({
+      query: ({ id, formData }) => ({
+        url: `${THEATER_URL}/theaters/${id}`,
+        method: 'PUT',
+        body: formData,
+      }),
+    }),
+    
+    deleteTheater: builder.mutation({
+      query: ({ id }) => ({
+        url: `${THEATER_URL}/theaters/${id}`,
+        method: 'DELETE',
+      }),
+    }),
   }),
 });
 
@@ -116,5 +136,8 @@ export const {
   useGetTheaterOwnerProfileQuery,
   useUpdateTheaterOwnerMutation,
   useAddTheaterMutation,
-  useGetTheatersMutation, 
+  useGetTheatersMutation,
+  useGetTheaterByTheaterIdQuery,
+  useUpdateTheaterMutation,
+  useDeleteTheaterMutation,
 } = theaterApiSlice;

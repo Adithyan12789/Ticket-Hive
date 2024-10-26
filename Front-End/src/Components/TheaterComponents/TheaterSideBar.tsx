@@ -20,7 +20,12 @@ const TheaterOwnerSidebar: React.FC = () => {
         <li>
           <Link 
             to="/theater/management" 
-            className={location.pathname === "/theater-management" ? "active sidebar-link" : "sidebar-link"}
+            className={
+              location.pathname === "/theater/management" || location.pathname === "/theater/details" || location.pathname === "/theater/edit" 
+                ? "active sidebar-link"
+                : "sidebar-link"
+            }
+            
           >
             <FaFilm className="sidebar-icon" /> Theater Management
           </Link>
@@ -28,7 +33,7 @@ const TheaterOwnerSidebar: React.FC = () => {
         <li>
           <Link 
             to="/user-management" 
-            className={location.pathname === "/user-management" ? "active sidebar-link" : "sidebar-link"}
+            className={location.pathname === "/user/management" ? "active sidebar-link" : "sidebar-link"}
           >
             <FaUsers className="sidebar-icon" /> User Management
           </Link>

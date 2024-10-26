@@ -4,7 +4,7 @@ import fs from "fs";
 
 const baseDir = process.cwd();
 
-class ProfileImageUpload {
+class ImageUploads {
   private static ensureDirectoryExists(directory: string): void {
     if (!fs.existsSync(directory)) {
       fs.mkdirSync(directory, { recursive: true });
@@ -62,4 +62,4 @@ class ProfileImageUpload {
   });
 }
 
-export default ProfileImageUpload;
+export default ImageUploads;

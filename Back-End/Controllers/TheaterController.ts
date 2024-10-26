@@ -6,6 +6,7 @@ import Theater from "../Models/TheaterOwnerModel";
 import TheaterTokenService from "../Utils/GenerateTheaterToken";
 import { CustomRequest } from '../Middlewares/TheaterAuthMiddleware';
 import mongoose from "mongoose";
+import TheaterDetails from "../Models/TheaterDetailsModel";
 
 class TheaterController {
     authTheaterOwner = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -269,10 +270,10 @@ class TheaterController {
         }
     
         const images: string[] = Array.isArray(req.files) 
-            ? req.files.map((file: Express.Multer.File) => {
-                return file.path.replace(/.*public[\\/]/, ""); 
-            }) 
-            : [];
+        ? req.files.map((file: Express.Multer.File) => {
+            return file.filename; 
+        }) 
+        : [];
     
         try {
             const response = await TheaterOwnerService.addTheaterService(req.theaterOwner._id, {
@@ -293,6 +294,75 @@ class TheaterController {
             res.status(500).json({ message: "An error occurred while adding the theater" });
         }
     });
+
+    getTheaters = asyncHandler(async (req: CustomRequest, res: Response): Promise<void> => {
+        const theaters = await TheaterOwnerService.getAllTheaters();
+        console.log("theaters: ", theaters);
+        
+        res.status(200).json(theaters);
+    });
+
+    getTheaterByIdHandler = asyncHandler(async (req: CustomRequest, res: Response): Promise<void> => {
+        console.log("3: Handler called");
+      
+        try {
+          const theater = await TheaterDetails.findById(req.params.id);
+          console.log("Theater fetched:", theater);
+      
+          if (!theater) {
+            console.log("Theater not found");
+            res.status(404).json({ message: 'Theater not found' });
+            return;
+          }
+      
+          res.json(theater.toObject());
+        } catch (error) {
+          console.error("Error in handler:", error);
+          res.status(500).json({ message: 'Server error' });
+        }
+      });
+      
+      
+      updateTheaterHandler = asyncHandler(async (req: CustomRequest, res: Response): Promise<void> => {
+        const { id } = req.params;
+        const updateData = req.body;
+      
+        try {
+          const updatedTheater = await TheaterOwnerService.updateTheaterData(id, updateData, req.files);
+      
+          if (!updatedTheater) {
+            res.status(404).json({ message: 'Theater not found for updating' });
+            return;
+          }
+      
+          res.status(200).json(updatedTheater);
+        } catch (error: any) {
+          console.error("Error updating theater:", error);
+          res.status(500).json({ message: 'Error updating theater', error: error.message });
+        }
+      });
+      
+      deleteTheaterHandler = asyncHandler(async (req: CustomRequest, res: Response): Promise<void> => {
+        const { id } = req.params;
+    
+        try {
+            const deletedTheater = await TheaterOwnerService.deleteTheaterService(id);
+
+            console.log("deletedTheater: ", deletedTheater);
+            
+    
+            if (!deletedTheater) {
+                res.status(404).json({ message: 'Theater not found for deletion' });
+                return;
+            }
+    
+            res.status(200).json({ message: 'Theater deleted successfully', deletedTheater });
+        } catch (error: any) {
+            console.error("Error deleting theater:", error);
+            res.status(500).json({ message: 'Error deleting theater', error: error.message });
+        }
+    });
+    
 
     logoutTheaterOwner = asyncHandler(async (req: Request, res: Response): Promise<void> => {
         await TheaterOwnerService.logoutTheaterOwnerService();

@@ -8,6 +8,7 @@ export interface ITheaterDetails extends Document {
     images: string[];
     description: string;
     amenities: string[];
+    removeImages?: string[];
     isListed?: boolean;
     theaterOwnerId: mongoose.Types.ObjectId;
     certificate?: string;
@@ -26,6 +27,7 @@ const theaterDetailsSchema: Schema<ITheaterDetails> = new Schema(
         images: { type: [String], required: true },
         description: { type: String, required: true },
         amenities: { type: [String], required: true },
+        removeImages: { type: [String] },
         isListed: { type: Boolean, default: false },
         theaterOwnerId: { type: Schema.Types.ObjectId, ref: 'TheaterOwner', required: true },
         certificate: { type: String },

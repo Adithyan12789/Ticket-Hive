@@ -1,5 +1,4 @@
 import { JwtPayload } from "jwt-decode";
-import { Key } from "react";
 
 /** User Informations */
 export interface User {
@@ -88,13 +87,14 @@ export interface Theater {
 }
 
 export interface TheaterManagement {
-  _id: Key | null | undefined;
+  images: string[];
+  _id: string;
   id: string;
   name: string;
   city: string;
   address: string;
   description: string;
-  amenities: string;
+  amenities: string[];
   latitude: string;
   longitude: string;
 }
