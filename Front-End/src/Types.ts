@@ -87,16 +87,19 @@ export interface Theater {
 }
 
 export interface TheaterManagement {
+  isVerified: boolean;
   images: string[];
   _id: string;
   id: string;
   name: string;
   city: string;
   address: string;
+  showTimes: string[];
   description: string;
   amenities: string[];
   latitude: string;
   longitude: string;
+  verificationStatus: string;
 }
 
 export interface TheaterInfo {
@@ -135,9 +138,12 @@ export interface TheaterResponse {
   email: string;
   token: string;
 }
-
-
-
+export interface TheaterVerification {
+  _id: string;
+  name: string;
+  verificationStatus: string;
+  certificate?: string;
+}
 
 
 

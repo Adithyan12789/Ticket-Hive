@@ -6,6 +6,7 @@ import TokenService from "../Utils/GenerateToken";
 import { Request, Response, NextFunction } from "express";
 import { IUser } from "../Models/UserModel";
 import { CustomRequest } from '../Middlewares/AuthMiddleware';
+
 class UserController {
   authUser = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {

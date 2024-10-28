@@ -95,6 +95,36 @@ class AdminController {
         }
     });
 
+
+    getVerificationDetails = expressAsyncHandler(async (req, res) => {
+        const theaters = await adminService.getVerificationDetails();
+        res.status(200).json(theaters);
+      });
+      
+    acceptVerification = expressAsyncHandler(async (req, res) => {
+        try {
+          await adminService.acceptVerification(req.params.theaterId);
+          res.json({ message: 'Verification accepted' });
+        } catch (error) {
+          console.error('Error accepting verification:', error);
+          res.status(500).json({ message: 'Server Error' });
+        }
+    });
+      
+    rejectVerification = expressAsyncHandler(async (req, res) => {
+        try {
+          const { adminId } = req.params; 
+          const { reason } = req.body;  
+      
+          await adminService.rejectVerification(adminId, reason); 
+          res.json({ message: 'Verification rejected' });
+        } catch (error) {
+          console.error('Error rejecting verification:', error);
+          res.status(500).json({ message: 'Server Error' });
+        }
+    });
+      
+
     adminLogout = asyncHandler(async (req: Request, res: Response): Promise<void> => {
         const result = adminService.adminLogoutService(res);
         res.status(200).json(result);

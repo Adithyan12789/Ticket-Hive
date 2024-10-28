@@ -11,6 +11,9 @@ router.patch('/block-user', AdminAuthMiddleware.protect, AdminController.blockUs
 router.patch('/unblock-user', AdminAuthMiddleware.protect, AdminController.unblockUserController);
 router.patch('/block-theaterOwner', AdminAuthMiddleware.protect, AdminController.blockTheaterOwnerController);
 router.patch('/unblock-theaterOwner', AdminAuthMiddleware.protect, AdminController.unblockTheaterOwnerController);
+router.get('/verification',AdminAuthMiddleware.protect,AdminController.getVerificationDetails) 
+router.put('/verification/:theaterId/accept',AdminAuthMiddleware.protect,AdminController.acceptVerification) 
+router.put('/verification/:adminId/reject', AdminAuthMiddleware.protect,AdminController.rejectVerification); 
 router.post('/admin-logout', AdminController.adminLogout);
 
 export default router;

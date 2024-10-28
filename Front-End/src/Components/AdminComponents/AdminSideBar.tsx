@@ -1,5 +1,5 @@
-import { Link } from "react-router-dom";
-import { FaHome, FaFilm, FaUsers, FaTicketAlt, FaTag, FaCogs } from "react-icons/fa";
+import { NavLink } from "react-router-dom";
+import { FaHome, FaFilm, FaUsers, FaTicketAlt, FaTag, FaCogs, FaCheck } from "react-icons/fa";
 import "./AdminSidebar.css";
 
 interface AdminSidebarProps {
@@ -12,34 +12,39 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ adminName }) => {
       <h2 className="sidebar-title">Welcome, {adminName}</h2>
       <ul className="sidebar-links">
         <li>
-          <Link to="/admin-dashboard">
+          <NavLink to="/admin/dashboard" className={({ isActive }) => (isActive ? "active" : "")}>
             <FaHome className="sidebar-icon" /> Admin Dashboard
-          </Link>
+          </NavLink>
         </li>
         <li>
-          <Link to="/admin-dashboard/get-user">
+          <NavLink to="/admin/get-user" className={({ isActive }) => (isActive ? "active" : "")}>
             <FaUsers className="sidebar-icon" /> User Management
-          </Link>
+          </NavLink>
         </li>
         <li>
-          <Link to="/admin-dashboard/get-theaterOwner">
+          <NavLink to="/admin/get-theaterOwner" className={({ isActive }) => (isActive ? "active" : "")}>
             <FaFilm className="sidebar-icon" /> Theater Management
-          </Link>
+          </NavLink>
         </li>
         <li>
-          <Link to="/admin/bookings">
+          <NavLink to="/admin/verification" className={({ isActive }) => (isActive ? "active" : "")}>
+            <FaCheck className="sidebar-icon" /> Verification Requests
+          </NavLink>
+        </li>
+        <li>
+          <NavLink to="/admin/bookings" className={({ isActive }) => (isActive ? "active" : "")}>
             <FaTicketAlt className="sidebar-icon" /> Bookings
-          </Link>
+          </NavLink>
         </li>
         <li>
-          <Link to="/admin/coupons">
+          <NavLink to="/admin/coupons" className={({ isActive }) => (isActive ? "active" : "")}>
             <FaTag className="sidebar-icon" /> Coupon Management
-          </Link>
+          </NavLink>
         </li>
         <li>
-          <Link to="/admin/settings">
+          <NavLink to="/admin/settings" className={({ isActive }) => (isActive ? "active" : "")}>
             <FaCogs className="sidebar-icon" /> Settings
-          </Link>
+          </NavLink>
         </li>
       </ul>
       <div className="sidebar-footer">&copy; 2024 Admin Panel</div>

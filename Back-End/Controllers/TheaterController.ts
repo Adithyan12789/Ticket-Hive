@@ -94,6 +94,7 @@ class TheaterController {
         }
     });
 
+
     registerTheaterOwner = asyncHandler(async (req: Request, res: Response): Promise<void> => {
         const { name, email, password, phone } = req.body;
 
@@ -212,8 +213,6 @@ class TheaterController {
         }
       
         const theaterOwner = await TheaterOwnerService.getTheaterOwnerProfile(req.theaterOwner._id);
-
-        console.log("theaterOwner:", theaterOwner);
         
         res.status(200).json(theaterOwner);
       });
@@ -226,10 +225,7 @@ class TheaterController {
         }
       
         try {
-          const updateData = { ...req.body };
-    
-          console.log("updateData: ", updateData);
-          
+          const updateData = { ...req.body };    
           
           const fileData = req.file ? { filename: req.file.filename } : { filename: undefined };
       
@@ -256,10 +252,28 @@ class TheaterController {
         }
       });
 
-    addTheaterController = asyncHandler(async (req: CustomRequest, res: Response): Promise<void> => {
-        const { name, city, address, description, amenities, latitude, longitude } = req.body;
+      uploadVerificationDetailsHandler = asyncHandler(async (req: CustomRequest, res: Response): Promise<void> => {
+        const theaterId = req.params.theaterId;
     
-        if (!name || !city || !address || !description || !latitude || !longitude) {
+        if (!req.file) {
+            res.status(400).json({ message: 'No file uploaded' });
+            return;
+        }
+    
+        const certificatePath = req.file.path.replace(/.*public[\\/]/, "").replace(/\\/g, "/");
+    
+        try {
+            await TheaterOwnerService.uploadCertificates(theaterId, certificatePath);
+            res.status(200).json({ message: 'Verification details submitted successfully' });
+        } catch (error: any) {
+            res.status(404).json({ message: error.message });
+        }
+    });
+
+    addTheaterController = asyncHandler(async (req: CustomRequest, res: Response): Promise<void> => {
+        const { name, city, address, showTimes, description, amenities, latitude, longitude } = req.body;
+    
+        if (!name || !city || !address || !showTimes || !description || !latitude || !longitude) {
             res.status(400).json({ message: "All fields are required" });
             return;
         }
@@ -276,11 +290,14 @@ class TheaterController {
         : [];
     
         try {
+            const showTimesArray = Array.isArray(showTimes) ? showTimes : [showTimes];
+
             const response = await TheaterOwnerService.addTheaterService(req.theaterOwner._id, {
                 theaterOwnerId: new mongoose.Types.ObjectId(req.theaterOwner._id),
                 name,
                 city,
                 address,
+                showTimes: showTimesArray.map((time: string) => time.trim()),
                 images,
                 description,
                 amenities: amenities.split(",").map((amenity: string) => amenity.trim()),
@@ -297,30 +314,33 @@ class TheaterController {
 
     getTheaters = asyncHandler(async (req: CustomRequest, res: Response): Promise<void> => {
         const theaters = await TheaterOwnerService.getAllTheaters();
-        console.log("theaters: ", theaters);
         
         res.status(200).json(theaters);
     });
 
     getTheaterByIdHandler = asyncHandler(async (req: CustomRequest, res: Response): Promise<void> => {
-        console.log("3: Handler called");
-      
-        try {
-          const theater = await TheaterDetails.findById(req.params.id);
-          console.log("Theater fetched:", theater);
-      
-          if (!theater) {
-            console.log("Theater not found");
-            res.status(404).json({ message: 'Theater not found' });
+        
+        const theaterId = req.params.id;
+        
+        if (!mongoose.Types.ObjectId.isValid(theaterId)) {
+            res.status(400).json({ message: "Invalid Theater ID" });
             return;
-          }
-      
-          res.json(theater.toObject());
-        } catch (error) {
-          console.error("Error in handler:", error);
-          res.status(500).json({ message: 'Server error' });
         }
-      });
+        
+        try {
+            const theater = await TheaterDetails.findById(theaterId);
+    
+            if (!theater) {
+                res.status(404).json({ message: 'Theater not found' });
+                return;
+            }
+    
+            res.json(theater.toObject());
+        } catch (error) {
+            console.error("Error in handler:", error);
+            res.status(500).json({ message: 'Server error' });
+        }
+    });
       
       
       updateTheaterHandler = asyncHandler(async (req: CustomRequest, res: Response): Promise<void> => {
@@ -347,9 +367,6 @@ class TheaterController {
     
         try {
             const deletedTheater = await TheaterOwnerService.deleteTheaterService(id);
-
-            console.log("deletedTheater: ", deletedTheater);
-            
     
             if (!deletedTheater) {
                 res.status(404).json({ message: 'Theater not found for deletion' });

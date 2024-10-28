@@ -60,6 +60,25 @@ export const adminApiSlice = apiSlice.injectEndpoints({
       }),
     }),
 
+    getVerificationData: builder.query({
+      query: () => `${ADMIN_URL}/verification`,
+    }),
+
+    adminAcceptVerification: builder.mutation({
+      query: (adminId) => ({
+        url: `${ADMIN_URL}/verification/${adminId}/accept`,
+        method: 'PUT',
+      }),
+    }),
+
+    adminRejectVerification: builder.mutation({
+      query: ({ adminId, reason }) => ({
+        url: `${ADMIN_URL}/verification/${adminId}/reject`,
+        method: 'PUT',
+        body: { reason },
+      }),
+    }),
+
     adminLogout: builder.mutation<void, void>({
       query: () => ({
         url: `${ADMIN_URL}/admin-logout`,
@@ -77,5 +96,8 @@ export const {
   useAdminUnblockUserMutation,
   useAdminBlockTheaterOwnerMutation,
   useAdminUnblockTheaterOwnerMutation,
+  useGetVerificationDataQuery,
+  useAdminAcceptVerificationMutation,
+  useAdminRejectVerificationMutation,
   useAdminLogoutMutation,
 } = adminApiSlice;

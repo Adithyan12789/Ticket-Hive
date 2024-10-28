@@ -140,7 +140,7 @@ class TheaterOwnerService {
         return true;
     }
 
-    public getTheaterOwnerProfile = async (theaterOwnerId: any) => {
+    public getTheaterOwnerProfile = async (theaterOwnerId: string) => {
         const theaterOwner = await TheaterRepository.findTheaterOwnerById(theaterOwnerId);
 
         console.log("theaterOwner Service:", theaterOwner);
@@ -189,6 +189,17 @@ class TheaterOwnerService {
 
         return await TheaterRepository.saveTheaterOwner(theaterOwner);
     };
+
+    public uploadCertificates = async (theaterId: string, certificatePath: string) => {
+        const theater = await TheaterRepository.findTheaterById(theaterId);
+        if (!theater) {
+          throw new Error('Theater not found');
+        }
+      
+        theater.certificate = certificatePath.replace('Back-End/public/', '');
+        theater.verificationStatus="pending"
+        return await theater.save();
+      };
 
 
     public addTheaterService = async (theaterId: string, theaterData: Partial<ITheaterDetails>) => {
@@ -273,4 +284,4 @@ class TheaterOwnerService {
     }
 }
 
-export default new TheaterOwnerService();
+    export default new TheaterOwnerService();

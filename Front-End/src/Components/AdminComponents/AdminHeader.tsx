@@ -19,7 +19,7 @@ const AdminHeader: React.FC = () => {
   const [logoutApiCall] = useAdminLogoutMutation();
 
   const handleDashboardClick = () => {
-    navigate("/admin-dashboard");
+    navigate("/admin/dashboard");
   };
 
   const logoutHandler = async () => {

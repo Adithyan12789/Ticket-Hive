@@ -14,7 +14,7 @@ const TheaterOwnerLayout: React.FC<TheaterOwnerLayoutProps> = ({ children }) => 
         <Col md={2} className="theaterOwnersidecol">
           <TheaterSidebar />
         </Col>
-        <Col md={10} className='pt-5'>
+        <Col md={10}>
           {children}
         </Col>
       </Row>

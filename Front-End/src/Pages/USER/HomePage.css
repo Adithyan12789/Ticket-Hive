@@ -83,7 +83,7 @@
 }
 
 /* Styling for card body */
-.card-body {
+.movie-card {
   padding: 15px;
   display: flex;
   flex-direction: column;

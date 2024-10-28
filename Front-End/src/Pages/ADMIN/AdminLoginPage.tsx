@@ -31,7 +31,7 @@ const AdminLoginPage = () => {
 
   useEffect(() => {
     if (adminInfo) {
-      navigate('/admin-dashboard');
+      navigate('/admin/dashboard');
     }
   }, [navigate, adminInfo]);
   
@@ -72,7 +72,7 @@ const AdminLoginPage = () => {
           ...res,
           data: undefined
         }));
-        navigate('/admin-dashboard'); 
+        navigate('/admin/dashboard'); 
       } else {
         toast.error('You do not have admin access');
       }

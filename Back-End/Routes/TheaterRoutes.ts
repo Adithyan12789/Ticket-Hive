@@ -1,5 +1,6 @@
 import express from 'express';
 import TheaterController from '../Controllers/TheaterController';
+import ScreenController from '../Controllers/ScreenController';
 import { TheaterAuthMiddleware } from '../Middlewares/TheaterAuthMiddleware';
 import MulterConfig from '../Config/Multer';
 
@@ -17,6 +18,8 @@ router.route('/theater-profile')
 .get( TheaterAuthMiddleware.protect, TheaterController.getTheaterProfile )
 .put( TheaterAuthMiddleware.protect, MulterConfig.multerUploadTheaterProfile.single('profileImage'), TheaterController.updateTheaterProfile);
 
+router.post('/upload-certificate/:theaterId', TheaterAuthMiddleware.protect, MulterConfig.multerUploadCertificatesImages.single('certificate'), TheaterController.uploadVerificationDetailsHandler); 
+
 router.post("/add-theaters",TheaterAuthMiddleware.protect, MulterConfig.multerUploadTheaterImages.array("images", 3),TheaterController.addTheaterController);
 router.get('/get-theaters',TheaterAuthMiddleware.protect, TheaterController.getTheaters);
 
@@ -24,6 +27,9 @@ router.route('/theaters/:id')
     .get(TheaterAuthMiddleware.protect, TheaterController.getTheaterByIdHandler)
     .put(TheaterAuthMiddleware.protect, MulterConfig.multerUploadTheaterImages.array("images", 3), TheaterController.updateTheaterHandler)
     .delete(TheaterAuthMiddleware.protect, TheaterController.deleteTheaterHandler);
+
+
+router.post('/add-screen/:theaterId', TheaterAuthMiddleware.protect, ScreenController.addScreen); 
 
 router.post('/theater-logout', TheaterController.logoutTheaterOwner);
 

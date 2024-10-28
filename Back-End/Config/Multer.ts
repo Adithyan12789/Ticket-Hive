@@ -36,6 +36,10 @@ class ImageUploads {
   
   private static theatersStorage(): StorageEngine {
     return this.createStorage('TheatersImages');
+  }  
+  
+  private static uploadCertificateStorage(): StorageEngine {
+    return this.createStorage('UploadsCerificates');
   }
 
   private static fileFilter(req: Express.Request, file: Express.Multer.File, cb: FileFilterCallback): void {
@@ -59,7 +63,13 @@ class ImageUploads {
   public static multerUploadTheaterImages = multer({
     storage: this.theatersStorage(),
     fileFilter: this.fileFilter,
+  });  
+  
+  public static multerUploadCertificatesImages = multer({
+    storage: this.uploadCertificateStorage(),
+    fileFilter: this.fileFilter,
   });
+
 }
 
 export default ImageUploads;

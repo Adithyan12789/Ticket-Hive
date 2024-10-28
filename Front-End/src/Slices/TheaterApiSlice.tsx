@@ -85,6 +85,14 @@ export const theaterApiSlice = apiSlice.injectEndpoints({
       })
     }),
 
+    uploadTheaterCertificate: builder.mutation({
+      query: ({ theaterId, formData }) => ({
+        url: `${THEATER_URL}/upload-certificate/${theaterId}`,
+        method: 'POST',
+        body: formData,
+      }),
+    }),
+
     addTheater: builder.mutation({
       query: (data) => ({
         url: `${THEATER_URL}/add-theaters`,
@@ -114,6 +122,14 @@ export const theaterApiSlice = apiSlice.injectEndpoints({
         body: formData,
       }),
     }),
+
+    addScreen: builder.mutation({
+      query: ({ theaterId, formData }) => ({
+        url: `${THEATER_URL}/add-screen/${theaterId}`,
+        method: 'POST',
+        body: formData,
+      }),
+    }),
     
     deleteTheater: builder.mutation({
       query: ({ id }) => ({
@@ -135,9 +151,11 @@ export const {
   useResetPasswordTheaterMutation,
   useGetTheaterOwnerProfileQuery,
   useUpdateTheaterOwnerMutation,
+  useUploadTheaterCertificateMutation,
   useAddTheaterMutation,
   useGetTheatersMutation,
   useGetTheaterByTheaterIdQuery,
   useUpdateTheaterMutation,
+  useAddScreenMutation,
   useDeleteTheaterMutation,
 } = theaterApiSlice;

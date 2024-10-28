@@ -39,9 +39,9 @@ const TheaterOwnerTable: React.FC<TheaterOwnersTableProps> = ({ theaterOwners, r
 
   useEffect(() => {
     if (adminInfo) {
-      navigate("/admin-dashboard/get-theaterOwner");
+      navigate("/admin/get-theaterOwner");
     } else {
-      navigate("/admin-dashboard");
+      navigate("/admin/dashboard");
     }
   }, [adminInfo, navigate]);
 

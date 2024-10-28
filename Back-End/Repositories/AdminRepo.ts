@@ -1,7 +1,9 @@
 import dotenv from 'dotenv';
 import User, { IUser } from '../Models/UserModel';
-import mongoose from 'mongoose';
 import TheaterOwner, { ITheaterOwner } from '../Models/TheaterOwnerModel';
+import Theater from '../Models/TheaterDetailsModel'; // Import Hotel if required for verification
+import mongoose from 'mongoose';
+import asyncHandler from 'express-async-handler'; // Import asyncHandler
 
 dotenv.config();
 
@@ -19,18 +21,18 @@ class AdminRepository {
 
     public static async getAllUsers(): Promise<IUser[]> {
         try {
-            const users = await User.find({}, { name: 1, email: 1, phone: 1, isBlocked: 1 });
-            return users;
+            return await User.find({}, { name: 1, email: 1, phone: 1, isBlocked: 1 });
         } catch (error) {
+            console.error("Error fetching users:", error);
             throw new Error("Error fetching users");
         }
     }
 
     public static async getAllTheaterOwners(): Promise<ITheaterOwner[]> {
         try {
-            const theaterOwners = await TheaterOwner.find({}, { name: 1, email: 1, phone: 1, isBlocked: 1 });
-            return theaterOwners;
+            return await TheaterOwner.find({}, { name: 1, email: 1, phone: 1, isBlocked: 1 });
         } catch (error) {
+            console.error("Error fetching theater owners:", error);
             throw new Error("Error fetching theater owners");
         }
     }
@@ -42,16 +44,10 @@ class AdminRepository {
                 throw new Error('Invalid userId format');
             }
 
-            console.log(`Updating user with ID: ${userId}`);
             const user = await User.findById(userId);
+            if (!user) throw new Error('User not found');
 
-            if (!user) {
-                throw new Error('User not found');
-            }
-
-            if (userData.name !== undefined) user.name = userData.name;
-            if (userData.email !== undefined) user.email = userData.email;
-            if (userData.isBlocked !== undefined) user.isBlocked = userData.isBlocked;
+            Object.assign(user, userData); // Update properties from userData
 
             return await user.save();
         } catch (error: any) {
@@ -67,26 +63,60 @@ class AdminRepository {
                 throw new Error('Invalid theaterOwnerId format');
             }
 
-            console.log(`Updating theater Owner with ID: ${theaterOwnerId}`);
             const theaterOwner = await TheaterOwner.findById(theaterOwnerId);
+            if (!theaterOwner) throw new Error('Theater Owner not found');
 
-            console.log("theaterOwnerData: ", theaterOwnerData);
+            Object.assign(theaterOwner, theaterOwnerData); // Update properties from theaterOwnerData
 
-            if (!theaterOwner) {
-                throw new Error('Theater Owner not found');
-            }
-
-            // Update the actual theaterOwner document
-            if (theaterOwnerData.name !== undefined) theaterOwner.name = theaterOwnerData.name;
-            if (theaterOwnerData.email !== undefined) theaterOwner.email = theaterOwnerData.email;
-            if (theaterOwnerData.isBlocked !== undefined) theaterOwner.isBlocked = theaterOwnerData.isBlocked;
-
-            console.log("theaterOwner: ", theaterOwner);
-
-            return await theaterOwner.save(); // Ensure save after update
+            return await theaterOwner.save();
         } catch (error: any) {
             console.error('Error in updatedTheaterOwner:', error);
             throw new Error(error.message);
+        }
+    }
+
+    public static async getPendingTheaterOwnerVerifications() {
+        try {
+            return await Theater.find({ verificationStatus: 'pending' }).select('-password');
+        } catch (error) {
+            console.error("Error fetching pending theater verifications:", error);
+            throw new Error("Error fetching pending theater verifications");
+        }
+    }
+
+    public static async findTheaterOwnerById(id: string) {
+        try {
+            return await TheaterOwner.findById(id);
+        } catch (error) {
+            console.error(`Error finding Theater Owner with ID: ${id}`, error);
+            throw new Error("Error finding Theater Owner");
+        }
+    }
+
+    public static async findTheaterById(id: string) {
+        try {
+            return await Theater.findById(id);
+        } catch (error) {
+            console.error(`Error finding Theater with ID: ${id}`, error);
+            throw new Error("Error finding Theater");
+        }
+    }
+
+    public static async saveHotelier(theaterOwner: any) {
+        try {
+            return await theaterOwner.save();
+        } catch (error) {
+            console.error("Error saving theater owner:", error);
+            throw new Error("Error saving theater owner");
+        }
+    }
+
+    public static async saveTheater(theater: any) {
+        try {
+            return await theater.save();
+        } catch (error) {
+            console.error("Error saving Theater:", error);
+            throw new Error("Error saving Theater");
         }
     }
 }

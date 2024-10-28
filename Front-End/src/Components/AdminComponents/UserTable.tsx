@@ -39,9 +39,9 @@ const UserTable: React.FC<UsersTableProps> = ({ users, refetchData }) => {
 
   useEffect(() => {
     if (adminInfo) {
-      navigate("/admin-dashboard/get-user");
+      navigate("/admin/get-user");
     } else {
-      navigate("/admin-dashboard");
+      navigate("/admin/dashboard");
     }
   }, [adminInfo, navigate]);
 

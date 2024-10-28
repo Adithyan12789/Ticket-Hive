@@ -9,15 +9,16 @@ import {
   Col,
   Pagination,
 } from "react-bootstrap";
-import Swal from 'sweetalert2';
+import Swal from "sweetalert2";
 import {
   useAddTheaterMutation,
   useGetTheatersMutation,
   useUpdateTheaterMutation,
   useDeleteTheaterMutation,
+  useUploadTheaterCertificateMutation,
 } from "../../Slices/TheaterApiSlice";
 import { toast } from "react-toastify";
-import { FaSearch, FaEdit, FaCheck, FaTrash } from "react-icons/fa";
+import { FaSearch, FaEdit, FaTrash, FaCheck } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import TheaterOwnerLayout from "../../Components/TheaterComponents/TheaterLayout";
 import Loader from "../../Components/UserComponents/Loader";
@@ -36,6 +37,7 @@ const AddTheaterScreen: React.FC = () => {
   const [city, setCity] = useState<string>("");
   const [address, setAddress] = useState<string>("");
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const [showTimes, setShowTimes] = useState<string[]>([""]);
   const [description, setDescription] = useState<string>("");
   const [amenities, setAmenities] = useState<string[]>([]);
   const [latitude, setLatitude] = useState<string>("");
@@ -46,10 +48,14 @@ const AddTheaterScreen: React.FC = () => {
   const [addTheater] = useAddTheaterMutation();
   const [updateTheater] = useUpdateTheaterMutation();
   const [deleteTheater] = useDeleteTheaterMutation();
+  const [uploadTheaterCertificate] = useUploadTheaterCertificateMutation();
   const navigate = useNavigate();
   const [getTheaters, { isLoading }] = useGetTheatersMutation();
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [itemsPerPage] = useState<number>(3);
+  const [refreshCounter, setRefreshCounter] = useState<number>(0);
+  const [certificateModal, setCertificateModal] = useState(false);
+  const [certificate, setCertificate] = useState<File | null>(null);
 
   const handleModalShow = () => setShowModal(true);
   const handleModalClose = () => {
@@ -85,10 +91,17 @@ const AddTheaterScreen: React.FC = () => {
     resetFormFields();
   };
 
+  const handleVerifyModalShow = (theater: TheaterManagement) => {
+    setSelectedTheater(theater);
+    setCertificateModal(true);
+  };
+
+  const handleCertificateModalClose = () => setCertificateModal(false);
+
   useEffect(() => {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [refreshCounter]);
 
   const fetchData = async () => {
     try {
@@ -96,6 +109,12 @@ const AddTheaterScreen: React.FC = () => {
       setTheaters(response);
     } catch (err) {
       console.error("Error fetching theaters", err);
+    }
+  };
+
+  const handleCertificateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setCertificate(e.target.files[0]);
     }
   };
 
@@ -121,26 +140,36 @@ const AddTheaterScreen: React.FC = () => {
 
   const handleDelete = async (theaterId: string) => {
     const result = await Swal.fire({
-      title: 'Are you sure?',
+      title: "Are you sure?",
       text: "You won't be able to revert this!",
-      icon: 'warning',
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
-      confirmButtonText: 'Yes, delete it!',
-      cancelButtonText: 'Cancel',
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "Cancel",
     });
-  
+
     if (result.isConfirmed) {
       try {
-        navigate("/theater/management");
-        await deleteTheater({ id: theaterId }).unwrap();  
+        await deleteTheater({ id: theaterId }).unwrap();
         toast.success("Theater deleted successfully");
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        setRefreshCounter((prev) => prev + 1);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
         toast.error(err?.data?.message || err.error);
       }
     }
+  };
+
+  const handleShowTimeChange = (index: number, value: string) => {
+    const newShowTimes = [...showTimes];
+    newShowTimes[index] = value;
+    setShowTimes(newShowTimes);
+  };
+
+  const addShowTime = () => {
+    setShowTimes([...showTimes, ""]); // Add a new empty show time
   };
 
   const validateName = (value: string) => /^[A-Za-z0-9\s'-]+$/.test(value);
@@ -172,7 +201,8 @@ const AddTheaterScreen: React.FC = () => {
       !trimmedDescription ||
       !trimmedAmenities ||
       !trimmedLatitude ||
-      !trimmedLongitude
+      !trimmedLongitude ||
+      showTimes.some((time) => time.trim() === "")
     ) {
       toast.error("All fields are required");
       return;
@@ -205,7 +235,11 @@ const AddTheaterScreen: React.FC = () => {
       formData.append("longitude", trimmedLongitude);
       selectedImages.forEach((image) => formData.append("images", image));
 
-      await addTheater(formData);
+      showTimes.forEach((time) => {
+        formData.append("showTimes[]", time);
+      });
+
+      await addTheater(formData).unwrap(); // Call the add theater mutation
       toast.success("Theater added successfully");
       handleModalClose();
       navigate("/theater/management");
@@ -229,50 +263,72 @@ const AddTheaterScreen: React.FC = () => {
     formData.append("city", city.trim());
     formData.append("address", address.trim());
     formData.append("description", description.trim());
-    amenities.forEach((amenity) => formData.append("amenities[]", amenity));
+    formData.append("amenities", amenities.join(", "));
     formData.append("latitude", lat);
     formData.append("longitude", long);
-    selectedImages.forEach((image) => formData.append("images", image));
+
+    showTimes.forEach((time) => {
+      formData.append("showTimes[]", time);
+    });
+
+    if (selectedImages.length) {
+      selectedImages.forEach((image) => formData.append("images", image));
+    }
 
     try {
-      setLoading(true);
-      if (selectedTheater) {
-        await updateTheater({ id: selectedTheater._id, formData }).unwrap();
-        toast.success("Theater updated successfully");
-        handleEditModalClose();
-      } else {
-        await addTheater(formData).unwrap();
-        toast.success("Theater added successfully");
-        handleModalClose();
-      }
-
-      const response = await getTheaters({}).unwrap();
-      setTheaters(response);
-      navigate("/theater/management");
+      await updateTheater({
+        id: selectedTheater?._id,
+        data: formData,
+      }).unwrap();
+      toast.success("Theater updated successfully");
+      handleEditModalClose();
       fetchData();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       toast.error(err?.data?.message || err.error);
-    } finally {
-      setLoading(false);
     }
   };
 
-  if (isLoading || loading) return <Loader />;
+  const handleCertificateUpload = async () => {
+    if (!certificate || !selectedTheater?._id) {
+      toast.error("Please select a certificate file and a theater");
+      return;
+    }
 
-  const filteredTheaters = theaters.filter((theater) =>
-    theater.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+    try {
+      const formData = new FormData();
+      formData.append("certificate", certificate);
+
+      // Trigger the upload mutation with the selected theater ID and formData
+      await uploadTheaterCertificate({
+        theaterId: selectedTheater._id,
+        formData,
+      }).unwrap();
+
+      toast.success("Certificate uploaded successfully");
+      handleCertificateModalClose();
+      setRefreshCounter((prev) => prev + 1); // Refresh theater list
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      toast.error("Failed to upload certificate", err);
+    }
+  };
 
   const indexOfLastTheater = currentPage * itemsPerPage;
   const indexOfFirstTheater = indexOfLastTheater - itemsPerPage;
-  const currentTheaters = filteredTheaters.slice(
+  const currentTheaters = theaters.slice(
     indexOfFirstTheater,
     indexOfLastTheater
   );
+  const totalPages = Math.ceil(theaters.length / itemsPerPage);
 
-  // Calculate total pages
-  const totalPages = Math.ceil(filteredTheaters.length / itemsPerPage);
+  if (isLoading || loading) return <Loader />;
+
+  const removeShowTime = (index: number) => {
+    setShowTimes((prevShowTimes) =>
+      prevShowTimes.filter((_, i) => i !== index)
+    );
+  };
 
   return (
     <TheaterOwnerLayout theaterOwnerName="John Doe">
@@ -281,7 +337,7 @@ const AddTheaterScreen: React.FC = () => {
         style={{ maxHeight: "100vh", overflowY: "auto" }}
       >
         <Row className="justify-content-between align-items-center mb-3">
-          <Col md={6} className="d-flex">
+          <Col md={6} className="d-flex pt-4">
             <div className="input-group">
               <Form.Control
                 type="text"
@@ -362,7 +418,38 @@ const AddTheaterScreen: React.FC = () => {
                     </div>
                   </Form.Group>
                 </Col>
+
                 <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Show Times</Form.Label>
+                    <div className="d-flex flex-wrap">
+                      {showTimes.map((showTime, index) => (
+                        <div className="d-flex me-2 mb-2" key={index}>
+                          <Form.Control
+                            type="text"
+                            value={showTime}
+                            onChange={(e) =>
+                              handleShowTimeChange(index, e.target.value)
+                            }
+                            placeholder="Enter show time"
+                            required
+                            className="me-2"
+                            style={{ width: "150px" }} // Set a fixed width to maintain uniformity
+                          />
+                          <Button
+                            variant="danger"
+                            style={{ height: "40px", marginTop: "5px" }}
+                            onClick={() => removeShowTime(index)}
+                          >
+                            <FaTrash />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                    <Button variant="secondary" onClick={addShowTime}>
+                      Add Another Show Time
+                    </Button>
+                  </Form.Group>
                   <Form.Group controlId="description" className="mb-3">
                     <Form.Label>Description</Form.Label>
                     <Form.Control
@@ -459,6 +546,23 @@ const AddTheaterScreen: React.FC = () => {
                   </Form.Group>
                 </Col>
                 <Col md={6}>
+                  {showTimes.map((showTime, index) => (
+                    <Form.Group key={index} className="mb-3">
+                      <Form.Label>Show Time {index + 1}</Form.Label>
+                      <Form.Control
+                        type="text"
+                        value={showTime}
+                        onChange={(e) =>
+                          handleShowTimeChange(index, e.target.value)
+                        }
+                        placeholder="Enter show time"
+                        required
+                      />
+                    </Form.Group>
+                  ))}
+                  <Button variant="secondary" onClick={addShowTime}>
+                    Add Another Show Time
+                  </Button>
                   <Form.Group controlId="amenities" className="mb-3">
                     <Form.Label>Amenities</Form.Label>
                     <Form.Control
@@ -507,102 +611,47 @@ const AddTheaterScreen: React.FC = () => {
                   </Form.Group>
                 </Col>
               </Row>
-            </Form>
-          </Modal.Body>
-        </Modal>
-
-        <Modal
-          show={showEditModal}
-          onHide={handleEditModalClose}
-          centered
-          className="custom-modal"
-        >
-          <Modal.Header closeButton>
-            <Modal.Title>Edit Theater</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <Form onSubmit={handleEditSubmit}>
-              <Form.Group className="mb-3">
-                <Form.Label>Theater Name</Form.Label>
-                <Form.Control
-                  type="text"
-                  placeholder="Enter theater name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>City</Form.Label>
-                <Form.Control
-                  type="text"
-                  placeholder="Enter city"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  required
-                />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Address</Form.Label>
-                <Form.Control
-                  type="text"
-                  placeholder="Enter address"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  required
-                />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Description</Form.Label>
-                <Form.Control
-                  as="textarea"
-                  rows={3}
-                  placeholder="Enter description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Amenities</Form.Label>
-                <Form.Control
-                  type="text"
-                  placeholder="Enter amenities (comma-separated)"
-                  value={amenities.join(", ")}
-                  onChange={handleAmenitiesChange}
-                />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Latitude</Form.Label>
-                <Form.Control
-                  type="text"
-                  placeholder="Enter latitude"
-                  value={latitude}
-                  onChange={(e) => setLatitude(e.target.value)}
-                />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Longitude</Form.Label>
-                <Form.Control
-                  type="text"
-                  placeholder="Enter longitude"
-                  value={longitude}
-                  onChange={(e) => setLongitude(e.target.value)}
-                />
-              </Form.Group>
-              <Form.Group controlId="formFileMultiple" className="mb-3">
-                <Form.Label>Theater Images</Form.Label>
-                <Form.Control
-                  type="file"
-                  multiple
-                  onChange={handleImageChange}
-                  accept="image/*"
-                />
-              </Form.Group>
               <Button variant="primary" type="submit">
                 {loading ? "Saving..." : "Save Theater"}
               </Button>
             </Form>
           </Modal.Body>
+        </Modal>
+
+        <Modal show={certificateModal} onHide={handleCertificateModalClose}>
+          <Modal.Header closeButton>
+            <Modal.Title>Verify Theater Certificate</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form>
+              <Form.Group>
+                <Form.Label>Upload Certificate</Form.Label>
+                <Form.Control
+                  type="file"
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  onChange={handleCertificateChange}
+                />
+                {certificate && (
+                  <div className="mt-3">
+                    <img
+                      src={URL.createObjectURL(certificate)}
+                      alt="Certificate Preview"
+                      className="img-thumbnail"
+                      style={{ width: "150px" }}
+                    />
+                  </div>
+                )}
+              </Form.Group>
+            </Form>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleCertificateModalClose}>
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={handleCertificateUpload}>
+              Upload
+            </Button>
+          </Modal.Footer>
         </Modal>
 
         <Row>
@@ -611,11 +660,11 @@ const AddTheaterScreen: React.FC = () => {
           ) : (
             currentTheaters.map((theater) => (
               <Col key={theater._id} md={4} className="mb-4">
-                <Link
-                  to={`/theater/details/${theater?._id}`}
-                  style={{ textDecoration: "none", color: "inherit" }}
-                >
-                  <Card style={{ height: "450px" }}>
+                <Card style={{ height: "450px" }}>
+                  <Link
+                    to={`/theater/details/${theater?._id}`}
+                    style={{ textDecoration: "none", color: "inherit" }}
+                  >
                     <Card.Img
                       variant="top"
                       src={
@@ -625,36 +674,38 @@ const AddTheaterScreen: React.FC = () => {
                       }
                       alt={theater.name}
                     />
-                    <Card.Body>
-                      <Card.Title>{theater.name}</Card.Title>
-                      <Card.Text>{theater.description}</Card.Text>
-                      <div className="button-group" >
+                  </Link>
+                  <Card.Body>
+                    <Card.Title>{theater.name}</Card.Title>
+                    <Card.Text>{theater.description}</Card.Text>
+                    <div className="button-group">
+                      {!theater.isVerified && (
                         <Button
-                          variant="danger"
+                          variant="info"
                           className="icon-button"
-                          onClick={() => handleDelete(theater._id)}
+                          onClick={() => handleVerifyModalShow(theater)}
                         >
-                          <FaTrash />
+                          <FaCheck />
                         </Button>
+                      )}
+                      <Button
+                        variant="info"
+                        className="icon-button"
+                        onClick={() => handleEditModalShow(theater)}
+                      >
+                        <FaEdit />
+                      </Button>
 
-                        <Link to={`/theater/edit/${theater._id}`}>
-                          <Button
-                            variant="info"
-                            className="icon-button"
-                            onClick={() => handleEditModalShow(theater)}
-                          >
-                            <FaEdit />
-                          </Button>
-                        </Link>
-                        <Link to={`/theater/certificateVerify/${theater._id}`}>
-                          <Button variant="info" className="icon-button">
-                            <FaCheck />
-                          </Button>
-                        </Link>
-                      </div>
-                    </Card.Body>
-                  </Card>
-                </Link>
+                      <Button
+                        variant="danger"
+                        className="icon-button"
+                        onClick={() => handleDelete(theater._id)}
+                      >
+                        <FaTrash />
+                      </Button>
+                    </div>
+                  </Card.Body>
+                </Card>
               </Col>
             ))
           )}
