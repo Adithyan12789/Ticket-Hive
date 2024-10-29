@@ -130,6 +130,10 @@ export const theaterApiSlice = apiSlice.injectEndpoints({
         body: formData,
       }),
     }),
+
+   getScreensByTheaterId: builder.query({
+      query: (id) => `${THEATER_URL}/theaters/${id}/screens`,
+   }),
     
     deleteTheater: builder.mutation({
       query: ({ id }) => ({
@@ -157,5 +161,6 @@ export const {
   useGetTheaterByTheaterIdQuery,
   useUpdateTheaterMutation,
   useAddScreenMutation,
+  useGetScreensByTheaterIdQuery,
   useDeleteTheaterMutation,
 } = theaterApiSlice;

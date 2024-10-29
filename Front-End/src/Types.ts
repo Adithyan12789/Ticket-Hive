@@ -146,6 +146,15 @@ export interface TheaterVerification {
 }
 
 
+/** Screens Types*/
+export interface Screen {
+  _id: string;
+  screenNumber: number; // Assuming screenNumber is a number
+  capacity: number;
+  layout: string[][]; // Assuming layout is a 2D array of strings
+  showTimes: string[];
+}
+
 
 
 

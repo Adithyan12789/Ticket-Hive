@@ -30,6 +30,8 @@ router.route('/theaters/:id')
 
 
 router.post('/add-screen/:theaterId', TheaterAuthMiddleware.protect, ScreenController.addScreen); 
+router.get('/theaters/:id/screens', TheaterAuthMiddleware.protect, ScreenController.getScreensByTheaterId);
+
 
 router.post('/theater-logout', TheaterController.logoutTheaterOwner);
 

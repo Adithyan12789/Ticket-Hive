@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Card, Button, Carousel } from "react-bootstrap";
+import { Container, Row, Col, Card, Carousel } from "react-bootstrap";
 import axios from "axios";
 import "./HomePage.css";
 import Footer from "../../Components/UserComponents/Footer";
@@ -120,7 +120,6 @@ const HomePage: React.FC = () => {
                     <Card.Text>
                       <strong>Release Date:</strong> {movie.release_date}
                     </Card.Text>
-                    <Button className="book-now-btn">Book Now</Button>
                   </Card.Body>
                 </Card>
               </Col>
@@ -145,6 +144,7 @@ const HomePage: React.FC = () => {
               <Col key={movie.id} md={3} className="mb-5">
                 <Card className="movie-card">
                   <Card.Img
+                  style={{height: "300px"}}
                     variant="top"
                     src={
                       movie.poster_path
@@ -164,7 +164,6 @@ const HomePage: React.FC = () => {
                     <Card.Text>
                       <strong>Release Date:</strong> {movie.release_date}
                     </Card.Text>
-                    <Button className="book-now-btn">Book Now</Button>
                   </Card.Body>
                 </Card>
               </Col>

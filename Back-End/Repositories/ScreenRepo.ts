@@ -14,8 +14,8 @@ class ScreenRepository {
     }
     
 
-  public async getScreensByTheater(theaterId: string) {
-    return await Screens.find({ theater: theaterId });
+  public async getScreensByTheater(id: string) {
+    return await Screens.find({ theater: id });
   }
 
   public async getScreenById(screenId: string) {

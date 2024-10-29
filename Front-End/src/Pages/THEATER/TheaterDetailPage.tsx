@@ -5,15 +5,19 @@ import {
   FaFileAlt,
   FaTheaterMasks,
   FaCogs,
-  FaCheckCircle, // Verified icon
-  FaTimesCircle, // Not verified icon
-} from "react-icons/fa"; // Import the not verified icon
+  FaCheckCircle,
+  FaTimesCircle,
+} from "react-icons/fa";
 import { Link, useParams } from "react-router-dom";
-import { useGetTheaterByTheaterIdQuery } from "../../Slices/TheaterApiSlice.js";
+import {
+  useGetTheaterByTheaterIdQuery,
+  useGetScreensByTheaterIdQuery,
+} from "../../Slices/TheaterApiSlice.js";
 import TheaterLayout from "../../Components/TheaterComponents/TheaterLayout.jsx";
 import { toast } from "react-toastify";
 import Loader from "../../Components/UserComponents/Loader";
 import "./TheaterDetailsPage.css";
+import { Screen } from "../../Types.js";
 
 const THEATER_IMAGES_DIR_PATH = "http://localhost:5000/TheatersImages/";
 const DEFAULT_THEATER_IMAGE = "/profileImage_1729749713837.jpg";
@@ -22,20 +26,32 @@ const TheaterDetailScreen = () => {
   const { id } = useParams();
   const {
     data: theater,
-    isLoading,
-    isError,
+    isLoading: loadingTheater,
+    isError: errorTheater,
     refetch,
   } = useGetTheaterByTheaterIdQuery(id);
+
+  const {
+    data: screens,
+    isLoading: loadingScreens,
+    isError: errorScreens,
+  } = useGetScreensByTheaterIdQuery(id); // Updated query
 
   useEffect(() => {
     document.title = "Theater Details";
     refetch();
   }, [id, refetch]);
 
-  if (isLoading) return <Loader />;
-  if (isError) {
+  if (loadingTheater || loadingScreens) return <Loader />;
+
+  if (errorTheater) {
     toast.error("Error fetching theater details");
-    return <div>Error</div>;
+    return <div>Error fetching data</div>;
+  }
+
+  if (errorScreens) {
+    toast.error("Error fetching screens");
+    return <div>Error fetching data</div>;
   }
 
   return (
@@ -52,10 +68,11 @@ const TheaterDetailScreen = () => {
                   boxShadow: "0px 4px 8px rgba(0,0,0,0.1)",
                 }}
               >
+                {/* Carousel for theater images */}
                 <Carousel interval={3000} fade>
                   {theater.images && theater.images.length > 0 ? (
-                    theater.images.map((image: string) => (
-                      <Carousel.Item key={image}>
+                    theater.images.map((image: string, index: number) => (
+                      <Carousel.Item key={index}>
                         <Card.Img
                           variant="top"
                           src={`${THEATER_IMAGES_DIR_PATH}${image}`}
@@ -122,6 +139,38 @@ const TheaterDetailScreen = () => {
                     <FaCogs style={{ marginRight: "10px" }} />
                     {theater.amenities.join(", ")}
                   </Card.Text>
+
+                  <Row>
+                    {screens && screens.length > 0 ? (
+                      screens.map((screen: Screen) => (
+                        <Col md={6} key={screen._id} className="mb-3">
+                          <Card style={{ padding: "15px" }}>
+                            <Card.Title
+                              style={{ fontSize: "1.2rem", fontWeight: "bold" }}
+                            >
+                              Screen {screen.screenNumber}
+                            </Card.Title>
+                            <Card.Text>
+                              <strong>Showtimes:</strong>{" "}
+                              {screen.showTimes.join(", ")}
+                            </Card.Text>
+                            <Card.Text>
+                              <strong>Seating Capacity:</strong>{" "}
+                              {screen.capacity}
+                            </Card.Text>
+                          </Card>
+                        </Col>
+                      ))
+                    ) : (
+                      <Col>
+                        <Card>
+                          <Card.Body>
+                            No screens available for this theater.
+                          </Card.Body>
+                        </Card>
+                      </Col>
+                    )}
+                  </Row>
 
                   <div className="pt-3">
                     <Link to={`/theater/add-screen/${theater._id}`}>

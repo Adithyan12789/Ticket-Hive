@@ -58,6 +58,27 @@ class ScreenController {
             res.status(201).json({ message: "Screen created successfully", createdScreen });
         }
     );
+
+    getScreensByTheaterId = asyncHandler(
+        async (req: CustomRequest, res: Response): Promise<void> => {
+
+            console.log("helloooooooooooo");
+            
+          const { id } = req.params;
+          console.log(id);
+          
+          try {
+            const screen = await ScreenService.getScreensByTheaterIdsService(id);
+            if (!screen) {
+                res.status(404).json({ message: 'Screen not found' });
+                return
+            }
+            res.status(200).json(screen);
+          } catch (error: any) {
+            res.status(500).json({ message: error?.message || 'Internal server error' });
+          }
+        }
+      );      
 }
 
 export default new ScreenController();
