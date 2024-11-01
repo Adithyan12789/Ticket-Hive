@@ -1,5 +1,5 @@
 import { apiSlice } from "./ApiSlice";
-import { UserResponse, UserCredentials, RegisterCredentials, OtpCredentials } from "../Types";
+import { UserResponse, UserCredentials, RegisterCredentials, OtpCredentials } from "../Types/UserTypes";
 
 const USERS_URL = '/api/users';
 

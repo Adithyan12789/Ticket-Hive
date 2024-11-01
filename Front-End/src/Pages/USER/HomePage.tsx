@@ -3,7 +3,7 @@ import { Container, Row, Col, Card, Carousel } from "react-bootstrap";
 import axios from "axios";
 import "./HomePage.css";
 import Footer from "../../Components/UserComponents/Footer";
-import { Movie } from "../../Types";
+import { Movie } from "../../Types/UserTypes";
 
 const API_KEY = "0ffb386a852dbf070ac6b977313d8039";
 const TRENDING_API_URL = `https://api.themoviedb.org/3/movie/popular?api_key=${API_KEY}&language=en-US&page=1`;
@@ -99,8 +99,9 @@ const HomePage: React.FC = () => {
           <Row>
             {trendingMovies.slice(0, 8).map((movie) => (
               <Col key={movie.id} md={3} className="mb-5">
-                <Card className="movie-card">
+                <Card style={{height: "500px"}} className="movie-card">
                   <Card.Img
+                  style={{height: "300px"}}
                     variant="top"
                     src={
                       movie.poster_path
@@ -142,7 +143,7 @@ const HomePage: React.FC = () => {
           <Row>
             {recommendedMovies.slice(0, 8).map((movie) => (
               <Col key={movie.id} md={3} className="mb-5">
-                <Card className="movie-card">
+                <Card style={{height: "500px"}} className="movie-card">
                   <Card.Img
                   style={{height: "300px"}}
                     variant="top"

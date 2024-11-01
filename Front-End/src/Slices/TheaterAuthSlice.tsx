@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { TheaterInfo, TheaterState } from "../Types";
+import { TheaterInfo, TheaterState } from "../Types/TheaterTypes";
 
 
 const initialState: TheaterState = {

@@ -7,7 +7,6 @@ import {
   FaTag,
   FaCogs,
 } from "react-icons/fa";
-import { MdMovie } from "react-icons/md";
 import "./TheaterSidebar.css";
 
 const TheaterOwnerSidebar: React.FC = () => {
@@ -41,18 +40,6 @@ const TheaterOwnerSidebar: React.FC = () => {
             }
           >
             <FaFilm className="sidebar-icon" /> Theater Management
-          </Link>
-        </li>
-        <li>
-          <Link
-            to="/movies-management"
-            className={
-              location.pathname === "/theater/movies"
-                ? "active sidebar-link"
-                : "sidebar-link"
-            }
-          >
-            <MdMovie className="sidebar-icon" /> Movies Management
           </Link>
         </li>
         <li>

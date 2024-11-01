@@ -11,7 +11,7 @@ import "./LoginPage.css";
 import { RootState, AppDispatch } from "../../Store";
 import { useGoogleLoginMutation, useLoginMutation } from "../../Slices/UserApiSlice";
 import { CredentialResponse } from '@react-oauth/google';
-import { GoogleJwtPayload } from "../../Types";
+import { GoogleJwtPayload } from "../../Types/UserTypes";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");

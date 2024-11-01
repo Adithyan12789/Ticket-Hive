@@ -8,7 +8,7 @@ import {
 import AdminLayout from "../../Components/AdminComponents/AdminLayout";
 import { toast } from "react-toastify";
 import Loader from "../../Components/UserComponents/Loader";
-import { TheaterVerification } from "../../Types";
+import { TheaterVerification } from "../../Types/TheaterTypes";
 import { FaCheck, FaTimes, FaFileAlt } from "react-icons/fa";
 
 

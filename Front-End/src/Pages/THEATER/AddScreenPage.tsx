@@ -8,21 +8,16 @@ import {
   useGetTheaterByTheaterIdQuery,
 } from "../../Slices/TheaterApiSlice";
 import TheaterSidebar from "../../Components/TheaterComponents/TheaterSideBar";
-
-// Define a type for the options in the dropdown
-type ShowTimeOption = {
-  value: string;
-  label: string;
-};
+import { ShowTimeOption } from "../../Types/TheaterTypes";
 
 const AddScreenPage: React.FC = () => {
   const { theaterId } = useParams<{ theaterId: string }>();
-  const [screenNumber, setScreenNumber] = useState<number | string>("");
-  const [capacity, setCapacity] = useState<number | string>("");
+  const [screenNumber, setScreenNumber] = useState<number>(0);
+  const [capacity, setCapacity] = useState<number>(0);
   const [selectedShowTimes, setSelectedShowTimes] = useState<string[]>([]);
   const [numRows, setNumRows] = useState<number>(0);
   const [seatsPerRow, setSeatsPerRow] = useState<number>(0);
-  const [layout, setLayout] = useState<number[][]>([]);
+  const [layout, setLayout] = useState<{ label: string }[][]>([]);
   const navigate = useNavigate();
 
   const { data: theater } = useGetTheaterByTheaterIdQuery(theaterId);
@@ -34,20 +29,40 @@ const AddScreenPage: React.FC = () => {
     }
   }, [theater]);
 
-  // Handle changes to selected show times
   const handleShowTimesChange = (options: MultiValue<ShowTimeOption>) => {
     setSelectedShowTimes(options ? options.map((opt) => opt.value) : []);
   };
 
   const handleLayoutChange = () => {
-    const newLayout = Array.from({ length: numRows }, () =>
-      Array(seatsPerRow).fill(1)
-    );
-    setLayout(newLayout);
+    if (numRows > 0 && seatsPerRow > 0) {
+      const newLayout = Array.from({ length: numRows }, (_, rowIndex) =>
+        Array.from({ length: seatsPerRow }, (_, seatIndex) => {
+          const rowLabel = String.fromCharCode(65 + rowIndex);
+          const seatLabel = `${rowLabel}${String(seatIndex + 1).padStart(
+            2,
+            "0"
+          )}`;
+          return { label: seatLabel };
+        })
+      );
+      setLayout(newLayout);
+    } else {
+      toast.warn(
+        "Please set both rows and seats per row to generate a layout."
+      );
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    const totalSeats = numRows * seatsPerRow;
+
+    if (totalSeats > capacity) {
+      toast.error("Total seat count exceeds the specified capacity!");
+      return;
+    }
+
     try {
       await addScreen({
         theaterId,
@@ -59,9 +74,9 @@ const AddScreenPage: React.FC = () => {
         },
       }).unwrap();
       toast.success("Screen added successfully!");
-      navigate(`/theater/details/${theater?._id}`)
-      setScreenNumber("");
-      setCapacity("");
+      navigate(`/theater/details/${theater?._id}`);
+      setScreenNumber(0);
+      setCapacity(0);
       setSelectedShowTimes([]);
       setLayout([]);
     } catch (error) {
@@ -98,22 +113,32 @@ const AddScreenPage: React.FC = () => {
                 type="number"
                 placeholder="Enter screen number"
                 value={screenNumber}
-                onChange={(e) => setScreenNumber(e.target.value)}
+                onChange={(e) => {
+                  const value = Number(e.target.value);
+                  setScreenNumber(value >= 0 ? value : 0);
+                }}
                 required
+                min={0}
                 style={{ borderColor: "#007bff" }}
               />
             </Form.Group>
+
             <Form.Group controlId="formCapacity" className="mb-3">
               <Form.Label>Capacity</Form.Label>
               <Form.Control
                 type="number"
                 placeholder="Enter capacity"
                 value={capacity}
-                onChange={(e) => setCapacity(e.target.value)}
+                onChange={(e) => {
+                  const value = Number(e.target.value);
+                  setCapacity(value >= 0 ? value : 0);
+                }}
                 required
+                min={0}
                 style={{ borderColor: "#007bff" }}
               />
             </Form.Group>
+
             <Form.Group controlId="formShowTimes" className="mb-3">
               <Form.Label>Select Show Times</Form.Label>
               <Select
@@ -223,9 +248,7 @@ const AddScreenPage: React.FC = () => {
                 <div
                   className="mt-2"
                   style={{
-                    border: "1px solid #007bff",
-                    borderRadius: "5px",
-                    padding: "40px",
+                    padding: "10px",
                   }}
                 >
                   {layout.map((row, rowIndex) => (
@@ -242,17 +265,19 @@ const AddScreenPage: React.FC = () => {
                             border: "1px solid #007bff",
                             textAlign: "center",
                             lineHeight: "30px",
-                            backgroundColor: seat === 1 ? "#28a745" : "#dc3545",
-                            color: "white",
                             marginRight: "10px",
                             borderRadius: "3px",
                             transition: "background-color 0.3s",
                           }}
                         >
-                          {seat === 1 ? "O" : "X"}{" "}
-                          {/* O for available, X for taken */}
+                          {seat.label}
                         </div>
                       ))}
+
+                      {(rowIndex + 1) % 5 === 0 && (
+                        <div style={{ height: "10px" }} />
+                      )}{" "}
+
                     </div>
                   ))}
                 </div>

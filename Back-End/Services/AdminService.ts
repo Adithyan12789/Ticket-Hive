@@ -1,15 +1,15 @@
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 import AdminRepository from "../Repositories/AdminRepo";
 import AdminTokenService from "../Utils/GenerateAdminToken";
 import { Request, Response } from "express";
-import nodemailer from 'nodemailer';
+import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
-    service: 'Gmail',
-    auth: {
-      user: 'adithiruthiparambil12@gmail.com',
-      pass: 'phfa kacx ozkz ueig',
-    },
+  service: "Gmail",
+  auth: {
+    user: "adithiruthiparambil12@gmail.com",
+    pass: "phfa kacx ozkz ueig",
+  },
 });
 
 class AdminService {
@@ -194,16 +194,20 @@ class AdminService {
     return { message: "Admin logged out successfully" };
   }
 
-  private async sendVerificationEmail(recipient: string, subject: string, message: string) {
+  private async sendVerificationEmail(
+    recipient: string,
+    subject: string,
+    message: string
+  ) {
     try {
       await transporter.sendMail({
-        from: 'adithiruthiparambil12@gmail.com',
+        from: "adithiruthiparambil12@gmail.com",
         to: recipient,
         subject: subject,
         text: message,
       });
     } catch (error) {
-      console.error('Error sending email:', error);
+      console.error("Error sending email:", error);
       throw error;
     }
   }

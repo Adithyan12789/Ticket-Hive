@@ -1,10 +1,8 @@
 import { NavLink } from "react-router-dom";
 import { FaHome, FaFilm, FaUsers, FaTicketAlt, FaTag, FaCogs, FaCheck } from "react-icons/fa";
 import "./AdminSidebar.css";
-
-interface AdminSidebarProps {
-  adminName: string;
-}
+import { AdminSidebarProps } from "../../Types/AdminTypes";
+import { MdMovie } from "react-icons/md";
 
 const AdminSidebar: React.FC<AdminSidebarProps> = ({ adminName }) => {
   return (
@@ -24,6 +22,11 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ adminName }) => {
         <li>
           <NavLink to="/admin/get-theaterOwner" className={({ isActive }) => (isActive ? "active" : "")}>
             <FaFilm className="sidebar-icon" /> Theater Management
+          </NavLink>
+        </li>
+        <li>
+          <NavLink to="/admin/get-movies" className={({ isActive }) => (isActive ? "active" : "")}>
+            <MdMovie className="sidebar-icon" /> Movies Management
           </NavLink>
         </li>
         <li>

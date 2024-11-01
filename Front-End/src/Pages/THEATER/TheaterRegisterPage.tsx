@@ -15,19 +15,13 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import "./TheaterRegisterPage.css";
 import Loader from "../../Components/UserComponents/Loader";
-import {jwtDecode, JwtPayload } from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import { CredentialResponse } from '@react-oauth/google';
 import { setTheaterDetails } from "../../Slices/TheaterAuthSlice";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../../Store";
-
-
-interface GoogleJwtPayload extends JwtPayload {
-  name: string;
-  email: string;
-  picture?: string;
-}
+import { GoogleJwtPayload } from "../../Types/TheaterTypes";
 
 const SignUpPage = () => {
   const [name, setName] = useState("");

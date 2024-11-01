@@ -17,7 +17,7 @@ import {
   useGetUserProfileQuery,
   useUpdateUserMutation,
 } from "../../Slices/UserApiSlice";
-import { UserInfo } from "../../Types";
+import { UserInfo } from "../../Types/UserTypes";
 import UserProfileSidebar from "../../Components/UserComponents/UserSideBar";
 import "./UserProfilePage.css";
 import { useNavigate } from "react-router-dom";
@@ -35,8 +35,8 @@ const ProfileScreen: React.FC = () => {
   const [profileImage, setProfileImage] = useState<File | null>(null);
 
   const dispatch = useDispatch();
-  const navigate = useNavigate(); // Add this line
-
+  const navigate = useNavigate();
+  
   const { userInfo } = useSelector(
     (state: { auth: { userInfo: UserInfo } }) => state.auth
   );

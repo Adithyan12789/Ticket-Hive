@@ -1,11 +1,7 @@
-import React, { ReactNode } from 'react';
+import React from 'react';
 import TheaterSidebar from '../../Components/TheaterComponents/TheaterSideBar';
 import { Container, Row, Col } from 'react-bootstrap';
-
-interface TheaterOwnerLayoutProps {
-  children: ReactNode;
-  theaterOwnerName: string;
-}
+import { TheaterOwnerLayoutProps } from '../../Types/TheaterTypes';
 
 const TheaterOwnerLayout: React.FC<TheaterOwnerLayoutProps> = ({ children }) => {
   return (

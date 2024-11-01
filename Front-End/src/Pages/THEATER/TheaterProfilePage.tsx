@@ -17,7 +17,7 @@ import {
   useGetTheaterOwnerProfileQuery,
   useUpdateTheaterOwnerMutation,
 } from "../../Slices/TheaterApiSlice";
-import { TheaterInfo } from "../../Types";
+import { TheaterInfo } from "../../Types/TheaterTypes";
 import TheaterProfileSidebar from "../../Components/TheaterComponents/TheaterProfileSidebar";
 import "./TheaterProfilePage.css";
 

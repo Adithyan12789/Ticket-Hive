@@ -22,7 +22,7 @@ import { FaSearch, FaEdit, FaTrash, FaCheck } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import TheaterOwnerLayout from "../../Components/TheaterComponents/TheaterLayout";
 import Loader from "../../Components/UserComponents/Loader";
-import { TheaterManagement } from "../../Types";
+import { TheaterManagement } from "../../Types/TheaterTypes";
 import "./TheaterManagement.css";
 
 const THEATER_IMAGES_DIR_PATH = "http://localhost:5000/TheatersImages/";
@@ -544,25 +544,57 @@ const AddTheaterScreen: React.FC = () => {
                       onChange={(e) => setDescription(e.target.value)}
                     />
                   </Form.Group>
+                  <Form.Group controlId="images" className="mb-3">
+                    <Form.Label>Images</Form.Label>
+                    <Form.Control
+                      type="file"
+                      multiple
+                      onChange={handleImageChange}
+                    />
+                    <div className="mt-3">
+                      {selectedImages.map((image, index) => (
+                        <img
+                          key={index}
+                          src={URL.createObjectURL(image)}
+                          alt="preview"
+                          className="img-thumbnail"
+                          style={{ width: "150px", marginRight: "10px" }}
+                        />
+                      ))}
+                    </div>
+                  </Form.Group>
                 </Col>
                 <Col md={6}>
-                  {showTimes.map((showTime, index) => (
-                    <Form.Group key={index} className="mb-3">
-                      <Form.Label>Show Time {index + 1}</Form.Label>
-                      <Form.Control
-                        type="text"
-                        value={showTime}
-                        onChange={(e) =>
-                          handleShowTimeChange(index, e.target.value)
-                        }
-                        placeholder="Enter show time"
-                        required
-                      />
-                    </Form.Group>
-                  ))}
-                  <Button variant="secondary" onClick={addShowTime}>
-                    Add Another Show Time
-                  </Button>
+                <Form.Group className="mb-3">
+                    <Form.Label>Show Times</Form.Label>
+                    <div className="d-flex flex-wrap">
+                      {showTimes.map((showTime, index) => (
+                        <div className="d-flex me-2 mb-2" key={index}>
+                          <Form.Control
+                            type="text"
+                            value={showTime}
+                            onChange={(e) =>
+                              handleShowTimeChange(index, e.target.value)
+                            }
+                            placeholder="Enter show time"
+                            required
+                            className="me-2"
+                            style={{ width: "150px" }}
+                          />
+                          <Button
+                            variant="danger"
+                            style={{ height: "40px", marginTop: "5px" }}
+                            onClick={() => removeShowTime(index)}
+                          >
+                            <FaTrash />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                    <Button variant="secondary" onClick={addShowTime}>
+                      Add Another Show Time
+                    </Button>
+                  </Form.Group>
                   <Form.Group controlId="amenities" className="mb-3">
                     <Form.Label>Amenities</Form.Label>
                     <Form.Control
@@ -589,25 +621,6 @@ const AddTheaterScreen: React.FC = () => {
                       value={longitude}
                       onChange={(e) => setLongitude(e.target.value)}
                     />
-                  </Form.Group>
-                  <Form.Group controlId="images" className="mb-3">
-                    <Form.Label>Images</Form.Label>
-                    <Form.Control
-                      type="file"
-                      multiple
-                      onChange={handleImageChange}
-                    />
-                    <div className="mt-3">
-                      {selectedImages.map((image, index) => (
-                        <img
-                          key={index}
-                          src={URL.createObjectURL(image)}
-                          alt="preview"
-                          className="img-thumbnail"
-                          style={{ width: "150px", marginRight: "10px" }}
-                        />
-                      ))}
-                    </div>
                   </Form.Group>
                 </Col>
               </Row>

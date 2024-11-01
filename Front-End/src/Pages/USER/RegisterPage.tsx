@@ -21,7 +21,7 @@ import { CredentialResponse } from '@react-oauth/google';
 import { setCredentials } from "../../Slices/AuthSlice";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../../Store";
-import { GoogleJwtPayload } from "../../Types";
+import { GoogleJwtPayload } from "../../Types/UserTypes";
 
 
 const SignUpPage = () => {

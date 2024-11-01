@@ -1,5 +1,5 @@
 import { apiSlice } from "./ApiSlice";
-import { TheaterResponse, TheaterCredentials, RegisterCredentials,OtpCredentials } from "../Types";
+import { TheaterResponse, TheaterCredentials, RegisterCredentials, OtpCredentials } from "../Types/TheaterTypes";
 
 
 const THEATER_URL = '/api/theater';

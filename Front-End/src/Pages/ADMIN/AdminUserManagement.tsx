@@ -5,7 +5,7 @@ import AdminLayout from "../../Components/AdminComponents/AdminLayout";
 import { Container } from "react-bootstrap";
 import { toast } from "react-toastify";
 import Loader from "../../Components/UserComponents/Loader";
-import { User } from "../../Types";
+import { User } from "../../Types/UserTypes";
 
 const AdminUser: React.FC = () => {
   const [usersData, setUsersData] = useState<User[]>([]);

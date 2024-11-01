@@ -5,7 +5,7 @@ import AdminLayout from "../../Components/AdminComponents/AdminLayout";
 import { Container } from "react-bootstrap";
 import { toast } from "react-toastify";
 import Loader from "../../Components/UserComponents/Loader";
-import { Theater } from "../../Types";
+import { Theater } from "../../Types/TheaterTypes";
 
 const TheaterOwners: React.FC = () => {
   const [theaterOwnersData, settheaterOwnersData] = useState<Theater[]>([]);

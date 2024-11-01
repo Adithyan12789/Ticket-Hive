@@ -20,12 +20,7 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { RootState } from "../../Store";
 import "./UserTable.css";
-import { Theater } from "../../Types";
-
-interface TheaterOwnersTableProps {
-  theaterOwners: Theater[];
-  refetchData: () => void;
-}
+import { Theater, TheaterOwnersTableProps } from "../../Types/TheaterTypes";
 
 const TheaterOwnerTable: React.FC<TheaterOwnersTableProps> = ({ theaterOwners, refetchData }) => {
   const [searchQuery, setSearchQuery] = useState<string>("");

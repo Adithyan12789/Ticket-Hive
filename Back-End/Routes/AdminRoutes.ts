@@ -1,6 +1,8 @@
 import express from 'express';
 import AdminController from '../Controllers/AdminController';
+import MovieController from '../Controllers/MovieController';
 import { AdminAuthMiddleware } from '../Middlewares/AdminAuthMiddleware';
+import MulterConfig from '../Config/Multer';
 
 const router = express.Router();
 
@@ -14,6 +16,19 @@ router.patch('/unblock-theaterOwner', AdminAuthMiddleware.protect, AdminControll
 router.get('/verification',AdminAuthMiddleware.protect,AdminController.getVerificationDetails) 
 router.put('/verification/:theaterId/accept',AdminAuthMiddleware.protect,AdminController.acceptVerification) 
 router.put('/verification/:adminId/reject', AdminAuthMiddleware.protect,AdminController.rejectVerification); 
-router.post('/admin-logout', AdminController.adminLogout);
 
+router.post("/add-movie",
+    AdminAuthMiddleware.protect,
+    MulterConfig.multerUploadMoviePosters.single("poster"),
+    MovieController.addMovieController
+);
+
+router.get('/get-movies',AdminAuthMiddleware.protect, MovieController.getAllMoviesController);
+
+router.get('/movie-details/:id',AdminAuthMiddleware.protect, MovieController.getMovieByIdHandler);
+router.put('/movie-edit/:id',AdminAuthMiddleware.protect, MulterConfig.multerUploadMoviePosters.single("poster"), MovieController.updateMovieHandler);
+router.delete('/movie-delete/:id',AdminAuthMiddleware.protect, MovieController.deleteMovieHandler);
+
+router.post('/admin-logout', AdminController.adminLogout);
+ 
 export default router;

@@ -238,7 +238,6 @@ class TheaterOwnerService {
                 throw new Error("Theater not found");
             }
     
-            // Update theater properties
             theater.name = updateData.name || theater.name;
             theater.city = updateData.city || theater.city;
             theater.address = updateData.address || theater.address;
@@ -249,17 +248,14 @@ class TheaterOwnerService {
             theater.latitude = updateData.latitude || theater.latitude;
             theater.longitude = updateData.longitude || theater.longitude;
     
-            // Replace existing images with new ones if files are provided
             if (files && files.length > 0) {
                 const newImages = files.map((file: { path: string; }) => {
                     return file.path.split('\\').pop()?.split('/').pop();
                 }).filter((image: string | undefined) => image !== undefined);
     
-                // Replace existing images
-                theater.images = newImages; // Replace with new images
+                theater.images = newImages;
             }
     
-            // Remove images if specified
             if (Array.isArray(updateData.removeImages) && updateData.removeImages.length > 0) {
                 theater.images = theater.images.filter(
                     (image: string) => !updateData.removeImages!.includes(image)

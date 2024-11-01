@@ -16,9 +16,9 @@ class TheaterTokenService {
 
         res.cookie('theaterOwnerJwt', token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV !== 'development', // Ensures cookie is secure in production
+            secure: process.env.NODE_ENV !== 'development',
             sameSite: 'strict',
-            maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+            maxAge: 30 * 24 * 60 * 60 * 1000,
         });
     }
 }

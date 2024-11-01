@@ -8,15 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelope, faLock } from '@fortawesome/free-solid-svg-icons';
 import './AdminLoginPage.css'; 
 import { RootState, AppDispatch } from '../../Store';
-
-
-interface AdminResponse {
-  id: string;
-  name: string;
-  email: string;
-  token: string;
-  isAdmin: boolean;
-}
+import { AdminResponse } from '../../Types/AdminTypes';
 
 const AdminLoginPage = () => {
   const [email, setEmail] = useState('');

@@ -8,15 +8,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelope, faLock } from '@fortawesome/free-solid-svg-icons';
 import './TheaterLoginPage.css';
 import { RootState, AppDispatch } from '../../Store';
-import {jwtDecode, JwtPayload } from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import { CredentialResponse } from '@react-oauth/google';
-
-interface GoogleJwtPayload extends JwtPayload {
-  name: string;
-  email: string;
-  picture?: string;
-}
+import { GoogleJwtPayload } from '../../Types/TheaterTypes';
 
 const TheaterLoginPage = () => {
   const [email, setEmail] = useState('');

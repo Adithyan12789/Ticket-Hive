@@ -1,5 +1,5 @@
 import { apiSlice } from "./ApiSlice";
-import { AdminResponse, AdminCredentials } from "../Types";
+import { AdminResponse, AdminCredentials } from "../Types/AdminTypes";
 
 
 const ADMIN_URL = '/api/admin';
@@ -79,6 +79,44 @@ export const adminApiSlice = apiSlice.injectEndpoints({
       }),
     }),
 
+
+    addMovie: builder.mutation({
+      query: (data) => ({
+        url: `${ADMIN_URL}/add-movie`,
+        method: 'POST',
+        body: data,
+      }),
+    }),
+
+    getMovies: builder.mutation({
+      query: () => ({
+        url: `${ADMIN_URL}/get-movies`,
+        method: 'GET',
+      }),
+    }),
+
+    getMovieByMovieId: builder.query({
+      query: (id) => ({
+        url: `${ADMIN_URL}/movie-details/${id}`,
+        method: 'GET',
+      }),
+    }),
+
+    updateMovie: builder.mutation({
+      query: ({ id, formData }) => ({
+        url: `${ADMIN_URL}/movie-edit/${id}`,
+        method: 'PUT',
+        body: formData,
+      }),
+    }),
+
+    deleteMovie: builder.mutation({
+      query: ({ id }) => ({
+        url: `${ADMIN_URL}/movie-delete/${id}`,
+        method: 'DELETE',
+      }),
+    }),
+
     adminLogout: builder.mutation<void, void>({
       query: () => ({
         url: `${ADMIN_URL}/admin-logout`,
@@ -99,5 +137,10 @@ export const {
   useGetVerificationDataQuery,
   useAdminAcceptVerificationMutation,
   useAdminRejectVerificationMutation,
+  useAddMovieMutation,
+  useGetMoviesMutation,
+  useGetMovieByMovieIdQuery,
+  useUpdateMovieMutation,
+  useDeleteMovieMutation,
   useAdminLogoutMutation,
 } = adminApiSlice;

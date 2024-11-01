@@ -20,12 +20,7 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { RootState } from "../../Store";
 import "./UserTable.css";
-import { User } from "../../Types";
-
-interface UsersTableProps {
-  users: User[];
-  refetchData: () => void;
-}
+import { User, UsersTableProps } from "../../Types/UserTypes";
 
 const UserTable: React.FC<UsersTableProps> = ({ users, refetchData }) => {
   const [searchQuery, setSearchQuery] = useState<string>("");
