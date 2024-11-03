@@ -8,6 +8,8 @@ import {
   Button,
   Modal,
 } from "react-bootstrap";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChair, faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
 import {
   FaMapMarkerAlt,
   FaFileAlt,
@@ -20,12 +22,16 @@ import { Link, useParams } from "react-router-dom";
 import {
   useGetTheaterByTheaterIdQuery,
   useGetScreensByTheaterIdQuery,
+  useGetMoviesMutation,
+  useDeleteScreenMutation,
 } from "../../Slices/TheaterApiSlice";
 import TheaterLayout from "../../Components/TheaterComponents/TheaterLayout";
 import { toast } from "react-toastify";
 import Loader from "../../Components/UserComponents/Loader";
 import "./TheaterDetailsPage.css";
-import { Screen } from "../../Types/ScreenTypes";
+import { Screen, ShowTime } from "../../Types/ScreenTypes";
+import { MovieManagement } from "../../Types/MoviesTypes";
+import Swal from "sweetalert2";
 
 const THEATER_IMAGES_DIR_PATH = "http://localhost:5000/TheatersImages/";
 const DEFAULT_THEATER_IMAGE = "/profileImage_1729749713837.jpg";
@@ -35,8 +41,8 @@ const TheaterDetailScreen: React.FC = () => {
   const {
     data: theater,
     isLoading: loadingTheater,
-    isError: errorTheater,
-    refetch,
+      isError: errorTheater,
+      refetch,
   } = useGetTheaterByTheaterIdQuery(id);
 
   const {
@@ -45,13 +51,31 @@ const TheaterDetailScreen: React.FC = () => {
     isError: errorScreens,
   } = useGetScreensByTheaterIdQuery(id);
 
+  const [, setMovies] = useState<MovieManagement[]>([]);
+  const [getMovies] = useGetMoviesMutation();
+  const [deleteScreen] = useDeleteScreenMutation();
+
   const [showModal, setShowModal] = useState(false);
   const [selectedScreen, setSelectedScreen] = useState<Screen | null>(null);
 
   useEffect(() => {
     document.title = "Theater Details";
     refetch();
-  }, [id, refetch]);
+  }, [id, refetch]);  
+
+  useEffect(() => {
+    const fetchMovies = async () => {
+      try {
+        const fetchedMovies = await getMovies({}).unwrap();
+        setMovies(fetchedMovies);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (error) {
+        toast.error("Error fetching movies");
+      }
+    };
+
+    fetchMovies();
+  }, [getMovies]);
 
   const handleOpenModal = (screen: Screen) => {
     setSelectedScreen(screen);
@@ -61,6 +85,30 @@ const TheaterDetailScreen: React.FC = () => {
   const handleCloseModal = () => {
     setSelectedScreen(null);
     setShowModal(false);
+  };
+
+  const handleDelete = async (screenId: string) => {
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "Cancel",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await deleteScreen({ screenId }).unwrap();
+        refetch(); 
+        toast.success("Theater deleted successfully");
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (err: any) {
+        toast.error(err?.data?.message || err.error);
+      }
+    }
   };
 
   if (loadingTheater || loadingScreens) return <Loader />;
@@ -160,25 +208,80 @@ const TheaterDetailScreen: React.FC = () => {
                     {theater.amenities.join(", ")}
                   </Card.Text>
 
-                  <Row>
+                  <Row
+                    style={{
+                      width: "100%",
+                      maxWidth: "1200px",
+                      margin: "0 auto",
+                    }}
+                  >
                     {screens && screens.length > 0 ? (
                       screens.map((screen: Screen) => (
                         <Col md={4} key={screen._id} className="mb-3">
-                          <Card
-                            style={{ padding: "15px", cursor: "pointer" }}
-                            onClick={() => handleOpenModal(screen)}
-                          >
+                          <Card style={{ padding: "15px", cursor: "pointer" }}>
                             <Card.Title
-                              style={{ fontSize: "1.2rem", fontWeight: "bold" }}
+                              style={{
+                                fontSize: "1.2rem",
+                                fontWeight: "bold",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                              }}
                             >
                               Screen {screen.screenNumber}
                             </Card.Title>
                             <Card.Text>
-                              Showtimes: {screen.showTimes.join(", ")}
+                              Showtimes:{" "}
+                              {(screen.showTimes as unknown as ShowTime[])
+                                .map(
+                                  (show) => `${show.movieTitle} at ${show.time}`
+                                )
+                                .join(", ")}
                             </Card.Text>
                             <Card.Text>
                               Seating Capacity: {screen.capacity}
                             </Card.Text>
+
+                            <div
+                              style={{
+                                display: "flex",
+                                justifyContent: "space-evenly",
+                                marginTop: "20px",
+                              }}
+                            >
+                              <Link to={`/theater/edit-screen/${screen._id}`}>
+                                <FontAwesomeIcon
+                                  icon={faEdit}
+                                  style={{
+                                    height: "25px",
+                                    cursor: "pointer",
+                                    color: "#007bff",
+                                  }}
+                                />
+                              </Link>
+
+                              <FontAwesomeIcon
+                                icon={faChair} // Replace with appropriate icon for seats
+                                style={{
+                                  cursor: "pointer",
+                                  marginLeft: "40px",
+                                  height: "25px",
+                                  color: "#007bff",
+                                }}
+                                onClick={() => handleOpenModal(screen)}
+                              />
+
+                              <FontAwesomeIcon
+                                icon={faTrash}
+                                style={{
+                                  cursor: "pointer",
+                                  marginLeft: "40px",
+                                  height: "25px",
+                                  color: "red",
+                                }}
+                                onClick={() => handleDelete(screen._id)}
+                              />
+                            </div>
                           </Card>
                         </Col>
                       ))
@@ -208,26 +311,42 @@ const TheaterDetailScreen: React.FC = () => {
                       {selectedScreen ? (
                         <div
                           style={{
-                            display: "grid",
-                            gridTemplateColumns: "repeat(15, 1fr)",
+                            display: "flex",
+                            flexDirection: "column",
                             gap: "10px",
                           }}
                         >
-                          {selectedScreen.layout.flat().map((seat, index) => (
+                          {selectedScreen.layout.map((row, rowIndex) => (
                             <div
-                              key={index}
+                              key={rowIndex}
                               style={{
-                                width: "30px",
-                                height: "30px",
-                                backgroundColor: "#28a745",
-                                color: "#fff",
                                 display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                fontSize: "0.8rem",
+                                gap: "6px", // Default gap between seats
                               }}
                             >
-                              {seat.label}
+                              {row.map((seat, seatIndex) => (
+                                <div
+                                  key={seatIndex}
+                                  style={{
+                                    width: "40px",
+                                    height: "40px",
+                                    backgroundColor: "#e0e0e0", // Subtle background color for seats
+                                    color: "#333",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    borderRadius: "4px",
+                                    boxShadow: "0px 0px 2px rgba(0,0,0,0.2)", // Subtle shadow for a more realistic look
+                                    fontSize: "0.8rem",
+                                    marginRight:
+                                      (seatIndex + 1) % 5 === 0
+                                        ? "20px"
+                                        : "6px", // Larger gap after every 5th seat
+                                  }}
+                                >
+                                  {seat.label}
+                                </div>
+                              ))}
                             </div>
                           ))}
                         </div>
@@ -235,7 +354,6 @@ const TheaterDetailScreen: React.FC = () => {
                         <p>No seat layout available for this screen.</p>
                       )}
                     </Modal.Body>
-
                     <Modal.Footer>
                       <Button variant="secondary" onClick={handleCloseModal}>
                         Close

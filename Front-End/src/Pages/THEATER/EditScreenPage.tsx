@@ -1,22 +1,22 @@
 import React, { useState, useEffect } from "react";
-import { Container, Form, Button, Row, Col, Modal } from "react-bootstrap";
+import { Container, Form, Button, Modal, Row, Col } from "react-bootstrap";
 import Select from "react-select";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import {
-  useAddScreenMutation,
-  useGetTheaterByTheaterIdQuery,
+  useUpdateScreenMutation,
+  useGetScreensByIdQuery,
   useGetMoviesMutation,
 } from "../../Slices/TheaterApiSlice";
 import TheaterSidebar from "../../Components/TheaterComponents/TheaterSideBar";
 import { ShowTimeOption } from "../../Types/TheaterTypes";
 import { MovieManagement } from "../../Types/MoviesTypes";
 
-const AddScreenPage: React.FC = () => {
-  const { theaterId } = useParams<{ theaterId: string }>();
+const EditScreen: React.FC = () => {
+  const { screenId } = useParams<{ screenId: string }>();
   const [screenNumber, setScreenNumber] = useState<number>(0);
   const [capacity, setCapacity] = useState<number>(0);
-  const [, setSelectedShowTimes] = useState<string[]>([]);
+  const [,setSelectedShowTimes] = useState<string[]>([]);
   const [numRows, setNumRows] = useState<number>(0);
   const [seatsPerRow, setSeatsPerRow] = useState<number>(0);
   const [layout, setLayout] = useState<{ label: string }[][]>([]);
@@ -30,35 +30,36 @@ const AddScreenPage: React.FC = () => {
   >([]);
 
   const navigate = useNavigate();
-  const { data: theater } = useGetTheaterByTheaterIdQuery(theaterId);
+  const { data: screen = {} } = useGetScreensByIdQuery(screenId);
   const [getMovies] = useGetMoviesMutation();
-  const [addScreen, { isLoading }] = useAddScreenMutation();
+  const [updateScreen, { isLoading }] = useUpdateScreenMutation();
 
-  console.log("add theaters page: ", theater);
-  
+  console.log("screen: ", screen)
 
   useEffect(() => {
-    if (theater && theater.showTimes) {
-      setSelectedShowTimes(theater.showTimes);
+    if (screen) {
+      setScreenNumber(screen.screenNumber || 0);
+      setCapacity(screen.capacity || 0);
+      setNumRows(screen.layout?.length || 0);
+      setSeatsPerRow(screen.layout?.[0]?.length || 0);
+      setLayout(screen.layout || []);
+      setSelectedShowTimes(screen.showTimes || []);
+      setShowTimesWithMovies(screen.showTimesWithMovies || []);
     }
-  }, [theater]);
+  }, [screen]);
 
   useEffect(() => {
     const fetchMovies = async () => {
-      setIsLoadingMovies(true); // Set loading to true
+      setIsLoadingMovies(true);
       try {
         const response = await getMovies({}).unwrap();
-        setMovies(response.movies || []); // Adjust for response structure
-        if ((response.movies || []).length === 0) {
-          handleShowModal();
-        }
+        setMovies(response.movies || []);
       } catch (err) {
         console.error("Error fetching movies", err);
       } finally {
-        setIsLoadingMovies(false); // Set loading to false
+        setIsLoadingMovies(false);
       }
     };
-
     fetchMovies();
   }, [getMovies]);
 
@@ -82,11 +83,13 @@ const AddScreenPage: React.FC = () => {
     }
   };
 
+  console.log("showTimesWithMovies: ", showTimesWithMovies);
+  
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const totalSeats = numRows * seatsPerRow;
-
     if (totalSeats > capacity) {
       toast.error("Total seat count exceeds the specified capacity!");
       return;
@@ -96,13 +99,15 @@ const AddScreenPage: React.FC = () => {
       ({ showTime, movieId, movieTitle }) => ({
         time: showTime,
         movie: movieId,
-        movieTitle: movieTitle,
+        movieTitle,
       })
     );
 
+
+
     try {
-      await addScreen({
-        theaterId,
+      await updateScreen({
+        screenId,
         formData: {
           screenNumber: Number(screenNumber),
           capacity: Number(capacity),
@@ -110,16 +115,10 @@ const AddScreenPage: React.FC = () => {
           layout,
         },
       }).unwrap();
-      toast.success("Screen added successfully!");
-      navigate(`/theater/details/${theater?._id}`);
-      setScreenNumber(0);
-      setCapacity(0);
-      setSelectedShowTimes([]);
-      setLayout([]);
-      setShowTimesWithMovies([]);
+      toast.success("Screen updated successfully!");
+      navigate(`/theater/management`);
     } catch (error) {
-      toast.error("Failed to add screen");
-      console.error("Failed to add screen:", error);
+      console.error("Failed to update screen: ", error);
     }
   };
 
@@ -137,11 +136,15 @@ const AddScreenPage: React.FC = () => {
           movieTitle: selectedMovieObject.title,
           movieId: selectedMovieObject._id,
         };
-
-        setShowTimesWithMovies((prev) => [...prev, newShowTime]);
-
+  
+        setShowTimesWithMovies((prev) => [
+          ...prev,
+          { ...newShowTime, _id: new Date().toISOString() },  // Add a unique ID
+        ]);
+  
+        // Only updating show times, not entire objects
         setSelectedShowTimes((prev) => [...prev, newShowTime.showTime]);
-
+  
         setSelectedShowTime("");
         setSelectedMovie("");
         setShowModal(false);
@@ -151,6 +154,7 @@ const AddScreenPage: React.FC = () => {
       toast.warn("Please select both a show time and a movie.");
     }
   };
+  
 
   const filteredMovies = movies.filter(
     (movie) =>
@@ -159,25 +163,20 @@ const AddScreenPage: React.FC = () => {
       )
   );
 
-  const movieOptions = filteredMovies.map((movie: MovieManagement) => ({
+  const movieOptions = filteredMovies.map((movie) => ({
     value: movie._id,
     label: movie.title,
   }));
 
-  const filteredShowTimes =
-    theater?.showTimes?.filter(
-      (time: string) =>
-        !showTimesWithMovies.some(
-          (showTimeWithMovie) => showTimeWithMovie.showTime === time
-        )
-    ) || [];
+  console.log("screen.showTimes: ", screen.showTimes);
+  
+  const showTimeOptions: ShowTimeOption[] = Array.isArray(screen.showTimes) ? 
+  screen.showTimes.map((showTimeObj: { time: string; }) => ({
+    value: showTimeObj.time,
+    label: String(showTimeObj.time),
+  })) : [];
 
-  const showTimeOptions: ShowTimeOption[] = filteredShowTimes.map(
-    (time: string) => ({
-      value: time,
-      label: time,
-    })
-  );
+    
 
   return (
     <Container
@@ -193,7 +192,7 @@ const AddScreenPage: React.FC = () => {
           <TheaterSidebar />
         </Col>
         <Col md={9}>
-          <h2 className="text-primary mb-4">Add New Screen</h2>
+          <h2 className="text-primary mb-4">Edit Screen</h2>
           <Form onSubmit={handleSubmit}>
             <Form.Group controlId="formScreenNumber" className="mb-3">
               <Form.Label>Screen Number</Form.Label>
@@ -201,10 +200,7 @@ const AddScreenPage: React.FC = () => {
                 type="number"
                 placeholder="Enter screen number"
                 value={screenNumber}
-                onChange={(e) => {
-                  const value = Number(e.target.value);
-                  setScreenNumber(value >= 0 ? value : 0);
-                }}
+                onChange={(e) => setScreenNumber(Number(e.target.value))}
                 required
                 min={0}
                 style={{ borderColor: "#007bff" }}
@@ -217,17 +213,13 @@ const AddScreenPage: React.FC = () => {
                 type="number"
                 placeholder="Enter capacity"
                 value={capacity}
-                onChange={(e) => {
-                  const value = Number(e.target.value);
-                  setCapacity(value >= 0 ? value : 0);
-                }}
+                onChange={(e) => setCapacity(Number(e.target.value))}
                 required
                 min={0}
                 style={{ borderColor: "#007bff" }}
               />
             </Form.Group>
 
-            {/* Show Times Selector */}
             <Form.Group controlId="formShowTimes" className="mb-3">
               <Button
                 variant="outline-primary"
@@ -239,7 +231,6 @@ const AddScreenPage: React.FC = () => {
             </Form.Group>
 
             <div className="mt-3 mb-5">
-              {/* Conditionally render the header only if there are saved showtimes */}
               {showTimesWithMovies.length > 0 && (
                 <>
                   <h5 className="mb-3 text-primary">Saved Show Times</h5>
@@ -375,19 +366,18 @@ const AddScreenPage: React.FC = () => {
             </Form.Group>
 
             <Button variant="primary" type="submit" disabled={isLoading}>
-              {isLoading ? "Adding..." : "Add Screen"}
+              {isLoading ? "Updating..." : "Update Screen"}
             </Button>
           </Form>
         </Col>
       </Row>
 
-      {/* Modal for adding show time */}
       <Modal show={showModal} onHide={handleCloseModal}>
         <Modal.Header closeButton>
           <Modal.Title>Add Show Time</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
+        <Form>
             <Form.Group>
               <Form.Label>Select Movie</Form.Label>
               <Select
@@ -442,4 +432,4 @@ const AddScreenPage: React.FC = () => {
   );
 };
 
-export default AddScreenPage;
+export default EditScreen;

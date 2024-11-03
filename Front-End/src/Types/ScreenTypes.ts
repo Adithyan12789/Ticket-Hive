@@ -11,3 +11,9 @@ export interface Screen {
   layout: { label: string }[][];
   showTimes: string[];
 }
+
+export interface ShowTime {
+  time: string;
+  movieTitle: string;
+  movie?: string
+}

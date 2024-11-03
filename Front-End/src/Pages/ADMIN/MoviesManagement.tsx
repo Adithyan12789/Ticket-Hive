@@ -45,8 +45,7 @@ const MovieManagementScreen: React.FC = () => {
   const [genres, setGenres] = useState<string[]>([]);
   const [hours, setHours] = useState("");
   const [minutes, setMinutes] = useState("");
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [duration, setDuration] = useState("");
+  const [, setDuration] = useState("");
   const [selectedPoster, setSelectedPoster] = useState<File | null>(null);
   const [description, setDescription] = useState<string>("");
   const [languages, setLanguages] = useState<string[]>([]);

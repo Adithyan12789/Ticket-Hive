@@ -1,31 +1,35 @@
 import { apiSlice } from "./ApiSlice";
-import { TheaterResponse, TheaterCredentials, RegisterCredentials, OtpCredentials } from "../Types/TheaterTypes";
+import {
+  TheaterResponse,
+  TheaterCredentials,
+  RegisterCredentials,
+  OtpCredentials,
+} from "../Types/TheaterTypes";
 
-
-const THEATER_URL = '/api/theater';
+const THEATER_URL = "/api/theater";
 
 export const theaterApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     loginTheater: builder.mutation<TheaterResponse, TheaterCredentials>({
       query: (data) => ({
         url: `${THEATER_URL}/theater-login`,
-        method: 'POST',
+        method: "POST",
         body: data,
       }),
     }),
 
-    googleLoginTheater:builder.mutation({
-      query:(data)=>({
-         url:`${THEATER_URL}/theater-GoogleLogin`,
-         method:'POST',
-         body:data
-      })
-  }),
+    googleLoginTheater: builder.mutation({
+      query: (data) => ({
+        url: `${THEATER_URL}/theater-GoogleLogin`,
+        method: "POST",
+        body: data,
+      }),
+    }),
 
     registerTheater: builder.mutation<TheaterResponse, RegisterCredentials>({
       query: (data) => ({
         url: `${THEATER_URL}/theater-signup`,
-        method: 'POST',
+        method: "POST",
         body: data,
       }),
     }),
@@ -33,16 +37,15 @@ export const theaterApiSlice = apiSlice.injectEndpoints({
     verifyOtpTheater: builder.mutation<TheaterResponse, OtpCredentials>({
       query: (data) => ({
         url: `${THEATER_URL}/theater-verifyotp`,
-        method: 'POST',
+        method: "POST",
         body: data,
       }),
     }),
 
-    
     resendOtpTheater: builder.mutation({
       query: (data) => ({
         url: `${THEATER_URL}/theater-resend-otp`,
-        method: 'POST',
+        method: "POST",
         body: data,
       }),
     }),
@@ -50,14 +53,14 @@ export const theaterApiSlice = apiSlice.injectEndpoints({
     logoutTheater: builder.mutation<void, void>({
       query: () => ({
         url: `${THEATER_URL}/theater-logout`,
-        method: 'POST',
+        method: "POST",
       }),
     }),
-    
+
     sendPasswordResetEmailTheater: builder.mutation({
       query: (data) => ({
         url: `${THEATER_URL}/theater-forgot-password`,
-        method: 'POST',
+        method: "POST",
         body: data,
       }),
     }),
@@ -65,30 +68,30 @@ export const theaterApiSlice = apiSlice.injectEndpoints({
     resetPasswordTheater: builder.mutation({
       query: (data) => ({
         url: `${THEATER_URL}/theater-reset-password/${data.token}`,
-        method: 'PUT',
+        method: "PUT",
         body: { password: data.password },
       }),
-    }),    
+    }),
 
     getTheaterOwnerProfile: builder.query({
       query: () => ({
-        url: `${THEATER_URL}/theater-profile`, 
-        method: 'GET',
+        url: `${THEATER_URL}/theater-profile`,
+        method: "GET",
       }),
     }),
 
     updateTheaterOwner: builder.mutation({
-      query: (data)=>({ 
+      query: (data) => ({
         url: `${THEATER_URL}/theater-profile`,
-        method: 'PUT',
-        body: data
-      })
+        method: "PUT",
+        body: data,
+      }),
     }),
 
     uploadTheaterCertificate: builder.mutation({
       query: ({ theaterId, formData }) => ({
         url: `${THEATER_URL}/upload-certificate/${theaterId}`,
-        method: 'POST',
+        method: "POST",
         body: formData,
       }),
     }),
@@ -96,7 +99,7 @@ export const theaterApiSlice = apiSlice.injectEndpoints({
     addTheater: builder.mutation({
       query: (data) => ({
         url: `${THEATER_URL}/add-theaters`,
-        method: 'POST',
+        method: "POST",
         body: data,
       }),
     }),
@@ -104,42 +107,68 @@ export const theaterApiSlice = apiSlice.injectEndpoints({
     getTheaters: builder.mutation({
       query: () => ({
         url: `${THEATER_URL}/get-theaters`,
-        method: 'GET',
+        method: "GET",
       }),
     }),
 
     getTheaterByTheaterId: builder.query({
       query: (id) => ({
         url: `${THEATER_URL}/theaters/${id}`,
-        method: 'GET',
+        method: "GET",
       }),
     }),
-    
+
     updateTheater: builder.mutation({
-      query: ({ id, formData }) => ({
+      query: ({ id, data }) => ({
         url: `${THEATER_URL}/theaters/${id}`,
-        method: 'PUT',
-        body: formData,
+        method: "PUT",
+        body: data,
+      }),
+    }),
+
+    deleteTheater: builder.mutation({
+      query: ({ id }) => ({
+        url: `${THEATER_URL}/theaters/${id}`,
+        method: "DELETE",
       }),
     }),
 
     addScreen: builder.mutation({
       query: ({ theaterId, formData }) => ({
         url: `${THEATER_URL}/add-screen/${theaterId}`,
-        method: 'POST',
+        method: "POST",
         body: formData,
       }),
     }),
 
-   getScreensByTheaterId: builder.query({
-      query: (id) => `${THEATER_URL}/theaters/${id}/screens`,
-   }),
-    
-    deleteTheater: builder.mutation({
-      query: ({ id }) => ({
-        url: `${THEATER_URL}/theaters/${id}`,
-        method: 'DELETE',
+    updateScreen: builder.mutation({
+      query: ({ screenId, formData }) => ({
+        url: `${THEATER_URL}/update-screen/${screenId}`,
+        method: "PUT",
+        body: formData,
       }),
+    }),
+
+    deleteScreen: builder.mutation({
+      query: ({ screenId }) => ({
+        url: `${THEATER_URL}/delete-screen/${screenId}`,
+        method: "DELETE",
+      }),
+    }),
+
+    getMovies: builder.mutation({
+      query: () => ({
+        url: `${THEATER_URL}/get-movies`,
+        method: "GET",
+      }),
+    }),
+
+    getScreensByTheaterId: builder.query({
+      query: (id) => `${THEATER_URL}/theaters/${id}/screens`,
+    }),
+
+    getScreensById: builder.query({
+      query: (screenId) => `${THEATER_URL}/screen/${screenId}`,
     }),
   }),
 });
@@ -161,6 +190,10 @@ export const {
   useGetTheaterByTheaterIdQuery,
   useUpdateTheaterMutation,
   useAddScreenMutation,
+  useUpdateScreenMutation,
+  useGetMoviesMutation,
   useGetScreensByTheaterIdQuery,
+  useGetScreensByIdQuery,
+  useDeleteScreenMutation,
   useDeleteTheaterMutation,
 } = theaterApiSlice;

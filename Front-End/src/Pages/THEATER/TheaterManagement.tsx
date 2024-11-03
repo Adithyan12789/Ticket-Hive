@@ -37,7 +37,9 @@ const AddTheaterScreen: React.FC = () => {
   const [city, setCity] = useState<string>("");
   const [address, setAddress] = useState<string>("");
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
-  const [showTimes, setShowTimes] = useState<string[]>([""]);
+  const [showTimes, setShowTimes] = useState([
+    { hour: "01", minute: "00", ampm: "AM" },
+  ]);
   const [description, setDescription] = useState<string>("");
   const [amenities, setAmenities] = useState<string[]>([]);
   const [latitude, setLatitude] = useState<string>("");
@@ -72,6 +74,7 @@ const AddTheaterScreen: React.FC = () => {
     setLatitude("");
     setLongitude("");
     setSelectedImages([]);
+    setShowTimes([{ hour: "01", minute: "00", ampm: "AM" }]); 
   };
 
   const handleEditModalShow = (theater: TheaterManagement) => {
@@ -162,14 +165,20 @@ const AddTheaterScreen: React.FC = () => {
     }
   };
 
-  const handleShowTimeChange = (index: number, value: string) => {
-    const newShowTimes = [...showTimes];
-    newShowTimes[index] = value;
-    setShowTimes(newShowTimes);
+  const handleShowTimeChange = (
+    index: number,
+    field: "hour" | "minute" | "ampm",
+    value: string
+  ) => {
+    setShowTimes((prevShowTimes) =>
+      prevShowTimes.map((showTime, i) =>
+        i === index ? { ...showTime, [field]: value } : showTime
+      )
+    );
   };
 
   const addShowTime = () => {
-    setShowTimes([...showTimes, ""]); // Add a new empty show time
+    setShowTimes([...showTimes, { hour: "01", minute: "00", ampm: "AM" }]);
   };
 
   const validateName = (value: string) => /^[A-Za-z0-9\s'-]+$/.test(value);
@@ -184,6 +193,10 @@ const AddTheaterScreen: React.FC = () => {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    const formattedShowTimes = showTimes.map(
+      ({ hour, minute, ampm }) => `${hour}:${minute} ${ampm}`
+    );
 
     const trimmedName = name.trim();
     const trimmedCity = city.trim();
@@ -202,7 +215,9 @@ const AddTheaterScreen: React.FC = () => {
       !trimmedAmenities ||
       !trimmedLatitude ||
       !trimmedLongitude ||
-      showTimes.some((time) => time.trim() === "")
+      showTimes.some(
+        (time) => !time.hour.trim() || !time.minute.trim() || !time.ampm.trim()
+      )
     ) {
       toast.error("All fields are required");
       return;
@@ -223,6 +238,11 @@ const AddTheaterScreen: React.FC = () => {
       return;
     }
 
+    if (formattedShowTimes.some((time) => !time)) {
+      toast.error("All show times are required");
+      return;
+    }
+
     try {
       setLoading(true);
       const formData = new FormData();
@@ -235,7 +255,7 @@ const AddTheaterScreen: React.FC = () => {
       formData.append("longitude", trimmedLongitude);
       selectedImages.forEach((image) => formData.append("images", image));
 
-      showTimes.forEach((time) => {
+      formattedShowTimes.forEach((time) => {
         formData.append("showTimes[]", time);
       });
 
@@ -268,7 +288,10 @@ const AddTheaterScreen: React.FC = () => {
     formData.append("longitude", long);
 
     showTimes.forEach((time) => {
-      formData.append("showTimes[]", time);
+      formData.append(
+        "showTimes[]",
+        `${time.hour}:${time.minute} ${time.ampm}`
+      );
     });
 
     if (selectedImages.length) {
@@ -276,10 +299,18 @@ const AddTheaterScreen: React.FC = () => {
     }
 
     try {
-      await updateTheater({
-        id: selectedTheater?._id,
-        data: formData,
-      }).unwrap();
+      const data = {
+        name: name.trim(),
+        city: city.trim(),
+        address: address.trim(),
+        description: description.trim(),
+        amenities: amenities,
+        latitude: lat,
+        longitude: long,
+        showTimes: showTimes.map(time => `${time.hour}:${time.minute} ${time.ampm}`)
+    };
+    
+      await updateTheater({ id: selectedTheater?._id, data }).unwrap();
       toast.success("Theater updated successfully");
       handleEditModalClose();
       fetchData();
@@ -325,9 +356,7 @@ const AddTheaterScreen: React.FC = () => {
   if (isLoading || loading) return <Loader />;
 
   const removeShowTime = (index: number) => {
-    setShowTimes((prevShowTimes) =>
-      prevShowTimes.filter((_, i) => i !== index)
-    );
+    setShowTimes(showTimes.filter((_, i) => i !== index));
   };
 
   return (
@@ -424,22 +453,71 @@ const AddTheaterScreen: React.FC = () => {
                     <Form.Label>Show Times</Form.Label>
                     <div className="d-flex flex-wrap">
                       {showTimes.map((showTime, index) => (
-                        <div className="d-flex me-2 mb-2" key={index}>
-                          <Form.Control
-                            type="text"
-                            value={showTime}
-                            onChange={(e) =>
-                              handleShowTimeChange(index, e.target.value)
+                        <div
+                          className="d-flex align-items-center me-2 mb-2"
+                          key={index}
+                        >
+                          <Form.Select
+                            value={showTime.hour}
+                            onChange={(
+                              e: React.ChangeEvent<HTMLSelectElement>
+                            ) =>
+                              handleShowTimeChange(
+                                index,
+                                "hour",
+                                e.target.value
+                              )
                             }
-                            placeholder="Enter show time"
-                            required
                             className="me-2"
-                            style={{ width: "150px" }} // Set a fixed width to maintain uniformity
-                          />
+                            style={{width: "150px"}}
+                          >
+                            {Array.from({ length: 12 }, (_, i) => (
+                              <option
+                                key={i}
+                                value={String(i + 1).padStart(2, "0")}
+                              >
+                                {String(i + 1).padStart(2, "0")}
+                              </option>
+                            ))}
+                          </Form.Select>
+                          <Form.Select
+                            value={showTime.minute}
+                            onChange={(e) =>
+                              handleShowTimeChange(
+                                index,
+                                "minute",
+                                e.target.value
+                              )
+                            }
+                            className="me-2"
+                          >
+                            {Array.from({ length: 60 }, (_, i) => (
+                              <option
+                                key={i}
+                                value={String(i).padStart(2, "0")}
+                              >
+                                {String(i).padStart(2, "0")}
+                              </option>
+                            ))}
+                          </Form.Select>
+                          <Form.Select
+                            value={showTime.ampm}
+                            onChange={(e) =>
+                              handleShowTimeChange(
+                                index,
+                                "ampm",
+                                e.target.value
+                              )
+                            }
+                            className="me-2"
+                          >
+                            <option value="AM">AM</option>
+                            <option value="PM">PM</option>
+                          </Form.Select>
                           <Button
                             variant="danger"
-                            style={{ height: "40px", marginTop: "5px" }}
                             onClick={() => removeShowTime(index)}
+                            style={{ height: "40px", marginTop: "5px" }}
                           >
                             <FaTrash />
                           </Button>
@@ -450,6 +528,7 @@ const AddTheaterScreen: React.FC = () => {
                       Add Another Show Time
                     </Button>
                   </Form.Group>
+
                   <Form.Group controlId="description" className="mb-3">
                     <Form.Label>Description</Form.Label>
                     <Form.Control
@@ -565,36 +644,95 @@ const AddTheaterScreen: React.FC = () => {
                   </Form.Group>
                 </Col>
                 <Col md={6}>
-                <Form.Group className="mb-3">
+                  <Form.Group className="mb-3">
                     <Form.Label>Show Times</Form.Label>
                     <div className="d-flex flex-wrap">
                       {showTimes.map((showTime, index) => (
-                        <div className="d-flex me-2 mb-2" key={index}>
-                          <Form.Control
-                            type="text"
-                            value={showTime}
-                            onChange={(e) =>
-                              handleShowTimeChange(index, e.target.value)
+                        <div
+                          className="d-flex align-items-center me-2 mb-2"
+                          key={index}
+                        >
+                          {/* Hour Selection */}
+                          <Form.Select
+                            value={showTime.hour}
+                            onChange={(
+                              e: React.ChangeEvent<HTMLSelectElement>
+                            ) =>
+                              handleShowTimeChange(
+                                index,
+                                "hour",
+                                e.target.value
+                              )
                             }
-                            placeholder="Enter show time"
-                            required
                             className="me-2"
-                            style={{ width: "150px" }}
-                          />
+                            style={{width: "150px"}}
+                          >
+                            {Array.from({ length: 12 }, (_, i) => (
+                              <option
+                                key={i}
+                                value={String(i + 1).padStart(2, "0")}
+                              >
+                                {String(i + 1).padStart(2, "0")}
+                              </option>
+                            ))}
+                          </Form.Select>
+
+                          {/* Minute Selection */}
+                          <Form.Select
+                            value={showTime.minute}
+                            onChange={(e) =>
+                              handleShowTimeChange(
+                                index,
+                                "minute",
+                                e.target.value
+                              )
+                            }
+                            className="me-2"
+                          >
+                            {Array.from({ length: 60 }, (_, i) => (
+                              <option
+                                key={i}
+                                value={String(i).padStart(2, "0")}
+                              >
+                                {String(i).padStart(2, "0")}
+                              </option>
+                            ))}
+                          </Form.Select>
+
+                          {/* AM/PM Selection */}
+                          <Form.Select
+                            value={showTime.ampm}
+                            onChange={(e) =>
+                              handleShowTimeChange(
+                                index,
+                                "ampm",
+                                e.target.value
+                              )
+                            }
+                            className="me-2"
+                          >
+                            <option value="AM">AM</option>
+                            <option value="PM">PM</option>
+                          </Form.Select>
+
+                          {/* Remove Show Time Button */}
                           <Button
                             variant="danger"
-                            style={{ height: "40px", marginTop: "5px" }}
                             onClick={() => removeShowTime(index)}
+                            style={{ height: "40px", marginTop: "5px" }}
                           >
                             <FaTrash />
                           </Button>
                         </div>
                       ))}
                     </div>
+
+                    {/* Add Another Show Time Button */}
                     <Button variant="secondary" onClick={addShowTime}>
                       Add Another Show Time
                     </Button>
                   </Form.Group>
+
                   <Form.Group controlId="amenities" className="mb-3">
                     <Form.Label>Amenities</Form.Label>
                     <Form.Control

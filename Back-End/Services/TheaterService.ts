@@ -233,6 +233,9 @@ class TheaterOwnerService {
     ) {
         try {
             const theater = await TheaterRepository.findTheaterById(theaterId);
+
+            console.log("service theater: ", theater);
+            
     
             if (!theater) {
                 throw new Error("Theater not found");
@@ -263,6 +266,7 @@ class TheaterOwnerService {
             }
     
             const updatedTheater = await theater.save();
+            console.log("service updated theater: ", updatedTheater);
             return updatedTheater;
         } catch (error) {
             throw error;
