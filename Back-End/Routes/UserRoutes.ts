@@ -19,6 +19,7 @@ router.route('/profile')
 .put( AuthMiddleware.protect, MulterConfig.multerUploadUserProfile.single('profileImage'), UserController.updateUserProfile);
 
 router.get('/get-movies',AuthMiddleware.protect, MovieController.getAllMoviesController);
+router.get('/movie-detail/:id',AuthMiddleware.protect, MovieController.getMovieByIdHandler);
 
 router.post('/logout', UserController.logoutUser);
 

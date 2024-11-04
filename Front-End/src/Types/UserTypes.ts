@@ -8,6 +8,7 @@ export interface User {
     phone: number;
     isBlocked?: boolean;
   }
+
   
   /** Auth State */
   export interface AuthState {
@@ -17,10 +18,11 @@ export interface User {
   /** Movie */
   export interface Movie {
     posters: string;
-    id: number;
+    _id: string;
     title: string;
     genres: string[];
-    overview: string;
+    images: string[];
+    description: string;
     vote_average: number;
     releaseDate: string;
     poster_path?: string;

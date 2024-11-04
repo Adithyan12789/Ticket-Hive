@@ -89,6 +89,13 @@ export const usersApiSlice = apiSlice.injectEndpoints({
         method: "GET",
       }),
     }),
+
+    getMovieByMovieId: builder.query({
+      query: (id) => ({
+        url: `${USERS_URL}/movie-detail/${id}`,
+        method: 'GET',
+      }),
+    }),
     
   }),
 });
@@ -105,4 +112,5 @@ export const {
   useGetUserProfileQuery,
   useUpdateUserMutation,
   useGetMoviesMutation,
+  useGetMovieByMovieIdQuery,
 } = usersApiSlice;

@@ -7,43 +7,24 @@ import { Movie } from "../../Types/UserTypes";
 import { useGetMoviesMutation } from "../../Slices/UserApiSlice";
 import Loader from "../../Components/UserComponents/Loader";
 import { FaSearch } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 const API_KEY = "0ffb386a852dbf070ac6b977313d8039";
-const RECOMMENDED_API_URL = `https://api.themoviedb.org/3/movie/top_rated?api_key=${API_KEY}&language=en-US&page=1`;
-const SLIDER_API_URL = `https://api.themoviedb.org/3/movie/now_playing?api_key=${API_KEY}&language=en-US&page=1`;
+const RECOMMENDED_API_URL = `https://api.themoviedb.org/3/movie/top_rated?api_key=${API_KEY}&language=en-US&page=1;`; // Assume this is proxied through the backend for security
 
 const HomePage: React.FC = () => {
-  const [getMovies, { isLoading }] = useGetMoviesMutation();
+  const [getMovies, { isLoading: loadingTrending }] = useGetMoviesMutation();
   const [trendingMovies, setTrendingMovies] = useState<Movie[]>([]);
   const [recommendedMovies, setRecommendedMovies] = useState<Movie[]>([]);
-  const [sliderMovies, setSliderMovies] = useState<Movie[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [loadingSlider, setLoadingSlider] = useState<boolean>(true);
+  const [loadingRecommended, setLoadingRecommended] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState<string>("");
-
-  console.log("getMovies: ", getMovies);
-
-  useEffect(() => {
-    const fetchSliderMovies = async () => {
-      try {
-        const response = await axios.get(SLIDER_API_URL);
-        setSliderMovies(response.data.results);
-        setLoadingSlider(false);
-      } catch (error) {
-        console.error("Error fetching slider movies: ", error);
-        setLoadingSlider(false);
-      }
-    };
-
-    fetchSliderMovies();
-  }, []);
 
   const fetchData = useCallback(async () => {
     try {
       const response = await getMovies({}).unwrap();
       setTrendingMovies(response.movies || []);
     } catch (err) {
-      console.error("Error fetching movies", err);
+      console.error("Error fetching trending movies", err);
     }
   }, [getMovies]);
 
@@ -56,10 +37,10 @@ const HomePage: React.FC = () => {
       try {
         const response = await axios.get(RECOMMENDED_API_URL);
         setRecommendedMovies(response.data.results);
-        setLoading(false);
       } catch (error) {
-        console.error("Error fetching recommended movies: ", error);
-        setLoading(false);
+        console.error("Error fetching recommended movies:", error);
+      } finally {
+        setLoadingRecommended(false);
       }
     };
 
@@ -67,41 +48,51 @@ const HomePage: React.FC = () => {
   }, []);
 
   const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500/";
-  const BACKDROP_BASE_URL = "https://image.tmdb.org/t/p/w1280/";
+  const BACKDROP_BASE_URL = "http://localhost:5000/movieImages/";
   const MOVIE_IMAGES_DIR_PATH = "http://localhost:5000/MoviePosters/";
 
-  console.log("Movies", trendingMovies);
-
-  if (isLoading || loading) return <Loader />;
+  if (loadingTrending || loadingRecommended) return <Loader />;
 
   const filteredMovies = trendingMovies.filter((movie) =>
     movie.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  console.log("movie id: ", filteredMovies);
+
   return (
     <div>
-      {loadingSlider ? (
-        <p>Loading slider...</p>
-      ) : (
+      {filteredMovies.length > 0 ? (
         <Carousel className="image-slider">
-          {sliderMovies.slice(0, 5).map((movie) => (
-            <Carousel.Item key={movie.id}>
-              <img
-                className="d-block w-100 slider-image"
-                src={
-                  movie.backdrop_path
-                    ? BACKDROP_BASE_URL + movie.backdrop_path
-                    : "/default-banner.jpg"
-                }
-                alt={movie.title}
-              />
-              <Carousel.Caption>
-                <h3>{movie.title}</h3>
-                <p>{movie.overview}</p>
+          {filteredMovies.slice(0, 5).map((movie) => (
+            <Carousel.Item key={movie._id}>
+              <Link to={`/movie-detail/${movie._id}`}>
+                <img
+                  className="d-block w-100 slider-image"
+                  src={
+                    movie.images && movie.images.length > 0
+                      ? BACKDROP_BASE_URL + movie.images[1]
+                      : "/default-banner.jpg"
+                  }
+                  alt={movie.title}
+                />
+              </Link>
+              <Carousel.Caption
+                style={{
+                  backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent black background
+                  borderRadius: "5px", // Optional: rounded corners
+                  padding: "10px", // Optional: padding for better spacing
+                }}
+              >
+                <h3 style={{ color: "#fff" }}>{movie.title}</h3>
+                <p style={{ color: "#fff" }}>
+                  {movie.description || "No description available"}
+                </p>
               </Carousel.Caption>
             </Carousel.Item>
           ))}
         </Carousel>
+      ) : (
+        <p>No movies available</p>
       )}
 
       <Container>
@@ -120,36 +111,40 @@ const HomePage: React.FC = () => {
         <h1 className="text-center my-5" style={{ color: "black" }}>
           Trending Movies
         </h1>
-        {loading ? (
-          <p>Loading trending movies...</p>
-        ) : (
+        {filteredMovies.length > 0 ? (
           <Row>
             {filteredMovies.slice(0, 8).map((movie) => (
-              <Col key={movie.id} md={3} className="mb-5">
-                <Card style={{ height: "500px" }} className="movie-card">
-                  <Card.Img
-                    style={{ height: "350px" }}
-                    variant="top"
-                    src={
-                      movie.posters
-                        ? MOVIE_IMAGES_DIR_PATH + movie.posters
-                        : "/default-poster.jpg"
-                    }
-                    alt={movie.title}
-                    className="movie-poster"
-                  />
-                  <Card.Body>
-                    <Card.Title className="movie-title">
-                      {movie.title}
-                    </Card.Title>
-                    <Card.Text>
-                      {movie.genres.join(", ")}
-                    </Card.Text>
-                  </Card.Body>
-                </Card>
+              <Col key={movie._id} md={3} className="mb-5">
+                <Link to={`/movie-detail/${movie._id}`}>
+                  <Card style={{ height: "500px" }} className="movie-card">
+                    <Card.Img
+                      style={{ height: "350px" }}
+                      variant="top"
+                      src={
+                        movie.posters
+                          ? MOVIE_IMAGES_DIR_PATH + movie.posters
+                          : "/default-poster.jpg"
+                      }
+                      alt={movie.title}
+                      className="movie-poster"
+                    />
+                    <Card.Body>
+                      <Card.Title className="movie-title">
+                        {movie.title}
+                      </Card.Title>
+                      <Card.Text>
+                        {movie.genres && movie.genres.length > 0
+                          ? movie.genres.join(", ")
+                          : "Genres not available"}
+                      </Card.Text>
+                    </Card.Body>
+                  </Card>
+                </Link>
               </Col>
             ))}
           </Row>
+        ) : (
+          <p>No trending movies found</p>
         )}
 
         <div className="banner-container">
@@ -163,12 +158,10 @@ const HomePage: React.FC = () => {
         <h1 className="text-center my-5" style={{ color: "black" }}>
           Recommended Movies
         </h1>
-        {loading ? (
-          <p>Loading recommended movies...</p>
-        ) : (
+        {recommendedMovies.length > 0 ? (
           <Row>
             {recommendedMovies.slice(0, 8).map((movie) => (
-              <Col key={movie.id} md={3} className="mb-5">
+              <Col key={movie._id} md={3} className="mb-5">
                 <Card style={{ height: "500px" }} className="movie-card">
                   <Card.Img
                     style={{ height: "300px" }}
@@ -189,13 +182,18 @@ const HomePage: React.FC = () => {
                       <strong>Rating:</strong> {movie.vote_average}/10
                     </Card.Text>
                     <Card.Text>
-                      <strong>Release Date:</strong> {movie.releaseDate}
+                      <strong>Release Date:</strong>{" "}
+                      {movie.releaseDate
+                        ? new Date(movie.releaseDate).toLocaleDateString()
+                        : "N/A"}
                     </Card.Text>
                   </Card.Body>
                 </Card>
               </Col>
             ))}
           </Row>
+        ) : (
+          <p>No recommended movies found</p>
         )}
       </Container>
 

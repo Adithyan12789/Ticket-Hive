@@ -21,15 +21,10 @@ class MovieController {
       const movieImageFiles = (req.files as any)["movieImages"] || [];
       const castImageFiles = (req.files as any)["castImages"] || [];
 
-      console.log("posterFile: ", posterFile);
-      console.log("movieImageFiles: ", movieImageFiles);
-      console.log("castImageFiles: ", castImageFiles);
-      
-
       if (!posterFile || movieImageFiles.length === 0 || castImageFiles.length === 0) {
         res.status(400).json({ message: "Please upload all required files." });
         return;
-      }    
+    }    
 
       // Construct movie data
       const movieData: Partial<IMovie> = {
@@ -48,11 +43,7 @@ class MovieController {
         castsImages: castImageFiles.map((file: any) => file.filename), // Map filenames for cast images
       };
 
-      console.log("movieData: ", movieData);
-
       const newMovie = await MovieService.addMovie(movieData);
-
-      console.log("newMovie: ", newMovie);
 
       res
         .status(201)
@@ -102,17 +93,9 @@ class MovieController {
       const { id } = req.params;
       const updateData = req.body;
 
-      console.log("updateData: ", updateData);
-      
-
       const posterFile = (req.files as any)["poster"]?.[0];
       const movieImageFiles = (req.files as any)["movieImages"] || [];
       const castImageFiles = (req.files as any)["castImages"] || [];
-
-      console.log("posterFile: ", posterFile);
-      console.log("movieImageFiles: ", movieImageFiles);
-      console.log("castImageFiles: ", castImageFiles);
-      
       
       try {
         const updatedMovie = await MovieService.updateMovieData(
@@ -122,8 +105,6 @@ class MovieController {
           movieImageFiles,
           castImageFiles
         );
-
-        console.log("updatedMovie: ", updatedMovie);
 
         if (!updatedMovie) {
           res.status(404).json({ message: "Movie not found for updating" });

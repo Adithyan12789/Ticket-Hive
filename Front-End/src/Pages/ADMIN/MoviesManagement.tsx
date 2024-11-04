@@ -769,9 +769,10 @@ const MovieManagementScreen: React.FC = () => {
                     />
                   </Form.Group>
 
-                  <Form.Group controlId="poster" className="mb-3">
+                  <Form.Group controlId="image" className="mb-3">
                     <Form.Label>Poster</Form.Label>
                     <Form.Control
+                      name="poster"
                       type="file"
                       onChange={handlePosterChange}
                       accept="image/*"
@@ -790,9 +791,10 @@ const MovieManagementScreen: React.FC = () => {
                   </Form.Group>
                 </Col>
                 <Col md={6}>
-                  <Form.Group controlId="movieImages" className="mb-3">
+                  <Form.Group controlId="image" className="mb-3">
                     <Form.Label>Movie Images</Form.Label>
                     <Form.Control
+                      name="movieImages"
                       type="file"
                       multiple
                       onChange={handleImagesChange}
@@ -838,9 +840,10 @@ const MovieManagementScreen: React.FC = () => {
                     />
                   </Form.Group>
 
-                  <Form.Group controlId="castImages" className="mb-3">
+                  <Form.Group controlId="image" className="mb-3">
                     <Form.Label>Cast Images</Form.Label>
                     <Form.Control
+                      name="castImages"
                       type="file"
                       multiple
                       onChange={handleCastsImagesChange}
