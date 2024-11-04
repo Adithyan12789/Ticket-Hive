@@ -6,7 +6,10 @@ export interface IMovie extends Document {
   duration: string;
   description: string;
   languages: string[];
+  images: string[];
   casts: string[];
+  castsImages: string[];
+  director: string;
   releaseDate: Date;
   posters: string | null;
 }
@@ -17,7 +20,10 @@ const MovieSchema = new Schema<IMovie>({
   duration: { type: String, required: true },
   description: { type: String, required: true },
   languages: { type: [String], required: true },
+  images: { type: [String], required: true, default: [] },
   casts: { type: [String], required: true },
+  castsImages: { type: [String], required: true, default: [] },
+  director: { type: String, required: true },
   releaseDate: { type: Date, required: true },
   posters: { type: String, required: true }
 });

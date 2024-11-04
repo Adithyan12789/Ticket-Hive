@@ -2,7 +2,7 @@ import express from 'express';
 import TheaterController from '../Controllers/TheaterController';
 import ScreenController from '../Controllers/ScreenController';
 import { TheaterAuthMiddleware } from '../Middlewares/TheaterAuthMiddleware';
-import MulterConfig from '../Config/Multer';
+import MulterConfig from '../Config/Multer/TheaterMulter';
 import MovieController from '../Controllers/MovieController';
 
 const router = express.Router();

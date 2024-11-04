@@ -1,21 +1,27 @@
-import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Card, Carousel } from "react-bootstrap";
+import React, { useState, useEffect, useCallback } from "react";
+import { Container, Row, Col, Card, Carousel, Form } from "react-bootstrap";
 import axios from "axios";
 import "./HomePage.css";
 import Footer from "../../Components/UserComponents/Footer";
 import { Movie } from "../../Types/UserTypes";
+import { useGetMoviesMutation } from "../../Slices/UserApiSlice";
+import Loader from "../../Components/UserComponents/Loader";
+import { FaSearch } from "react-icons/fa";
 
 const API_KEY = "0ffb386a852dbf070ac6b977313d8039";
-const TRENDING_API_URL = `https://api.themoviedb.org/3/movie/popular?api_key=${API_KEY}&language=en-US&page=1`;
 const RECOMMENDED_API_URL = `https://api.themoviedb.org/3/movie/top_rated?api_key=${API_KEY}&language=en-US&page=1`;
 const SLIDER_API_URL = `https://api.themoviedb.org/3/movie/now_playing?api_key=${API_KEY}&language=en-US&page=1`;
 
 const HomePage: React.FC = () => {
+  const [getMovies, { isLoading }] = useGetMoviesMutation();
   const [trendingMovies, setTrendingMovies] = useState<Movie[]>([]);
   const [recommendedMovies, setRecommendedMovies] = useState<Movie[]>([]);
   const [sliderMovies, setSliderMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [loadingSlider, setLoadingSlider] = useState<boolean>(true);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+
+  console.log("getMovies: ", getMovies);
 
   useEffect(() => {
     const fetchSliderMovies = async () => {
@@ -32,20 +38,18 @@ const HomePage: React.FC = () => {
     fetchSliderMovies();
   }, []);
 
-  useEffect(() => {
-    const fetchTrendingMovies = async () => {
-      try {
-        const response = await axios.get(TRENDING_API_URL);
-        setTrendingMovies(response.data.results);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching trending movies: ", error);
-        setLoading(false);
-      }
-    };
+  const fetchData = useCallback(async () => {
+    try {
+      const response = await getMovies({}).unwrap();
+      setTrendingMovies(response.movies || []);
+    } catch (err) {
+      console.error("Error fetching movies", err);
+    }
+  }, [getMovies]);
 
-    fetchTrendingMovies();
-  }, []);
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   useEffect(() => {
     const fetchRecommendedMovies = async () => {
@@ -64,6 +68,15 @@ const HomePage: React.FC = () => {
 
   const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500/";
   const BACKDROP_BASE_URL = "https://image.tmdb.org/t/p/w1280/";
+  const MOVIE_IMAGES_DIR_PATH = "http://localhost:5000/MoviePosters/";
+
+  console.log("Movies", trendingMovies);
+
+  if (isLoading || loading) return <Loader />;
+
+  const filteredMovies = trendingMovies.filter((movie) =>
+    movie.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div>
@@ -92,20 +105,34 @@ const HomePage: React.FC = () => {
       )}
 
       <Container>
-        <h1 className="text-center my-5" style={{color:"black"}}>Trending Movies</h1>
+        <div className="input-group">
+          <Form.Control
+            type="text"
+            placeholder="Search movies by title"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="search-input"
+          />
+          <span className="search-input-group-text">
+            <FaSearch />
+          </span>
+        </div>
+        <h1 className="text-center my-5" style={{ color: "black" }}>
+          Trending Movies
+        </h1>
         {loading ? (
           <p>Loading trending movies...</p>
         ) : (
           <Row>
-            {trendingMovies.slice(0, 8).map((movie) => (
+            {filteredMovies.slice(0, 8).map((movie) => (
               <Col key={movie.id} md={3} className="mb-5">
-                <Card style={{height: "500px"}} className="movie-card">
+                <Card style={{ height: "500px" }} className="movie-card">
                   <Card.Img
-                  style={{height: "300px"}}
+                    style={{ height: "350px" }}
                     variant="top"
                     src={
-                      movie.poster_path
-                        ? IMAGE_BASE_URL + movie.poster_path
+                      movie.posters
+                        ? MOVIE_IMAGES_DIR_PATH + movie.posters
                         : "/default-poster.jpg"
                     }
                     alt={movie.title}
@@ -116,10 +143,7 @@ const HomePage: React.FC = () => {
                       {movie.title}
                     </Card.Title>
                     <Card.Text>
-                      <strong>Rating:</strong> {movie.vote_average}/10
-                    </Card.Text>
-                    <Card.Text>
-                      <strong>Release Date:</strong> {movie.release_date}
+                      {movie.genres.join(", ")}
                     </Card.Text>
                   </Card.Body>
                 </Card>
@@ -136,16 +160,18 @@ const HomePage: React.FC = () => {
           />
         </div>
 
-        <h1 className="text-center my-5" style={{color:"black"}}>Recommended Movies</h1>
+        <h1 className="text-center my-5" style={{ color: "black" }}>
+          Recommended Movies
+        </h1>
         {loading ? (
           <p>Loading recommended movies...</p>
         ) : (
           <Row>
             {recommendedMovies.slice(0, 8).map((movie) => (
               <Col key={movie.id} md={3} className="mb-5">
-                <Card style={{height: "500px"}} className="movie-card">
+                <Card style={{ height: "500px" }} className="movie-card">
                   <Card.Img
-                  style={{height: "300px"}}
+                    style={{ height: "300px" }}
                     variant="top"
                     src={
                       movie.poster_path
@@ -163,7 +189,7 @@ const HomePage: React.FC = () => {
                       <strong>Rating:</strong> {movie.vote_average}/10
                     </Card.Text>
                     <Card.Text>
-                      <strong>Release Date:</strong> {movie.release_date}
+                      <strong>Release Date:</strong> {movie.releaseDate}
                     </Card.Text>
                   </Card.Body>
                 </Card>

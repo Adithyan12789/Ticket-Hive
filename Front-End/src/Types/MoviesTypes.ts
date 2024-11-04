@@ -2,10 +2,14 @@ export interface MovieManagement {
     _id: string;
     title: string;
     genre: string;
+    genres: string[];
     duration: string;
     description: string;
     posters: string;
+    images: string[];
     casts: string[];
+    castsImages: string[];
+    director: string;
     releaseDate: Date;
     language: string;
     createdAt: string;
@@ -18,7 +22,10 @@ export interface AddMovieForm {
     duration: string;
     description: string;
     poster: File;
-    cast: string[];
+    images: File[];
+    casts: string[];
+    castsImages: File[];
+    director: string;
     releaseDate: Date;
     language: string;
 }

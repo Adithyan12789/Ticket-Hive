@@ -82,6 +82,13 @@ export const usersApiSlice = apiSlice.injectEndpoints({
         body: data
       })
     }),
+
+    getMovies: builder.mutation({
+      query: () => ({
+        url: `${USERS_URL}/get-movies`,
+        method: "GET",
+      }),
+    }),
     
   }),
 });
@@ -97,4 +104,5 @@ export const {
   useResetPasswordMutation,
   useGetUserProfileQuery,
   useUpdateUserMutation,
+  useGetMoviesMutation,
 } = usersApiSlice;

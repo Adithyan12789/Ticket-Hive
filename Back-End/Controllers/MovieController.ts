@@ -16,24 +16,34 @@ const languageMapping: { [key: string]: string } = {
 class MovieController {
   async addMovieController(req: Request, res: Response): Promise<void> {
     try {
-      console.log("body: ", req.body);
-      console.log("Files: ", req.file);
+      
+      const posterFile = (req.files as any)["poster"]?.[0];
+      const movieImageFiles = (req.files as any)["movieImages"] || [];
+      const castImageFiles = (req.files as any)["castImages"] || [];
 
+      if (!posterFile || movieImageFiles.length === 0 || castImageFiles.length === 0) {
+        res.status(400).json({ message: "Please upload all required files." });
+        return;
+    }    
+
+      // Construct movie data
       const movieData: Partial<IMovie> = {
         title: req.body.title,
         genres: req.body.genre.map((genre: string) => genre.toString()),
         duration: req.body.duration,
         description: req.body.description,
+        director: req.body.director,
         languages: req.body.language.map(
           (lang: string) => languageMapping[lang] || lang
         ),
         casts: req.body.casts,
         releaseDate: req.body.releaseDate,
-        posters: req.file ? req.file.filename : null,
+        posters: posterFile.filename, // Use filename directly
+        images: movieImageFiles.map((file: any) => file.filename), // Map filenames for movie images
+        castsImages: castImageFiles.map((file: any) => file.filename), // Map filenames for cast images
       };
 
       const newMovie = await MovieService.addMovie(movieData);
-      console.log("newMovie: ", newMovie);
 
       res
         .status(201)
@@ -80,18 +90,20 @@ class MovieController {
 
   updateMovieHandler = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
-      console.log("body 232r3: ", req.body);
-      console.log("params: ", req.params);
-
       const { id } = req.params;
       const updateData = req.body;
-      const file = req.file ? req.file.path : null;
 
+      const posterFile = (req.files as any)["poster"]?.[0];
+      const movieImageFiles = (req.files as any)["movieImages"] || [];
+      const castImageFiles = (req.files as any)["castImages"] || [];
+      
       try {
         const updatedMovie = await MovieService.updateMovieData(
           id,
           updateData,
-          file
+          posterFile,
+          movieImageFiles,
+          castImageFiles
         );
 
         if (!updatedMovie) {

@@ -16,11 +16,13 @@ export interface User {
   
   /** Movie */
   export interface Movie {
+    posters: string;
     id: number;
     title: string;
+    genres: string[];
     overview: string;
     vote_average: number;
-    release_date: string;
+    releaseDate: string;
     poster_path?: string;
     backdrop_path?: string;
   }

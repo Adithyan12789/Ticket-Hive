@@ -1,7 +1,8 @@
 import express from 'express';
 import UserController from '../Controllers/UserController';
 import { AuthMiddleware } from '../Middlewares/AuthMiddleware';
-import MulterConfig from '../Config/Multer';
+import MulterConfig from '../Config/Multer/UserMulter';
+import MovieController from '../Controllers/MovieController';
 
 const router = express.Router();
 
@@ -16,6 +17,8 @@ router.put('/reset-password/:token', UserController.resetPassword);
 router.route('/profile')
 .get( AuthMiddleware.protect, UserController.getUserProfile )
 .put( AuthMiddleware.protect, MulterConfig.multerUploadUserProfile.single('profileImage'), UserController.updateUserProfile);
+
+router.get('/get-movies',AuthMiddleware.protect, MovieController.getAllMoviesController);
 
 router.post('/logout', UserController.logoutUser);
 

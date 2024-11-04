@@ -47,12 +47,16 @@ const MovieManagementScreen: React.FC = () => {
   const [minutes, setMinutes] = useState("");
   const [, setDuration] = useState("");
   const [selectedPoster, setSelectedPoster] = useState<File | null>(null);
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const [selectedCastsImages, setSelectedCastsImages] = useState<File[]>([]);
   const [description, setDescription] = useState<string>("");
   const [languages, setLanguages] = useState<string[]>([]);
   const [casts, setCasts] = useState<string[]>([]);
   const [releaseDate, setReleaseDate] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [movies, setMovies] = useState<MovieManagement[]>([]);
+  const [director, setDirector] = useState<string>("");
+
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [addMovie] = useAddMovieMutation();
   const [editMovie] = useUpdateMovieMutation();
@@ -90,6 +94,9 @@ const MovieManagementScreen: React.FC = () => {
     setLanguages(movie.language ? movie.language.split(",") : []);
 
     setSelectedPoster(null);
+
+    setDirector(movie.director);
+
     setEditShowModal(true);
   };
 
@@ -106,6 +113,7 @@ const MovieManagementScreen: React.FC = () => {
     setDescription("");
     setLanguages([""]);
     setCasts([""]);
+    setDirector("");
     setReleaseDate("");
     setSelectedPoster(null); // Reset single file
   };
@@ -134,6 +142,31 @@ const MovieManagementScreen: React.FC = () => {
     }
     setSelectedPoster(file);
   };
+
+  const handleImagesChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const validImages = files.filter((file) => file.type.startsWith("image/"));
+
+    if (validImages.length !== files.length) {
+      toast.error("Only images are allowed");
+      return;
+    }
+    setSelectedImages(validImages);
+  };
+
+  const handleCastsImagesChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const validImages = files.filter((file) => file.type.startsWith("image/"));
+
+    if (validImages.length !== files.length) {
+      toast.error("Only images are allowed");
+      return;
+    }
+    setSelectedCastsImages(validImages);
+  };
+
+  console.log("handleImagesChange: ", handleImagesChange);
+  console.log("handleCastsImagesChange: ", handleCastsImagesChange);
 
   const handleDelete = async (movieId: string) => {
     const result = await Swal.fire({
@@ -216,6 +249,7 @@ const MovieManagementScreen: React.FC = () => {
     const trimmedGenres = getGenreNames(genres.map((genre) => genre.trim()));
     const trimmedDuration = formattedDuration.trim();
     const trimmedDescription = description.trim();
+    const trimmedDirector = director.trim();
     const trimmedLanguages = languages.map((language) => language.trim());
     const trimmedCasts = casts.map((cast) => cast.trim());
     const trimmedReleaseDate = releaseDate.trim();
@@ -224,10 +258,13 @@ const MovieManagementScreen: React.FC = () => {
       !trimmedTitle ||
       trimmedGenres.length === 0 ||
       !trimmedDuration ||
+      !selectedImages.length ||
       !selectedPoster ||
       !trimmedDescription ||
+      !trimmedDirector ||
       trimmedLanguages.length === 0 ||
       !trimmedCasts.length ||
+      !selectedCastsImages.length ||
       !trimmedReleaseDate
     ) {
       toast.error("All fields are required");
@@ -249,31 +286,36 @@ const MovieManagementScreen: React.FC = () => {
     try {
       setLoading(true);
       const formData = new FormData();
+
       formData.append("title", trimmedTitle);
-      trimmedGenres.forEach((genre) => {
-        formData.append("genre[]", genre);
-      });
+      trimmedGenres.forEach((genre) => formData.append("genre[]", genre));
       formData.append("duration", trimmedDuration);
       formData.append("description", trimmedDescription);
-      trimmedLanguages.forEach((language) => {
-        formData.append("language[]", language);
-      });
-      trimmedCasts.forEach((cast) => {
-        formData.append("casts[]", cast);
-      });
+      formData.append("director", trimmedDirector);
+      trimmedLanguages.forEach((language) =>
+        formData.append("language[]", language)
+      );
+      trimmedCasts.forEach((cast) => formData.append("casts[]", cast));
       formData.append("releaseDate", trimmedReleaseDate);
+
       if (selectedPoster) {
         formData.append("poster", selectedPoster);
       }
+
+      selectedImages.forEach((image) => formData.append("movieImages", image));
+      selectedCastsImages.forEach((castImage) =>
+        formData.append("castImages", castImage)
+      );
+
+      console.log("formData: ", formData);
 
       await addMovie(formData).unwrap();
       toast.success("Movie added successfully");
       handleModalClose();
       navigate("/admin/get-movies");
       fetchData();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
-      toast.error(err?.data?.message || err.error);
+    } catch (err) {
+      console.error("Error adding movie: ", err);
     } finally {
       setLoading(false);
     }
@@ -289,6 +331,7 @@ const MovieManagementScreen: React.FC = () => {
     const trimmedGenres = getGenreNames(genres.map((genre) => genre.trim()));
     const trimmedDuration = formattedDuration.trim();
     const trimmedDescription = description.trim();
+    const trimmedDirector = director.trim();
     const trimmedLanguages = languages.map((language) => language.trim());
     const trimmedCasts = casts.map((cast) => cast.trim());
     const trimmedReleaseDate = releaseDate.trim();
@@ -297,10 +340,13 @@ const MovieManagementScreen: React.FC = () => {
       !trimmedTitle ||
       trimmedGenres.length === 0 ||
       !trimmedDuration ||
+      !selectedImages.length ||
       !selectedPoster ||
       !trimmedDescription ||
+      !trimmedDirector ||
       trimmedLanguages.length === 0 ||
       !trimmedCasts.length ||
+      !selectedCastsImages.length ||
       !trimmedReleaseDate
     ) {
       toast.error("All fields are required");
@@ -322,22 +368,26 @@ const MovieManagementScreen: React.FC = () => {
     try {
       setLoading(true);
       const formData = new FormData();
+
       formData.append("title", trimmedTitle);
-      trimmedGenres.forEach((genre) => {
-        formData.append("genre[]", genre);
-      });
+      trimmedGenres.forEach((genre) => formData.append("genre[]", genre));
       formData.append("duration", trimmedDuration);
       formData.append("description", trimmedDescription);
-      trimmedLanguages.forEach((language) => {
-        formData.append("language[]", language);
-      });
-      trimmedCasts.forEach((cast) => {
-        formData.append("casts[]", cast);
-      });
+      formData.append("director", trimmedDirector);
+      trimmedLanguages.forEach((language) =>
+        formData.append("language[]", language)
+      );
+      trimmedCasts.forEach((cast) => formData.append("casts[]", cast));
       formData.append("releaseDate", trimmedReleaseDate);
+
       if (selectedPoster) {
         formData.append("poster", selectedPoster);
       }
+
+      selectedImages.forEach((image) => formData.append("movieImages", image));
+      selectedCastsImages.forEach((castImage) =>
+        formData.append("castImages", castImage)
+      );
 
       await editMovie({ id: editingMovieId, formData }).unwrap();
       toast.success("Movie updated successfully");
@@ -486,10 +536,11 @@ const MovieManagementScreen: React.FC = () => {
                     />
                   </Form.Group>
 
-                  <Form.Group controlId="images" className="mb-3">
+                  <Form.Group controlId="image" className="mb-3">
                     <Form.Label>Poster</Form.Label>
                     <Form.Control
                       type="file"
+                      name="poster"
                       onChange={handlePosterChange}
                       accept="image/*"
                     />
@@ -507,6 +558,41 @@ const MovieManagementScreen: React.FC = () => {
                   </Form.Group>
                 </Col>
                 <Col md={6}>
+                  <Form.Group controlId="image" className="mb-3">
+                    <Form.Label>Movie Images</Form.Label>
+                    <Form.Control
+                      type="file"
+                      multiple
+                      name="movieImages"
+                      onChange={handleImagesChange}
+                      accept="image/*"
+                    />
+                    {selectedImages && (
+                      <div className="mt-2">
+                        {selectedImages.map((image, index) => (
+                          <img
+                            key={index}
+                            src={URL.createObjectURL(image)}
+                            alt={`Selected image ${index + 1}`}
+                            style={{
+                              width: "50%",
+                              height: "auto",
+                              margin: "5px",
+                            }}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </Form.Group>
+                  <Form.Group controlId="director" className="mb-3">
+                    <Form.Label>Director</Form.Label>
+                    <Form.Control
+                      type="text"
+                      placeholder="Enter director's name"
+                      value={director}
+                      onChange={(e) => setDirector(e.target.value)}
+                    />
+                  </Form.Group>
                   <Form.Group controlId="casts" className="mb-3">
                     <Form.Label>Casts</Form.Label>
                     <Form.Control
@@ -519,6 +605,38 @@ const MovieManagementScreen: React.FC = () => {
                         )
                       }
                     />
+                  </Form.Group>
+
+                  <Form.Group controlId="image" className="mb-3">
+                    <Form.Label>Cast Images</Form.Label>
+                    <Form.Control
+                      type="file"
+                      multiple
+                      name="castImages"
+                      onChange={handleCastsImagesChange}
+                      accept="image/*"
+                    />
+                    <div style={{ display: "flex", flexDirection: "column" }}>
+                      {selectedCastsImages &&
+                        selectedCastsImages.length > 0 && (
+                          <div className="mt-2">
+                            {selectedCastsImages.map((image, index) => (
+                              <img
+                                key={index}
+                                src={URL.createObjectURL(image)}
+                                alt={`Cast image ${index + 1}`}
+                                style={{
+                                  width: "100px",
+                                  height: "100px",
+                                  marginBottom: "10px",
+                                  objectFit: "cover",
+                                  borderRadius: "5px",
+                                }}
+                              />
+                            ))}
+                          </div>
+                        )}
+                    </div>
                   </Form.Group>
 
                   <Form.Group controlId="releaseDate" className="mb-3">
@@ -651,7 +769,7 @@ const MovieManagementScreen: React.FC = () => {
                     />
                   </Form.Group>
 
-                  <Form.Group controlId="images" className="mb-3">
+                  <Form.Group controlId="poster" className="mb-3">
                     <Form.Label>Poster</Form.Label>
                     <Form.Control
                       type="file"
@@ -672,6 +790,40 @@ const MovieManagementScreen: React.FC = () => {
                   </Form.Group>
                 </Col>
                 <Col md={6}>
+                  <Form.Group controlId="movieImages" className="mb-3">
+                    <Form.Label>Movie Images</Form.Label>
+                    <Form.Control
+                      type="file"
+                      multiple
+                      onChange={handleImagesChange}
+                      accept="image/*"
+                    />
+                    {selectedImages && selectedImages.length > 0 && (
+                      <div className="mt-2">
+                        {selectedImages.map((image, index) => (
+                          <img
+                            key={index}
+                            src={URL.createObjectURL(image)}
+                            alt={`Selected image ${index + 1}`}
+                            style={{
+                              width: "50%",
+                              height: "auto",
+                              margin: "5px",
+                            }}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </Form.Group>
+                  <Form.Group controlId="director" className="mb-3">
+                    <Form.Label>Director</Form.Label>
+                    <Form.Control
+                      type="text"
+                      placeholder="Enter director name"
+                      value={director}
+                      onChange={(e) => setDirector(e.target.value)}
+                    />
+                  </Form.Group>
                   <Form.Group controlId="casts" className="mb-3">
                     <Form.Label>Casts</Form.Label>
                     <Form.Control
@@ -684,6 +836,37 @@ const MovieManagementScreen: React.FC = () => {
                         )
                       }
                     />
+                  </Form.Group>
+
+                  <Form.Group controlId="castImages" className="mb-3">
+                    <Form.Label>Cast Images</Form.Label>
+                    <Form.Control
+                      type="file"
+                      multiple
+                      onChange={handleCastsImagesChange}
+                      accept="image/*"
+                    />
+                    <div style={{ display: "flex", flexDirection: "column" }}>
+                      {selectedCastsImages &&
+                        selectedCastsImages.length > 0 && (
+                          <div className="mt-2">
+                            {selectedCastsImages.map((image, index) => (
+                              <img
+                                key={index}
+                                src={URL.createObjectURL(image)}
+                                alt={`Cast image ${index + 1}`}
+                                style={{
+                                  width: "100px",
+                                  height: "100px",
+                                  marginBottom: "10px",
+                                  objectFit: "cover",
+                                  borderRadius: "5px",
+                                }}
+                              />
+                            ))}
+                          </div>
+                        )}
+                    </div>
                   </Form.Group>
 
                   <Form.Group controlId="releaseDate" className="mb-3">
@@ -723,7 +906,7 @@ const MovieManagementScreen: React.FC = () => {
               )
               .map((movie) => (
                 <Col key={movie._id} md={4} className="mb-4">
-                  <Card>
+                  <Card style={{ height: "610px" }}>
                     <Link
                       to={`/admin/movie-details/${movie?._id}`}
                       style={{ textDecoration: "none", color: "inherit" }}
@@ -737,7 +920,7 @@ const MovieManagementScreen: React.FC = () => {
                     </Link>
                     <Card.Body>
                       <Card.Title>{movie.title}</Card.Title>
-                      <Card.Text>{movie.description}</Card.Text>
+                      <Card.Text>{movie.genres.join(", ")}</Card.Text>
                       <div
                         style={{
                           display: "flex",
