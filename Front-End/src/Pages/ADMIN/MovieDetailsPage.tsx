@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Container, Carousel, Row, Col } from "react-bootstrap";
-import { FaFileAlt, FaTheaterMasks, FaRegClock, FaRegCalendarAlt, FaGlobeAmericas, FaUserAlt, FaTag } from "react-icons/fa";
+import { FaFileAlt, FaTheaterMasks, FaRegClock, FaRegCalendarAlt, FaGlobeAmericas, FaUserAlt, FaTag, FaFilm } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 import { useGetMovieByMovieIdQuery } from "../../Slices/AdminApiSlice";
 import AdminLayout from "../../Components/AdminComponents/AdminLayout";
@@ -71,6 +71,10 @@ const MovieDetailScreen: React.FC = () => {
               <p style={{ display: "flex", alignItems: "center", marginBottom: "15px", color: "#555" }}>
                 <FaUserAlt style={{ marginRight: "10px" }} />
                 Casts: {movie.casts.join(', ')}
+              </p>
+              <p style={{ display: "flex", alignItems: "center", marginBottom: "15px", color: "#555" }}>
+                <FaFilm style={{ marginRight: "10px" }} />
+                Director: {movie.director}
               </p>
               <p style={{ display: "flex", alignItems: "center", marginBottom: "15px", color: "#555" }}>
                 <FaRegCalendarAlt style={{ marginRight: "10px" }} />
