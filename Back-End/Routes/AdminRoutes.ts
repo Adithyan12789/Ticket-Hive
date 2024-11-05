@@ -22,7 +22,7 @@ router.post(
   '/add-movie',
   MovieImageUploads.multerUploadMultipleFields,
   (req, res, next) => {
-    console.log('Uploaded files:', req.files); // Check what is uploaded
+    console.log('Uploaded files:', req.files);
     next();
   },
   MovieController.addMovieController
@@ -33,8 +33,11 @@ router.get('/get-movies',AdminAuthMiddleware.protect, MovieController.getAllMovi
 
 router.get('/movie-details/:id',AdminAuthMiddleware.protect, MovieController.getMovieByIdHandler);
 router.put('/movie-edit/:id',
-  AdminAuthMiddleware.protect,
   MovieImageUploads.multerUploadMultipleFields,
+  (req, res, next) => {
+    console.log('Updated files:', req.files);
+    next();
+  },
   MovieController.updateMovieHandler
 );
 

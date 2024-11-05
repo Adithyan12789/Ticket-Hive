@@ -96,6 +96,10 @@ class MovieController {
       const posterFile = (req.files as any)["poster"]?.[0];
       const movieImageFiles = (req.files as any)["movieImages"] || [];
       const castImageFiles = (req.files as any)["castImages"] || [];
+
+      console.log("posterFile: ", posterFile);
+      console.log("movieImageFiles: ", movieImageFiles);
+      console.log("castImageFiles: ", castImageFiles);
       
       try {
         const updatedMovie = await MovieService.updateMovieData(
@@ -105,6 +109,8 @@ class MovieController {
           movieImageFiles,
           castImageFiles
         );
+
+        console.log("updatedMovie: ", updatedMovie);
 
         if (!updatedMovie) {
           res.status(404).json({ message: "Movie not found for updating" });

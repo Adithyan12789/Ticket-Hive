@@ -167,10 +167,8 @@ const MovieDetailScreen: React.FC = () => {
       <Container style={{ padding: "30px 20px" }}>
         <Row className="justify-content-center text-center mb-4">
           {" "}
-          {/* Add text-center here */}
           <Col md={12}>
             {" "}
-            {/* Make this a separate Col to control header positioning */}
             <h3>Casts</h3>
           </Col>
         </Row>
@@ -178,10 +176,10 @@ const MovieDetailScreen: React.FC = () => {
           {movie.casts.map((actor: string, index: number) => (
             <Col key={index} md={3} className="text-center">
               <img
-                src={`${USER_MOVIE_CAST_IMAGES}${movie.castsImages[index]}`} // Access the corresponding image using the index
+                src={`${USER_MOVIE_CAST_IMAGES}${movie.castsImages[index]}`}
                 alt={actor}
                 style={{
-                  borderRadius: "50%", // Set borderRadius to 50% for a round image
+                  borderRadius: "50%",
                   boxShadow: "0px 4px 12px rgba(0,0,0,0.5)",
                   marginBottom: "10px",
                 }}

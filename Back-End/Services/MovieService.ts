@@ -15,16 +15,25 @@ class MovieService {
   public async updateMovieData(
     id: string,
     updateData: Partial<IMovie>,
-    posterFile: string | null,
-    movieImageFiles?: string[],
-    castImageFiles?: string[]
+    posterFile: { filename: string } | null,
+    movieImageFiles: { filename: string }[],
+    castImageFiles: { filename: string }[]    
   ) {
     try {
       const movie = await MovieRepository.findMovieById(id);
 
+      console.log("movie: ", movie);
+      
+
       if (!movie) {
         throw new Error("Movie not found");
       }
+
+      console.log("updateData: ", updateData);
+      console.log("posterFile: ", posterFile);
+      console.log("movieImageFiles: ", movieImageFiles);
+      console.log("castImageFiles: ", castImageFiles);
+      
 
       // Update properties conditionally
       movie.title = updateData.title || movie.title;
@@ -45,23 +54,23 @@ class MovieService {
           : movie.languages;
       movie.releaseDate = updateData.releaseDate || movie.releaseDate;
 
-      // Update poster file if provided
+      console.log("Type of posterFile:", typeof posterFile);
+
       if (posterFile) {
-        const newPoster = posterFile.split("\\").pop()?.split("/").pop();
-        if (newPoster) {
-          movie.posters = newPoster;
-        }
+          movie.posters = posterFile.filename;
       }
 
       if (movieImageFiles && movieImageFiles.length > 0) {
-        movie.images = movieImageFiles;
+        movie.images = movieImageFiles.map(file => file.filename);
       }
-
+      
       if (castImageFiles && castImageFiles.length > 0) {
-        movie.castsImages = castImageFiles;
-      }
+        movie.castsImages = castImageFiles.map(file => file.filename);
+      }      
 
       const updatedMovie = await movie.save();
+      console.log("service updated movie: ", updatedMovie);
+      
       return updatedMovie;
     } catch (error) {
       console.error("Error updating movie:", error);
