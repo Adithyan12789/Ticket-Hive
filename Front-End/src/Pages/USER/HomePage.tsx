@@ -78,9 +78,9 @@ const HomePage: React.FC = () => {
               </Link>
               <Carousel.Caption
                 style={{
-                  backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent black background
-                  borderRadius: "5px", // Optional: rounded corners
-                  padding: "10px", // Optional: padding for better spacing
+                  backgroundColor: "rgba(0, 0, 0, 0.5)",
+                  borderRadius: "5px",
+                  padding: "10px",
                 }}
               >
                 <h3 style={{ color: "#fff" }}>{movie.title}</h3>
@@ -96,15 +96,16 @@ const HomePage: React.FC = () => {
       )}
 
       <Container>
-        <div className="input-group">
+        <div className="input-group mt-5">
           <Form.Control
+            style={{border: "1px solid #008bb3"}}
             type="text"
             placeholder="Search movies by title"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="search-input"
           />
-          <span className="search-input-group-text">
+          <span className="search-input-group-text"  style={{border: "1px solid #008bb3"}}>
             <FaSearch />
           </span>
         </div>
@@ -115,7 +116,7 @@ const HomePage: React.FC = () => {
           <Row>
             {filteredMovies.slice(0, 8).map((movie) => (
               <Col key={movie._id} md={3} className="mb-5">
-                <Link to={`/movie-detail/${movie._id}`}>
+                <Link to={`/movie-detail/${movie._id}`} style={{ textDecoration: "none" }}>
                   <Card style={{ height: "500px" }} className="movie-card">
                     <Card.Img
                       style={{ height: "350px" }}

@@ -35,7 +35,6 @@ const AddScreenPage: React.FC = () => {
   const [addScreen, { isLoading }] = useAddScreenMutation();
 
   console.log("add theaters page: ", theater);
-  
 
   useEffect(() => {
     if (theater && theater.showTimes) {
@@ -345,23 +344,68 @@ const AddScreenPage: React.FC = () => {
               </Button>
               {layout.length > 0 && (
                 <div className="mt-3">
-                  <h5>Seating Layout</h5>
-                  <div style={{ display: "flex", flexWrap: "wrap" }}>
-                    {layout.map((row, rowIndex) => (
-                      <div key={rowIndex} style={{ display: "flex" }}>
+                  <h5 className="mb-5">Seating Layout</h5>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                    }}
+                  >
+                    {layout.slice(0, 2).map((row, rowIndex) => (
+                      <div
+                        key={`first-set-${rowIndex}`}
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                        }}
+                      >
                         {row.map((seat, seatIndex) => (
                           <div
-                            key={seatIndex}
+                            key={`first-set-seat-${seatIndex}`}
                             style={{
-                              width: "40px",
-                              height: "40px",
+                              width: "30px",
+                              height: "30px",
                               border: "1px solid #007bff",
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
-                              margin: "2px",
+                              fontSize: "10px",
+                              margin: "2px 8px 20px 0px",
+                            }}
+                          >
+                            {seat.label}
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+
+                    {layout.slice(2).map((row, rowIndex) => (
+                      <div
+                        key={`rest-set-${rowIndex + 2}`}
+                        style={{
+                          display: "flex",
+                          marginTop: "10px", // Space for rows after the first two
+                          justifyContent: "center",
+                        }}
+                      >
+                        {row.map((seat, seatIndex) => (
+                          <div
+                            key={`rest-set-seat-${seatIndex}`}
+                            style={{
+                              width: "30px",
+                              height: "30px",
+                              border: "1px solid #007bff",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              fontSize: "10px",
+                              margin: "5px",
                               marginRight:
-                                (seatIndex + 1) % 5 === 0 ? "30px" : "10px",
+                                (seatIndex + 1) % Math.ceil(seatsPerRow / 2) ===
+                                0
+                                  ? "40px"
+                                  : "10px", // Large gap for splitting into two columns
                             }}
                           >
                             {seat.label}

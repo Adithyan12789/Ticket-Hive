@@ -16,7 +16,7 @@ const EditScreen: React.FC = () => {
   const { screenId } = useParams<{ screenId: string }>();
   const [screenNumber, setScreenNumber] = useState<number>(0);
   const [capacity, setCapacity] = useState<number>(0);
-  const [,setSelectedShowTimes] = useState<string[]>([]);
+  const [, setSelectedShowTimes] = useState<string[]>([]);
   const [numRows, setNumRows] = useState<number>(0);
   const [seatsPerRow, setSeatsPerRow] = useState<number>(0);
   const [layout, setLayout] = useState<{ label: string }[][]>([]);
@@ -34,7 +34,7 @@ const EditScreen: React.FC = () => {
   const [getMovies] = useGetMoviesMutation();
   const [updateScreen, { isLoading }] = useUpdateScreenMutation();
 
-  console.log("screen: ", screen)
+  console.log("screen: ", screen);
 
   useEffect(() => {
     if (screen) {
@@ -84,7 +84,6 @@ const EditScreen: React.FC = () => {
   };
 
   console.log("showTimesWithMovies: ", showTimesWithMovies);
-  
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -102,8 +101,6 @@ const EditScreen: React.FC = () => {
         movieTitle,
       })
     );
-
-
 
     try {
       await updateScreen({
@@ -136,15 +133,15 @@ const EditScreen: React.FC = () => {
           movieTitle: selectedMovieObject.title,
           movieId: selectedMovieObject._id,
         };
-  
+
         setShowTimesWithMovies((prev) => [
           ...prev,
-          { ...newShowTime, _id: new Date().toISOString() },  // Add a unique ID
+          { ...newShowTime, _id: new Date().toISOString() }, // Add a unique ID
         ]);
-  
+
         // Only updating show times, not entire objects
         setSelectedShowTimes((prev) => [...prev, newShowTime.showTime]);
-  
+
         setSelectedShowTime("");
         setSelectedMovie("");
         setShowModal(false);
@@ -154,7 +151,6 @@ const EditScreen: React.FC = () => {
       toast.warn("Please select both a show time and a movie.");
     }
   };
-  
 
   const filteredMovies = movies.filter(
     (movie) =>
@@ -169,14 +165,13 @@ const EditScreen: React.FC = () => {
   }));
 
   console.log("screen.showTimes: ", screen.showTimes);
-  
-  const showTimeOptions: ShowTimeOption[] = Array.isArray(screen.showTimes) ? 
-  screen.showTimes.map((showTimeObj: { time: string; }) => ({
-    value: showTimeObj.time,
-    label: String(showTimeObj.time),
-  })) : [];
 
-    
+  const showTimeOptions: ShowTimeOption[] = Array.isArray(screen.showTimes)
+    ? screen.showTimes.map((showTimeObj: { time: string }) => ({
+        value: showTimeObj.time,
+        label: String(showTimeObj.time),
+      }))
+    : [];
 
   return (
     <Container
@@ -336,23 +331,35 @@ const EditScreen: React.FC = () => {
               </Button>
               {layout.length > 0 && (
                 <div className="mt-3">
-                  <h5>Seating Layout</h5>
-                  <div style={{ display: "flex", flexWrap: "wrap" }}>
-                    {layout.map((row, rowIndex) => (
-                      <div key={rowIndex} style={{ display: "flex" }}>
+                  <h5 className="mb-5">Seating Layout</h5>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                    }}
+                  >
+                    {/* Render the first two rows */}
+                    {layout.slice(0, 2).map((row, rowIndex) => (
+                      <div
+                        key={`first-set-${rowIndex}`}
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                        }}
+                      >
                         {row.map((seat, seatIndex) => (
                           <div
-                            key={seatIndex}
+                            key={`first-set-seat-${seatIndex}`}
                             style={{
-                              width: "40px",
-                              height: "40px",
+                              width: "30px",
+                              height: "30px",
                               border: "1px solid #007bff",
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
-                              margin: "2px",
-                              marginRight:
-                                (seatIndex + 1) % 5 === 0 ? "30px" : "10px",
+                              fontSize: "10px",
+                              margin: "2px 8px 20px 0px",
                             }}
                           >
                             {seat.label}
@@ -360,6 +367,61 @@ const EditScreen: React.FC = () => {
                         ))}
                       </div>
                     ))}
+
+                    {/* Render the rest of the rows */}
+                    {layout.slice(2).map((row, rowIndex) => (
+                      <div
+                        key={`rest-set-${rowIndex + 2}`}
+                        style={{
+                          display: "flex",
+                          marginTop: "10px",
+                          justifyContent: "center",
+                        }}
+                      >
+                        {row.map((seat, seatIndex) => (
+                          <div
+                            key={`rest-set-seat-${seatIndex}`}
+                            style={{
+                              width: "30px",
+                              height: "30px",
+                              border: "1px solid #007bff",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              fontSize: "10px",
+                              margin: "5px",
+                              marginRight:
+                                (seatIndex + 1) % Math.ceil(seatsPerRow / 2) ===
+                                0
+                                  ? "40px"
+                                  : "10px",
+                            }}
+                          >
+                            {seat.label}
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+
+                    {/* Static Screen */}
+                    <div
+                      style={{
+                        width: "100%",
+                        maxWidth: "600px",
+                        height: "50px",
+                        backgroundColor: "rgb(134 226 254)",
+                        color: "#fff",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        marginTop: "40px",
+                        marginBottom: "40px",
+                        borderRadius: "5px",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Screen
+                    </div>
                   </div>
                 </div>
               )}
@@ -377,7 +439,7 @@ const EditScreen: React.FC = () => {
           <Modal.Title>Add Show Time</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-        <Form>
+          <Form>
             <Form.Group>
               <Form.Label>Select Movie</Form.Label>
               <Select

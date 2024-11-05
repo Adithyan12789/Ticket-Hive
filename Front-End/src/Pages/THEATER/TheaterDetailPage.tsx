@@ -41,8 +41,8 @@ const TheaterDetailScreen: React.FC = () => {
   const {
     data: theater,
     isLoading: loadingTheater,
-      isError: errorTheater,
-      refetch,
+    isError: errorTheater,
+    refetch,
   } = useGetTheaterByTheaterIdQuery(id);
 
   const {
@@ -61,7 +61,7 @@ const TheaterDetailScreen: React.FC = () => {
   useEffect(() => {
     document.title = "Theater Details";
     refetch();
-  }, [id, refetch]);  
+  }, [id, refetch]);
 
   useEffect(() => {
     const fetchMovies = async () => {
@@ -102,12 +102,21 @@ const TheaterDetailScreen: React.FC = () => {
     if (result.isConfirmed) {
       try {
         await deleteScreen({ screenId }).unwrap();
-        refetch(); 
+        refetch();
         toast.success("Theater deleted successfully");
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
         toast.error(err?.data?.message || err.error);
       }
+    }
+  };
+
+  const handleOpenGoogleMaps = () => {
+    if (theater && theater.latitude && theater.longitude) {
+      const googleMapsUrl = `https://www.google.com/maps?q=${theater.latitude},${theater.longitude}`;
+      window.open(googleMapsUrl, "_blank");
+    } else {
+      toast.error("Location details are not available.");
     }
   };
 
@@ -196,7 +205,13 @@ const TheaterDetailScreen: React.FC = () => {
                     )}
                   </Card.Title>
                   <Card.Text>
-                    <FaMapMarkerAlt style={{ marginRight: "10px" }} />
+                    <FaMapMarkerAlt
+                      style={{
+                        marginRight: "10px",
+                        cursor: "pointer",
+                      }}
+                      onClick={handleOpenGoogleMaps}
+                    />
                     {theater.address}
                   </Card.Text>
                   <Card.Text>
@@ -299,8 +314,9 @@ const TheaterDetailScreen: React.FC = () => {
                   <Modal
                     show={showModal}
                     onHide={handleCloseModal}
-                    size="lg"
+                    size="xl" // Increased modal size
                     centered
+                    dialogClassName="custom-modal-width" // Custom class for further width adjustments
                   >
                     <Modal.Header closeButton>
                       <Modal.Title>
@@ -313,42 +329,105 @@ const TheaterDetailScreen: React.FC = () => {
                           style={{
                             display: "flex",
                             flexDirection: "column",
+                            alignItems: "center",
                             gap: "10px",
                           }}
                         >
-                          {selectedScreen.layout.map((row, rowIndex) => (
-                            <div
-                              key={rowIndex}
-                              style={{
-                                display: "flex",
-                                gap: "6px", // Default gap between seats
-                              }}
-                            >
-                              {row.map((seat, seatIndex) => (
-                                <div
-                                  key={seatIndex}
-                                  style={{
-                                    width: "40px",
-                                    height: "40px",
-                                    backgroundColor: "#e0e0e0", // Subtle background color for seats
-                                    color: "#333",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    borderRadius: "4px",
-                                    boxShadow: "0px 0px 2px rgba(0,0,0,0.2)", // Subtle shadow for a more realistic look
-                                    fontSize: "0.8rem",
-                                    marginRight:
-                                      (seatIndex + 1) % 5 === 0
-                                        ? "20px"
-                                        : "6px", // Larger gap after every 5th seat
-                                  }}
-                                >
-                                  {seat.label}
-                                </div>
-                              ))}
-                            </div>
-                          ))}
+                          {/* First two rows */}
+                          {selectedScreen.layout
+                            .slice(0, 2)
+                            .map((row, rowIndex) => (
+                              <div
+                                key={`first-set-${rowIndex}`}
+                                style={{
+                                  display: "flex",
+                                  gap: "6px",
+                                  justifyContent: "center",
+                                }}
+                              >
+                                {row.map((seat, seatIndex) => (
+                                  <div
+                                    key={`first-set-seat-${seatIndex}`}
+                                    style={{
+                                      width: "30px",
+                                      height: "30px",
+                                      backgroundColor: "#e0e0e0",
+                                      color: "#333",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      justifyContent: "center",
+                                      borderRadius: "4px",
+                                      boxShadow: "0px 0px 2px rgba(0,0,0,0.2)",
+                                      fontSize: "10px",
+                                      margin: "2px 2px 20px 0px",
+                                    }}
+                                  >
+                                    {seat.label}
+                                  </div>
+                                ))}
+                              </div>
+                            ))}
+
+                          {/* Rest of the rows */}
+                          {selectedScreen.layout
+                            .slice(2)
+                            .map((row, rowIndex) => (
+                              <div
+                                key={`rest-set-${rowIndex + 2}`}
+                                style={{
+                                  display: "flex",
+                                  gap: "6px",
+                                  marginTop: "10px",
+                                  justifyContent: "center",
+                                }}
+                              >
+                                {row.map((seat, seatIndex) => (
+                                  <div
+                                    key={`rest-set-seat-${seatIndex}`}
+                                    style={{
+                                      width: "30px",
+                                      height: "30px",
+                                      backgroundColor: "#e0e0e0",
+                                      color: "#333",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      justifyContent: "center",
+                                      borderRadius: "4px",
+                                      boxShadow: "0px 0px 2px rgba(0,0,0,0.2)",
+                                      fontSize: "10px",
+                                      margin: "2px",
+                                      marginRight:
+                                        (seatIndex + 1) %
+                                          Math.ceil(row.length / 2) ===
+                                        0
+                                          ? "40px"
+                                          : "8px",
+                                    }}
+                                  >
+                                    {seat.label}
+                                  </div>
+                                ))}
+                              </div>
+                            ))}
+
+                          {/* Static screen at the bottom */}
+                          <div
+                            style={{
+                              width: "100%",
+                              maxWidth: "600px",
+                              height: "40px",
+                              backgroundColor: "#007bff",
+                              color: "#fff",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              marginTop: "50px",
+                              borderRadius: "5px",
+                              fontWeight: "bold",
+                            }}
+                          >
+                            Screen
+                          </div>
                         </div>
                       ) : (
                         <p>No seat layout available for this screen.</p>
