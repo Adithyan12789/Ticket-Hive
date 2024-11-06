@@ -55,7 +55,7 @@ class ScreenController {
         screenNumber,
         capacity,
         layout,
-        showTimes, // Ensure this follows the new structure of showTimes array with objects { time, movie }
+        showTimes,
         theater: theaterId,
       };
 

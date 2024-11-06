@@ -10,7 +10,7 @@ import { FaSearch } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 const API_KEY = "0ffb386a852dbf070ac6b977313d8039";
-const RECOMMENDED_API_URL = `https://api.themoviedb.org/3/movie/top_rated?api_key=${API_KEY}&language=en-US&page=1;`; // Assume this is proxied through the backend for security
+const RECOMMENDED_API_URL = `https://api.themoviedb.org/3/movie/top_rated?api_key=${API_KEY}&language=en-US&page=1;`;
 
 const HomePage: React.FC = () => {
   const [getMovies, { isLoading: loadingTrending }] = useGetMoviesMutation();

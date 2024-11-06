@@ -70,7 +70,6 @@ class TheaterOwnerService {
 
         const OTP_EXPIRATION_TIME = 5 * 60 * 1000;
 
-        // Check if OTP has expired
         if (new Date().getTime() - new Date(theater.otpGeneratedAt).getTime() > OTP_EXPIRATION_TIME) {
             throw new Error('OTP expired');
         }

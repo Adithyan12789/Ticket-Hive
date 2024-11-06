@@ -34,8 +34,6 @@ class MovieService {
       console.log("movieImageFiles: ", movieImageFiles);
       console.log("castImageFiles: ", castImageFiles);
       
-
-      // Update properties conditionally
       movie.title = updateData.title || movie.title;
       movie.genres =
         updateData.genres && Array.isArray(updateData.genres)

@@ -259,7 +259,7 @@ const AddTheaterScreen: React.FC = () => {
         formData.append("showTimes[]", time);
       });
 
-      await addTheater(formData).unwrap(); // Call the add theater mutation
+      await addTheater(formData).unwrap();
       toast.success("Theater added successfully");
       handleModalClose();
       navigate("/theater/management");
@@ -330,7 +330,6 @@ const AddTheaterScreen: React.FC = () => {
       const formData = new FormData();
       formData.append("certificate", certificate);
 
-      // Trigger the upload mutation with the selected theater ID and formData
       await uploadTheaterCertificate({
         theaterId: selectedTheater._id,
         formData,
@@ -338,7 +337,7 @@ const AddTheaterScreen: React.FC = () => {
 
       toast.success("Certificate uploaded successfully");
       handleCertificateModalClose();
-      setRefreshCounter((prev) => prev + 1); // Refresh theater list
+      setRefreshCounter((prev) => prev + 1);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       toast.error("Failed to upload certificate", err);

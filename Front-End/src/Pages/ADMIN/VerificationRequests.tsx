@@ -29,7 +29,6 @@ const AdminVerificationScreen = () => {
   const [selectedTheaterId, setSelectedTheaterId] = useState("");
   const [rejectionReason, setRejectionReason] = useState("");
 
-  // Define types for error handling
   interface FetchBaseQueryError {
     status: number;
     data: {
@@ -108,7 +107,6 @@ const AdminVerificationScreen = () => {
   if (error) {
     let errorMessage: string;
 
-    // Type narrowing
     if ("status" in error) {
       const fetchError = error as FetchBaseQueryError;
       errorMessage =

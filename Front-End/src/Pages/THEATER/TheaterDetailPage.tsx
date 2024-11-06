@@ -276,7 +276,7 @@ const TheaterDetailScreen: React.FC = () => {
                               </Link>
 
                               <FontAwesomeIcon
-                                icon={faChair} // Replace with appropriate icon for seats
+                                icon={faChair}
                                 style={{
                                   cursor: "pointer",
                                   marginLeft: "40px",
@@ -314,9 +314,9 @@ const TheaterDetailScreen: React.FC = () => {
                   <Modal
                     show={showModal}
                     onHide={handleCloseModal}
-                    size="xl" // Increased modal size
+                    size="xl"
                     centered
-                    dialogClassName="custom-modal-width" // Custom class for further width adjustments
+                    dialogClassName="custom-modal-width"
                   >
                     <Modal.Header closeButton>
                       <Modal.Title>

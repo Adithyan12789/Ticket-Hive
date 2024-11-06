@@ -10,7 +10,6 @@ const languageMapping: { [key: string]: string } = {
   ml: "Mal",
   hi: "Hindi",
   te: "Telugu",
-  // Add other mappings as necessary
 };
 
 class MovieController {
@@ -26,7 +25,6 @@ class MovieController {
         return;
     }    
 
-      // Construct movie data
       const movieData: Partial<IMovie> = {
         title: req.body.title,
         genres: req.body.genre.map((genre: string) => genre.toString()),
@@ -38,9 +36,9 @@ class MovieController {
         ),
         casts: req.body.casts,
         releaseDate: req.body.releaseDate,
-        posters: posterFile.filename, // Use filename directly
-        images: movieImageFiles.map((file: any) => file.filename), // Map filenames for movie images
-        castsImages: castImageFiles.map((file: any) => file.filename), // Map filenames for cast images
+        posters: posterFile.filename,
+        images: movieImageFiles.map((file: any) => file.filename),
+        castsImages: castImageFiles.map((file: any) => file.filename),
       };
 
       const newMovie = await MovieService.addMovie(movieData);

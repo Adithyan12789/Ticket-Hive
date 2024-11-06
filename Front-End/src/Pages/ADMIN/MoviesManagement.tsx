@@ -115,13 +115,13 @@ const MovieManagementScreen: React.FC = () => {
     setCasts([""]);
     setDirector("");
     setReleaseDate("");
-    setSelectedPoster(null); // Reset single file
+    setSelectedPoster(null);
   };
 
   const fetchData = useCallback(async () => {
     try {
       const response = await getMovies({}).unwrap();
-      setMovies(response.movies || []); // Adjust for response structure
+      setMovies(response.movies || []);
       if ((response.movies || []).length === 0) {
         handleModalShow();
       }
@@ -135,7 +135,7 @@ const MovieManagementScreen: React.FC = () => {
   }, [fetchData]);
 
   const handlePosterChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null; // Only take the first selected file
+    const file = e.target.files?.[0] || null;
     if (file && !file.type.startsWith("image/")) {
       toast.error("Only images are allowed");
       return;
@@ -232,7 +232,7 @@ const MovieManagementScreen: React.FC = () => {
   const getGenreNames = (selectedGenres: string[]) => {
     return selectedGenres.map((id) => {
       const genre = genreOptions.find((g) => g.id.toString() === id);
-      return genre ? genre.name : id; // Return genre name or id if not found
+      return genre ? genre.name : id;
     });
   };
 

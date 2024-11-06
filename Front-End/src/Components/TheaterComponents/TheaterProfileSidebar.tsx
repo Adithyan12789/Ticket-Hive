@@ -22,7 +22,7 @@ const TheaterOwnerProfileSidebar: React.FC = () => {
           <NavLink
             to="/theater-profile"
             className={({ isActive }) =>
-              isActive || location.pathname === "/" // Set as active when on home route "/"
+              isActive || location.pathname === "/"
                 ? "theater-sidebar-link active"
                 : "theater-sidebar-link"
             }

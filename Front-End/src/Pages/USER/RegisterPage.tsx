@@ -44,7 +44,7 @@ const SignUpPage = () => {
   const [verifyOtp] = useVerifyOtpMutation();
   const [resendOtp] = useResendOtpMutation();
   
-  const [googleLogin] = useGoogleLoginMutation(); // Updated Hook
+  const [googleLogin] = useGoogleLoginMutation();
 
   const validateEmail = (email: string) =>
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -69,7 +69,6 @@ const SignUpPage = () => {
     if (!validateName(name)) errors.push("Please enter a valid name.");
     if (!validateEmail(email)) errors.push("Please enter a valid email address.");
     
-    // Enhanced password validation messages
     if (!validatePassword(password)) {
       errors.push("Password must be at least 8 characters long, contain at least one letter, one number, and one special character.");
     }

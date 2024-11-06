@@ -136,7 +136,7 @@ const EditScreen: React.FC = () => {
 
         setShowTimesWithMovies((prev) => [
           ...prev,
-          { ...newShowTime, _id: new Date().toISOString() }, // Add a unique ID
+          { ...newShowTime, _id: new Date().toISOString() },
         ]);
 
         // Only updating show times, not entire objects
@@ -453,11 +453,11 @@ const EditScreen: React.FC = () => {
                   if (option) {
                     setSelectedMovie(option.value);
                   } else {
-                    setSelectedMovie(""); // Reset or handle case when option is null
+                    setSelectedMovie("");
                   }
                 }}
                 placeholder="Select a movie"
-                isLoading={isLoadingMovies} // Show loading state
+                isLoading={isLoadingMovies}
               />
             </Form.Group>
             <Form.Group className="mt-4">
@@ -473,7 +473,7 @@ const EditScreen: React.FC = () => {
                   if (option) {
                     setSelectedShowTime(option.value);
                   } else {
-                    setSelectedShowTime(""); // Reset or handle case when option is null
+                    setSelectedShowTime("");
                   }
                 }}
                 placeholder="Select a show time"

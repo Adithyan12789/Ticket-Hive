@@ -44,17 +44,17 @@ const AddScreenPage: React.FC = () => {
 
   useEffect(() => {
     const fetchMovies = async () => {
-      setIsLoadingMovies(true); // Set loading to true
+      setIsLoadingMovies(true); 
       try {
         const response = await getMovies({}).unwrap();
-        setMovies(response.movies || []); // Adjust for response structure
+        setMovies(response.movies || []);
         if ((response.movies || []).length === 0) {
           handleShowModal();
         }
       } catch (err) {
         console.error("Error fetching movies", err);
       } finally {
-        setIsLoadingMovies(false); // Set loading to false
+        setIsLoadingMovies(false);
       }
     };
 
@@ -385,7 +385,7 @@ const AddScreenPage: React.FC = () => {
                         key={`rest-set-${rowIndex + 2}`}
                         style={{
                           display: "flex",
-                          marginTop: "10px", // Space for rows after the first two
+                          marginTop: "10px",
                           justifyContent: "center",
                         }}
                       >
@@ -405,7 +405,7 @@ const AddScreenPage: React.FC = () => {
                                 (seatIndex + 1) % Math.ceil(seatsPerRow / 2) ===
                                 0
                                   ? "40px"
-                                  : "10px", // Large gap for splitting into two columns
+                                  : "10px",
                             }}
                           >
                             {seat.label}
@@ -445,11 +445,11 @@ const AddScreenPage: React.FC = () => {
                   if (option) {
                     setSelectedMovie(option.value);
                   } else {
-                    setSelectedMovie(""); // Reset or handle case when option is null
+                    setSelectedMovie("");
                   }
                 }}
                 placeholder="Select a movie"
-                isLoading={isLoadingMovies} // Show loading state
+                isLoading={isLoadingMovies}
               />
             </Form.Group>
             <Form.Group className="mt-4">
@@ -465,7 +465,7 @@ const AddScreenPage: React.FC = () => {
                   if (option) {
                     setSelectedShowTime(option.value);
                   } else {
-                    setSelectedShowTime(""); // Reset or handle case when option is null
+                    setSelectedShowTime("");
                   }
                 }}
                 placeholder="Select a show time"
