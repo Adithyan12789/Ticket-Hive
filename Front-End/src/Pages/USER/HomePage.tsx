@@ -1,5 +1,14 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Container, Row, Col, Card, Carousel, Form } from "react-bootstrap";
+import {
+  Container,
+  Row,
+  Col,
+  Card,
+  Carousel,
+  Form,
+  Dropdown,
+  InputGroup,
+} from "react-bootstrap";
 import axios from "axios";
 import "./HomePage.css";
 import Footer from "../../Components/UserComponents/Footer";
@@ -18,6 +27,7 @@ const HomePage: React.FC = () => {
   const [recommendedMovies, setRecommendedMovies] = useState<Movie[]>([]);
   const [loadingRecommended, setLoadingRecommended] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [sortOption, setSortOption] = useState<string>("newest");
 
   const fetchData = useCallback(async () => {
     try {
@@ -53,9 +63,15 @@ const HomePage: React.FC = () => {
 
   if (loadingTrending || loadingRecommended) return <Loader />;
 
-  const filteredMovies = trendingMovies.filter((movie) =>
-    movie.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredMovies = trendingMovies
+    .filter((movie) =>
+      movie.title.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    .sort((a, b) => {
+      const dateA = new Date(a.releaseDate || "").getTime();
+      const dateB = new Date(b.releaseDate || "").getTime();
+      return sortOption === "newest" ? dateB - dateA : dateA - dateB;
+    });
 
   console.log("movie id: ", filteredMovies);
 
@@ -85,7 +101,11 @@ const HomePage: React.FC = () => {
               >
                 <h3 style={{ color: "#fff" }}>{movie.title}</h3>
                 <p style={{ color: "#fff" }}>
-                  {movie.description || "No description available"}
+                  {movie.description
+                    ? movie.description.length > 200
+                      ? movie.description.slice(0, 200) + "..."
+                      : movie.description
+                    : "No description available"}
                 </p>
               </Carousel.Caption>
             </Carousel.Item>
@@ -96,18 +116,64 @@ const HomePage: React.FC = () => {
       )}
 
       <Container>
-        <div className="input-group mt-5">
-          <Form.Control
-            style={{border: "1px solid #008bb3"}}
-            type="text"
-            placeholder="Search movies by title"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="search-input"
-          />
-          <span className="search-input-group-text"  style={{border: "1px solid #008bb3"}}>
-            <FaSearch />
-          </span>
+        <div
+          className="d-flex align-items-center mt-5"
+          style={{ gap: "0.5rem", justifyContent: "space-evenly" }}
+        >
+          {/* Sort Dropdown on the Left */}
+          <Dropdown
+            onSelect={(eventKey) => setSortOption(eventKey || "newest")}
+          >
+            <Dropdown.Toggle
+              variant="outline-secondary"
+              id="dropdown-sort"
+              style={{
+                border: "1px solid #008bb3",
+                borderRadius: "0.5rem",
+                color: "#008bb3",
+                boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)",
+                padding: "0.5rem 1rem",
+              }}
+            >
+              Sort by:{" "}
+              {sortOption === "newest" ? "Newest First" : "Oldest First"}
+            </Dropdown.Toggle>
+            <Dropdown.Menu>
+              <Dropdown.Item eventKey="newest">Newest First</Dropdown.Item>
+              <Dropdown.Item eventKey="oldest">Oldest First</Dropdown.Item>
+            </Dropdown.Menu>
+          </Dropdown>
+
+          {/* Search Bar on the Right with Limited Width */}
+          <InputGroup style={{ maxWidth: "400px", flexGrow: 1 }}>
+            <Form.Control
+              style={{
+                border: "1px solid #008bb3",
+                borderRadius: "0.5rem 0 0 0.5rem",
+                paddingLeft: "2.5rem",
+                boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)",
+              }}
+              type="text"
+              placeholder="Search movies by title"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="search-input"
+            />
+            <InputGroup.Text
+              className="search-icon"
+              style={{
+                backgroundColor: "#008bb3",
+                borderRadius: "0 0.5rem 0.5rem 0",
+                border: "none",
+                color: "#fff",
+                cursor: "pointer",
+                padding: "0.5rem 1rem",
+                height: "50px",
+              }}
+            >
+              <FaSearch />
+            </InputGroup.Text>
+          </InputGroup>
         </div>
         <h1 className="text-center my-5" style={{ color: "black" }}>
           Trending Movies
@@ -116,7 +182,10 @@ const HomePage: React.FC = () => {
           <Row>
             {filteredMovies.slice(0, 8).map((movie) => (
               <Col key={movie._id} md={3} className="mb-5">
-                <Link to={`/movie-detail/${movie._id}`} style={{ textDecoration: "none" }}>
+                <Link
+                  to={`/movie-detail/${movie._id}`}
+                  style={{ textDecoration: "none" }}
+                >
                   <Card style={{ height: "500px" }} className="movie-card">
                     <Card.Img
                       style={{ height: "350px" }}
@@ -147,7 +216,6 @@ const HomePage: React.FC = () => {
         ) : (
           <p>No trending movies found</p>
         )}
-
         <div className="banner-container">
           <img
             src="/tickets-stickers-badges-decorative-design-600w-2451487379-transformed.png"
@@ -155,7 +223,6 @@ const HomePage: React.FC = () => {
             className="banner-image"
           />
         </div>
-
         <h1 className="text-center my-5" style={{ color: "black" }}>
           Recommended Movies
         </h1>

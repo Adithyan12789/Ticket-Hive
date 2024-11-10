@@ -1,3 +1,4 @@
+import { Movie } from "../Models/MoviesModel";
 import TheaterDetails, { ITheaterDetails } from "../Models/TheaterDetailsModel";
 import TheaterOwner, { ITheaterOwner } from "../Models/TheaterOwnerModel";
 
@@ -44,6 +45,21 @@ class TheaterRepository {
     public async updateTheaterOwner(theaterOwnerId: string, updates: Partial<ITheaterOwner>): Promise<ITheaterOwner | null> {
         return await TheaterOwner.findByIdAndUpdate(theaterOwnerId, updates, { new: true });
     }
+
+    public async findTheatersByMovieTitle(movieTitle: string): Promise<ITheaterDetails[]> {
+        try {
+            const movie = await Movie.findOne({ title: movieTitle }).exec();
+            if (!movie) {
+                throw new Error('Movie not found');
+            }
+    
+            const theaters = await TheaterDetails.find({ movies: movie._id }).exec();
+            return theaters;
+        } catch (error) {
+            throw new Error("Error fetching theater by movie name");
+        }
+    }
+    
 }
 
 export default new TheaterRepository();

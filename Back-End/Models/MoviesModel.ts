@@ -1,4 +1,4 @@
-import { Schema, model, Document, Types } from "mongoose";
+import mongoose, { Schema, model, Document, Types } from "mongoose";
 
 export interface IMovie extends Document {
   title: string;
@@ -12,9 +12,11 @@ export interface IMovie extends Document {
   director: string;
   releaseDate: Date;
   posters: string | null;
+  theater: mongoose.Types.ObjectId;
 }
 
 const MovieSchema = new Schema<IMovie>({
+
   title: { type: String, required: true },
   genres: { type: [String], required: true },
   duration: { type: String, required: true },
@@ -25,7 +27,9 @@ const MovieSchema = new Schema<IMovie>({
   castsImages: { type: [String], required: true, default: [] },
   director: { type: String, required: true },
   releaseDate: { type: Date, required: true },
-  posters: { type: String, required: true }
+  posters: { type: String, required: true },
+  theater: { type: mongoose.Schema.Types.ObjectId, ref: 'TheaterDetails', required: true },
+  
 });
 
 export const Movie = model<IMovie>("Movie", MovieSchema);

@@ -35,6 +35,11 @@ class ScreenRepository {
   public async deleteScreen(screenId: string) {
     return await Screens.findByIdAndDelete(screenId);
   }
+
+  public async getTheatersByMovieName(movieName: string) {
+    return await Screens.find({ "showTimes.movie": movieName }).populate("theater", "name location");
+  }
+
 }
 
 export default new ScreenRepository();

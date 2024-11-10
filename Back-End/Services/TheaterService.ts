@@ -4,6 +4,7 @@ import TheaterRepository from "../Repositories/TheaterRepo";
 import EmailUtil from "../Utils/EmailUtil";
 import TheaterOwner from "../Models/TheaterOwnerModel";
 import TheaterDetails, { ITheaterDetails } from "../Models/TheaterDetailsModel";
+import { Movie } from "../Models/MoviesModel";
 
 class TheaterOwnerService {
     public async authTheaterOwnerService(email: string, password: string) {
@@ -277,6 +278,20 @@ class TheaterOwnerService {
         const deletedTheater = await TheaterDetails.findByIdAndDelete(id);
         return deletedTheater;
     }
+
+    public getTheatersByMovieTitle = async (movieTitle: string) => {
+        try {
+            const movie = await Movie.findOne({ title: movieTitle }).exec();
+            if (!movie) {
+                throw new Error('Movie not found');
+            }
+
+            const theaters = await TheaterDetails.find({ movies: movie._id }).exec();
+            return theaters;
+        } catch (error) {
+            throw new Error("Error fetching theater by movie name");
+        }
+    };
 
     public logoutTheaterOwnerService() {
         return true;

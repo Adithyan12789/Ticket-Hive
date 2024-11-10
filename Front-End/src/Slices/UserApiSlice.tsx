@@ -96,6 +96,14 @@ export const usersApiSlice = apiSlice.injectEndpoints({
         method: 'GET',
       }),
     }),
+
+    getTheatersByMovieTitle: builder.query({
+      query: ({ movieTitle, date }) => ({
+        url: `${USERS_URL}/movie-theaters/${movieTitle}`,
+        params: { date }, // If the date is needed as a query parameter
+        method: "GET",
+      }),
+    }),   
     
   }),
 });
@@ -113,4 +121,5 @@ export const {
   useUpdateUserMutation,
   useGetMoviesMutation,
   useGetMovieByMovieIdQuery,
+  useGetTheatersByMovieTitleQuery,
 } = usersApiSlice;

@@ -67,6 +67,14 @@ class ScreenService {
       throw new Error("Error fetching Screens");
     }
   };
+
+  public async getTheatersByMovieNameService(movieName: string) {
+    try {
+      return await ScreenRepository.getTheatersByMovieName(movieName);
+    } catch (error) {
+      throw new Error("Error fetching theaters by movie name");
+    }
+  }
 }
 
 export default new ScreenService();

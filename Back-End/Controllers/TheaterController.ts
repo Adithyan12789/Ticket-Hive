@@ -7,6 +7,8 @@ import TheaterTokenService from "../Utils/GenerateTheaterToken";
 import { CustomRequest } from "../Middlewares/TheaterAuthMiddleware";
 import mongoose from "mongoose";
 import TheaterDetails from "../Models/TheaterDetailsModel";
+import { Movie } from "../Models/MoviesModel";
+import Screens from "../Models/ScreensModel";
 
 class TheaterController {
   authTheaterOwner = asyncHandler(
@@ -34,12 +36,9 @@ class TheaterController {
       } catch (err: unknown) {
         if (err instanceof Error) {
           if (err.message === "Your account has been blocked") {
-            res
-              .status(401)
-              .json({
-                message:
-                  "Your account has been blocked. Please contact support.",
-              });
+            res.status(401).json({
+              message: "Your account has been blocked. Please contact support.",
+            });
           } else if (err.message === "Invalid Email or Password") {
             res.status(401).json({ message: "Invalid email or password" });
           } else {
@@ -144,11 +143,9 @@ class TheaterController {
       } catch (err: unknown) {
         if (err instanceof Error) {
           if (err.message === "Email already exists.") {
-            res
-              .status(400)
-              .json({
-                message: "Theater Owner with this email already exists",
-              });
+            res.status(400).json({
+              message: "Theater Owner with this email already exists",
+            });
           } else if (err.message === "Email exists but OTP is not verified.") {
             res
               .status(400)
@@ -244,11 +241,9 @@ class TheaterController {
             .status(500)
             .json({ message: "Failed to send reset email. Please try again" });
         } else {
-          res
-            .status(500)
-            .json({
-              message: "An error occurred during password reset request",
-            });
+          res.status(500).json({
+            message: "An error occurred during password reset request",
+          });
         }
       }
     }
@@ -482,7 +477,6 @@ class TheaterController {
       console.log("id: ", id);
       console.log("req.body: ", req.body);
       console.log("updateData: ", updateData);
-      
 
       try {
         const updatedTheater = await TheaterOwnerService.updateTheaterData(
@@ -530,6 +524,74 @@ class TheaterController {
         res
           .status(500)
           .json({ message: "Error deleting theater", error: error.message });
+      }
+    }
+  );
+
+  getTheatersByMovieTitle = asyncHandler(
+    async (req: Request, res: Response): Promise<void> => {
+      const { movieTitle } = req.params; // Get the movieTitle from URL params
+
+      console.log("movieTitle: ", movieTitle); // Logging movieTitle for debugging
+
+      try {
+        let movie;
+
+        // Check if movieTitle is a valid ObjectId
+        if (mongoose.Types.ObjectId.isValid(movieTitle)) {
+          // If it's an ObjectId, find movie by _id
+          movie = await Movie.findById(movieTitle);
+        } else {
+          // If it's a string (movie title), find movie by title
+          movie = await Movie.findOne({ title: movieTitle });
+        }
+
+        console.log("movie: ", movie); // Logging the fetched movie
+
+        if (!movie) {
+          res.status(404).json({ message: "Movie not found" });
+          return;
+        }
+
+        // Step 2: Find Screens that have this movie in the showTimes array
+        const screens = await Screens.find({
+          "showTimes.movie": movie._id, // Match movie _id in showTimes array
+        })
+          .populate({
+            path: "theater", // Populate the theater field
+            select: "name location owner", // Select fields to return (adjust this based on your TheaterDetails schema)
+          })
+          .populate({
+            path: "showTimes.movie",
+            select: "title", // Optionally populate movie title (if needed)
+          });
+
+        console.log("screens: ", screens); // Logging screens for debugging
+
+      // Step 3: Extract unique theater IDs from the screens
+      const theaterIds = [...new Set(screens.map(screen => screen.theater._id.toString()))];
+
+      // Step 4: Query the TheaterDetails collection to get the full theater details
+      const theaters = await TheaterDetails.find({
+        _id: { $in: theaterIds }, // Find theaters with IDs in the list
+      });
+
+        console.log("theaters: ", theaters); 
+
+        if (!theaters || theaters.length === 0) {
+          res.status(404).json({ message: "No theaters found for this movie" });
+          return;
+        }
+
+        res.status(200).json(theaters); // Sending the list of theaters as the response
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          res
+            .status(500)
+            .json({ message: "An error occurred", error: err.message });
+        } else {
+          res.status(500).json({ message: "An unexpected error occurred" });
+        }
       }
     }
   );

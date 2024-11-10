@@ -3,6 +3,8 @@ import UserController from '../Controllers/UserController';
 import { AuthMiddleware } from '../Middlewares/AuthMiddleware';
 import MulterConfig from '../Config/Multer/UserMulter';
 import MovieController from '../Controllers/MovieController';
+import TheaterController from '../Controllers/TheaterController';
+import ScreenController from '../Controllers/ScreenController';
 
 const router = express.Router();
 
@@ -20,6 +22,7 @@ router.route('/profile')
 
 router.get('/get-movies',AuthMiddleware.protect, MovieController.getAllMoviesController);
 router.get('/movie-detail/:id',AuthMiddleware.protect, MovieController.getMovieByIdHandler);
+router.get('/movie-theaters/:movieTitle', AuthMiddleware.protect, TheaterController.getTheatersByMovieTitle);
 
 router.post('/logout', UserController.logoutUser);
 

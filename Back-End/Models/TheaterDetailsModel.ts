@@ -18,6 +18,7 @@ export interface ITheaterDetails extends Document {
     longitude?: number;
     createdAt?: Date;
     updatedAt?: Date;
+    movies: mongoose.Types.ObjectId[];
 }
 
 const theaterDetailsSchema: Schema<ITheaterDetails> = new Schema(
@@ -57,6 +58,7 @@ const theaterDetailsSchema: Schema<ITheaterDetails> = new Schema(
                 message: "Longitude must be between -180 and 180 degrees",
             },
         },
+        movies: [{ type: Schema.Types.ObjectId, ref: 'Movie', required: true }], // New movies field
     },
     {
         timestamps: true,

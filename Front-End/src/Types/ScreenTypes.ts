@@ -1,7 +1,7 @@
 /** Screen Types */
 export interface Seat {
   label: string;
-  isAvailable: boolean;
+  type: 'regular' | 'vip' | 'unavailable';
 }
 
 export interface Screen {

@@ -198,6 +198,31 @@ class ScreenController {
       }
     }
   );
+
+
+  getTheatersByMovieName = asyncHandler(
+    async (req: Request, res: Response): Promise<void> => {
+      const { movieName } = req.params;
+
+      if (!movieName) {
+        res.status(400).json({ error: "Movie name is required" });
+        return;
+      }
+
+      try {
+        const theaters = await ScreenService.getTheatersByMovieNameService(movieName);
+        
+        if (!theaters.length) {
+          res.status(404).json({ message: "No theaters found for the specified movie" });
+          return;
+        }
+
+        res.status(200).json(theaters);
+      } catch (error: any) {
+        res.status(500).json({ message: error?.message || "Internal server error" });
+      }
+    }
+  );
 }
 
 export default new ScreenController();

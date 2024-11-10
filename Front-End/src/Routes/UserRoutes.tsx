@@ -7,6 +7,7 @@ import ResetPassword from '../Pages/USER/ResetPasswordPage';
 import UserProfilePage from '../Pages/USER/UserProfilePage';
 import PrivateRoute from '../Components/UserComponents/PrivateRoute';
 import MovieDetailScreen from '../Pages/USER/MovieDetailPage';
+import MovieTheaterScreen from '../Pages/USER/MovieTheaterPage';
 
 export const UserRoutes = (
   <>
@@ -20,6 +21,7 @@ export const UserRoutes = (
     <Route path="" element={<PrivateRoute />}>
       <Route path="/profile" element={<UserProfilePage />} />
       <Route path="/movie-detail/:id" element={<MovieDetailScreen />} />
+      <Route path="/movie-theaters/:movieTitle" element={<MovieTheaterScreen />} />
     </Route>
   </>
 );

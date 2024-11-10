@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Container, Row, Col } from "react-bootstrap";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useGetMovieByMovieIdQuery } from "../../Slices/UserApiSlice";
 import Loader from "../../Components/UserComponents/Loader";
 import { toast } from "react-toastify";
@@ -11,6 +11,8 @@ const USER_MOVIE_CAST_IMAGES = "http://localhost:5000/CastsImages/";
 
 const MovieDetailScreen: React.FC = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+
   const {
     data: movie,
     isLoading: loadingMovie,
@@ -132,6 +134,7 @@ const MovieDetailScreen: React.FC = () => {
                   transition: "background-color 0.3s",
                   marginTop: "20px",
                 }}
+                onClick={() => navigate(`/movie-theaters/${id}`)}
                 onMouseEnter={(e) =>
                   (e.currentTarget.style.backgroundColor = "#e91e63")
                 }
@@ -166,9 +169,7 @@ const MovieDetailScreen: React.FC = () => {
 
       <Container style={{ padding: "30px 20px" }}>
         <Row className="justify-content-center text-center mb-4">
-          {" "}
           <Col md={12}>
-            {" "}
             <h3>Casts</h3>
           </Col>
         </Row>
@@ -184,7 +185,6 @@ const MovieDetailScreen: React.FC = () => {
                   marginBottom: "10px",
                 }}
               />
-
               <p>{actor}</p>
             </Col>
           ))}
