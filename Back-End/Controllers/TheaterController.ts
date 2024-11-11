@@ -530,60 +530,71 @@ class TheaterController {
 
   getTheatersByMovieTitle = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
-      const { movieTitle } = req.params; // Get the movieTitle from URL params
+      const { movieTitle } = req.params;
 
-      console.log("movieTitle: ", movieTitle); // Logging movieTitle for debugging
+      console.log("movieTitle: ", movieTitle);
 
       try {
+        // Step 1: Retrieve the movie by either ID or title
         let movie;
 
-        // Check if movieTitle is a valid ObjectId
         if (mongoose.Types.ObjectId.isValid(movieTitle)) {
-          // If it's an ObjectId, find movie by _id
           movie = await Movie.findById(movieTitle);
         } else {
-          // If it's a string (movie title), find movie by title
           movie = await Movie.findOne({ title: movieTitle });
         }
 
-        console.log("movie: ", movie); // Logging the fetched movie
+        console.log("movie: ", movie);
 
         if (!movie) {
           res.status(404).json({ message: "Movie not found" });
           return;
         }
 
-        // Step 2: Find Screens that have this movie in the showTimes array
+        // Step 2: Query only the screens that show the specific movie
         const screens = await Screens.find({
-          "showTimes.movie": movie._id, // Match movie _id in showTimes array
+          "showTimes.movie": movie._id,
         })
           .populate({
-            path: "theater", // Populate the theater field
-            select: "name location owner", // Select fields to return (adjust this based on your TheaterDetails schema)
+            path: "theater",
+            select: "name location owner", // Theater details to include in response
           })
           .populate({
             path: "showTimes.movie",
-            select: "title", // Optionally populate movie title (if needed)
+            select: "title", // Movie title within showTimes
           });
 
-        console.log("screens: ", screens); // Logging screens for debugging
+          const filteredScreens = screens.filter((screen) =>
+            screen.showTimes.some((showTime) =>
+              showTime.movieTitle === movie.title
+            )
+          );          
 
-      // Step 3: Extract unique theater IDs from the screens
-      const theaterIds = [...new Set(screens.map(screen => screen.theater._id.toString()))];
+        console.log("filtered screens: ", filteredScreens);
 
-      // Step 4: Query the TheaterDetails collection to get the full theater details
-      const theaters = await TheaterDetails.find({
-        _id: { $in: theaterIds }, // Find theaters with IDs in the list
-      });
-
-        console.log("theaters: ", theaters); 
-
-        if (!theaters || theaters.length === 0) {
-          res.status(404).json({ message: "No theaters found for this movie" });
+        if (!filteredScreens || filteredScreens.length === 0) {
+          res.status(404).json({ message: "No screens found for this movie" });
           return;
         }
 
-        res.status(200).json(theaters); // Sending the list of theaters as the response
+        // Extract unique theaters from filtered screens
+        const theaters = filteredScreens
+          .map((screen) => screen.theater)
+          .filter(
+            (value, index, self) =>
+              value &&
+              self.findIndex(
+                (t) => t._id.toString() === value._id.toString()
+              ) === index
+          );
+
+        console.log("theaters: ", theaters);
+
+        // Send both theaters and filtered screens to the frontend
+        res.status(200).json({
+          theaters,
+          screens: filteredScreens,
+        });
       } catch (err: unknown) {
         if (err instanceof Error) {
           res
