@@ -103,7 +103,14 @@ export const usersApiSlice = apiSlice.injectEndpoints({
         params: { date }, // If the date is needed as a query parameter
         method: "GET",
       }),
-    }),   
+    }), 
+    
+    getScreensByTheaterId: builder.query({
+      query: (id) => ({
+        url: `${USERS_URL}/get-screens/${id}`,
+        method: 'GET',
+      }),
+    }),
     
   }),
 });
@@ -122,4 +129,5 @@ export const {
   useGetMoviesMutation,
   useGetMovieByMovieIdQuery,
   useGetTheatersByMovieTitleQuery,
+  useLazyGetScreensByTheaterIdQuery,
 } = usersApiSlice;

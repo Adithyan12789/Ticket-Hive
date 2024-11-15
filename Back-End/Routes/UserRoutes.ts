@@ -23,6 +23,8 @@ router.route('/profile')
 router.get('/get-movies',AuthMiddleware.protect, MovieController.getAllMoviesController);
 router.get('/movie-detail/:id',AuthMiddleware.protect, MovieController.getMovieByIdHandler);
 router.get('/movie-theaters/:movieTitle', AuthMiddleware.protect, TheaterController.getTheatersByMovieTitle);
+router.get('/get-screens/:id', AuthMiddleware.protect, UserController.getScreensByTheaterId);
+
 
 router.post('/logout', UserController.logoutUser);
 

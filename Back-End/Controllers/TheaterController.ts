@@ -551,34 +551,23 @@ class TheaterController {
           return;
         }
 
-        // Step 2: Query only the screens that show the specific movie
+        // Update the populate query to include 'address'
         const screens = await Screens.find({
           "showTimes.movie": movie._id,
         })
           .populate({
-            path: "theater",
-            select: "name location owner", // Theater details to include in response
+            path: "theater", // Populate theater field
+            select: "name location amenities description owner address", // Include 'amenities' in the populated fields
           })
           .populate({
-            path: "showTimes.movie",
-            select: "title", // Movie title within showTimes
+            path: "showTimes.movie", // Populate movie field inside showTimes
+            select: "title", // Include movie title within showTimes
           });
 
-          const filteredScreens = screens.filter((screen) =>
-            screen.showTimes.some((showTime) =>
-              showTime.movieTitle === movie.title
-            )
-          );          
-
-        console.log("filtered screens: ", filteredScreens);
-
-        if (!filteredScreens || filteredScreens.length === 0) {
-          res.status(404).json({ message: "No screens found for this movie" });
-          return;
-        }
+        console.log("screens: ", screens);
 
         // Extract unique theaters from filtered screens
-        const theaters = filteredScreens
+        const theaters = screens
           .map((screen) => screen.theater)
           .filter(
             (value, index, self) =>
@@ -593,7 +582,7 @@ class TheaterController {
         // Send both theaters and filtered screens to the frontend
         res.status(200).json({
           theaters,
-          screens: filteredScreens,
+          screens,
         });
       } catch (err: unknown) {
         if (err instanceof Error) {

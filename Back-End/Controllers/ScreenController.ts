@@ -157,7 +157,7 @@ class ScreenController {
 
   getScreensByTheaterId = asyncHandler(
     async (req: CustomRequest, res: Response): Promise<void> => {
-      console.log("helloooooooooooo");
+      console.log("hello");
 
       const { id } = req.params;
       console.log(id);

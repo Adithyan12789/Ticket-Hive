@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { Container, Row, Col } from "react-bootstrap";
+import React, { useState } from "react";
+import { Modal, Button, Container, Row, Col } from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom";
 import { useGetMovieByMovieIdQuery } from "../../Slices/UserApiSlice";
 import Loader from "../../Components/UserComponents/Loader";
@@ -12,6 +12,8 @@ const USER_MOVIE_CAST_IMAGES = "http://localhost:5000/CastsImages/";
 const MovieDetailScreen: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [showModal, setShowModal] = useState(false);
+  const [, setSelectedLanguage] = useState<string | null>(null);
 
   const {
     data: movie,
@@ -20,10 +22,24 @@ const MovieDetailScreen: React.FC = () => {
     refetch,
   } = useGetMovieByMovieIdQuery(id);
 
-  useEffect(() => {
+  React.useEffect(() => {
     document.title = movie ? `${movie.title} - Movie Details` : "Movie Details";
     refetch();
   }, [id, refetch, movie]);
+
+  const handleBookNow = () => {
+    if (!movie || !movie.languages.length) {
+      toast.error("No languages available for this movie.");
+      return;
+    }
+    setShowModal(true);
+  };
+
+  const handleLanguageSelect = (language: string) => {
+    setSelectedLanguage(language);
+    setShowModal(false);
+    navigate(`/movie-theaters/${id}?language=${language}`);
+  };  
 
   if (loadingMovie) return <Loader />;
 
@@ -63,14 +79,7 @@ const MovieDetailScreen: React.FC = () => {
           }}
         >
           <Row>
-            <Col
-              md={5}
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
+            <Col md={5}>
               <img
                 src={`${USER_MOVIE_POSTER}${movie.posters}`}
                 alt={movie.title}
@@ -88,33 +97,12 @@ const MovieDetailScreen: React.FC = () => {
                 }
               />
             </Col>
-            <Col md={7} style={{ alignContent: "center" }}>
-              <h2
-                style={{
-                  fontSize: "2.5rem",
-                  fontWeight: "bold",
-                  marginBottom: "10px",
-                }}
-              >
+            <Col md={7}>
+              <h2 style={{ fontSize: "2.5rem", fontWeight: "bold" }}>
                 {movie.title}
               </h2>
-              <p
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  marginBottom: "5px",
-                }}
-              >
-                {movie.genres.join(", ")}
-              </p>
-              <p
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  marginBottom: "10px",
-                  fontSize: "1.1rem",
-                }}
-              >
+              <p>{movie.genres.join(", ")}</p>
+              <p>
                 {movie.languages.join(", ")} | {movie.duration} |{" "}
                 {new Date(movie.releaseDate).toLocaleDateString("en-GB", {
                   day: "2-digit",
@@ -129,18 +117,10 @@ const MovieDetailScreen: React.FC = () => {
                   border: "none",
                   borderRadius: "5px",
                   padding: "10px 20px",
-                  fontSize: "1rem",
                   cursor: "pointer",
-                  transition: "background-color 0.3s",
                   marginTop: "20px",
                 }}
-                onClick={() => navigate(`/movie-theaters/${id}`)}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.backgroundColor = "#e91e63")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.backgroundColor = "#ff4081")
-                }
+                onClick={handleBookNow}
               >
                 Book Now
               </button>
@@ -190,6 +170,69 @@ const MovieDetailScreen: React.FC = () => {
           ))}
         </Row>
       </Container>
+
+      {/* Language Selection Modal */}
+      <Modal
+        show={showModal}
+        onHide={() => setShowModal(false)}
+        centered
+        style={{ fontFamily: "Arial, sans-serif" }}
+      >
+        <Modal.Header
+          closeButton
+          style={{
+            color: "#fff",
+            borderBottom: "none",
+          }}
+        >
+          <Modal.Title style={{ fontWeight: "bold", fontSize: "1.5rem" }}>
+            Select Language
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body
+          style={{
+            backgroundColor: "#f9f9f9",
+            borderRadius: "10px",
+            padding: "20px 15px",
+          }}
+        >
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "15px",
+            }}
+          >
+            {movie.languages.map((language: string) => (
+              <Button
+                key={language}
+                style={{
+                  backgroundColor: "#ff4081",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "25px",
+                  padding: "10px 20px",
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  boxShadow: "0 4px 10px rgba(255, 64, 129, 0.4)",
+                  transition: "transform 0.3s, background-color 0.3s",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "#e91e63";
+                  e.currentTarget.style.transform = "translateY(-2px)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "#ff4081";
+                  e.currentTarget.style.transform = "translateY(0)";
+                }}
+                onClick={() => handleLanguageSelect(language)}
+              >
+                {language}
+              </Button>
+            ))}
+          </div>
+        </Modal.Body>
+      </Modal>
     </>
   );
 };

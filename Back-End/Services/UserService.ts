@@ -3,6 +3,7 @@ import crypto from "crypto";
 import UserRepository from "../Repositories/UserRepo";
 import EmailUtil from "../Utils/EmailUtil";
 import User, { IUser } from "../Models/UserModel";
+import Screens from "../Models/ScreensModel";
 
 class UserService {
     public async authenticateUser(email: string, password: string) {
@@ -189,6 +190,19 @@ class UserService {
         
           return await UserRepository.saveUser(user);
       };
+
+      public async getScreensByTheaterId(id: string) {
+        if (!id) {
+          throw new Error("Theater ID is required");
+        }
+    
+        const screens = await Screens.find({ theater: id }).populate("theater", "name location").populate("showTimes.movie", "title genre");
+        if (!screens.length) {
+          throw new Error("No screens found for this theater");
+        }
+    
+        return screens;
+      }
 
 
     public logoutUserService() {

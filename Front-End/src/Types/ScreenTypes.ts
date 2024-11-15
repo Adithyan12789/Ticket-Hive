@@ -5,6 +5,7 @@ export interface Seat {
 }
 
 export interface Screen {
+  theater: string;
   _id: string;
   screenNumber: number;
   capacity: number;
