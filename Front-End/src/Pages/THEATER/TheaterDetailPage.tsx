@@ -32,6 +32,7 @@ import "./TheaterDetailsPage.css";
 import { Screen, ShowTime } from "../../Types/ScreenTypes";
 import { MovieManagement } from "../../Types/MoviesTypes";
 import Swal from "sweetalert2";
+import React from "react";
 
 const THEATER_IMAGES_DIR_PATH = "http://localhost:5000/TheatersImages/";
 const DEFAULT_THEATER_IMAGE = "/profileImage_1729749713837.jpg";
@@ -333,83 +334,52 @@ const TheaterDetailScreen: React.FC = () => {
                             gap: "10px",
                           }}
                         >
-                          {/* First two rows */}
-                          {selectedScreen.layout
-                            .slice(0, 2)
-                            .map((row, rowIndex) => (
-                              <div
-                                key={`first-set-${rowIndex}`}
-                                style={{
-                                  display: "flex",
-                                  gap: "6px",
-                                  justifyContent: "center",
-                                }}
-                              >
-                                {row.map((seat, seatIndex) => (
-                                  <div
-                                    key={`first-set-seat-${seatIndex}`}
+                          {selectedScreen.layout.map((row, rowIndex) => (
+                            <div
+                              key={`row-${rowIndex}`}
+                              style={{
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                marginBottom:
+                                  rowIndex === 1
+                                    ? "30px"
+                                    : rowIndex ===
+                                      Math.floor(
+                                        selectedScreen.layout.length / 2
+                                      )
+                                    ? "50px"
+                                    : "10px",
+                                gap: "10px",
+                              }}
+                            >
+                              {row.map((seat, seatIndex) => (
+                                <React.Fragment key={`seat-${seatIndex}`}>
+                                  {seatIndex === Math.floor(row.length / 2) && (
+                                    // Add horizontal gap in the middle
+                                    <div style={{ width: "30px" }}></div>
+                                  )}
+                                  <button
                                     style={{
                                       width: "30px",
                                       height: "30px",
-                                      backgroundColor: "#e0e0e0",
-                                      color: "#333",
+                                      backgroundColor: "#f8f9fa",
+                                      color: "#000",
                                       display: "flex",
                                       alignItems: "center",
                                       justifyContent: "center",
+                                      border: "1px solid #007bff",
                                       borderRadius: "4px",
-                                      boxShadow: "0px 0px 2px rgba(0,0,0,0.2)",
-                                      fontSize: "10px",
-                                      margin: "2px 2px 20px 0px",
+                                      fontSize: "0.8rem",
+                                      cursor: "pointer",
                                     }}
                                   >
                                     {seat.label}
-                                  </div>
-                                ))}
-                              </div>
-                            ))}
-
-                          {/* Rest of the rows */}
-                          {selectedScreen.layout
-                            .slice(2)
-                            .map((row, rowIndex) => (
-                              <div
-                                key={`rest-set-${rowIndex + 2}`}
-                                style={{
-                                  display: "flex",
-                                  gap: "6px",
-                                  marginTop: "10px",
-                                  justifyContent: "center",
-                                }}
-                              >
-                                {row.map((seat, seatIndex) => (
-                                  <div
-                                    key={`rest-set-seat-${seatIndex}`}
-                                    style={{
-                                      width: "30px",
-                                      height: "30px",
-                                      backgroundColor: "#e0e0e0",
-                                      color: "#333",
-                                      display: "flex",
-                                      alignItems: "center",
-                                      justifyContent: "center",
-                                      borderRadius: "4px",
-                                      boxShadow: "0px 0px 2px rgba(0,0,0,0.2)",
-                                      fontSize: "10px",
-                                      margin: "2px",
-                                      marginRight:
-                                        (seatIndex + 1) %
-                                          Math.ceil(row.length / 2) ===
-                                        0
-                                          ? "40px"
-                                          : "8px",
-                                    }}
-                                  >
-                                    {seat.label}
-                                  </div>
-                                ))}
-                              </div>
-                            ))}
-
+                                  </button>
+                                </React.Fragment>
+                              ))}
+                            </div>
+                          ))}
                           {/* Static screen at the bottom */}
                           <div
                             style={{
@@ -421,7 +391,7 @@ const TheaterDetailScreen: React.FC = () => {
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
-                              marginTop: "50px",
+                              marginTop: "20px",
                               borderRadius: "5px",
                               fontWeight: "bold",
                             }}
@@ -433,6 +403,7 @@ const TheaterDetailScreen: React.FC = () => {
                         <p>No seat layout available for this screen.</p>
                       )}
                     </Modal.Body>
+
                     <Modal.Footer>
                       <Button variant="secondary" onClick={handleCloseModal}>
                         Close

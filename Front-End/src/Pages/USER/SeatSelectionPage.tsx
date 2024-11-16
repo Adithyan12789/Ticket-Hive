@@ -5,59 +5,137 @@ import { FaArrowLeft } from "react-icons/fa";
 import { useGetScreenByIdQuery } from "../../Slices/UserApiSlice";
 import Loader from "../../Components/UserComponents/Loader";
 import { toast } from "react-toastify";
+import React from "react";
 
 type Seat = {
-  seatNumber: string;
+  label: string;
   isAvailable: boolean;
 };
 
 type ScreenDetails = {
   id: string;
   screenNumber: number;
-  layout: Seat[][]; // Updated to reflect a 2D array for rows of seats
+  layout: Seat[][];
 };
 
 const SelectSeatPage: React.FC = () => {
   const { screenId } = useParams<{ screenId: string }>();
   const navigate = useNavigate();
   const [selectedSeats, setSelectedSeats] = useState<Set<string>>(new Set());
+  const [, setLayout] = useState<Seat[][]>([]);
 
   const { data, isLoading, isError } = useGetScreenByIdQuery(screenId);
-
   const screenDetails = data as ScreenDetails | null;
 
-  console.log("screenDetails: ", screenDetails);
-  
+  useEffect(() => {
+    document.title = screenDetails
+      ? `Screen - ${screenDetails.screenNumber} - Select Seats`
+      : "Select Seats";
+  }, [screenDetails]);
 
-  const handleSelectSeat = (seatNumber: string) => {
-    const newSelectedSeats = new Set(selectedSeats);
-    if (newSelectedSeats.has(seatNumber)) {
-      newSelectedSeats.delete(seatNumber);
+  useEffect(() => {
+    if (screenDetails?.layout) {
+      setLayout(screenDetails.layout);
     } else {
-      newSelectedSeats.add(seatNumber);
+      setLayout(generateSeatNames(5, 8)); // Reduced number of seats for smaller layout
+    }
+  }, [screenDetails]);
+
+  const generateSeatNames = (rows: number, cols: number): Seat[][] => {
+    const layout: Seat[][] = [];
+    for (let i = 0; i < rows; i++) {
+      const row: Seat[] = [];
+      const rowPrefix = String.fromCharCode(65 + (i % 26));
+      for (let j = 1; j <= cols; j++) {
+        row.push({
+          label: `${rowPrefix}${j.toString().padStart(2, "0")}`,
+          isAvailable: true,
+        });
+      }
+      layout.push(row);
+    }
+    return layout;
+  };
+
+  const handleSeatSelection = (seatLabel: string, isAvailable: boolean) => {
+    if (!isAvailable) return;
+    const newSelectedSeats = new Set(selectedSeats);
+    if (newSelectedSeats.has(seatLabel)) {
+      newSelectedSeats.delete(seatLabel);
+    } else {
+      newSelectedSeats.add(seatLabel);
     }
     setSelectedSeats(newSelectedSeats);
   };
 
-  const handleConfirmSelection = () => {
-    if (selectedSeats.size === 0) {
-      toast.error("Please select at least one seat.");
-      return;
-    }
-    navigate("/confirmation", { state: { seats: Array.from(selectedSeats) } });
+  const renderScreenLayout = () => {
+    if (!screenDetails) return <p>No seat layout available for this screen.</p>;
+
+    return (
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: "5px", // Reduced gap between rows
+        }}
+      >
+        {screenDetails.layout.map((row, rowIndex) => (
+          <div
+            key={`row-${rowIndex}`}
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              marginBottom: rowIndex === Math.floor(screenDetails.layout.length / 2) ? "20px" : "5px", // Reduced margin
+              gap: "5px", // Reduced gap between buttons
+            }}
+          >
+            {row.map((seat, seatIndex) => (
+              <React.Fragment key={`seat-${seatIndex}`}>
+                {seatIndex === Math.floor(row.length / 2) && <div style={{ width: "20px" }}></div>}
+                <button
+                  style={{
+                    width: "35px", // Smaller button size
+                    height: "35px", // Smaller button size
+                    backgroundColor: "#f8f9fa",
+                    color: "#000",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    border: "1px solid #007bff",
+                    borderRadius: "4px",
+                    fontSize: "0.7rem", // Smaller font size
+                    cursor: "pointer",
+                  }}
+                  onClick={() => handleSeatSelection(seat.label, seat.isAvailable)}
+                  disabled={!seat.isAvailable}
+                >
+                  {seat.label}
+                </button>
+              </React.Fragment>
+            ))}
+          </div>
+        ))}
+        <div
+          style={{
+            width: "50%",
+            maxWidth: "250px",
+            height: "12px",
+            backgroundColor: "rgb(124, 187, 255)",
+            color: "#fff",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            marginTop: "50px", // Reduced top margin
+            borderRadius: "5px",
+            fontWeight: "bold",
+          }}
+        >
+        </div>
+      </div>
+    );
   };
-
-  useEffect(() => {
-    document.title = screenDetails ? `Screen - ${screenDetails.screenNumber} - Select Seats` : "Select Seats";
-  }, [screenDetails]);
-
-  if (screenDetails && screenDetails.layout) {
-    console.log("screenDetails.seatLayout: ", JSON.stringify(screenDetails.layout, null, 2));
-  } else {
-    console.log("seatLayout is not available in screenDetails.");
-  }
-  
-  
 
   if (isLoading) return <Loader />;
   if (isError) {
@@ -66,76 +144,29 @@ const SelectSeatPage: React.FC = () => {
   }
 
   return (
-    <Container style={{ padding: "40px 20px" }}>
-      <Row className="mb-4">
+    <Container style={{ padding: "30px 15px" }}> {/* Reduced padding */}
+      <Row className="mb-3">
         <Col>
-          <h2 className="text-dark font-weight-bold">Screen - {screenDetails?.screenNumber}</h2>
+          <h2 className="text-dark font-weight-bold">
+            Screen - {screenDetails?.screenNumber}
+          </h2>
         </Col>
       </Row>
 
-      <Row className="mb-4">
+      <Row className="mb-3">
         <Col>
           <Button
             variant="outline-secondary"
             size="sm"
-            onClick={() => navigate(-1)} // navigate(-1) replaces history.goBack()
-            style={{
-              fontSize: "1.2rem",
-              fontWeight: "bold",
-            }}
+            onClick={() => navigate(-1)}
+            style={{ fontSize: "0.9rem", fontWeight: "bold" }} // Smaller font size
           >
             <FaArrowLeft /> Go Back
           </Button>
         </Col>
       </Row>
 
-      <Row>
-        {screenDetails?.layout ? (
-          screenDetails.layout.map((row, rowIndex) => (
-            <Row key={rowIndex} style={{ display: "flex", justifyContent: "center" }}>
-              {row.map((seat, seatIndex) => (
-                <Col key={seatIndex} style={{ display: "flex", justifyContent: "center", marginBottom: "15px" }}>
-                  <Button
-                    variant={seat.isAvailable ? "outline-primary" : "outline-secondary"}
-                    onClick={() => handleSelectSeat(seat.seatNumber)}
-                    disabled={!seat.isAvailable}
-                    style={{
-                      width: "50px",
-                      height: "50px",
-                      fontSize: "0.85rem",
-                      fontWeight: "bold",
-                      margin: "5px",
-                      borderRadius: "50%",
-                    }}
-                  >
-                    {seat.seatNumber}
-                  </Button>
-                </Col>
-              ))}
-            </Row>
-          ))
-        ) : (
-          <p>No seats available for this screen.</p>
-        )}
-      </Row>
-
-      <Row>
-        <Col>
-          <Button
-            variant="primary"
-            size="lg"
-            onClick={handleConfirmSelection}
-            disabled={selectedSeats.size === 0}
-            style={{
-              marginTop: "20px",
-              fontSize: "1.2rem",
-              fontWeight: "bold",
-            }}
-          >
-            Confirm Selection ({selectedSeats.size} Seats)
-          </Button>
-        </Col>
-      </Row>
+      <Row>{renderScreenLayout()}</Row>
     </Container>
   );
 };
