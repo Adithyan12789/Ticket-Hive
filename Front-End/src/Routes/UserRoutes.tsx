@@ -8,6 +8,7 @@ import UserProfilePage from '../Pages/USER/UserProfilePage';
 import PrivateRoute from '../Components/UserComponents/PrivateRoute';
 import MovieDetailScreen from '../Pages/USER/MovieDetailPage';
 import MovieTheaterScreen from '../Pages/USER/MovieTheaterPage';
+import SelectSeatPage from '../Pages/USER/SeatSelectionPage';
 
 export const UserRoutes = (
   <>
@@ -22,6 +23,7 @@ export const UserRoutes = (
       <Route path="/profile" element={<UserProfilePage />} />
       <Route path="/movie-detail/:id" element={<MovieDetailScreen />} />
       <Route path="/movie-theaters/:movieTitle" element={<MovieTheaterScreen />} />
+      <Route path="/seat-select/:screenId" element={<SelectSeatPage />} />
     </Route>
   </>
 );

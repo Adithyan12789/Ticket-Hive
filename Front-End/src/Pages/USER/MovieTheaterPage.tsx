@@ -1,6 +1,6 @@
 import { Key, useEffect, useState } from "react";
 import { Container, Row, Col, Button, Modal } from "react-bootstrap";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   useGetMovieByMovieIdQuery,
   useGetTheatersByMovieTitleQuery,
@@ -16,6 +16,7 @@ type ShowTime = {
 };
 
 type Screen = {
+  _id: string;
   screenNumber: number;
   showTimes: ShowTime[];
   theater: {
@@ -43,10 +44,21 @@ const MovieTheaterScreen: React.FC = () => {
   const { movieTitle } = useParams<{ movieTitle: string }>();
   const [searchParams] = useSearchParams();
   const [startIndex, setStartIndex] = useState(0);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedTheater, setSelectedTheater] =
     useState<TheaterManagement | null>(null);
+
+    const navigate = useNavigate();
+
+  const dates = [...Array(365)].map((_, index) => {
+    const date = new Date();
+    date.setDate(date.getDate() + index);
+    return date;
+  });
+
+  const [selectedDate, setSelectedDate] = useState<Date | null>(
+    dates[0] || null
+  );
 
   const formattedDate = selectedDate
     ? selectedDate.toISOString().split("T")[0]
@@ -71,12 +83,6 @@ const MovieTheaterScreen: React.FC = () => {
 
   const movieName = movie?.title?.trim().toLowerCase();
   const genres = movie?.genres || [];
-
-  const dates = [...Array(365)].map((_, index) => {
-    const date = new Date();
-    date.setDate(date.getDate() + index + 1);
-    return date;
-  });
 
   const datesToShow = 7;
 
@@ -272,7 +278,10 @@ const MovieTheaterScreen: React.FC = () => {
                           (screen: Screen) => screen.theater._id === theater._id
                         ) // Filter screens by matching theater ID
                         .map((screen: Screen, idx: Key | null | undefined) => (
-                          <div key={idx}>
+                          <div
+                            style={{ display: "flex", flexWrap: "wrap" }}
+                            key={idx}
+                          >
                             {screen.showTimes
                               .filter(
                                 (show) =>
@@ -289,6 +298,9 @@ const MovieTheaterScreen: React.FC = () => {
                                       marginRight: "40px",
                                       transition: "all 0.3s ease-in-out",
                                     }}
+                                    onClick={() =>
+                                      navigate(`/seat-select/${screen._id}`)
+                                    }
                                   >
                                     {filteredShow.time}
                                   </Button>
@@ -331,16 +343,7 @@ const MovieTheaterScreen: React.FC = () => {
                 >
                   {selectedTheater.name}
                 </h5>
-                <p
-                  style={{
-                    fontSize: "0.875rem", // Smaller font size for the address
-                    color: "#555",
-                  }}
-                >
-                  {selectedTheater.address}
-                </p>
               </div>
-
               {/* Description Section */}
               <p
                 style={{
@@ -352,7 +355,6 @@ const MovieTheaterScreen: React.FC = () => {
                 <strong>Description:</strong>{" "}
                 {selectedTheater.description || "No description available."}
               </p>
-
               {/* Available Facilities Section */}
               <h1
                 style={{
@@ -363,7 +365,6 @@ const MovieTheaterScreen: React.FC = () => {
               >
                 Available Facilities
               </h1>
-
               <ul
                 style={{
                   listStyleType: "disc",
@@ -384,6 +385,15 @@ const MovieTheaterScreen: React.FC = () => {
                   <li>No amenities listed.</li>
                 )}
               </ul>
+              <strong className="mt-5">Address</strong>{" "}
+              <p
+                style={{
+                  fontSize: "0.875rem", // Smaller font size for the address
+                  color: "#555",
+                }}
+              >
+                {selectedTheater.address}
+              </p>
             </div>
           ) : (
             <p style={{ fontSize: "1rem", color: "#888" }}>Loading...</p>

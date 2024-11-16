@@ -104,6 +104,13 @@ export const usersApiSlice = apiSlice.injectEndpoints({
         method: "GET",
       }),
     }), 
+
+    getScreenById: builder.query({
+      query: (screenId) => ({
+        url: `${USERS_URL}/screen/${screenId}`,
+        method: 'GET',
+      }),
+    }),
     
   }),
 });
@@ -122,4 +129,5 @@ export const {
   useGetMoviesMutation,
   useGetMovieByMovieIdQuery,
   useGetTheatersByMovieTitleQuery,
+  useGetScreenByIdQuery,
 } = usersApiSlice;

@@ -182,10 +182,13 @@ class ScreenController {
       console.log("hello");
       
       const { screenId } = req.params;
+
       console.log(screenId);
 
       try {
         const screen = await ScreenService.getScreensByIdService(screenId);
+        console.log("screen: ", screen);
+        
         if (!screen) {
           res.status(404).json({ message: "Screen not found" });
           return;
