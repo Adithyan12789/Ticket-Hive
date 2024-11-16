@@ -191,19 +191,6 @@ class UserService {
           return await UserRepository.saveUser(user);
       };
 
-      public async getScreensByTheaterId(id: string) {
-        if (!id) {
-          throw new Error("Theater ID is required");
-        }
-    
-        const screens = await Screens.find({ theater: id }).populate("theater", "name location").populate("showTimes.movie", "title genre");
-        if (!screens.length) {
-          throw new Error("No screens found for this theater");
-        }
-    
-        return screens;
-      }
-
 
     public logoutUserService() {
         return true;

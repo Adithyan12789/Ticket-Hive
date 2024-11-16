@@ -301,36 +301,7 @@ class UserController {
     }
   });
   
-
-  getScreensByTheaterId = asyncHandler(
-    async (req: Request, res: Response): Promise<void> => {
-      console.log("started");
-      
-      const { id } = req.params;
-
-      console.log("id: ", id);
-  
-      if (!id) {
-        res.status(400).json({ message: "Theater ID is required" });
-        return;
-      }
-  
-      try {
-        const screens = await UserService.getScreensByTheaterId(id);
-  
-        if (!screens || screens.length === 0) {
-          res.status(404).json({ message: "No screens found for this theater" });
-          return;
-        }
-  
-        res.status(200).json(screens);
-      } catch (error) {
-        res.status(500).json({ message: "Internal Server Error", error });
-      }
-    }
-  );
-  
-  
+ 
 
   logoutUser = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
