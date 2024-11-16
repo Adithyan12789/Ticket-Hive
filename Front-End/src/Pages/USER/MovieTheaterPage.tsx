@@ -48,7 +48,7 @@ const MovieTheaterScreen: React.FC = () => {
   const [selectedTheater, setSelectedTheater] =
     useState<TheaterManagement | null>(null);
 
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const dates = [...Array(365)].map((_, index) => {
     const date = new Date();
@@ -299,8 +299,13 @@ const MovieTheaterScreen: React.FC = () => {
                                       transition: "all 0.3s ease-in-out",
                                     }}
                                     onClick={() =>
-                                      navigate(`/seat-select/${screen._id}`)
-                                    }
+                                      navigate(`/seat-select/${screen._id}`, {
+                                        state: {
+                                          date: selectedDate,
+                                          movieTitle: movie?.title,
+                                        }
+                                      })
+                                    }                                    
                                   >
                                     {filteredShow.time}
                                   </Button>

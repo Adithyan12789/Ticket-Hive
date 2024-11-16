@@ -39,7 +39,7 @@ const MovieDetailScreen: React.FC = () => {
     setSelectedLanguage(language);
     setShowModal(false);
     navigate(`/movie-theaters/${id}?language=${language}`);
-  };  
+  };
 
   if (loadingMovie) return <Loader />;
 
@@ -207,7 +207,7 @@ const MovieDetailScreen: React.FC = () => {
               <Button
                 key={language}
                 style={{
-                  backgroundColor: "#ff4081",
+                  backgroundColor: "rgb(147, 147, 147)",
                   color: "#fff",
                   border: "none",
                   borderRadius: "25px",
@@ -217,15 +217,13 @@ const MovieDetailScreen: React.FC = () => {
                   boxShadow: "0 4px 10px rgba(255, 64, 129, 0.4)",
                   transition: "transform 0.3s, background-color 0.3s",
                 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = "#e91e63";
-                  e.currentTarget.style.transform = "translateY(-2px)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "#ff4081";
-                  e.currentTarget.style.transform = "translateY(0)";
-                }}
                 onClick={() => handleLanguageSelect(language)}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.backgroundColor = "rgb(255, 64, 129)")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.backgroundColor = "rgb(147, 147, 147)")
+                }
               >
                 {language}
               </Button>

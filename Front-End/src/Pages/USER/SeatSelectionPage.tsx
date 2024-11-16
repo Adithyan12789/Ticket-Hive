@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import { FaArrowLeft } from "react-icons/fa";
 import { useGetScreenByIdQuery } from "../../Slices/UserApiSlice";
@@ -15,7 +15,12 @@ type Seat = {
 type ScreenDetails = {
   id: string;
   screenNumber: number;
-  layout: Seat[][];
+  layout: Seat[][]; // Array of rows, each row is an array of seats
+  movieTitle: string; // Added movie title field
+  theater: {
+    name: string; // Theater name field
+  };
+  showDate: string; // Date field for the show
 };
 
 const SelectSeatPage: React.FC = () => {
@@ -27,6 +32,16 @@ const SelectSeatPage: React.FC = () => {
   const { data, isLoading, isError } = useGetScreenByIdQuery(screenId);
   const screenDetails = data as ScreenDetails | null;
 
+  const location = useLocation();
+
+  console.log(location.state);
+  
+  const { date, movieTitle } = location.state || {};
+  const formattedDate = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+
+  console.log(formattedDate);
+  console.log(screenId, date, movieTitle);
+
   useEffect(() => {
     document.title = screenDetails
       ? `Screen - ${screenDetails.screenNumber} - Select Seats`
@@ -37,7 +52,7 @@ const SelectSeatPage: React.FC = () => {
     if (screenDetails?.layout) {
       setLayout(screenDetails.layout);
     } else {
-      setLayout(generateSeatNames(5, 8)); // Reduced number of seats for smaller layout
+      setLayout(generateSeatNames(5, 8)); // Default layout if no data is found
     }
   }, [screenDetails]);
 
@@ -45,10 +60,10 @@ const SelectSeatPage: React.FC = () => {
     const layout: Seat[][] = [];
     for (let i = 0; i < rows; i++) {
       const row: Seat[] = [];
-      const rowPrefix = String.fromCharCode(65 + (i % 26));
+      const rowPrefix = String.fromCharCode(65 + (i % 26)); // Row names from A to Z
       for (let j = 1; j <= cols; j++) {
         row.push({
-          label: `${rowPrefix}${j.toString().padStart(2, "0")}`,
+          label: `${rowPrefix}${j.toString().padStart(2, "0")}`, // Seat label like A01, A02...
           isAvailable: true,
         });
       }
@@ -58,12 +73,12 @@ const SelectSeatPage: React.FC = () => {
   };
 
   const handleSeatSelection = (seatLabel: string, isAvailable: boolean) => {
-    if (!isAvailable) return;
+    if (!isAvailable) return; // Don't allow selection for unavailable seats
     const newSelectedSeats = new Set(selectedSeats);
     if (newSelectedSeats.has(seatLabel)) {
-      newSelectedSeats.delete(seatLabel);
+      newSelectedSeats.delete(seatLabel); // Deselect if already selected
     } else {
-      newSelectedSeats.add(seatLabel);
+      newSelectedSeats.add(seatLabel); // Select if not already selected
     }
     setSelectedSeats(newSelectedSeats);
   };
@@ -87,28 +102,40 @@ const SelectSeatPage: React.FC = () => {
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
-              marginBottom: rowIndex === Math.floor(screenDetails.layout.length / 2) ? "20px" : "5px", // Reduced margin
-              gap: "5px", // Reduced gap between buttons
+              marginBottom:
+                rowIndex === Math.floor(screenDetails.layout.length / 2)
+                  ? "20px"
+                  : "5px", // Reduced margin
+              gap: "8px", // Reduced gap between buttons
             }}
           >
             {row.map((seat, seatIndex) => (
               <React.Fragment key={`seat-${seatIndex}`}>
-                {seatIndex === Math.floor(row.length / 2) && <div style={{ width: "20px" }}></div>}
+                {seatIndex === Math.floor(row.length / 2) && (
+                  <div style={{ width: "20px" }}></div>
+                )}
                 <button
                   style={{
-                    width: "35px", // Smaller button size
-                    height: "35px", // Smaller button size
-                    backgroundColor: "#f8f9fa",
-                    color: "#000",
+                    width: "30px", // Smaller button size
+                    height: "30px", // Smaller button size
+                    backgroundColor: selectedSeats.has(seat.label)
+                      ? "rgb(0 185 255)" // Highlight selected seat
+                      : seat.isAvailable
+                      ? "#f8f9fa" // Default for available seats
+                      : "gray", // Disabled color for unavailable seats
+                    color: selectedSeats.has(seat.label) ? "#fff" : "#000",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     border: "1px solid #007bff",
                     borderRadius: "4px",
                     fontSize: "0.7rem", // Smaller font size
-                    cursor: "pointer",
+                    cursor: seat.isAvailable ? "pointer" : "not-allowed", // Disable cursor for unavailable seats
+                    transition: "background-color 0.3s", // Smooth transition
                   }}
-                  onClick={() => handleSeatSelection(seat.label, seat.isAvailable)}
+                  onClick={() =>
+                    handleSeatSelection(seat.label, seat.isAvailable)
+                  }
                   disabled={!seat.isAvailable}
                 >
                   {seat.label}
@@ -122,16 +149,19 @@ const SelectSeatPage: React.FC = () => {
             width: "50%",
             maxWidth: "250px",
             height: "12px",
-            backgroundColor: "rgb(124, 187, 255)",
+            background: "linear-gradient(to bottom, rgb(96 176 255), #f8f9fa)", // Added gradient for light effect
             color: "#fff",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            marginTop: "50px", // Reduced top margin
+            marginTop: "50px",
             borderRadius: "5px",
             fontWeight: "bold",
+            boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.3)", // Box shadow for depth
           }}
-        >
+        ></div>
+        <div style={{ fontSize: "10px", marginTop: "10px" }}>
+          <p>All eyes this way please!</p>
         </div>
       </div>
     );
@@ -144,29 +174,97 @@ const SelectSeatPage: React.FC = () => {
   }
 
   return (
-    <Container style={{ padding: "30px 15px" }}> {/* Reduced padding */}
+    <Container
+      style={{ padding: "30px 15px", position: "relative", minHeight: "100vh" }}
+    >
+      {/* Row for Go Back Icon and Movie Title with UA Text */}
       <Row className="mb-3">
         <Col>
-          <h2 className="text-dark font-weight-bold">
-            Screen - {screenDetails?.screenNumber}
-          </h2>
-        </Col>
-      </Row>
-
-      <Row className="mb-3">
-        <Col>
-          <Button
-            variant="outline-secondary"
-            size="sm"
-            onClick={() => navigate(-1)}
-            style={{ fontSize: "0.9rem", fontWeight: "bold" }} // Smaller font size
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              fontSize: "1.2rem",
+              fontWeight: "bold",
+            }}
           >
-            <FaArrowLeft /> Go Back
-          </Button>
+            <FaArrowLeft
+              onClick={() => navigate(-1)}
+              style={{ cursor: "pointer", fontSize: "1.5rem" }}
+            />
+            <div>
+              <span style={{ fontSize: "1.2rem" }}>
+                {movieTitle || "Movie Title"} {/* Movie title */}
+              </span>
+              <span
+                style={{
+                  backgroundColor: "#f8f9fa",
+                  padding: "3px 8px",
+                  borderRadius: "12px",
+                  fontSize: "0.8rem",
+                  marginLeft: "10px",
+                  color: "#007bff",
+                  fontWeight: "600",
+                }}
+              >
+                UA
+              </span>
+            </div>
+          </div>
         </Col>
       </Row>
 
+      {/* Row for Screen Number, Theater Name and Date */}
+      <Row className="mb-3">
+        <Col>
+          <div
+            style={{
+              fontSize: "0.9rem",
+              color: "#343a40",
+              fontWeight: "500",
+              textAlign: "center",
+              marginBottom: "20px",
+            }}
+          >
+            Screen {screenDetails?.screenNumber} {/* Screen number */}
+            <br />
+            {screenDetails?.theater.name || "Theater Name"} |{" "}
+            {formattedDate || "Show Date"} {/* Theater name and date */}
+          </div>
+        </Col>
+      </Row>
+
+      {/* Render Screen Layout */}
       <Row>{renderScreenLayout()}</Row>
+      {/* Pay Button */}
+      {selectedSeats.size > 0 && (
+        <div
+          style={{
+            position: "fixed",
+            width: "100%",
+            backgroundColor: "rgb(225 225 225)",
+            height: "80px",
+            bottom: "20px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 1000,
+            display: "flex", // Add flexbox
+            justifyContent: "center", // Center content horizontally
+            alignItems: "center", // Center content
+            boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)", // Subtle shadow for depth
+          }}
+        >
+          <Button
+            variant="primary"
+            onClick={() => {
+              toast.success("Seats selected: " + [...selectedSeats].join(", "));
+            }}
+          >
+            Pay Now
+          </Button>
+        </div>
+      )}
     </Container>
   );
 };
