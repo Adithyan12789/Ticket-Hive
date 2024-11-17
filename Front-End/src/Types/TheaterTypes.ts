@@ -34,6 +34,7 @@ export interface TheaterManagement {
   address: string;
   showTimes: string[];
   description: string;
+  ticketPrice: string; 
   amenities: string[];
   latitude: string;
   longitude: string;

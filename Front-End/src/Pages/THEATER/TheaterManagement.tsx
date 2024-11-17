@@ -58,6 +58,7 @@ const AddTheaterScreen: React.FC = () => {
   const [refreshCounter, setRefreshCounter] = useState<number>(0);
   const [certificateModal, setCertificateModal] = useState(false);
   const [certificate, setCertificate] = useState<File | null>(null);
+  const [ticketPrice, setTicketPrice] = useState<string>("");
 
   const handleModalShow = () => setShowModal(true);
   const handleModalClose = () => {
@@ -74,7 +75,7 @@ const AddTheaterScreen: React.FC = () => {
     setLatitude("");
     setLongitude("");
     setSelectedImages([]);
-    setShowTimes([{ hour: "01", minute: "00", ampm: "AM" }]); 
+    setShowTimes([{ hour: "01", minute: "00", ampm: "AM" }]);
   };
 
   const handleEditModalShow = (theater: TheaterManagement) => {
@@ -86,8 +87,10 @@ const AddTheaterScreen: React.FC = () => {
     setAmenities(theater.amenities);
     setLatitude(theater.latitude);
     setLongitude(theater.longitude);
+    setTicketPrice(theater.ticketPrice);
     setShowEditModal(true);
   };
+  
 
   const handleEditModalClose = () => {
     setShowEditModal(false);
@@ -191,6 +194,8 @@ const AddTheaterScreen: React.FC = () => {
     return latRegex.test(lat) && lngRegex.test(lng);
   };
 
+  const validateTicketPrice = (value: string) => /^[0-9]+(\.[0-9]{1,2})?$/.test(value);
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -243,16 +248,23 @@ const AddTheaterScreen: React.FC = () => {
       return;
     }
 
+    if (!validateTicketPrice(ticketPrice.trim())) {
+      toast.error("Please enter a valid ticket price");
+      return;
+    }
+
     try {
       setLoading(true);
       const formData = new FormData();
       formData.append("name", trimmedName);
       formData.append("city", trimmedCity);
       formData.append("address", trimmedAddress);
+      formData.append("ticketPrice", ticketPrice.trim());
       formData.append("description", trimmedDescription);
       formData.append("amenities", trimmedAmenities);
       formData.append("latitude", trimmedLatitude);
       formData.append("longitude", trimmedLongitude);
+    
       selectedImages.forEach((image) => formData.append("images", image));
 
       formattedShowTimes.forEach((time) => {
@@ -286,6 +298,7 @@ const AddTheaterScreen: React.FC = () => {
     formData.append("amenities", amenities.join(", "));
     formData.append("latitude", lat);
     formData.append("longitude", long);
+    formData.append("ticketPrice", ticketPrice.trim());
 
     showTimes.forEach((time) => {
       formData.append(
@@ -298,18 +311,26 @@ const AddTheaterScreen: React.FC = () => {
       selectedImages.forEach((image) => formData.append("images", image));
     }
 
+    if (!validateTicketPrice(ticketPrice.trim())) {
+      toast.error("Please enter a valid ticket price");
+      return;
+    }
+
     try {
       const data = {
         name: name.trim(),
         city: city.trim(),
         address: address.trim(),
         description: description.trim(),
+        ticketPrice: ticketPrice.trim(),
         amenities: amenities,
         latitude: lat,
         longitude: long,
-        showTimes: showTimes.map(time => `${time.hour}:${time.minute} ${time.ampm}`)
-    };
-    
+        showTimes: showTimes.map(
+          (time) => `${time.hour}:${time.minute} ${time.ampm}`
+        ),
+      };
+
       await updateTheater({ id: selectedTheater?._id, data }).unwrap();
       toast.success("Theater updated successfully");
       handleEditModalClose();
@@ -426,6 +447,16 @@ const AddTheaterScreen: React.FC = () => {
                       onChange={(e) => setAddress(e.target.value)}
                     />
                   </Form.Group>
+                  <Form.Group controlId="ticketPrice" className="mb-3">
+                    <Form.Label>Ticket Price</Form.Label>
+                    <Form.Control
+                      type="number"
+                      placeholder="Enter ticket price"
+                      value={ticketPrice}
+                      onChange={(e) => setTicketPrice(e.target.value)}
+                    />
+                  </Form.Group>
+
                   <Form.Group controlId="images" className="mb-3">
                     <Form.Label>Images</Form.Label>
                     <Form.Control
@@ -468,7 +499,7 @@ const AddTheaterScreen: React.FC = () => {
                               )
                             }
                             className="me-2"
-                            style={{width: "150px"}}
+                            style={{ width: "150px" }}
                           >
                             {Array.from({ length: 12 }, (_, i) => (
                               <option
@@ -613,6 +644,16 @@ const AddTheaterScreen: React.FC = () => {
                       onChange={(e) => setAddress(e.target.value)}
                     />
                   </Form.Group>
+                  <Form.Group controlId="ticketPrice" className="mb-3">
+                    <Form.Label>Ticket Price</Form.Label>
+                    <Form.Control
+                      type="number"
+                      placeholder="Enter ticket price"
+                      value={ticketPrice}
+                      onChange={(e) => setTicketPrice(e.target.value)}
+                    />
+                  </Form.Group>
+
                   <Form.Group controlId="description" className="mb-3">
                     <Form.Label>Description</Form.Label>
                     <Form.Control
@@ -664,7 +705,7 @@ const AddTheaterScreen: React.FC = () => {
                               )
                             }
                             className="me-2"
-                            style={{width: "150px"}}
+                            style={{ width: "150px" }}
                           >
                             {Array.from({ length: 12 }, (_, i) => (
                               <option

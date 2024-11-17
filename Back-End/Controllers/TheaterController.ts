@@ -375,6 +375,7 @@ class TheaterController {
         amenities,
         latitude,
         longitude,
+        ticketPrice,
       } = req.body;
 
       if (
@@ -384,7 +385,8 @@ class TheaterController {
         !showTimes ||
         !description ||
         !latitude ||
-        !longitude
+        !longitude ||
+        !ticketPrice
       ) {
         res.status(400).json({ message: "All fields are required" });
         return;
@@ -416,6 +418,7 @@ class TheaterController {
             showTimes: showTimesArray.map((time: string) => time.trim()),
             images,
             description,
+            ticketPrice,
             amenities: amenities
               .split(",")
               .map((amenity: string) => amenity.trim()),
@@ -557,7 +560,7 @@ class TheaterController {
         })
           .populate({
             path: "theater", // Populate theater field
-            select: "name location amenities description owner address", // Include 'amenities' in the populated fields
+            select: "name location amenities description ticketPrice owner address", // Include 'amenities' in the populated fields
           })
           .populate({
             path: "showTimes.movie", // Populate movie field inside showTimes

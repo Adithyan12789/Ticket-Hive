@@ -19,6 +19,7 @@ export interface ITheaterDetails extends Document {
     createdAt?: Date;
     updatedAt?: Date;
     movies: mongoose.Types.ObjectId[];
+    ticketPrice: number;
 }
 
 const theaterDetailsSchema: Schema<ITheaterDetails> = new Schema(
@@ -59,6 +60,7 @@ const theaterDetailsSchema: Schema<ITheaterDetails> = new Schema(
             },
         },
         movies: [{ type: Schema.Types.ObjectId, ref: 'Movie', required: true }], // New movies field
+        ticketPrice: { type: Number, required: true }, 
     },
     {
         timestamps: true,

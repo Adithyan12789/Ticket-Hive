@@ -19,6 +19,7 @@ type ScreenDetails = {
   movieTitle: string; // Added movie title field
   theater: {
     name: string; // Theater name field
+    ticketPrice: number;
   };
   showDate: string; // Date field for the show
 };
@@ -32,12 +33,14 @@ const SelectSeatPage: React.FC = () => {
   const { data, isLoading, isError } = useGetScreenByIdQuery(screenId);
   const screenDetails = data as ScreenDetails | null;
 
+  console.log("screenDetails: ", screenDetails);
+
   const location = useLocation();
 
-  console.log(location.state);
-  
   const { date, movieTitle } = location.state || {};
-  const formattedDate = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+  const formattedDate = `${
+    date.getMonth() + 1
+  }/${date.getDate()}/${date.getFullYear()}`;
 
   console.log(formattedDate);
   console.log(screenId, date, movieTitle);
@@ -167,6 +170,10 @@ const SelectSeatPage: React.FC = () => {
     );
   };
 
+  const totalSeats = selectedSeats.size;
+  const ticketPrice = screenDetails?.theater?.ticketPrice || 0; // Default to 0 if undefined
+  const totalPrice = totalSeats * ticketPrice;
+  
   if (isLoading) return <Loader />;
   if (isError) {
     toast.error("Error fetching seat data.");
@@ -256,17 +263,36 @@ const SelectSeatPage: React.FC = () => {
           }}
         >
           <Button
+            style={{
+              width: "200px",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
             variant="primary"
             onClick={() => {
-              toast.success("Seats selected: " + [...selectedSeats].join(", "));
+              navigate("/booking", {
+                state: {
+                  selectedSeats: [...selectedSeats],
+                  theaterName: screenDetails?.theater.name,
+                  date: formattedDate,
+                  movieTitle,
+                  totalPrice: totalPrice,
+                },
+              });
             }}
           >
-            Pay Now
+            <div style={{ fontSize: "16px", textAlign: "center" }}>
+              <div>Pay Rs.{totalPrice}</div>
+              <div style={{ fontSize: "10px", color: "whitesmoke" }}>
+                {totalSeats} {totalSeats === 1 ? "ticket" : "tickets"}
+              </div>
+            </div>
           </Button>
         </div>
       )}
     </Container>
   );
-};
+};  
 
 export default SelectSeatPage;

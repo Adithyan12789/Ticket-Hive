@@ -25,7 +25,7 @@ class ScreenRepository {
   }
 
   public async getScreenById(screenId: string) {
-    return await Screens.findById(screenId).populate("theater", "name");
+    return await Screens.findById(screenId).populate("theater", "name ticketPrice");
   }
 
   public async updateScreen(screenId: string, updateData: any) {
