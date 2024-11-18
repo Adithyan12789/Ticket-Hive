@@ -5,7 +5,8 @@ import User from "../Models/UserModel";
 import TokenService from "../Utils/GenerateToken";
 import { Request, Response, NextFunction } from "express";
 import { IUser } from "../Models/UserModel";
-import { CustomRequest } from '../Middlewares/AuthMiddleware';
+import { CustomRequest } from "../Middlewares/AuthMiddleware";
+import { parse, format } from "date-fns";
 
 class UserController {
   authUser = asyncHandler(
@@ -254,54 +255,149 @@ class UserController {
     }
   );
 
-  getUserProfile = asyncHandler(async (req: CustomRequest, res: Response): Promise<void> => {
-    if (!req.user) {
-      res.status(401).json({ message: "Unauthorized" });
-      return;
-    }
-  
-    const user = await UserService.getUserProfile(req.user._id);
-    res.status(200).json(user);
-  });
+  getUserProfile = asyncHandler(
+    async (req: CustomRequest, res: Response): Promise<void> => {
+      if (!req.user) {
+        res.status(401).json({ message: "Unauthorized" });
+        return;
+      }
 
-  updateUserProfile = asyncHandler(async (req: CustomRequest, res: Response): Promise<void> => {
-    if (!req.user) {
-      res.status(401).json({ message: "Unauthorized" });
-      return;
+      const user = await UserService.getUserProfile(req.user._id);
+      res.status(200).json(user);
     }
-  
-    try {
-      const updateData = { ...req.body };
+  );
 
-      console.log("updateData: ", updateData);
-      
-      
-      const fileData = req.file ? { filename: req.file.filename } : { filename: undefined };
-  
-      const updatedUser = await UserService.updateUserProfileService(
-        req.user._id,
-        updateData,
-        fileData
-      );
-  
-      res.status(200).json({
-        _id: updatedUser._id,
-        name: updatedUser.name,
-        phone: updatedUser.phone,
-        profileImageName: updatedUser.profileImageName,
-      });
-    } catch (err: unknown) {
-      if (err instanceof Error && err.message === "Current password is incorrect") {
-        res.status(404).json({ message: "Current password is incorrect" });
-      }else{
-        res.status(500).json({
-          message: "An error occurred",
+  updateUserProfile = asyncHandler(
+    async (req: CustomRequest, res: Response): Promise<void> => {
+      if (!req.user) {
+        res.status(401).json({ message: "Unauthorized" });
+        return;
+      }
+
+      try {
+        const updateData = { ...req.body };
+
+        console.log("updateData: ", updateData);
+
+        const fileData = req.file
+          ? { filename: req.file.filename }
+          : { filename: undefined };
+
+        const updatedUser = await UserService.updateUserProfileService(
+          req.user._id,
+          updateData,
+          fileData
+        );
+
+        res.status(200).json({
+          _id: updatedUser._id,
+          name: updatedUser.name,
+          phone: updatedUser.phone,
+          profileImageName: updatedUser.profileImageName,
         });
+      } catch (err: unknown) {
+        if (
+          err instanceof Error &&
+          err.message === "Current password is incorrect"
+        ) {
+          res.status(404).json({ message: "Current password is incorrect" });
+        } else {
+          res.status(500).json({
+            message: "An error occurred",
+          });
+        }
       }
     }
-  });
+  );
+
   
- 
+
+  createBooking = asyncHandler(
+    async (req: Request, res: Response): Promise<void> => {
+      const {
+        movieId,
+        theaterId,
+        screenId,
+        seatIds,
+        showTime,
+        userId,
+        totalPrice,
+        paymentStatus,
+        paymentMethod,
+        convenienceFee,
+        bookingDate,
+      } = req.body;
+
+      console.log("Raw bookingDate: ", bookingDate);
+      console.log("payment Method: ", paymentMethod);
+
+      let formattedBookingDate: Date;
+      try {
+        // Parse and format bookingDate as a Date object
+        const parsedDate = parse(bookingDate, "EEEE dd MMM yyyy", new Date());
+        if (isNaN(parsedDate.getTime())) {
+          throw new Error("Invalid date");
+        }
+        formattedBookingDate = parsedDate; // Successfully parsed to Date
+      } catch (error) {
+        console.error("Error parsing bookingDate:", error);
+        res.status(400).json({ message: "Invalid bookingDate format" });
+        return;
+      }
+
+      console.log("Formatted bookingDate: ", formattedBookingDate);
+
+      // Validate input data
+      if (
+        !movieId ||
+        !theaterId ||
+        !screenId ||
+        !seatIds ||
+        !showTime ||
+        !userId ||
+        !totalPrice ||
+        !paymentStatus ||
+        !convenienceFee ||
+        !formattedBookingDate
+      ) {
+        res.status(400).json({ message: "Missing required fields" });
+        return;
+      }
+
+      try {
+        // Call the service method to create a booking
+        const booking = await UserService.createBookingService(
+          movieId,
+          theaterId,
+          screenId,
+          seatIds,
+          userId,
+          totalPrice,
+          showTime,
+          paymentStatus,
+          paymentMethod,
+          convenienceFee,
+          formattedBookingDate
+        );
+
+        console.log("controller booking: ", booking);
+
+        res.status(201).json({
+          message: "Booking successful",
+          booking,
+        });
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          res.status(500).json({
+            message: "An error occurred during booking",
+            error: err.message,
+          });
+        } else {
+          res.status(500).json({ message: "An unexpected error occurred" });
+        }
+      }
+    }
+  );
 
   logoutUser = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {

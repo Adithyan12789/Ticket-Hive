@@ -4,7 +4,8 @@ export interface IBooking extends Document {
   user: mongoose.Types.ObjectId; // Reference to the user who made the booking
   movie: mongoose.Types.ObjectId; // Reference to the movie being booked
   theater: mongoose.Types.ObjectId; // Reference to the theater where the movie is being shown
-  selectedSeats: string[]; // Array of selected seats
+  screen: mongoose.Types.ObjectId; 
+  seats: string[]; // Array of selected seats
   showTime: Date; // Date and time of the movie show
   totalPrice: number; // Total price for the booking
   paymentStatus: "pending" | "completed" | "failed"; // Payment status of the booking
@@ -13,22 +14,19 @@ export interface IBooking extends Document {
   bookingDate: Date; // Date when the booking was made
 }
 
-const BookingSchema = new Schema<IBooking>({
-  user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  movie: { type: mongoose.Schema.Types.ObjectId, ref: "Movie", required: true },
-  theater: { type: mongoose.Schema.Types.ObjectId, ref: "TheaterDetails", required: true },
-  selectedSeats: { type: [String], required: true },
-  showTime: { type: Date, required: true },
-  totalPrice: { type: Number, required: true },
-  paymentStatus: {
-    type: String,
-    enum: ["pending", "completed", "failed"],
-    default: "pending",
-    required: true,
-  },
+const bookingSchema = new mongoose.Schema({
+  movie: { type: mongoose.Schema.Types.ObjectId, ref: 'Movie', required: true },
+  theater: { type: mongoose.Schema.Types.ObjectId, ref: 'Theater', required: true },
+  screen: { type: mongoose.Schema.Types.ObjectId, ref: 'Screen', required: true },
+  seats: { type: [String], required: true },
+  bookingDate: { type: Date, required: true },
+  showTime: { type: String, required: true },
+  paymentStatus: { type: String, required: true },
   paymentMethod: { type: String, required: true },
   convenienceFee: { type: Number, required: true },
-  bookingDate: { type: Date, default: Date.now, required: true },
+  totalPrice: { type: Number, required: true },
+  createdAt: { type: Date, default: Date.now },
 });
 
-export const Booking = model<IBooking>("Booking", BookingSchema);
+
+export const Booking = model<IBooking>("Booking", bookingSchema);

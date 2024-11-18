@@ -303,6 +303,9 @@ const MovieTheaterScreen: React.FC = () => {
                                         state: {
                                           date: selectedDate,
                                           movieTitle: movie?.title,
+                                          movieId: movie?._id,
+                                          theaterId: theater?._id,
+                                          showTime: filteredShow.time,
                                         }
                                       })
                                     }                                    

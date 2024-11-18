@@ -13,7 +13,7 @@ type Seat = {
 };
 
 type ScreenDetails = {
-  id: string;
+  _id: string;
   screenNumber: number;
   layout: Seat[][]; // Array of rows, each row is an array of seats
   movieTitle: string; // Added movie title field
@@ -37,7 +37,12 @@ const SelectSeatPage: React.FC = () => {
 
   const location = useLocation();
 
-  const { date, movieTitle } = location.state || {};
+  const { date, movieTitle, movieId, theaterId, showTime } = location.state || {};
+  
+  console.log("movieId: ", movieId);
+  console.log("theaterId: ", theaterId);
+  
+
   const formattedDate = `${
     date.getMonth() + 1
   }/${date.getDate()}/${date.getFullYear()}`;
@@ -278,6 +283,10 @@ const SelectSeatPage: React.FC = () => {
                   date: formattedDate,
                   movieTitle,
                   totalPrice: totalPrice,
+                  movieId: movieId,
+                  theaterId: theaterId,
+                  screenId: screenId,
+                  showTime: showTime
                 },
               });
             }}

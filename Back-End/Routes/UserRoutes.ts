@@ -24,6 +24,8 @@ router.get('/get-movies',AuthMiddleware.protect, MovieController.getAllMoviesCon
 router.get('/movie-detail/:id',AuthMiddleware.protect, MovieController.getMovieByIdHandler);
 router.get('/movie-theaters/:movieTitle', AuthMiddleware.protect, TheaterController.getTheatersByMovieTitle);
 router.get('/screen/:screenId', AuthMiddleware.protect, ScreenController.getScreensById);
+router.post('/book-ticket', AuthMiddleware.protect, UserController.createBooking);
+
 
 
 router.post('/logout', UserController.logoutUser);

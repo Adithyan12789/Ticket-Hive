@@ -111,6 +111,14 @@ export const usersApiSlice = apiSlice.injectEndpoints({
         method: 'GET',
       }),
     }),
+
+    createBooking: builder.mutation({
+      query: (data) => ({
+        url: `${USERS_URL}/book-ticket`,
+        method: 'POST',
+        body: data,
+      }),
+    }),    
     
   }),
 });
@@ -130,4 +138,5 @@ export const {
   useGetMovieByMovieIdQuery,
   useGetTheatersByMovieTitleQuery,
   useGetScreenByIdQuery,
+  useCreateBookingMutation,
 } = usersApiSlice;
