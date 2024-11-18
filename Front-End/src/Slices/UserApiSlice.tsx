@@ -1,30 +1,35 @@
 import { apiSlice } from "./ApiSlice";
-import { UserResponse, UserCredentials, RegisterCredentials, OtpCredentials } from "../Types/UserTypes";
+import {
+  UserResponse,
+  UserCredentials,
+  RegisterCredentials,
+  OtpCredentials,
+} from "../Types/UserTypes";
 
-const USERS_URL = '/api/users';
+const USERS_URL = "/api/users";
 
 export const usersApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     login: builder.mutation<UserResponse, UserCredentials>({
       query: (data) => ({
         url: `${USERS_URL}/auth`,
-        method: 'POST',
+        method: "POST",
         body: data,
       }),
     }),
 
-    googleLogin:builder.mutation({
-      query:(data)=>({
-         url:`${USERS_URL}/googleLogin`,
-         method:'POST',
-         body:data
-      })
-  }),
+    googleLogin: builder.mutation({
+      query: (data) => ({
+        url: `${USERS_URL}/googleLogin`,
+        method: "POST",
+        body: data,
+      }),
+    }),
 
     register: builder.mutation<UserResponse, RegisterCredentials>({
       query: (data) => ({
         url: `${USERS_URL}/signup`,
-        method: 'POST',
+        method: "POST",
         body: data,
       }),
     }),
@@ -32,7 +37,7 @@ export const usersApiSlice = apiSlice.injectEndpoints({
     verifyOtp: builder.mutation<UserResponse, OtpCredentials>({
       query: (data) => ({
         url: `${USERS_URL}/verifyotp`,
-        method: 'POST',
+        method: "POST",
         body: data,
       }),
     }),
@@ -40,7 +45,7 @@ export const usersApiSlice = apiSlice.injectEndpoints({
     resendOtp: builder.mutation({
       query: (data) => ({
         url: `${USERS_URL}/resend-otp`,
-        method: 'POST',
+        method: "POST",
         body: data,
       }),
     }),
@@ -48,14 +53,14 @@ export const usersApiSlice = apiSlice.injectEndpoints({
     logout: builder.mutation<void, void>({
       query: () => ({
         url: `${USERS_URL}/logout`,
-        method: 'POST',
+        method: "POST",
       }),
     }),
-    
+
     sendPasswordResetEmail: builder.mutation({
       query: (data) => ({
         url: `${USERS_URL}/forgot-password`,
-        method: 'POST',
+        method: "POST",
         body: data,
       }),
     }),
@@ -63,24 +68,24 @@ export const usersApiSlice = apiSlice.injectEndpoints({
     resetPassword: builder.mutation({
       query: (data) => ({
         url: `${USERS_URL}/reset-password/${data.token}`,
-        method: 'PUT',
+        method: "PUT",
         body: { password: data.password },
       }),
     }),
 
     getUserProfile: builder.query({
       query: () => ({
-        url: `${USERS_URL}/profile`, 
-        method: 'GET',
+        url: `${USERS_URL}/profile`,
+        method: "GET",
       }),
     }),
 
     updateUser: builder.mutation({
-      query: (data)=>({ 
+      query: (data) => ({
         url: `${USERS_URL}/profile`,
-        method: 'PUT',
-        body: data
-      })
+        method: "PUT",
+        body: data,
+      }),
     }),
 
     getMovies: builder.mutation({
@@ -93,7 +98,7 @@ export const usersApiSlice = apiSlice.injectEndpoints({
     getMovieByMovieId: builder.query({
       query: (id) => ({
         url: `${USERS_URL}/movie-detail/${id}`,
-        method: 'GET',
+        method: "GET",
       }),
     }),
 
@@ -103,23 +108,36 @@ export const usersApiSlice = apiSlice.injectEndpoints({
         params: { date }, // If the date is needed as a query parameter
         method: "GET",
       }),
-    }), 
+    }),
 
     getScreenById: builder.query({
       query: (screenId) => ({
         url: `${USERS_URL}/screen/${screenId}`,
-        method: 'GET',
+        method: "GET",
       }),
     }),
 
     createBooking: builder.mutation({
       query: (data) => ({
         url: `${USERS_URL}/book-ticket`,
-        method: 'POST',
+        method: "POST",
         body: data,
       }),
-    }),    
-    
+    }),
+
+    getBookingDetails: builder.query({
+      query: (userId) => ({
+        url: `${USERS_URL}/bookings/${userId}`,
+        method: "GET",
+      }),
+    }),
+
+    cancelBooking: builder.mutation({
+      query: (bookingId) => ({
+        url: `${USERS_URL}/cancel-booking/${bookingId}`,
+        method: "POST",
+      }),
+    }),
   }),
 });
 
@@ -139,4 +157,6 @@ export const {
   useGetTheatersByMovieTitleQuery,
   useGetScreenByIdQuery,
   useCreateBookingMutation,
+  useGetBookingDetailsQuery,
+  useCancelBookingMutation,
 } = usersApiSlice;

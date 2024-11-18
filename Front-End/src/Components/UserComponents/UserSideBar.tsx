@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
-import { FaUser, FaCog, FaSignOutAlt } from "react-icons/fa";
-import "./UserSidebar.css";
+import { FaUser, FaCalendarAlt, FaWallet, FaSignOutAlt } from "react-icons/fa"; // Updated icons
+import "./UserSidebar.css"; // Import external CSS
 
 const UserProfileSidebar: React.FC = () => {
   const location = useLocation();
@@ -8,30 +8,45 @@ const UserProfileSidebar: React.FC = () => {
   return (
     <div className="user-sidebar">
       <ul className="user-sidebar-links">
-        <li>
+        {/* Profile Link */}
+        <li className="user-sidebar-item">
           <Link
             to="/profile"
-            className={location.pathname === "/profile" || location.pathname === "/" ? "active user-sidebar-link" : "user-sidebar-link"}
+            className={`user-sidebar-link ${location.pathname === "/profile" || location.pathname === "/" ? "active" : ""}`}
           >
             <FaUser className="user-sidebar-icon" /> My Profile
           </Link>
         </li>
-        <li>
-          <Link to="/settings" className="user-sidebar-link">
-            <FaCog className="user-sidebar-icon" /> Booking Details
+
+        {/* Booking Details Link */}
+        <li className="user-sidebar-item">
+          <Link
+            to="/booking-details"
+            className={`user-sidebar-link ${location.pathname === "/booking-details" ? "active" : ""}`}
+          >
+            <FaCalendarAlt className="user-sidebar-icon" /> Booking Details
           </Link>
         </li>
-        <li>
-          <Link to="/wallet" className="user-sidebar-link">
-            <FaCog className="user-sidebar-icon" /> Wallet
+
+        {/* Wallet Link */}
+        <li className="user-sidebar-item">
+          <Link
+            to="/wallet"
+            className={`user-sidebar-link ${location.pathname === "/wallet" ? "active" : ""}`}
+          >
+            <FaWallet className="user-sidebar-icon" /> Wallet
           </Link>
         </li>
-        <li>
+
+        {/* Logout Link */}
+        <li className="user-sidebar-item">
           <Link to="/logout" className="user-sidebar-link">
             <FaSignOutAlt className="user-sidebar-icon" /> Log Out
           </Link>
         </li>
       </ul>
+
+      {/* Footer */}
       <div className="user-sidebar-footer">&copy; 2024 User Panel</div>
     </div>
   );

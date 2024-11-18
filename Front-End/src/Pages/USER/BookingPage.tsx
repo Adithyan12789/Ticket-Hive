@@ -167,34 +167,56 @@ const BookingPage: React.FC = () => {
   return (
     <Container className="mt-5" style={{ maxWidth: "700px" }}>
       <h2
-        className="text-center mb-4"
-        style={{ fontSize: "2.5rem", fontWeight: "400", color: "#1d3557" }}
+        className="text-center mb-5"
+        style={{ fontSize: "40px", fontWeight: "300", color: "rgb(1 85 108)", textTransform: "uppercase" }}
       >
         Booking Summary
       </h2>
 
       <Card
-        className="shadow-lg rounded-lg border-0"
-        style={{ overflow: "hidden", borderRadius: "15px" }}
+        className="rounded-lg border-0"
+        style={{ overflow: "hidden", borderRadius: "15px", boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.4)" }}
       >
         <Card.Body>
           <Row>
             <Col className="text-center mb-3">
-              <FaFilm style={{ fontSize: "2.5rem", color: "#e63946" }} />
-              <h4 style={{ fontWeight: "600", color: "#1d3557" }}>
-                {movieTitle}
-              </h4>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <FaFilm
+                  style={{
+                    fontSize: "2.5rem",
+                    color: "#e63946",
+                    marginRight: "10px",
+                    marginBottom: "20px",
+                  }}
+                />
+                <h4
+                  style={{
+                    fontWeight: "400",
+                    color: "#2c3e50",
+                    textTransform: "uppercase",
+                    marginBottom: "20px",
+                  }}
+                >
+                  {movieTitle}
+                </h4>
+              </div>
             </Col>
           </Row>
           <Row className="mb-4">
             <Col>
-              <p className="text-muted">
+              <p>
                 <FaTicketAlt style={{ color: "#457b9d", marginRight: "8px" }} />
                 {theaterName}
               </p>
             </Col>
             <Col>
-              <p className="text-muted">
+              <p>
                 <FaRegCalendarAlt
                   style={{ color: "#457b9d", marginRight: "8px" }}
                 />
@@ -205,7 +227,7 @@ const BookingPage: React.FC = () => {
           <Row className="mb-4">
             <Col>
               <p style={{ fontWeight: "500", color: "#1d3557" }}>Seats:</p>
-              <p className="text-muted">
+              <p>
                 {selectedSeats.length > 0
                   ? selectedSeats.join(", ")
                   : "No seats selected"}
@@ -215,11 +237,11 @@ const BookingPage: React.FC = () => {
           <hr />
           <Row className="mb-4">
             <Col>
-              <p className="text-muted">
+              <p>
                 Total Price (excluding convenience fee):{" "}
                 <strong>Rs. {totalPrice}</strong>
               </p>
-              <p className="text-muted">
+              <p>
                 Convenience Fee (10%):{" "}
                 <strong>Rs. {convenienceFee.toFixed(2)}</strong>
               </p>
@@ -231,7 +253,7 @@ const BookingPage: React.FC = () => {
                   color: "#1d3557",
                 }}
               >
-                Final Price:{" "}
+                Amount Payable:{" "}
                 <span style={{ color: "#e63946" }}>
                   Rs. {finalPrice.toFixed(2)}
                 </span>

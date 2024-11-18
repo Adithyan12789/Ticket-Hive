@@ -1,223 +1,83 @@
-/* General Profile Screen */
-.profile-screen {
-  background-color: #f4f6f9;
-  min-height: 88vh;
-  padding: 40px;
-}
-
-/* Profile Container */
+/* Profile Page Container */
 .profile-container {
-  max-width: 1100px;
+  flex-wrap: nowrap;
+  min-height: calc(100vh - 120px); /* Ensures it fills the viewport below header */
+  padding-top: 20px;
 }
 
-/* Modern Profile Card */
+/* Sidebar column */
+.sidebar-column {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+/* Main profile card adjustments */
 .profile-card-modern {
-  background-color: #000000;
-  border-radius: 15px;
+  border: none;
+  border-radius: 12px;
+  background-color: #ffffff;
   padding: 30px;
-  height: 70vh;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-  transition: transform 0.3s ease-in-out;
 }
 
-.profile-card-modern:hover {
-  transform: translateY(-5px);
-}
-
-/* Profile Photo Styles */
+/* Profile photo container */
 .profile-photo-modern {
-  width: 150px;
-  height: 150px;
-  border: 5px solid #007bff;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease-in-out;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #007bff;
 }
 
-.profile-photo-modern:hover {
-  transform: scale(1.05);
+.profile-photo-container {
+  display: flex;
+  justify-content: center;
 }
 
-/* Profile Details */
+/* Modern profile details */
 .profile-details-modern {
-  margin-top: 20px;
-  color: #343a40;
+  font-size: 1rem;
 }
 
 .profile-name-modern {
-  font-size: 28px;
-  font-weight: 700;
-  color: #007bff;
-  
+  font-weight: 600;
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
 }
 
-.profile-email-modern, .profile-phone-modern {
-  font-size: 16px;
-  font-weight: 400;
+.profile-email-modern,
+.profile-phone-modern {
   color: #6c757d;
+  margin-bottom: 0.3rem;
 }
 
-/* Edit Profile Button */
+/* Edit button styling */
 .profile-edit-button-modern {
-  padding: 10px 20px;
   background-color: #007bff;
   border: none;
-  color: white;
-  font-weight: bold;
-  border-radius: 30px;
-  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
-  transition: background-color 0.3s ease, transform 0.3s ease-in-out;
+  padding: 10px 20px;
+  font-size: 1rem;
+  color: #ffffff;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
 }
 
 .profile-edit-button-modern:hover {
   background-color: #0056b3;
-  transform: translateY(-3px);
 }
 
-/* Form Styles (if editing) */
-.edit-profile-form-modern {
-  background-color: #f8f9fa;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
-}
-
-/* Mobile Responsive */
-@media (max-width: 768px) {
-  .profile-card-modern {
-    padding: 20px;
-  }
-
-  .profile-photo-modern {
-    width: 120px;
-    height: 120px;
-  }
-
-  .profile-name-modern {
-    font-size: 24px;
-  }
-
-  .profile-edit-button-modern {
-    padding: 8px 16px;
-  }
-}
-
-
-/* Modal Content */
-.modal-content {
-  background-color: #ffffff;
-  border-radius: 20px;
-  padding: 30px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-  transition: all 0.3s ease-in-out;
-}
-
-/* Modal Header */
-.modal-header {
-  border-bottom: none;
-  padding-bottom: 0;
-}
-
-.modal-title {
-  font-size: 24px;
-  font-weight: bold;
-  color: #007bff;
-  margin: 0;
-}
-
-.modal-header .btn-close {
-  font-size: 1.5rem;
-  color: #6c757d;
-  transition: color 0.3s ease;
-}
-
-.modal-header .btn-close:hover {
-  color: #007bff;
-}
-
-/* Modal Body */
-.modal-body {
-  padding-top: 50px
-  ;
-}
-
-/* Form Styling */
-.form-group {
-  margin-bottom: 20px;
-}
-
-.form-label {
-  font-size: 16px;
-  font-weight: 500;
-  color: #6c757d;
-}
-
-.form-control {
-  border-radius: 10px;
-  padding: 12px;
-  font-size: 16px;
-  background-color: #f8f9fa;
-  border: 1px solid #ced4da;
-  transition: all 0.3s ease;
-}
-
-.form-control:focus {
-  background-color: #ffffff;
-  border-color: #007bff;
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-}
-
-/* File Input Styling */
-input[type="file"] {
-  border-radius: 10px;
-  padding: 10px;
-  background-color: #f8f9fa;
-  border: 1px solid #ced4da;
-  transition: all 0.3s ease;
-}
-
-input[type="file"]:hover {
-  background-color: #e9ecef;
-}
-
-/* Modal Footer */
-.modal-footer {
-  border-top: none;
-  justify-content: center;
-  padding-top: 10px;
-}
-
-/* Submit Button */
+/* Modal form button */
 .profile-button-modern {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 12px 20px;
-  font-size: 16px;
-  font-weight: bold;
-  border-radius: 30px;
-  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
-  transition: all 0.3s ease-in-out;
   width: 100%;
+  background-color: #007bff;
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #ffffff;
+  transition: background-color 0.3s ease;
 }
 
 .profile-button-modern:hover {
   background-color: #0056b3;
-  transform: translateY(-3px);
-}
-
-/* Mobile Responsive for Modal */
-@media (max-width: 768px) {
-  .modal-content {
-    padding: 20px;
-  }
-
-  .modal-title {
-    font-size: 20px;
-  }
-
-  .profile-button-modern {
-    font-size: 14px;
-    padding: 10px 16px;
-  }
 }
