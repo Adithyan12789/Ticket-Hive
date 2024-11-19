@@ -236,6 +236,69 @@ class UserService {
 
     return newBooking;
   }  
+
+
+  public async getAllTicketsService(userId: string) {
+    const user = await UserRepository.findUserById(userId);
+
+    console.log("user service: ", user);
+    
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const tickets = await UserRepository.findBookingsByUserId(userId);
+
+    console.log("tickets service: ", tickets);
+
+    if (!tickets.length) {
+      throw new Error("No tickets found");
+    }
+
+    return tickets.map((booking) => ({
+      bookingId: booking._id,
+      movieId: booking.movie._id,
+      movieTitle: booking.movie.title,
+      theaterName: booking.theater.name,
+      screenName: booking.screen.screenNumber,
+      seats: booking.seats,
+      showTime: booking.showTime,
+      bookingDate: booking.bookingDate,
+      paymentStatus: booking.paymentStatus,
+      totalPrice: booking.totalPrice,
+    }));
+  }
+
+  public async cancelTicketService(bookingId: string, userId: string) {
+    const booking = await UserRepository.findBookingById(bookingId);
+
+    if (!booking) {
+      throw new Error("Booking not found");
+    }
+
+    if (String(booking.user) !== userId) {
+      throw new Error("You are not authorized to cancel this ticket");
+    }
+
+    // Check cancellation conditions (e.g., within allowed cancellation time)
+    const CANCELLATION_WINDOW_HOURS = 24; // 24 hours before the show
+    const now = new Date();
+    const showDate = new Date(booking.bookingDate);
+    const timeDifference = showDate.getTime() - now.getTime();
+
+    if (timeDifference < CANCELLATION_WINDOW_HOURS * 60 * 60 * 1000) {
+      throw new Error(
+        "Tickets cannot be canceled within 24 hours of the showtime"
+      );
+    }
+
+    // Update booking status or delete
+    await UserRepository.deleteBookingById(bookingId);
+
+    return { message: "Booking canceled successfully" };
+  }
+  
   
 
   public logoutUserService() {

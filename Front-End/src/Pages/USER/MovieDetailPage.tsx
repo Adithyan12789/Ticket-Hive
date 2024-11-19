@@ -35,10 +35,17 @@ const MovieDetailScreen: React.FC = () => {
     setShowModal(true);
   };
 
+  console.log("movie posters: ", movie?.posters);
+  
+
   const handleLanguageSelect = (language: string) => {
     setSelectedLanguage(language);
     setShowModal(false);
-    navigate(`/movie-theaters/${id}?language=${language}`);
+    navigate(`/movie-theaters/${id}?language=${language}`, {
+      state: {
+        moviePoster: movie?.posters,
+      }
+    })
   };
 
   if (loadingMovie) return <Loader />;
@@ -219,7 +226,7 @@ const MovieDetailScreen: React.FC = () => {
                 }}
                 onClick={() => handleLanguageSelect(language)}
                 onMouseEnter={(e) =>
-                  (e.currentTarget.style.backgroundColor = "rgb(255, 64, 129)")
+                  (e.currentTarget.style.backgroundColor = "#0d6efd")
                 }
                 onMouseLeave={(e) =>
                   (e.currentTarget.style.backgroundColor = "rgb(147, 147, 147)")

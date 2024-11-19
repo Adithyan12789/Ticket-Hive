@@ -1,6 +1,6 @@
 import { Key, useEffect, useState } from "react";
 import { Container, Row, Col, Button, Modal } from "react-bootstrap";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   useGetMovieByMovieIdQuery,
   useGetTheatersByMovieTitleQuery,
@@ -49,6 +49,12 @@ const MovieTheaterScreen: React.FC = () => {
     useState<TheaterManagement | null>(null);
 
   const navigate = useNavigate();
+  const location = useLocation();
+
+
+  const { moviePoster } = location.state || {};
+
+  console.log(" second movie posters: ", moviePoster);
 
   const dates = [...Array(365)].map((_, index) => {
     const date = new Date();
@@ -306,6 +312,7 @@ const MovieTheaterScreen: React.FC = () => {
                                           movieId: movie?._id,
                                           theaterId: theater?._id,
                                           showTime: filteredShow.time,
+                                          moviePoster: moviePoster,
                                         }
                                       })
                                     }                                    

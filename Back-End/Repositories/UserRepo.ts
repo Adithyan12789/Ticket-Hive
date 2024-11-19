@@ -1,3 +1,4 @@
+import { Booking } from "../Models/bookingModel";
 import User, { IUser } from "../Models/UserModel";
 
 class UserRepository {
@@ -23,6 +24,18 @@ class UserRepository {
 
     public async findUserById(userId: string): Promise<IUser | null> {
         return await User.findById(userId);
+    }
+
+    public async findBookingsByUserId(userId: string): Promise<any[]> {
+        return await Booking.find({ user: userId }).populate("movie theater screen").lean();
+    }
+
+    public async findBookingById(bookingId: string): Promise<any | null> {
+        return await Booking.findById(bookingId).populate("movie theater screen").lean();
+    }    
+
+    public async deleteBookingById(bookingId: string): Promise<any | null> {
+        return await Booking.findByIdAndDelete(bookingId);
     }
 }
 

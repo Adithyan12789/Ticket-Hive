@@ -127,14 +127,14 @@ export const usersApiSlice = apiSlice.injectEndpoints({
 
     getBookingDetails: builder.query({
       query: (userId) => ({
-        url: `${USERS_URL}/bookings/${userId}`,
+        url: `${USERS_URL}/get-tickets/${userId}`,
         method: "GET",
       }),
     }),
 
     cancelBooking: builder.mutation({
       query: (bookingId) => ({
-        url: `${USERS_URL}/cancel-booking/${bookingId}`,
+        url: `${USERS_URL}/cancel-ticket/${bookingId}`,
         method: "POST",
       }),
     }),

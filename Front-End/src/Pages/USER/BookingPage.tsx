@@ -23,13 +23,12 @@ const BookingPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { userInfo } = useSelector((state: RootState) => state.auth) || {
-    userInfo: null,
-  };
+  const { userInfo } = useSelector((state: RootState) => state.auth);
 
-  console.log("userInfo: ", userInfo?.data._id);
+  console.log("user info: ", userInfo);
+  
 
-  const { movieId, theaterId, screenId, showTime } = location.state || {};
+  const { movieId, theaterId, screenId, showTime, movieTitle } = location.state || {};
 
   console.log("booking page movieId: ", movieId);
   console.log("booking page theaterId: ", theaterId);
@@ -39,7 +38,6 @@ const BookingPage: React.FC = () => {
     selectedSeats = [],
     theaterName = "Unknown Theater",
     date = new Date().toISOString(),
-    movieTitle = "Unknown Movie",
     totalPrice = 0,
   } = location.state as LocationState;
 
@@ -124,7 +122,7 @@ const BookingPage: React.FC = () => {
       console.log("entered to booking function");
 
       const bookingData = {
-        userId: userInfo?.data._id,
+        userId: userInfo?.id,
         movieId: movieId,
         theaterId: theaterId,
         seatIds: selectedSeats,

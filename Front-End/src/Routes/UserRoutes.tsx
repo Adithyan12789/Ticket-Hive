@@ -11,7 +11,8 @@ import MovieTheaterScreen from '../Pages/USER/MovieTheaterPage';
 import SelectSeatPage from '../Pages/USER/SeatSelectionPage';
 import BookingPage from '../Pages/USER/BookingPage';
 import ThankYou from '../Pages/USER/ThankyouPage';
-import BookingDetailsScreen from '../Pages/USER/BookingDetailsPage';
+import TicketsScreen from '../Pages/USER/TicketsPage';
+import TicketDetailsScreen from '../Pages/USER/TicketDetailsPage';
 
 export const UserRoutes = (
   <>
@@ -29,7 +30,8 @@ export const UserRoutes = (
       <Route path="/seat-select/:screenId" element={<SelectSeatPage />} />
       <Route path="/booking" element={<BookingPage />} />
       <Route path="/thankyou" element={<ThankYou />} />
-      <Route path="/booking-details" element={<BookingDetailsScreen />} />
+      <Route path="/tickets" element={<TicketsScreen />} />
+      <Route path="/ticket/:bookingId" element={<TicketDetailsScreen />} />
     </Route>
   </>
 );

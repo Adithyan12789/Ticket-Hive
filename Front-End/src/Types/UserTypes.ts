@@ -1,5 +1,12 @@
 import { JwtPayload } from "jwt-decode";
 
+export interface ApiError {
+  message: string;
+  data?: {
+    message?: string;
+  };
+}
+
 /** User Informations */
 export interface User {
     _id: string;
@@ -41,6 +48,7 @@ export interface User {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data: any;
     id: string;
+    _id: string;
     profileImage?: string;
     name: string;
     email: string;

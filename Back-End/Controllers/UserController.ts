@@ -7,6 +7,7 @@ import { Request, Response, NextFunction } from "express";
 import { IUser } from "../Models/UserModel";
 import { CustomRequest } from "../Middlewares/AuthMiddleware";
 import { parse, format } from "date-fns";
+import { Movie } from "../Models/MoviesModel";
 
 class UserController {
   authUser = asyncHandler(
@@ -310,8 +311,6 @@ class UserController {
     }
   );
 
-  
-
   createBooking = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
       const {
@@ -346,6 +345,7 @@ class UserController {
       }
 
       console.log("Formatted bookingDate: ", formattedBookingDate);
+      console.log("user id: ", userId);
 
       // Validate input data
       if (
@@ -395,6 +395,91 @@ class UserController {
         } else {
           res.status(500).json({ message: "An unexpected error occurred" });
         }
+      }
+    }
+  );
+
+  getAllTickets = asyncHandler(
+    async (req: Request, res: Response): Promise<void> => {
+      console.log("hi");
+
+      const { userId } = req.params;
+      console.log("userId: ", userId);
+
+      if (!userId) {
+        res.status(400).json({ message: "User ID is required" });
+        return;
+      }
+
+      try {
+        const tickets = await UserService.getAllTicketsService(userId);
+
+        if (!tickets || tickets.length === 0) {
+          res.status(404).json({ message: "No tickets found for this user" });
+          return;
+        }
+
+        // Fetch movie details for each ticket
+        const ticketsWithMovieDetails = await Promise.all(
+          tickets.map(async (ticket) => {
+            const movie = await Movie.findById(ticket.movieId).exec();
+            return {
+              ticket, // Original ticket details
+              movieDetails: movie
+                ? {
+                    title: movie.title,
+                    poster: movie.posters,
+                    duration: movie.duration,
+                    genre: movie.genres,
+                  }
+                : null, // Include movie details if found
+            };
+          })
+        );
+
+        res.status(200).json({
+          success: true,
+          tickets: ticketsWithMovieDetails,
+        });
+      } catch (error: unknown) {
+        res.status(500).json({
+          success: false,
+          message: "Failed to retrieve tickets",
+          error: error instanceof Error ? error.message : "Unknown error",
+        });
+      }
+    }
+  );
+
+  cancelTicket = asyncHandler(
+    async (req: CustomRequest, res: Response): Promise<void> => {
+      const { bookingId } = req.params;
+      const userId = req.user?._id;
+
+      if (!bookingId || !userId) {
+        res
+          .status(400)
+          .json({ message: "Booking ID and User ID are required" });
+        return;
+      }
+
+      try {
+        const cancellationResult = await UserService.cancelTicketService(
+          bookingId,
+          userId
+        );
+
+        res.status(200).json({
+          success: true,
+          message: "Booking canceled successfully",
+          booking: cancellationResult,
+        });
+      } catch (error: unknown) {
+        res.status(500).json({
+          success: false,
+          message: "Failed to cancel booking",
+          error: error instanceof Error ? error.message : "Unknown error",
+        });
       }
     }
   );

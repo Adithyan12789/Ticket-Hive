@@ -37,11 +37,11 @@ const SelectSeatPage: React.FC = () => {
 
   const location = useLocation();
 
-  const { date, movieTitle, movieId, theaterId, showTime } = location.state || {};
-  
+  const { date, movieTitle, movieId, theaterId, showTime } =
+    location.state || {};
+
   console.log("movieId: ", movieId);
   console.log("theaterId: ", theaterId);
-  
 
   const formattedDate = `${
     date.getMonth() + 1
@@ -81,12 +81,12 @@ const SelectSeatPage: React.FC = () => {
   };
 
   const handleSeatSelection = (seatLabel: string, isAvailable: boolean) => {
-    if (!isAvailable) return; // Don't allow selection for unavailable seats
+    if (!isAvailable) return;
     const newSelectedSeats = new Set(selectedSeats);
     if (newSelectedSeats.has(seatLabel)) {
-      newSelectedSeats.delete(seatLabel); // Deselect if already selected
+      newSelectedSeats.delete(seatLabel);
     } else {
-      newSelectedSeats.add(seatLabel); // Select if not already selected
+      newSelectedSeats.add(seatLabel);
     }
     setSelectedSeats(newSelectedSeats);
   };
@@ -144,7 +144,7 @@ const SelectSeatPage: React.FC = () => {
                   onClick={() =>
                     handleSeatSelection(seat.label, seat.isAvailable)
                   }
-                  disabled={!seat.isAvailable}
+                  disabled={!seat.isAvailable} // Disable click on unavailable seats
                 >
                   {seat.label}
                 </button>
@@ -178,7 +178,7 @@ const SelectSeatPage: React.FC = () => {
   const totalSeats = selectedSeats.size;
   const ticketPrice = screenDetails?.theater?.ticketPrice || 0; // Default to 0 if undefined
   const totalPrice = totalSeats * ticketPrice;
-  
+
   if (isLoading) return <Loader />;
   if (isError) {
     toast.error("Error fetching seat data.");
@@ -281,12 +281,12 @@ const SelectSeatPage: React.FC = () => {
                   selectedSeats: [...selectedSeats],
                   theaterName: screenDetails?.theater.name,
                   date: formattedDate,
-                  movieTitle,
+                  movieTitle: movieTitle,
                   totalPrice: totalPrice,
                   movieId: movieId,
                   theaterId: theaterId,
                   screenId: screenId,
-                  showTime: showTime
+                  showTime: showTime,
                 },
               });
             }}
@@ -302,6 +302,6 @@ const SelectSeatPage: React.FC = () => {
       )}
     </Container>
   );
-};  
+};
 
 export default SelectSeatPage;

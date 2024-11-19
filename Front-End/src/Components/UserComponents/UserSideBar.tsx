@@ -21,8 +21,8 @@ const UserProfileSidebar: React.FC = () => {
         {/* Booking Details Link */}
         <li className="user-sidebar-item">
           <Link
-            to="/booking-details"
-            className={`user-sidebar-link ${location.pathname === "/booking-details" ? "active" : ""}`}
+            to="/tickets"
+            className={`user-sidebar-link ${location.pathname === "/tickets" ? "active" : ""}`}
           >
             <FaCalendarAlt className="user-sidebar-icon" /> Booking Details
           </Link>
