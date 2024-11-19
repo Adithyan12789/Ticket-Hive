@@ -210,11 +210,45 @@ class UserService {
     paymentStatus: string,
     paymentMethod: string,
     convenienceFee: number,
-    formattedBookingDate: Date // Ensure the type is Date
+    formattedBookingDate: Date
   ) {
-    console.log("Received formattedBookingDate in service:", formattedBookingDate);
-  
-    // Create the booking object
+    
+    console.log(
+      "Received formattedBookingDate in service:",
+      formattedBookingDate
+    );
+
+    console.log("screenId: ", screenId);
+    console.log("seatIds: ", seatIds);
+    
+
+    const screen = await Screens.findById(screenId);
+    if (!screen) {
+      throw new Error("Screen not found");
+    }
+
+    console.log("seatIds: ", seatIds);
+
+    const showTimeLayout = screen.layout.find(
+      (layout) => layout.showTime === showTime
+    );
+    if (!showTimeLayout) {
+      throw new Error("Showtime not found");
+    }
+
+    console.log("showTimeLayout: ", showTimeLayout);
+    
+
+    showTimeLayout.seats.forEach((seat) => {
+      if (seatIds.includes(seat.label)) {
+        console.log("ok");
+        
+        seat.isAvailable = false;
+      }
+    });
+
+    await screen.save();
+
     const newBooking = new Booking({
       movie: movieId,
       theater: theaterId,
@@ -230,19 +264,16 @@ class UserService {
     });
 
     console.log("new booking: ", newBooking);
-    
-  
+
     await newBooking.save();
 
     return newBooking;
-  }  
-
+  }
 
   public async getAllTicketsService(userId: string) {
     const user = await UserRepository.findUserById(userId);
 
     console.log("user service: ", user);
-    
 
     if (!user) {
       throw new Error("User not found");
@@ -298,8 +329,6 @@ class UserService {
 
     return { message: "Booking canceled successfully" };
   }
-  
-  
 
   public logoutUserService() {
     return true;

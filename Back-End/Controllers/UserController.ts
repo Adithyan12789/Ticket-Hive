@@ -311,6 +311,7 @@ class UserController {
     }
   );
 
+  // Controller
   createBooking = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
       const {
@@ -331,6 +332,7 @@ class UserController {
       console.log("payment Method: ", paymentMethod);
 
       let formattedBookingDate: Date;
+
       try {
         // Parse and format bookingDate as a Date object
         const parsedDate = parse(bookingDate, "EEEE dd MMM yyyy", new Date());
@@ -365,7 +367,10 @@ class UserController {
       }
 
       try {
-        // Call the service method to create a booking
+
+        console.log("screenId: ", screenId);
+        
+
         const booking = await UserService.createBookingService(
           movieId,
           theaterId,
