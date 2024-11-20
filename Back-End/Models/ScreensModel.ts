@@ -6,21 +6,11 @@ export interface ShowTime {
   movieTitle: string;
 }
 
-export interface ISeat {
-  label: string;
-  isAvailable: boolean;
-}
-
-export interface IShowTimeLayout {
-  showTime: string; // Show time for this specific slot
-  seats: ISeat[]; // Seat availability for this show time
-}
-
 export interface IScreen extends Document {
   screenNumber: number;
   capacity: number;
   theater: mongoose.Types.ObjectId;
-  layout: IShowTimeLayout[]; // Store layouts for each showtime
+  layout: { label: string; isAvailable: boolean }[][]; // Updated layout type
   showTimes: ShowTime[];
   createdAt: Date;
   updatedAt: Date;
@@ -38,17 +28,10 @@ const ScreenSchema: Schema<IScreen> = new Schema({
     ref: 'TheaterDetails', 
     required: true 
   },
-  layout: [
-    {
-      showTime: { type: String, required: true }, // The specific showtime for this layout
-      seats: [
-        { 
-          label: { type: String, required: true },
-          isAvailable: { type: Boolean, default: true } // Availability of the seat at this show time
-        }
-      ]
-    }
-  ],
+  layout: [[{ 
+    label: { type: String, required: true }, 
+    isAvailable: { type: Boolean, default: true } // Added isAvailable field
+  }]],
   showTimes: [
     {
       time: { type: String, required: true },

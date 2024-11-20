@@ -311,7 +311,6 @@ class UserController {
     }
   );
 
-  // Controller
   createBooking = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
       const {
@@ -330,9 +329,9 @@ class UserController {
 
       console.log("Raw bookingDate: ", bookingDate);
       console.log("payment Method: ", paymentMethod);
+      console.log("showTime: ", showTime);
 
       let formattedBookingDate: Date;
-
       try {
         // Parse and format bookingDate as a Date object
         const parsedDate = parse(bookingDate, "EEEE dd MMM yyyy", new Date());
@@ -367,10 +366,7 @@ class UserController {
       }
 
       try {
-
-        console.log("screenId: ", screenId);
-        
-
+        // Call the service method to create a booking
         const booking = await UserService.createBookingService(
           movieId,
           theaterId,
@@ -419,6 +415,8 @@ class UserController {
       try {
         const tickets = await UserService.getAllTicketsService(userId);
 
+        console.log("controller tickets: ", tickets);
+        
         if (!tickets || tickets.length === 0) {
           res.status(404).json({ message: "No tickets found for this user" });
           return;

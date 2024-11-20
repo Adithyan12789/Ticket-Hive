@@ -212,43 +212,14 @@ class UserService {
     convenienceFee: number,
     formattedBookingDate: Date
   ) {
-    
     console.log(
       "Received formattedBookingDate in service:",
       formattedBookingDate
     );
-
+  
     console.log("screenId: ", screenId);
-    console.log("seatIds: ", seatIds);
-    
-
-    const screen = await Screens.findById(screenId);
-    if (!screen) {
-      throw new Error("Screen not found");
-    }
-
-    console.log("seatIds: ", seatIds);
-
-    const showTimeLayout = screen.layout.find(
-      (layout) => layout.showTime === showTime
-    );
-    if (!showTimeLayout) {
-      throw new Error("Showtime not found");
-    }
-
-    console.log("showTimeLayout: ", showTimeLayout);
-    
-
-    showTimeLayout.seats.forEach((seat) => {
-      if (seatIds.includes(seat.label)) {
-        console.log("ok");
-        
-        seat.isAvailable = false;
-      }
-    });
-
-    await screen.save();
-
+  
+    // Create the booking object
     const newBooking = new Booking({
       movie: movieId,
       theater: theaterId,
@@ -262,22 +233,44 @@ class UserService {
       user: userId,
       totalPrice,
     });
-
+  
     console.log("new booking: ", newBooking);
-
+  
     await newBooking.save();
-
+  
+    // Update seat availability in the screen layout
+    const screen = await Screens.findById(screenId);
+  
+    console.log("serv screen: ", screen);
+  
+    if (!screen) {
+      throw new Error("Screen not found");
+    }
+  
+    // Filter out the show matching the showTime
+    const show = screen.showTimes.find((s) => s.time === showTime);
+    
+    console.log("show: ", show);
+  
+    // Update seat availability for the given show
+    const updatedLayout = screen.layout.map((row) =>
+      row.map((seat) =>
+        seatIds.includes(seat.label) ? { ...seat, isAvailable: false } : seat
+      )
+    );
+  
+    screen.layout = updatedLayout;
+  
+    await screen.save();
+  
     return newBooking;
-  }
+  }  
+  
 
   public async getAllTicketsService(userId: string) {
     const user = await UserRepository.findUserById(userId);
 
     console.log("user service: ", user);
-
-    if (!user) {
-      throw new Error("User not found");
-    }
 
     const tickets = await UserRepository.findBookingsByUserId(userId);
 
@@ -312,8 +305,7 @@ class UserService {
       throw new Error("You are not authorized to cancel this ticket");
     }
 
-    // Check cancellation conditions (e.g., within allowed cancellation time)
-    const CANCELLATION_WINDOW_HOURS = 24; // 24 hours before the show
+    const CANCELLATION_WINDOW_HOURS = 24;
     const now = new Date();
     const showDate = new Date(booking.bookingDate);
     const timeDifference = showDate.getTime() - now.getTime();
