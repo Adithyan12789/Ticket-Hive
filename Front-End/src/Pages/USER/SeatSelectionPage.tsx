@@ -6,23 +6,7 @@ import { useGetScreenByIdQuery } from "../../Slices/UserApiSlice";
 import Loader from "../../Components/UserComponents/Loader";
 import { toast } from "react-toastify";
 import React from "react";
-
-type Seat = {
-  label: string;
-  isAvailable: boolean;
-};
-
-type ScreenDetails = {
-  _id: string;
-  screenNumber: number;
-  layout: Seat[][]; // Array of rows, each row is an array of seats
-  movieTitle: string; // Added movie title field
-  theater: {
-    name: string; // Theater name field
-    ticketPrice: number;
-  };
-  showDate: string; // Date field for the show
-};
+import { Seat, Screen } from "../../Types/ScreenTypes";
 
 const SelectSeatPage: React.FC = () => {
   const { screenId } = useParams<{ screenId: string }>();
@@ -31,17 +15,19 @@ const SelectSeatPage: React.FC = () => {
   const [, setLayout] = useState<Seat[][]>([]);
 
   const { data, isLoading, isError } = useGetScreenByIdQuery(screenId);
-  const screenDetails = data as ScreenDetails | null;
+
+  const screenDetails = data as Screen | null;
 
   console.log("screenDetails: ", screenDetails);
 
   const location = useLocation();
 
-  const { date, movieTitle, movieId, theaterId, showTime } =
+  const { date, movieTitle, movieId, theaterId, showTime, showTimeId } =
     location.state || {};
 
   console.log("movieId: ", movieId);
   console.log("theaterId: ", theaterId);
+  console.log("showTimeId: ", showTimeId);
 
   const formattedDate = `${
     date.getMonth() + 1
@@ -57,12 +43,22 @@ const SelectSeatPage: React.FC = () => {
   }, [screenDetails]);
 
   useEffect(() => {
-    if (screenDetails?.layout) {
-      setLayout(screenDetails.layout);
+    if (screenDetails && showTimeId) {
+      // Find the specific showTime by its ID
+      const selectedShowTime = screenDetails.showTimes.find(
+        (showTime) => showTime._id === showTimeId
+      );
+
+      if (selectedShowTime) {
+        setLayout(selectedShowTime.layout); // Use the layout of the selected showTime
+      } else {
+        toast.error("Show time not found.");
+      }
     } else {
-      setLayout(generateSeatNames(5, 8)); // Default layout if no data is found
+      // Default to a generated layout if no showTime is available
+      setLayout(generateSeatNames(5, 8)); // Default layout
     }
-  }, [screenDetails]);
+  }, [screenDetails, showTimeId]);
 
   const generateSeatNames = (rows: number, cols: number): Seat[][] => {
     const layout: Seat[][] = [];
@@ -94,6 +90,10 @@ const SelectSeatPage: React.FC = () => {
   const renderScreenLayout = () => {
     if (!screenDetails) return <p>No seat layout available for this screen.</p>;
 
+    const selectedShowTime = screenDetails.showTimes.find(
+      (showTime) => showTime._id === showTimeId
+    );
+
     return (
       <div
         style={{
@@ -103,7 +103,7 @@ const SelectSeatPage: React.FC = () => {
           gap: "5px", // Reduced gap between rows
         }}
       >
-        {screenDetails.layout.map((row, rowIndex) => (
+        {selectedShowTime?.layout.map((row, rowIndex) => (
           <div
             key={`row-${rowIndex}`}
             style={{
@@ -111,7 +111,8 @@ const SelectSeatPage: React.FC = () => {
               justifyContent: "center",
               alignItems: "center",
               marginBottom:
-                rowIndex === Math.floor(screenDetails.layout.length / 2)
+                rowIndex ===
+                Math.floor(selectedShowTime?.layout.length / 2)
                   ? "20px"
                   : "5px", // Reduced margin
               gap: "8px", // Reduced gap between buttons
@@ -152,6 +153,7 @@ const SelectSeatPage: React.FC = () => {
             ))}
           </div>
         ))}
+
         <div
           style={{
             width: "50%",

@@ -126,6 +126,7 @@ const EditScreen: React.FC = () => {
         time: showTime,
         movie: movieId,
         movieTitle,
+        layout,
       })
     );
 
@@ -136,7 +137,6 @@ const EditScreen: React.FC = () => {
           screenNumber: Number(screenNumber),
           capacity: Number(capacity),
           showTimes: formattedShowTimes,
-          layout,
         },
       }).unwrap();
       toast.success("Screen updated successfully!");

@@ -11,6 +11,7 @@ import { toast } from "react-toastify";
 import "react-datepicker/dist/react-datepicker.css";
 
 type ShowTime = {
+  _id: string;
   time: string;
   movieTitle: string;
 };
@@ -313,6 +314,7 @@ const MovieTheaterScreen: React.FC = () => {
                                           theaterId: theater?._id,
                                           showTime: filteredShow.time,
                                           moviePoster: moviePoster,
+                                          showTimeId: filteredShow._id,
                                         }
                                       })
                                     }                                    

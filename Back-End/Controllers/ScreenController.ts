@@ -54,7 +54,6 @@ class ScreenController {
       const ScreenData = {
         screenNumber,
         capacity,
-        layout,
         showTimes,
         theater: theaterId,
       };
@@ -94,14 +93,13 @@ class ScreenController {
         return;
       }
 
-      const { screenNumber, capacity, layout, showTimes } = req.body;
+      const { screenNumber, capacity, showTimes } = req.body;
 
       console.log("req.body", req.body);
 
       const updateData = {
         screenNumber,
         capacity,
-        layout,
         showTimes,
       };
 

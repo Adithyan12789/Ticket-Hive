@@ -125,6 +125,7 @@ const AddScreenPage: React.FC = () => {
         time: showTime,
         movie: movieId,
         movieTitle: movieTitle,
+        layout,
       })
     );
 
@@ -135,7 +136,6 @@ const AddScreenPage: React.FC = () => {
           screenNumber: Number(screenNumber),
           capacity: Number(capacity),
           showTimes: formattedShowTimes,
-          layout,
         },
       }).unwrap();
       toast.success("Screen added successfully!");

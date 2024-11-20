@@ -216,9 +216,11 @@ class UserService {
       "Received formattedBookingDate in service:",
       formattedBookingDate
     );
-  
     console.log("screenId: ", screenId);
-  
+
+    console.log("showTime: ", showTime);
+    
+
     // Create the booking object
     const newBooking = new Booking({
       movie: movieId,
@@ -233,39 +235,38 @@ class UserService {
       user: userId,
       totalPrice,
     });
-  
+
     console.log("new booking: ", newBooking);
-  
+
     await newBooking.save();
-  
-    // Update seat availability in the screen layout
+
+    // Get the screen details
     const screen = await Screens.findById(screenId);
-  
     console.log("serv screen: ", screen);
-  
-    if (!screen) {
-      throw new Error("Screen not found");
-    }
-  
-    // Filter out the show matching the showTime
-    const show = screen.showTimes.find((s) => s.time === showTime);
-    
+
+    // Find the specific show time for the booking
+    const show = screen?.showTimes.find((s) => s.time === showTime);
     console.log("show: ", show);
-  
-    // Update seat availability for the given show
-    const updatedLayout = screen.layout.map((row) =>
+
+    if (!show) {
+      throw new Error("Show time not found");
+    }
+
+    console.log("after show: ", show);
+
+    const updatedLayout = show.layout.map((row) =>
       row.map((seat) =>
         seatIds.includes(seat.label) ? { ...seat, isAvailable: false } : seat
       )
     );
-  
-    screen.layout = updatedLayout;
-  
-    await screen.save();
-  
+    
+    show.layout = updatedLayout;
+
+    await screen?.save();
+    console.log("Screen after update: ", screen);
+    
     return newBooking;
-  }  
-  
+  }
 
   public async getAllTicketsService(userId: string) {
     const user = await UserRepository.findUserById(userId);
@@ -282,6 +283,7 @@ class UserService {
 
     return tickets.map((booking) => ({
       bookingId: booking._id,
+      screenId: booking.screen._id,
       movieId: booking.movie._id,
       movieTitle: booking.movie.title,
       theaterName: booking.theater.name,

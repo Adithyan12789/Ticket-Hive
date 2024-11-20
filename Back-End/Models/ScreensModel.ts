@@ -4,13 +4,13 @@ export interface ShowTime {
   time: string;
   movie: mongoose.Types.ObjectId;
   movieTitle: string;
+  layout: { label: string; isAvailable: boolean }[][]; 
 }
 
 export interface IScreen extends Document {
   screenNumber: number;
   capacity: number;
   theater: mongoose.Types.ObjectId;
-  layout: { label: string; isAvailable: boolean }[][]; // Updated layout type
   showTimes: ShowTime[];
   createdAt: Date;
   updatedAt: Date;
@@ -28,10 +28,6 @@ const ScreenSchema: Schema<IScreen> = new Schema({
     ref: 'TheaterDetails', 
     required: true 
   },
-  layout: [[{ 
-    label: { type: String, required: true }, 
-    isAvailable: { type: Boolean, default: true } // Added isAvailable field
-  }]],
   showTimes: [
     {
       time: { type: String, required: true },
@@ -40,7 +36,11 @@ const ScreenSchema: Schema<IScreen> = new Schema({
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'Movie', 
         required: true 
-      }
+      },
+      layout: [[{ 
+        label: { type: String, required: true }, 
+        isAvailable: { type: Boolean, default: true } 
+      }]],
     }
   ],
   createdAt: { type: Date, default: Date.now },

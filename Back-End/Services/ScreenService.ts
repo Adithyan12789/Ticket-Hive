@@ -7,13 +7,13 @@ class ScreenService {
     ScreenData: {
       screenNumber: number;
       capacity: number;
-      layout: any;
-      showTimes: { time: string; movie: string }[];
+      showTimes: { time: string; movie: string; layout: any }[]; // Layout inside each showtime
       theater: string;
     }
   ) {
     return await ScreenRepository.createScreen(ScreenData);
-  }
+  }   
+  
 
   public async editScreenHandler(
     theaterOwnerId: string,
@@ -21,8 +21,7 @@ class ScreenService {
     updateData: {
       screenNumber?: number;
       capacity?: number;
-      layout?: any;
-      showTimes?: { time: string; movie: string }[];
+      showTimes: { time: string; movie: string; layout: any }[];
     }
   ) {
     const screen: IScreen | null = await ScreenRepository.getScreenById(

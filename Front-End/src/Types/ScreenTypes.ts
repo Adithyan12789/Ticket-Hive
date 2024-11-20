@@ -1,20 +1,27 @@
-/** Screen Types */
-export interface Seat {
-  label: string;
-  type: 'regular' | 'vip' | 'unavailable';
-}
-
 export interface Screen {
-  theater: string;
+  theater: Theater; 
   _id: string;
   screenNumber: number;
   capacity: number;
-  layout: { label: string }[][];
-  showTimes: string[];
+  showTimes: ShowTime[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Theater {
+  name: string;
+  ticketPrice: number;
 }
 
 export interface ShowTime {
   time: string;
+  movie: string;
   movieTitle: string;
-  movie?: string
+  layout: Seat[][];
+  _id?: string;
+}
+
+export interface Seat {
+  label: string;
+  isAvailable: boolean;
 }

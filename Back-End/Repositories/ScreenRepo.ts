@@ -5,8 +5,7 @@ class ScreenRepository {
   public async createScreen(screenData: {
     screenNumber: number;
     capacity: number;
-    layout: any;
-    showTimes: { time: string; movie: string }[];
+    showTimes: { time: string; movie: string; layout: any }[];
     theater: string;
   }) {
     const newScreen = new Screens({
@@ -14,9 +13,10 @@ class ScreenRepository {
       createdAt: new Date(),
       updatedAt: new Date(),
     });
-
+  
     return await newScreen.save();
   }
+  
 
   
 

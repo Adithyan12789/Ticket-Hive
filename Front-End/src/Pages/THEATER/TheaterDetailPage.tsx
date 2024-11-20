@@ -52,6 +52,8 @@ const TheaterDetailScreen: React.FC = () => {
     isError: errorScreens,
   } = useGetScreensByTheaterIdQuery(id);
 
+  console.log("screens: ", screens);
+
   const [, setMovies] = useState<MovieManagement[]>([]);
   const [getMovies] = useGetMoviesMutation();
   const [deleteScreen] = useDeleteScreenMutation();
@@ -326,79 +328,102 @@ const TheaterDetailScreen: React.FC = () => {
                     </Modal.Header>
                     <Modal.Body>
                       {selectedScreen ? (
-                        <div
-                          style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: "center",
-                            gap: "10px",
-                          }}
-                        >
-                          {selectedScreen.layout.map((row, rowIndex) => (
-                            <div
-                              key={`row-${rowIndex}`}
-                              style={{
-                                display: "flex",
-                                justifyContent: "center",
-                                alignItems: "center",
-                                marginBottom:
-                                  rowIndex === 1
-                                    ? "30px"
-                                    : rowIndex ===
-                                      Math.floor(
-                                        selectedScreen.layout.length / 2
-                                      )
-                                    ? "50px"
-                                    : "10px",
-                                gap: "10px",
-                              }}
-                            >
-                              {row.map((seat, seatIndex) => (
-                                <React.Fragment key={`seat-${seatIndex}`}>
-                                  {seatIndex === Math.floor(row.length / 2) && (
-                                    // Add horizontal gap in the middle
-                                    <div style={{ width: "30px" }}></div>
-                                  )}
-                                  <button
+                        selectedScreen.showTimes &&
+                        selectedScreen.showTimes.length > 0 ? (
+                          (() => {
+                            const showTime = selectedScreen.showTimes[0]; // Access the first showTime
+                            if (
+                              typeof showTime === "object" &&
+                              "time" in showTime
+                            ) {
+                              return (
+                                <div style={{ marginBottom: "20px" }}>
+                                  <div
                                     style={{
-                                      width: "30px",
-                                      height: "30px",
-                                      backgroundColor: "#f8f9fa",
-                                      color: "#000",
+                                      display: "flex",
+                                      flexDirection: "column",
+                                      alignItems: "center",
+                                      gap: "10px",
+                                    }}
+                                  >
+                                    {showTime.layout.map((row, rowIndex) => (
+                                      <div
+                                        key={`row-${rowIndex}`}
+                                        style={{
+                                          display: "flex",
+                                          justifyContent: "center",
+                                          alignItems: "center",
+                                          marginBottom:
+                                            rowIndex === 1
+                                              ? "30px"
+                                              : rowIndex ===
+                                                Math.floor(
+                                                  showTime.layout.length / 2
+                                                )
+                                              ? "50px"
+                                              : "10px",
+                                          gap: "10px",
+                                        }}
+                                      >
+                                        {row.map((seat, seatIndex) => (
+                                          <React.Fragment
+                                            key={`seat-${seatIndex}`}
+                                          >
+                                            {seatIndex ===
+                                              Math.floor(row.length / 2) && (
+                                              <div
+                                                style={{ width: "30px" }}
+                                              ></div>
+                                            )}
+                                            <button
+                                              style={{
+                                                width: "30px",
+                                                height: "30px",
+                                                backgroundColor: "#f8f9fa",
+                                                color: "#000",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                                border: "1px solid #007bff",
+                                                borderRadius: "4px",
+                                                fontSize: "0.8rem",
+                                                cursor: "pointer",
+                                              }}
+                                            >
+                                              {seat.label}
+                                            </button>
+                                          </React.Fragment>
+                                        ))}
+                                      </div>
+                                    ))}
+                                  </div>
+                                  <div
+                                    style={{
+                                      width: "100%",
+                                      maxWidth: "600px",
+                                      height: "40px",
+                                      backgroundColor: "#007bff",
+                                      color: "#fff",
                                       display: "flex",
                                       alignItems: "center",
                                       justifyContent: "center",
-                                      border: "1px solid #007bff",
-                                      borderRadius: "4px",
-                                      fontSize: "0.8rem",
-                                      cursor: "pointer",
+                                      marginTop: "20px",
+                                      borderRadius: "5px",
+                                      fontWeight: "bold",
+                                      marginLeft: "230px",
                                     }}
                                   >
-                                    {seat.label}
-                                  </button>
-                                </React.Fragment>
-                              ))}
-                            </div>
-                          ))}
-                          {/* Static screen at the bottom */}
-                          <div
-                            style={{
-                              width: "100%",
-                              maxWidth: "600px",
-                              height: "40px",
-                              backgroundColor: "#007bff",
-                              color: "#fff",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              marginTop: "20px",
-                              borderRadius: "5px",
-                              fontWeight: "bold",
-                            }}
-                          >
-                            Screen
-                          </div>
-                        </div>
+                                    Screen
+                                  </div>
+                                </div>
+                              );
+                            } else {
+                              return <p>Invalid showTime data</p>;
+                            }
+                          })()
+                        ) : (
+                          <p>No seat layout available for this screen.</p>
+                        )
                       ) : (
                         <p>No seat layout available for this screen.</p>
                       )}
