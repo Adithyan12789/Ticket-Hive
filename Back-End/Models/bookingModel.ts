@@ -8,7 +8,7 @@ export interface IBooking extends Document {
   seats: string[]; // Array of selected seats
   showTime: Date; // Date and time of the movie show
   totalPrice: number; // Total price for the booking
-  paymentStatus: "pending" | "completed" | "failed"; // Payment status of the booking
+  paymentStatus: "pending" | "completed" | "cancelled" | "failed"; // Payment status of the booking
   paymentMethod: string; // Payment method used
   convenienceFee: number; // Convenience fee applied
   bookingDate: Date; // Date when the booking was made

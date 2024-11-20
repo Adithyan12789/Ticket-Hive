@@ -297,32 +297,29 @@ class UserService {
   }
 
   public async cancelTicketService(bookingId: string, userId: string) {
-    const booking = await UserRepository.findBookingById(bookingId);
 
+    const booking = await UserRepository.findBookingById(bookingId);
+  
     if (!booking) {
       throw new Error("Booking not found");
     }
-
+  
     if (String(booking.user) !== userId) {
+      console.log("user problem");
       throw new Error("You are not authorized to cancel this ticket");
     }
+  
+    // Update paymentStatus to 'cancel'
+    booking.paymentStatus = "cancelled";
 
-    const CANCELLATION_WINDOW_HOURS = 24;
-    const now = new Date();
-    const showDate = new Date(booking.bookingDate);
-    const timeDifference = showDate.getTime() - now.getTime();
-
-    if (timeDifference < CANCELLATION_WINDOW_HOURS * 60 * 60 * 1000) {
-      throw new Error(
-        "Tickets cannot be canceled within 24 hours of the showtime"
-      );
-    }
-
-    // Update booking status or delete
-    await UserRepository.deleteBookingById(bookingId);
-
-    return { message: "Booking canceled successfully" };
+    
+  
+    // Save the updated booking
+    await booking.save();
+  
+    return { message: "Booking canceled successfully", booking };
   }
+  
 
   public logoutUserService() {
     return true;

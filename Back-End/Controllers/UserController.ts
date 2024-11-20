@@ -456,8 +456,16 @@ class UserController {
 
   cancelTicket = asyncHandler(
     async (req: CustomRequest, res: Response): Promise<void> => {
+
+      console.log("entered to cancel controller");
+
       const { bookingId } = req.params;
       const userId = req.user?._id;
+
+      console.log("bookingId: ", bookingId);
+      console.log("req user Id: ", req.user?._id);
+      console.log("userId: ", userId);
+      
 
       if (!bookingId || !userId) {
         res
@@ -467,10 +475,15 @@ class UserController {
       }
 
       try {
+        console.log("jjjjj");
+        
+
         const cancellationResult = await UserService.cancelTicketService(
           bookingId,
           userId
         );
+
+        console.log("cancellationResult: ", cancellationResult);
 
         res.status(200).json({
           success: true,

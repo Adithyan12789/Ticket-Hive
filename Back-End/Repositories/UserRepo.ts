@@ -31,7 +31,7 @@ class UserRepository {
     }
 
     public async findBookingById(bookingId: string): Promise<any | null> {
-        return await Booking.findById(bookingId).populate("movie theater screen").lean();
+        return await Booking.findById(bookingId).populate("movie theater screen");
     }    
 
     public async deleteBookingById(bookingId: string): Promise<any | null> {

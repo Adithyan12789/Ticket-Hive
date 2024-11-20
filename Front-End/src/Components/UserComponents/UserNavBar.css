@@ -1,0 +1,29 @@
+/* Center Alignment */
+.user-navbar .nav {
+  justify-content: center;
+  align-items: center;
+}
+
+/* Navbar Icons */
+.user-navbar-icon {
+  margin-right: 5px;
+  font-size: 1rem;
+}
+
+/* Navbar Link Styling */
+.t-user-navbar-link {
+  font-size: 1rem;
+  font-weight: 500;
+  margin: 0 15px;
+  transition: color 0.3s ease;
+  color: antiquewhite;
+  text-decoration: none !important;
+}
+
+/* Hover and Active State */
+.t-user-navbar-link:hover,
+.t-user-navbar-link.active {
+  color: #007bff;
+  font-weight: bold;
+  border-bottom: 2px solid #007bff;
+}

@@ -1,11 +1,11 @@
 import { useEffect } from "react";
-import { Container, Row, Col, Table, Button } from "react-bootstrap";
+import { Container, Table, Button, Card, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import Loader from "../../Components/UserComponents/Loader";
 import { useSelector } from "react-redux";
 import { useGetBookingDetailsQuery } from "../../Slices/UserApiSlice";
 import { RootState } from "../../Store";
-import UserProfileSidebar from "../../Components/UserComponents/UserSideBar";
+import UserNavBar from "../../Components/UserComponents/UserNavBar";
 
 interface MovieDetails {
   title: string;
@@ -35,11 +35,7 @@ const TicketsScreen: React.FC = () => {
   const { userInfo } = useSelector((state: RootState) => state.auth);
 
   const { data, isLoading } = useGetBookingDetailsQuery(userInfo?.id);
-
   const tickets: TicketEntry[] = data?.tickets || [];
-
-  console.log("tickets: ", tickets);
-  
 
   useEffect(() => {
     document.title = "Ticket Hive - Booking Details";
@@ -48,54 +44,93 @@ const TicketsScreen: React.FC = () => {
   if (isLoading) return <Loader />;
 
   return (
-    <div style={{ padding: "20px" }}>
-      <Container fluid>
-        <Row className="my-4">
-          {/* Sidebar */}
-          <Col md={3}>
-            <UserProfileSidebar />
-          </Col>
+    <div
+      style={{
+        backgroundColor: "#f8f9fa",
+        minHeight: "100vh",
+        marginTop: "30px",
+      }}
+    >
+      {/* User Navigation Bar */}
+      <UserNavBar />
 
-          {/* Main content */}
-          <Col md={9}>
-            <h3 className="mb-4">Your Tickets</h3>
-            {/* Table Layout */}
-            <Table striped bordered hover responsive>
-              <thead>
-                <tr>
-                  <th>Movie Title</th>
-                  <th>Theater</th>
-                  <th>Seats</th>
-                  <th>Status</th>
-                  <th>Booking ID</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {tickets.map((ticketEntry) => (
-                  <tr key={ticketEntry.ticket.bookingId}>
-                    <td>{ticketEntry.movieDetails.title}</td>
-                    <td>{ticketEntry.ticket.theaterName}</td>
-                    <td>{ticketEntry.ticket.seats.join(", ")}</td>
-                    <td>{ticketEntry.ticket.paymentStatus}</td>
-                    <td>{ticketEntry.ticket.bookingId}</td>
-                    <td>
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        onClick={() =>
-                          navigate(`/ticket/${ticketEntry.ticket.bookingId}`)
-                        }
-                      >
-                        View Details
-                      </Button>
-                    </td>
+      {/* Main Content */}
+      <Container className="py-4">
+        <Card className="shadow-sm">
+          <Card.Body>
+            <h3 className="mb-4 text-center text-primary">Your Tickets</h3>
+
+            {tickets.length === 0 ? (
+              <Alert variant="info" className="text-center">
+                You have no bookings yet. Start exploring movies and book your
+                tickets now!
+              </Alert>
+            ) : (
+              <Table
+                striped
+                bordered
+                hover
+                responsive
+                className="text-center my-3 py-3"
+              >
+                <thead className="table-dark">
+                  <tr>
+                    <th>Movie Title</th>
+                    <th>Theater</th>
+                    <th>Status</th>
+                    <th>Booking ID</th>
+                    <th>Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </Table>
-          </Col>
-        </Row>
+                </thead>
+                <tbody>
+                  {tickets.map((ticketEntry) => (
+                    <tr
+                      key={ticketEntry.ticket.bookingId}
+                      className={`${
+                        ticketEntry.ticket.paymentStatus === "cancelled"
+                          ? "bg-danger text-white"
+                          : ticketEntry.ticket.paymentStatus === "completed"
+                          ? "bg-success text-white"
+                          : ticketEntry.ticket.paymentStatus === "pending"
+                          ? "bg-warning text-dark"
+                          : ""
+                      }`}
+                    >
+                      <td className="py-3">{ticketEntry.movieDetails.title}</td>
+                      <td className="py-3">{ticketEntry.ticket.theaterName}</td>
+                      <td className="py-3">
+                        <span
+                          className={`badge ${
+                            ticketEntry.ticket.paymentStatus === "completed"
+                              ? "bg-success"
+                              : ticketEntry.ticket.paymentStatus === "cancelled"
+                              ? "bg-danger"
+                              : "bg-warning text-dark"
+                          }`}
+                        >
+                          {ticketEntry.ticket.paymentStatus}
+                        </span>
+                      </td>
+                      <td className="py-3">{ticketEntry.ticket.bookingId}</td>
+                      <td className="py-3">
+                        <Button
+                          variant="outline-primary"
+                          size="sm"
+                          onClick={() =>
+                            navigate(`/ticket/${ticketEntry.ticket.bookingId}`)
+                          }
+                          aria-label={`View details for booking ID ${ticketEntry.ticket.bookingId}`}
+                        >
+                          View Details
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            )}
+          </Card.Body>
+        </Card>
       </Container>
     </div>
   );

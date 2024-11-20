@@ -2,8 +2,6 @@ import { useState, useEffect } from "react";
 import {
   Card,
   Container,
-  Row,
-  Col,
   Image,
   Button,
   Form,
@@ -18,7 +16,7 @@ import {
   useUpdateUserMutation,
 } from "../../Slices/UserApiSlice";
 import { UserInfo } from "../../Types/UserTypes";
-import UserProfileSidebar from "../../Components/UserComponents/UserSideBar";
+import UserProfileNavbar from "../../Components/UserComponents/UserNavBar";
 import "./UserProfilePage.css";
 import { useNavigate } from "react-router-dom";
 
@@ -143,13 +141,10 @@ const ProfileScreen: React.FC = () => {
   if (profileLoading) return <Loader />;
 
   return (
-    <div className="profile-screen">
+    <div className="user-profile-screen" style={{paddingTop: "30px"}}>
+          <UserProfileNavbar />
+
       <Container fluid className="profile-container mt-4">
-        <Row className="my-4 justify-content-center">
-          <Col md={3} className="sidebar-column">
-            <UserProfileSidebar />
-          </Col>
-          <Col md={8}>
             <Card className="profile-card-modern shadow-sm">
               <Card.Body className="text-center">
                 <div className="profile-photo-container text-center mb-4">
@@ -183,8 +178,6 @@ const ProfileScreen: React.FC = () => {
                 </div>
               </Card.Body>
             </Card>
-          </Col>
-        </Row>
       </Container>
 
       {/* Edit Profile Modal */}
