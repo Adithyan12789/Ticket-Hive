@@ -73,6 +73,14 @@ export const usersApiSlice = apiSlice.injectEndpoints({
       }),
     }),
 
+    saveUserLocation: builder.mutation<void, { latitude: number; longitude: number }>({
+      query: (location) => ({
+        url: `${USERS_URL}/save-location`,
+        method: "POST",
+        body: location,
+      }),
+    }),
+
     getUserProfile: builder.query({
       query: () => ({
         url: `${USERS_URL}/profile`,

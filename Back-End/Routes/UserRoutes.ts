@@ -5,6 +5,7 @@ import MulterConfig from '../Config/Multer/UserMulter';
 import MovieController from '../Controllers/MovieController';
 import TheaterController from '../Controllers/TheaterController';
 import ScreenController from '../Controllers/ScreenController';
+import BookingController from '../Controllers/BookingController';
 
 const router = express.Router();
 
@@ -25,9 +26,10 @@ router.get('/movie-detail/:id',AuthMiddleware.protect, MovieController.getMovieB
 router.get('/movie-theaters/:movieTitle', AuthMiddleware.protect, TheaterController.getTheatersByMovieTitle);
 router.get('/screen/:screenId', AuthMiddleware.protect, ScreenController.getScreensById);
 
-router.post('/book-ticket', AuthMiddleware.protect, UserController.createBooking);
-router.get('/get-tickets/:userId', AuthMiddleware.protect, UserController.getAllTickets);
-router.post('/cancel-ticket/:bookingId', AuthMiddleware.protect, UserController.cancelTicket);
+router.post('/book-ticket', AuthMiddleware.protect, BookingController.createBooking);
+router.get('/get-tickets/:userId', AuthMiddleware.protect, BookingController.getAllTickets);
+router.get("/tickets/:ticketId", AuthMiddleware.protect, BookingController.getTicketDetails);
+router.post('/cancel-ticket/:bookingId', AuthMiddleware.protect, BookingController.cancelTicket);
 
 router.post('/logout', UserController.logoutUser);
 

@@ -117,6 +117,21 @@ export const adminApiSlice = apiSlice.injectEndpoints({
       }),
     }),
 
+    getBookingDetails: builder.query({
+      query: () => ({
+        url: `${ADMIN_URL}/getAlltickets`,
+        method: "GET",
+      }),
+    }),
+
+    updateBookingStatus: builder.mutation({
+      query: ({ bookingId, status }) => ({
+        url: `${ADMIN_URL}/statusChange/${bookingId}`,
+        method: "PATCH",
+        body: { status },
+      }),
+    }),
+
     adminLogout: builder.mutation<void, void>({
       query: () => ({
         url: `${ADMIN_URL}/admin-logout`,
@@ -142,5 +157,7 @@ export const {
   useGetMovieByMovieIdQuery,
   useUpdateMovieMutation,
   useDeleteMovieMutation,
+  useGetBookingDetailsQuery,
+  useUpdateBookingStatusMutation,
   useAdminLogoutMutation,
 } = adminApiSlice;

@@ -7,6 +7,8 @@ import TheaterOwners from '../Pages/ADMIN/TheaterOwnerManagement';
 import VerificationRequests from '../Pages/ADMIN/VerificationRequests';
 import MovieManagement from '../Pages/ADMIN/MoviesManagement';
 import MovieDetailsPage from '../Pages/ADMIN/MovieDetailsPage';
+import BookingsPage from '../Pages/ADMIN/BookingsPage';
+import BookingDetailsPage from '../Pages/ADMIN/BookingDetailsPage';
 
 export const AdminRoutes = (
   <Route path="/admin" element={<AdminPrivateRoute />}>
@@ -17,6 +19,8 @@ export const AdminRoutes = (
     <Route path="add-movies" element={<MovieManagement />} />
     <Route path="get-movies" element={<MovieManagement />} />
     <Route path="movie-details/:id" element={<MovieDetailsPage />} />
+    <Route path="bookings" element={<BookingsPage />} />
+    <Route path="bookings/:bookingId" element={<BookingDetailsPage />} />
   </Route>
 );
 

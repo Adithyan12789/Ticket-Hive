@@ -1,5 +1,14 @@
-import { useEffect } from "react";
-import { Container, Table, Button, Card, Alert } from "react-bootstrap";
+import { useState, useEffect } from "react";
+import {
+  Container,
+  Table,
+  Button,
+  Card,
+  Alert,
+  Pagination,
+  DropdownButton,
+  Dropdown,
+} from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import Loader from "../../Components/UserComponents/Loader";
 import { useSelector } from "react-redux";
@@ -37,11 +46,51 @@ const TicketsScreen: React.FC = () => {
   const { data, isLoading } = useGetBookingDetailsQuery(userInfo?.id);
   const tickets: TicketEntry[] = data?.tickets || [];
 
+  const [currentPage, setCurrentPage] = useState(1); // Current page
+  const [itemsPerPage] = useState(5); // Items per page
+  const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string>("movieTitle"); // Sort by movie title or booking time
+
   useEffect(() => {
     document.title = "Ticket Hive - Booking Details";
   }, []);
 
+  // Apply filtering
+  const filteredTickets =
+    filterStatus === "all"
+      ? tickets
+      : tickets.filter(
+          (ticket) => ticket.ticket.paymentStatus === filterStatus
+        );
+
+  const sortedTickets = [...filteredTickets].sort((a, b) => {
+    if (sortBy === "movieTitle") {
+      return a.movieDetails.title.localeCompare(b.movieDetails.title);
+    } else {
+      return (
+        new Date(a.ticket.bookingTime).getTime() -
+        new Date(b.ticket.bookingTime).getTime()
+      );
+    }
+  });
+
+  const totalTickets = sortedTickets.length; // Total number of filtered and sorted tickets
+  const totalPages = Math.ceil(totalTickets / itemsPerPage); // Total number of pages
+
+  // Logic to slice the tickets based on current page
+  const indexOfLastTicket = currentPage * itemsPerPage;
+  const indexOfFirstTicket = indexOfLastTicket - itemsPerPage;
+  const currentTickets = sortedTickets.slice(
+    indexOfFirstTicket,
+    indexOfLastTicket
+  );
+
   if (isLoading) return <Loader />;
+
+  // Handler for changing pages
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   return (
     <div
@@ -59,6 +108,47 @@ const TicketsScreen: React.FC = () => {
         <Card className="shadow-sm">
           <Card.Body>
             <h3 className="mb-4 text-center text-primary">Your Tickets</h3>
+
+            {/* Filters and Sort Options */}
+            <div className="d-flex justify-content-between mb-3">
+              {/* Filter by Payment Status */}
+              <DropdownButton
+                id="dropdown-filter"
+                variant="outline-secondary"
+                title={`Filter by Status: ${
+                  filterStatus === "all" ? "All" : filterStatus
+                }`}
+                onSelect={(status) => {
+                  if (status) {
+                    setFilterStatus(status);
+                  }
+                }}
+              >
+                <Dropdown.Item eventKey="all">All</Dropdown.Item>
+                <Dropdown.Item eventKey="Confirmed">Confirmed</Dropdown.Item>
+                <Dropdown.Item eventKey="pending">Pending</Dropdown.Item>
+                <Dropdown.Item eventKey="cancelled">Cancelled</Dropdown.Item>
+              </DropdownButton>
+
+              {/* Sort Options */}
+              <DropdownButton
+                id="dropdown-sort"
+                variant="outline-secondary"
+                title={`Sort by: ${
+                  sortBy === "movieTitle" ? "Movie Title" : "Booking Time"
+                }`}
+                onSelect={(sortOption) => {
+                  if (sortOption) {
+                    setSortBy(sortOption);
+                  }
+                }}
+              >
+                <Dropdown.Item eventKey="movieTitle">Movie Title</Dropdown.Item>
+                <Dropdown.Item eventKey="bookingTime">
+                  Booking Time
+                </Dropdown.Item>
+              </DropdownButton>
+            </div>
 
             {tickets.length === 0 ? (
               <Alert variant="info" className="text-center">
@@ -83,13 +173,13 @@ const TicketsScreen: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {tickets.map((ticketEntry) => (
+                  {currentTickets.map((ticketEntry) => (
                     <tr
                       key={ticketEntry.ticket.bookingId}
                       className={`${
                         ticketEntry.ticket.paymentStatus === "cancelled"
                           ? "bg-danger text-white"
-                          : ticketEntry.ticket.paymentStatus === "completed"
+                          : ticketEntry.ticket.paymentStatus === "Confirmed"
                           ? "bg-success text-white"
                           : ticketEntry.ticket.paymentStatus === "pending"
                           ? "bg-warning text-dark"
@@ -101,7 +191,7 @@ const TicketsScreen: React.FC = () => {
                       <td className="py-3">
                         <span
                           className={`badge ${
-                            ticketEntry.ticket.paymentStatus === "completed"
+                            ticketEntry.ticket.paymentStatus === "Confirmed"
                               ? "bg-success"
                               : ticketEntry.ticket.paymentStatus === "cancelled"
                               ? "bg-danger"
@@ -129,6 +219,27 @@ const TicketsScreen: React.FC = () => {
                 </tbody>
               </Table>
             )}
+
+            {/* Pagination */}
+            <Pagination>
+              <Pagination.Prev
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+              />
+              {[...Array(totalPages).keys()].map((pageNumber) => (
+                <Pagination.Item
+                  key={pageNumber + 1}
+                  active={pageNumber + 1 === currentPage}
+                  onClick={() => handlePageChange(pageNumber + 1)}
+                >
+                  {pageNumber + 1}
+                </Pagination.Item>
+              ))}
+              <Pagination.Next
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              />
+            </Pagination>
           </Card.Body>
         </Card>
       </Container>

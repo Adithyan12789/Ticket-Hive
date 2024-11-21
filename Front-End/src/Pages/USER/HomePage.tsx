@@ -117,7 +117,7 @@ const HomePage: React.FC = () => {
 
       <Container>
         <div
-          className="d-flex align-items-center mt-5"
+          className="d-flex mt-5"
           style={{ gap: "0.5rem", justifyContent: "space-evenly" }}
         >
           {/* Sort Dropdown on the Left */}
