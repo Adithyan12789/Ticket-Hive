@@ -7,7 +7,7 @@ import {
 import AdminLayout from "../../Components/AdminComponents/AdminLayout";
 import Loader from "../../Components/UserComponents/Loader";
 import { Ticket } from "../../Types/BookingTypes";
-import Swal from "sweetalert2";  // Import SweetAlert2
+import Swal from "sweetalert2";
 
 const AdminBookingDetailPage: React.FC = () => {
   const { bookingId } = useParams<{ bookingId: string }>();
@@ -42,7 +42,6 @@ const AdminBookingDetailPage: React.FC = () => {
   const movieDetails = selectedBooking.movieDetails;
 
   const handleStatusChange = async (newStatus: string) => {
-    // Show SweetAlert2 confirmation dialog
     const result = await Swal.fire({
       title: 'Are you sure?',
       text: `Do you want to update the booking status to ${newStatus}?`,
@@ -53,7 +52,7 @@ const AdminBookingDetailPage: React.FC = () => {
     });
 
     if (result.isConfirmed) {
-      setStatus(newStatus);  // Update the state with the new status
+      setStatus(newStatus);
       await updateBookingStatus({
         bookingId: ticket.bookingId,
         status: newStatus,

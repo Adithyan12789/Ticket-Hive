@@ -331,7 +331,7 @@ const TheaterDetailScreen: React.FC = () => {
                         selectedScreen.showTimes &&
                         selectedScreen.showTimes.length > 0 ? (
                           (() => {
-                            const showTime = selectedScreen.showTimes[0]; // Access the first showTime
+                            const showTime = selectedScreen.showTimes[0];
                             if (
                               typeof showTime === "object" &&
                               "time" in showTime

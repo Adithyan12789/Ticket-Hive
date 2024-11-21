@@ -1,17 +1,17 @@
 import mongoose, { Schema, model, Document, Types } from "mongoose";
 
 export interface IBooking extends Document {
-  user: mongoose.Types.ObjectId; // Reference to the user who made the booking
-  movie: mongoose.Types.ObjectId; // Reference to the movie being booked
-  theater: mongoose.Types.ObjectId; // Reference to the theater where the movie is being shown
+  user: mongoose.Types.ObjectId;
+  movie: mongoose.Types.ObjectId;
+  theater: mongoose.Types.ObjectId;
   screen: mongoose.Types.ObjectId; 
-  seats: string[]; // Array of selected seats
-  showTime: string; // Date and time of the movie show
-  totalPrice: number; // Total price for the booking
-  paymentStatus: "pending" | "confirmed" | "cancelled" | "failed"; // Payment status of the booking
-  paymentMethod: string; // Payment method used
-  convenienceFee: number; // Convenience fee applied
-  bookingDate: Date; // Date when the booking was made
+  seats: string[];
+  showTime: string;
+  totalPrice: number;
+  paymentStatus: "pending" | "confirmed" | "cancelled" | "failed";
+  paymentMethod: string;
+  convenienceFee: number;
+  bookingDate: Date;
 }
 
 const bookingSchema = new mongoose.Schema({

@@ -12,7 +12,7 @@ export interface IMovie extends Document {
   director: string;
   releaseDate: Date;
   posters: string | null;
-  theater: mongoose.Types.ObjectId;
+  // theater: mongoose.Types.ObjectId;
 }
 
 const MovieSchema = new Schema<IMovie>({
@@ -28,7 +28,7 @@ const MovieSchema = new Schema<IMovie>({
   director: { type: String, required: true },
   releaseDate: { type: Date, required: true },
   posters: { type: String, required: true },
-  theater: { type: mongoose.Schema.Types.ObjectId, ref: 'TheaterDetails', required: true },
+  // theater: { type: mongoose.Schema.Types.ObjectId, ref: 'TheaterDetails', required: true },
   
 });
 

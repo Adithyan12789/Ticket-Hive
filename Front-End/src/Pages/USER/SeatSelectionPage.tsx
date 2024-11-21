@@ -13,6 +13,7 @@ const SelectSeatPage: React.FC = () => {
   const navigate = useNavigate();
   const [selectedSeats, setSelectedSeats] = useState<Set<string>>(new Set());
   const [, setLayout] = useState<Seat[][]>([]);
+  const [loading, setLoading] = useState<boolean>(true); 
 
   const { data, isLoading, isError } = useGetScreenByIdQuery(screenId);
 
@@ -37,6 +38,14 @@ const SelectSeatPage: React.FC = () => {
   console.log(screenId, date, movieTitle);
 
   useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
     document.title = screenDetails
       ? `Screen - ${screenDetails.screenNumber} - Select Seats`
       : "Select Seats";
@@ -44,19 +53,17 @@ const SelectSeatPage: React.FC = () => {
 
   useEffect(() => {
     if (screenDetails && showTimeId) {
-      // Find the specific showTime by its ID
       const selectedShowTime = screenDetails.showTimes.find(
         (showTime) => showTime._id === showTimeId
       );
 
       if (selectedShowTime) {
-        setLayout(selectedShowTime.layout); // Use the layout of the selected showTime
+        setLayout(selectedShowTime.layout);
       } else {
         toast.error("Show time not found.");
       }
     } else {
-      // Default to a generated layout if no showTime is available
-      setLayout(generateSeatNames(5, 8)); // Default layout
+      setLayout(generateSeatNames(5, 8));
     }
   }, [screenDetails, showTimeId]);
 
@@ -64,10 +71,10 @@ const SelectSeatPage: React.FC = () => {
     const layout: Seat[][] = [];
     for (let i = 0; i < rows; i++) {
       const row: Seat[] = [];
-      const rowPrefix = String.fromCharCode(65 + (i % 26)); // Row names from A to Z
+      const rowPrefix = String.fromCharCode(65 + (i % 26));
       for (let j = 1; j <= cols; j++) {
         row.push({
-          label: `${rowPrefix}${j.toString().padStart(2, "0")}`, // Seat label like A01, A02...
+          label: `${rowPrefix}${j.toString().padStart(2, "0")}`,
           isAvailable: true,
         });
       }
@@ -100,7 +107,7 @@ const SelectSeatPage: React.FC = () => {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: "5px", // Reduced gap between rows
+          gap: "5px",
         }}
       >
         {selectedShowTime?.layout.map((row, rowIndex) => (
@@ -114,8 +121,8 @@ const SelectSeatPage: React.FC = () => {
                 rowIndex ===
                 Math.floor(selectedShowTime?.layout.length / 2)
                   ? "20px"
-                  : "5px", // Reduced margin
-              gap: "8px", // Reduced gap between buttons
+                  : "5px",
+              gap: "8px",
             }}
           >
             {row.map((seat, seatIndex) => (
@@ -125,27 +132,27 @@ const SelectSeatPage: React.FC = () => {
                 )}
                 <button
                   style={{
-                    width: "30px", // Smaller button size
-                    height: "30px", // Smaller button size
+                    width: "30px",
+                    height: "30px", 
                     backgroundColor: selectedSeats.has(seat.label)
-                      ? "rgb(0 185 255)" // Highlight selected seat
+                      ? "rgb(0 185 255)" 
                       : seat.isAvailable
-                      ? "#f8f9fa" // Default for available seats
-                      : "gray", // Disabled color for unavailable seats
+                      ? "#f8f9fa" 
+                      : "gray",
                     color: selectedSeats.has(seat.label) ? "#fff" : "#000",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     border: "1px solid #007bff",
                     borderRadius: "4px",
-                    fontSize: "0.7rem", // Smaller font size
-                    cursor: seat.isAvailable ? "pointer" : "not-allowed", // Disable cursor for unavailable seats
-                    transition: "background-color 0.3s", // Smooth transition
+                    fontSize: "0.7rem",
+                    cursor: seat.isAvailable ? "pointer" : "not-allowed",
+                    transition: "background-color 0.3s",
                   }}
                   onClick={() =>
                     handleSeatSelection(seat.label, seat.isAvailable)
                   }
-                  disabled={!seat.isAvailable} // Disable click on unavailable seats
+                  disabled={!seat.isAvailable}
                 >
                   {seat.label}
                 </button>
@@ -159,7 +166,7 @@ const SelectSeatPage: React.FC = () => {
             width: "50%",
             maxWidth: "250px",
             height: "12px",
-            background: "linear-gradient(to bottom, rgb(96 176 255), #f8f9fa)", // Added gradient for light effect
+            background: "linear-gradient(to bottom, rgb(96 176 255), #f8f9fa)",
             color: "#fff",
             display: "flex",
             alignItems: "center",
@@ -167,7 +174,7 @@ const SelectSeatPage: React.FC = () => {
             marginTop: "50px",
             borderRadius: "5px",
             fontWeight: "bold",
-            boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.3)", // Box shadow for depth
+            boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.3)",
           }}
         ></div>
         <div style={{ fontSize: "10px", marginTop: "10px" }}>
@@ -178,10 +185,10 @@ const SelectSeatPage: React.FC = () => {
   };
 
   const totalSeats = selectedSeats.size;
-  const ticketPrice = screenDetails?.theater?.ticketPrice || 0; // Default to 0 if undefined
+  const ticketPrice = screenDetails?.theater?.ticketPrice || 0;
   const totalPrice = totalSeats * ticketPrice;
 
-  if (isLoading) return <Loader />;
+  if (loading || isLoading) return <Loader />;
   if (isError) {
     toast.error("Error fetching seat data.");
     return <div>Error fetching seat data.</div>;
@@ -263,10 +270,10 @@ const SelectSeatPage: React.FC = () => {
             left: "50%",
             transform: "translateX(-50%)",
             zIndex: 1000,
-            display: "flex", // Add flexbox
-            justifyContent: "center", // Center content horizontally
-            alignItems: "center", // Center content
-            boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)", // Subtle shadow for depth
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
           }}
         >
           <Button

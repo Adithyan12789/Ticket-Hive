@@ -7,4 +7,3 @@ export const loadScript = (src: string): Promise<boolean> => {
       document.body.appendChild(script);
     });
   };
-  

@@ -137,7 +137,6 @@ const BookingPage: React.FC = () => {
 
       console.log("bookingData: ", bookingData);
 
-      // Call the function to create the booking
       await createBooking(bookingData).unwrap();
       Swal.fire(
         "Booking Successful",
@@ -158,8 +157,8 @@ const BookingPage: React.FC = () => {
   };
 
   const handleProceed = (method: "razorpay" | "paypal" | "wallet") => {
-    setPaymentMethod(method); // Set selected payment method
-    setShowModal(false); // Close the modal
+    setPaymentMethod(method);
+    setShowModal(false);
   };
 
   return (
@@ -357,10 +356,8 @@ const BookingPage: React.FC = () => {
                           "success"
                         );
 
-                        // Invoke handleCreateBooking after payment success
                         await handleCreateBooking("paypal");
 
-                        // Redirect to thank you page or confirmation page
                         navigate("/thankyou", {
                           state: {
                             paymentId: details.id,

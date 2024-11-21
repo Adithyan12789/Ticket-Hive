@@ -538,7 +538,6 @@ class TheaterController {
       console.log("movieTitle: ", movieTitle);
 
       try {
-        // Step 1: Retrieve the movie by either ID or title
         let movie;
 
         if (mongoose.Types.ObjectId.isValid(movieTitle)) {
@@ -554,22 +553,20 @@ class TheaterController {
           return;
         }
 
-        // Update the populate query to include 'address'
         const screens = await Screens.find({
           "showTimes.movie": movie._id,
         })
           .populate({
-            path: "theater", // Populate theater field
-            select: "name location amenities description ticketPrice owner address", // Include 'amenities' in the populated fields
+            path: "theater",
+            select: "name location amenities description ticketPrice owner address",
           })
           .populate({
-            path: "showTimes.movie", // Populate movie field inside showTimes
-            select: "title", // Include movie title within showTimes
+            path: "showTimes.movie",
+            select: "title",
           });
 
         console.log("screens: ", screens);
 
-        // Extract unique theaters from filtered screens
         const theaters = screens
           .map((screen) => screen.theater)
           .filter(
@@ -582,7 +579,6 @@ class TheaterController {
 
         console.log("theaters: ", theaters);
 
-        // Send both theaters and filtered screens to the frontend
         res.status(200).json({
           theaters,
           screens,

@@ -70,7 +70,7 @@ const AddScreenPage: React.FC = () => {
     if (numRows > 0 && seatsPerRow > 0) {
       const newLayout = Array.from({ length: numRows }, (_, rowIndex) =>
         Array.from({ length: seatsPerRow }, (_, seatIndex) => {
-          const rowLabel = String.fromCharCode(65 + rowIndex); // Labeling rows with A, B, C, etc.
+          const rowLabel = String.fromCharCode(65 + rowIndex);
           const seatLabel = `${rowLabel}${String(seatIndex + 1).padStart(
             2,
             "0"
@@ -89,7 +89,7 @@ const AddScreenPage: React.FC = () => {
   const deleteRow = (rowIndex: number) => {
     setLayout((prevLayout) => {
       const newLayout = [...prevLayout];
-      newLayout.splice(rowIndex, 1); // Remove the row at the specified index
+      newLayout.splice(rowIndex, 1);
       return newLayout;
     });
   };
@@ -97,12 +97,11 @@ const AddScreenPage: React.FC = () => {
   const deleteSeat = (rowIndex: number, seatIndex: number) => {
     setLayout((prevLayout) => {
       const newLayout = [...prevLayout];
-      newLayout[rowIndex].splice(seatIndex, 1); // Remove the seat at the specified index
+      newLayout[rowIndex].splice(seatIndex, 1);
 
-      // Re-label seats in the row to ensure they have correct labels
       newLayout[rowIndex] = newLayout[rowIndex].map((seat, index) => {
-        const rowLabel = String.fromCharCode(65 + rowIndex); // Row label
-        seat.label = `${rowLabel}${String(index + 1).padStart(2, "0")}`; // New seat label
+        const rowLabel = String.fromCharCode(65 + rowIndex); 
+        seat.label = `${rowLabel}${String(index + 1).padStart(2, "0")}`;
         return seat;
       });
 
@@ -248,7 +247,6 @@ const AddScreenPage: React.FC = () => {
               />
             </Form.Group>
 
-            {/* Show Times Selector */}
             <Form.Group controlId="formShowTimes" className="mb-3">
               <Button
                 variant="outline-primary"
@@ -260,7 +258,6 @@ const AddScreenPage: React.FC = () => {
             </Form.Group>
 
             <div className="mt-3 mb-5">
-              {/* Conditionally render the header only if there are saved showtimes */}
               {showTimesWithMovies.length > 0 && (
                 <>
                   <h5 className="mb-3 text-primary">Saved Show Times</h5>
@@ -385,11 +382,10 @@ const AddScreenPage: React.FC = () => {
                       >
                         {row.map((seat, seatIndex) => (
                           <React.Fragment key={`seat-${seatIndex}`}>
-                            {/* Add gap in the middle of the row */}
                             {seatIndex === Math.floor(seatsPerRow / 2) && (
                               <div
                                 style={{
-                                  width: "50px", // Adjust width for gap
+                                  width: "50px",
                                   height: "30px",
                                 }}
                               ></div>
@@ -412,7 +408,7 @@ const AddScreenPage: React.FC = () => {
                                     ? "#cce5ff"
                                     : seat.label
                                     ? "#fff"
-                                    : "#f0f0f0", // Default background color
+                                    : "#f0f0f0",
                               }}
                               onClick={() =>
                                 setSelectedSeat({
@@ -450,7 +446,6 @@ const AddScreenPage: React.FC = () => {
                           Delete Seat
                         </Button>
 
-                        {/* Button to Delete Row */}
                         <Button
                           variant="danger"
                           onClick={() => deleteRow(selectedSeat.row)}
@@ -472,7 +467,6 @@ const AddScreenPage: React.FC = () => {
         </Col>
       </Row>
 
-      {/* Modal for adding show time */}
       <Modal show={showModal} onHide={handleCloseModal}>
         <Modal.Header closeButton>
           <Modal.Title>Add Show Time</Modal.Title>

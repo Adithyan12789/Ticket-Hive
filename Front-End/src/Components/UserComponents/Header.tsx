@@ -66,7 +66,7 @@ const Header: React.FC = () => {
                 <Nav.Link className="nav-home">Home</Nav.Link>
               </LinkContainer>
 
-              <LinkContainer to="/movies">
+              <LinkContainer to="/allMovies">
                 <Nav.Link className="nav-movies">Movies</Nav.Link>
               </LinkContainer>
             </Nav>

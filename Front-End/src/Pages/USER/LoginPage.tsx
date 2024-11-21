@@ -12,10 +12,12 @@ import { RootState, AppDispatch } from "../../Store";
 import { useGoogleLoginMutation, useLoginMutation } from "../../Slices/UserApiSlice";
 import { CredentialResponse } from '@react-oauth/google';
 import { GoogleJwtPayload } from "../../Types/UserTypes";
+import Loader from "../../Components/UserComponents/Loader";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState<boolean>(true); 
 
   const navigate = useNavigate();
   const dispatch: AppDispatch = useDispatch();
@@ -30,6 +32,16 @@ const LoginPage = () => {
       navigate("/");
     }
   }, [navigate, userInfo]);
+
+  useEffect(() => {
+    // Simulate a 4-second loading delay
+    const timer = setTimeout(() => {
+      setLoading(false);  // After 4 seconds, set loading to false
+    }, 2000);
+
+    return () => clearTimeout(timer); // Cleanup timer on unmount
+  }, []);
+  
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -67,7 +79,8 @@ const LoginPage = () => {
       const res = await login({ email, password }).unwrap();
       dispatch(setCredentials({
         ...res,
-        data: undefined
+        data: undefined,
+        _id: ""
       }));
       navigate("/");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -98,6 +111,9 @@ const LoginPage = () => {
         error instanceof Error ? error.message : "An error occurred during Google login"
       );
     }
+
+    if (loading) return <Loader />;
+    
   };
 
   return (

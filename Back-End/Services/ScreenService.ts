@@ -7,7 +7,7 @@ class ScreenService {
     ScreenData: {
       screenNumber: number;
       capacity: number;
-      showTimes: { time: string; movie: string; layout: any }[]; // Layout inside each showtime
+      showTimes: { time: string; movie: string; layout: any }[];
       theater: string;
     }
   ) {

@@ -1,27 +1,72 @@
-.loader {
-  position: absolute;
+/* Loader container styles */
+.loader-container {
+  position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); /* Subtle dark overlay */
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column; /* Align vertically */
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.5); /* Dark background to simulate loading screen */
+  z-index: 1000;
+  color: white; /* Text color */
+  font-family: Arial, sans-serif; /* Font style */
+}
+
+/* Ticket-like loader style */
+.loader {
+  width: 80px;
+  height: 80px;
+  border-radius: 12px;
+  background: linear-gradient(45deg, #ff9a9e, #fad0c4, #fad0c4, #ff9a9e);
+  background-size: 200% 200%;
+  animation: loaderAnimation 1.5s ease-in-out infinite;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 9999; /* On top of all elements */
 }
 
-.loader::after {
-  content: '';
-  width: 50px;
-  height: 50px;
-  border: 5px solid #f3f3f3; /* Light grey color for background */
-  border-top: 5px solid #3498db; /* Blue color for spinning part */
-  border-radius: 50%;
-  animation: spin 1.5s linear infinite; /* Smooth spin animation */
+/* Spinning ticket effect */
+.loader:before {
+  content: "";
+  position: absolute;
+  width: 100px;
+  height: 20px;
+  background: #f5a623;
+  border-radius: 5px;
+  animation: spin 2s linear infinite;
 }
 
+/* Spinner animation for ticket */
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Animation for the loader background */
+@keyframes loaderAnimation {
+  0% {
+    background-position: 200% 200%;
+  }
+  50% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 200% 200%;
+  }
+}
+
+/* Text under the loader */
+.loader-text {
+  margin-top: 10px; /* Space between the loader and text */
+  font-size: 14px; /* Font size for the text */
+  font-weight: 400; /* Normal font weight */
+  text-align: center; /* Center align the text */
 }

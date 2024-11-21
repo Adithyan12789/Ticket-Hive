@@ -10,8 +10,8 @@ import { useNavigate } from "react-router-dom";
 const AdminBookingDetailsScreen: React.FC = () => {
   const navigate = useNavigate();
 
-  const [currentPage, setCurrentPage] = useState(1); // Current page
-  const [bookingsPerPage] = useState(6); // Bookings per page
+  const [currentPage, setCurrentPage] = useState(1);
+  const [bookingsPerPage] = useState(6);
 
   const { data: bookings, isLoading, refetch } = useGetBookingDetailsQuery({});
   const [showBookingModal, setShowBookingModal] = useState(false);
@@ -21,19 +21,16 @@ const AdminBookingDetailsScreen: React.FC = () => {
 
   console.log("bookings: ", bookings);
 
-  // Set document title and refetch data on component mount
   useEffect(() => {
     document.title = "Admin Booking Details";
     refetch();
   }, [refetch]);
 
-  // Handler to close the booking details modal
   const handleCloseBookingModal = () => {
     setSelectedBooking(null);
     setShowBookingModal(false);
   };
 
-  // Transform raw bookings data into a usable format
   const transformedBookings =
     bookings?.tickets?.map((ticket: Ticket) => ({
       bookingId: ticket.ticket.bookingId,
@@ -46,11 +43,10 @@ const AdminBookingDetailsScreen: React.FC = () => {
       images: ticket.ticket.images,
       showTime: ticket.ticket.showTime,
       paymentMethod: ticket.ticket.paymentMethod,
-      seats: ticket.ticket.seats || [], // Default to an empty array if seats are undefined
+      seats: ticket.ticket.seats || [], 
       status: ticket.ticket.paymentStatus || "Unknown",
     })) || [];
 
-  // Calculate total number of pages
   const totalPages = Math.ceil(transformedBookings.length / bookingsPerPage);
 
   const paginatedBookings = transformedBookings.slice(
@@ -63,7 +59,6 @@ const AdminBookingDetailsScreen: React.FC = () => {
     refetch();
   };
 
-  // Render a loader while fetching data
   if (isLoading) return <Loader />;
 
   console.log("transformedBookings: ", transformedBookings);

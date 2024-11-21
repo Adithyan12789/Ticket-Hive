@@ -28,6 +28,7 @@ const HomePage: React.FC = () => {
   const [loadingRecommended, setLoadingRecommended] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [sortOption, setSortOption] = useState<string>("newest");
+  const [loading, setLoading] = useState<boolean>(true); 
 
   const fetchData = useCallback(async () => {
     try {
@@ -57,11 +58,20 @@ const HomePage: React.FC = () => {
     fetchRecommendedMovies();
   }, []);
 
+  useEffect(() => {
+    // Simulate a 4-second loading delay
+    const timer = setTimeout(() => {
+      setLoading(false);  // After 4 seconds, set loading to false
+    }, 2000);
+
+    return () => clearTimeout(timer); // Cleanup timer on unmount
+  }, []);
+
   const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500/";
   const BACKDROP_BASE_URL = "http://localhost:5000/movieImages/";
   const MOVIE_IMAGES_DIR_PATH = "http://localhost:5000/MoviePosters/";
 
-  if (loadingTrending || loadingRecommended) return <Loader />;
+  if (loading || loadingTrending || loadingRecommended) return <Loader />;
 
   const filteredMovies = trendingMovies
     .filter((movie) =>
@@ -175,47 +185,89 @@ const HomePage: React.FC = () => {
             </InputGroup.Text>
           </InputGroup>
         </div>
-        <h1 className="text-center my-5" style={{ color: "black" }}>
+        {/* Trending Movies Section */}
+        <h1 className="text-center my-5" style={{ color: "rgb(0, 123, 255)" }}>
           Trending Movies
         </h1>
-        {filteredMovies.length > 0 ? (
-          <Row>
-            {filteredMovies.slice(0, 8).map((movie) => (
-              <Col key={movie._id} md={3} className="mb-5">
-                <Link
-                  to={`/movie-detail/${movie._id}`}
-                  style={{ textDecoration: "none" }}
+
+        <div
+          className="d-flex justify-content-between align-items-center mb-3"
+          style={{ marginRight: "20px" }}
+        >
+          <div></div> {/* Empty div to maintain space */}
+          {filteredMovies.length > 4 && (
+            <div className="text-end">
+              <Link
+                to="/allMovies"
+                style={{
+                  textDecoration: "none",
+                  fontWeight: "bold",
+                  fontSize: "1rem",
+                  color: "#007BFF",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  transition: "transform 0.3s ease, color 0.3s ease",
+                }}
+                className="hover-link"
+              >
+                See All
+                <span
+                  style={{
+                    marginLeft: "5px",
+                    fontSize: "1.2rem",
+                    display: "inline-block",
+                    transition: "transform 0.3s ease",
+                  }}
+                  className="arrow-icon"
                 >
-                  <Card style={{ height: "500px" }} className="movie-card">
-                    <Card.Img
-                      style={{ height: "350px" }}
-                      variant="top"
-                      src={
-                        movie.posters
-                          ? MOVIE_IMAGES_DIR_PATH + movie.posters
-                          : "/default-poster.jpg"
-                      }
-                      alt={movie.title}
-                      className="movie-poster"
-                    />
-                    <Card.Body>
-                      <Card.Title className="movie-title">
-                        {movie.title}
-                      </Card.Title>
-                      <Card.Text>
-                        {movie.genres && movie.genres.length > 0
-                          ? movie.genres.join(", ")
-                          : "Genres not available"}
-                      </Card.Text>
-                    </Card.Body>
-                  </Card>
-                </Link>
-              </Col>
-            ))}
-          </Row>
+                  →
+                </span>
+              </Link>
+            </div>
+          )}
+        </div>
+
+        {filteredMovies.length > 0 ? (
+          <>
+            <Row>
+              {filteredMovies.slice(0, 4).map((movie) => (
+                <Col key={movie._id} md={3} className="mb-5">
+                  <Link
+                    to={`/movie-detail/${movie._id}`}
+                    style={{ textDecoration: "none" }}
+                  >
+                    <Card style={{ height: "500px" }} className="movie-card">
+                      <Card.Img
+                        style={{ height: "350px" }}
+                        variant="top"
+                        src={
+                          movie.posters
+                            ? MOVIE_IMAGES_DIR_PATH + movie.posters
+                            : "/default-poster.jpg"
+                        }
+                        alt={movie.title}
+                        className="movie-poster"
+                      />
+                      <Card.Body>
+                        <Card.Title className="movie-title">
+                          {movie.title}
+                        </Card.Title>
+                        <Card.Text>
+                          {movie.genres && movie.genres.length > 0
+                            ? movie.genres.join(", ")
+                            : "Genres not available"}
+                        </Card.Text>
+                      </Card.Body>
+                    </Card>
+                  </Link>
+                </Col>
+              ))}
+            </Row>
+          </>
         ) : (
           <p>No trending movies found</p>
         )}
+
         <div className="banner-container">
           <img
             src="/tickets-stickers-badges-decorative-design-600w-2451487379-transformed.png"

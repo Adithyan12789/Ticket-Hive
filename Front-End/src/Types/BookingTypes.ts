@@ -10,14 +10,14 @@ export interface User {
   }
   
   export interface BookingDetails {
-    _id: string; // Unique identifier for the booking
-    bookingId: string; // Readable booking ID, if applicable
-    user: User; // User who made the booking
-    theater: Theater; // Theater where the movie is shown
-    showTime: string; // Date and time of the show in ISO string format
-    paymentMethod: string; // Date and time of the show in ISO string format
-    seats: string[]; // List of seat numbers
-    status: "pending" | "confirmed" | "cancelled" | "failed"; // Status of the booking
+    _id: string;
+    bookingId: string;
+    user: User;
+    theater: Theater;
+    showTime: string;
+    paymentMethod: string;
+    seats: string[];
+    status: "pending" | "confirmed" | "cancelled" | "failed";
   }
   
 

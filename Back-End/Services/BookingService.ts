@@ -75,7 +75,7 @@ class BookingService {
 
     return bookings.map((booking: BookingDetails) => ({
       bookingId: booking._id,
-      userId: booking.user._id, // Extract user details here
+      userId: booking.user._id,
       userName: booking.user.name,
       userEmail: booking.user.email,
       screenId: booking.screen._id,
@@ -102,28 +102,24 @@ class BookingService {
       throw new Error("You are not authorized to cancel this ticket");
     }
 
-    // Assuming the booking contains the screenId, showTime, and seats array
-    const { screen, seats, showTime } = booking; // Destructure to get screen, seats, and showTime
-    const screenId = screen._id; // Extract screenId from screen object
+    const { screen, seats, showTime } = booking;
+    const screenId = screen._id;
 
-    // Find the screen where the booking was made
     const screenDoc = await Screens.findById(screenId);
     if (!screenDoc) throw new Error("Screen not found");
 
-    // Find the showTime object within the screen based on the showTime string
     const showTimeIndex = screenDoc.showTimes.findIndex(
       (s) => s.time === showTime
     );
     if (showTimeIndex === -1) throw new Error("Show time not found");
 
-    // Find the corresponding seat labels in the layout and update them
     const showTimeDoc = screenDoc.showTimes[showTimeIndex];
     let seatFound = false;
 
     for (let row of showTimeDoc.layout) {
       for (let seat of row) {
         if (seats.includes(seat.label)) {
-          seat.isAvailable = true; // Mark the seat as available
+          seat.isAvailable = true;
           seatFound = true;
         }
       }
@@ -133,10 +129,8 @@ class BookingService {
       throw new Error("Seats not found in layout");
     }
 
-    // Save the updated screen document
     await screenDoc.save();
 
-    // Update the booking payment status
     booking.paymentStatus = "cancelled";
     await booking.save();
 

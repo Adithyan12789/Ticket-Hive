@@ -72,7 +72,7 @@ const EditScreen: React.FC = () => {
     if (numRows > 0 && seatsPerRow > 0) {
       const newLayout = Array.from({ length: numRows }, (_, rowIndex) =>
         Array.from({ length: seatsPerRow }, (_, seatIndex) => {
-          const rowLabel = String.fromCharCode(65 + rowIndex); // Labeling rows with A, B, C, etc.
+          const rowLabel = String.fromCharCode(65 + rowIndex);
           const seatLabel = `${rowLabel}${String(seatIndex + 1).padStart(
             2,
             "0"
@@ -91,7 +91,7 @@ const EditScreen: React.FC = () => {
   const deleteRow = (rowIndex: number) => {
     setLayout((prevLayout) => {
       const newLayout = [...prevLayout];
-      newLayout.splice(rowIndex, 1); // Remove the row at the specified index
+      newLayout.splice(rowIndex, 1); 
       return newLayout;
     });
   };
@@ -99,12 +99,11 @@ const EditScreen: React.FC = () => {
   const deleteSeat = (rowIndex: number, seatIndex: number) => {
     setLayout((prevLayout) => {
       const newLayout = [...prevLayout];
-      newLayout[rowIndex].splice(seatIndex, 1); // Remove the seat at the specified index
+      newLayout[rowIndex].splice(seatIndex, 1);
 
-      // Re-label seats in the row to ensure they have correct labels
       newLayout[rowIndex] = newLayout[rowIndex].map((seat, index) => {
-        const rowLabel = String.fromCharCode(65 + rowIndex); // Row label
-        seat.label = `${rowLabel}${String(index + 1).padStart(2, "0")}`; // New seat label
+        const rowLabel = String.fromCharCode(65 + rowIndex);
+        seat.label = `${rowLabel}${String(index + 1).padStart(2, "0")}`;
         return seat;
       });
 
@@ -166,7 +165,6 @@ const EditScreen: React.FC = () => {
           { ...newShowTime, _id: new Date().toISOString() },
         ]);
 
-        // Only updating show times, not entire objects
         setSelectedShowTimes((prev) => [...prev, newShowTime.showTime]);
 
         setSelectedShowTime("");
@@ -377,11 +375,10 @@ const EditScreen: React.FC = () => {
                       >
                         {row.map((seat, seatIndex) => (
                           <React.Fragment key={`seat-${seatIndex}`}>
-                            {/* Add gap in the middle of the row */}
                             {seatIndex === Math.floor(seatsPerRow / 2) && (
                               <div
                                 style={{
-                                  width: "50px", // Adjust width for gap
+                                  width: "50px",
                                   height: "30px",
                                 }}
                               ></div>
@@ -404,7 +401,7 @@ const EditScreen: React.FC = () => {
                                     ? "#cce5ff"
                                     : seat.label
                                     ? "#fff"
-                                    : "#f0f0f0", // Default background color
+                                    : "#f0f0f0",
                               }}
                               onClick={() =>
                                 setSelectedSeat({

@@ -59,7 +59,7 @@ const theaterDetailsSchema: Schema<ITheaterDetails> = new Schema(
                 message: "Longitude must be between -180 and 180 degrees",
             },
         },
-        movies: [{ type: Schema.Types.ObjectId, ref: 'Movie', required: true }], // New movies field
+        movies: [{ type: Schema.Types.ObjectId, ref: 'Movie', required: true }],
         ticketPrice: { type: Number, required: true }, 
     },
     {

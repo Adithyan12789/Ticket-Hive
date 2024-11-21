@@ -97,7 +97,6 @@ class BookingController {
   getAllTickets = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
       try {
-        // Fetch all tickets for the current user based on booking data
         const tickets = await BookingService.getAllTicketsService();
   
         if (!tickets || tickets.length === 0) {
@@ -105,7 +104,6 @@ class BookingController {
           return;
         }
   
-        // Include movie details in the response
         const ticketsWithMovieDetails = await Promise.all(
           tickets.map(async (ticket: { movieId: string; }) => {
             const movie = await Movie.findById(ticket.movieId).exec();
@@ -205,7 +203,7 @@ class BookingController {
       console.log("Request received for bookingId:", req.params.bookingId);
 
       const { bookingId } = req.params;
-      const { status } = req.body; // This will be the new status sent in the request body
+      const { status } = req.body;
 
       console.log("Request received with bookingId:", bookingId);
       console.log("Request body:", req.body);
@@ -216,7 +214,6 @@ class BookingController {
       }
 
       try {
-        // Ensure status is valid (you can add more validation here)
         const validStatuses = ["Pending", "Confirmed", "Cancelled"];
 
         console.log("validStatuses: ", validStatuses);

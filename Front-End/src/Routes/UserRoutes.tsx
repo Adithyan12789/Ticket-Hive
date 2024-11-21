@@ -13,6 +13,7 @@ import BookingPage from '../Pages/USER/BookingPage';
 import ThankYou from '../Pages/USER/ThankyouPage';
 import TicketsScreen from '../Pages/USER/TicketsPage';
 import TicketDetailsScreen from '../Pages/USER/TicketDetailsPage';
+import AllMoviesPage from '../Pages/USER/AllMoviesPage';
 
 export const UserRoutes = (
   <>
@@ -32,6 +33,8 @@ export const UserRoutes = (
       <Route path="/thankyou" element={<ThankYou />} />
       <Route path="/tickets" element={<TicketsScreen />} />
       <Route path="/ticket/:bookingId" element={<TicketDetailsScreen />} />
+
+      <Route path="/allMovies" element={<AllMoviesPage />} />
     </Route>
   </>
-);
+);  

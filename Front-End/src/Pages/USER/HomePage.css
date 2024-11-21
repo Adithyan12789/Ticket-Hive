@@ -152,7 +152,7 @@
 }
 
 .navbar .navbar-brand:hover {
-  color: #14e92a; /* Hover effect to match the button style */
+  color: rgb(0, 123, 255); /* Hover effect to match the button style */
 }
 
 /* Remove underline from nav links */
@@ -171,7 +171,7 @@
 
 .navbar .navbar-nav .nav-link.nav-home:hover,
 .navbar .navbar-nav .nav-link.nav-movies:hover {
-  color: #14e92a; /* Hover effect to match buttons */
+  color: rgb(0, 123, 255); /* Hover effect to match buttons */
 }
 
 /* Remove focus and active state underlines */
@@ -257,4 +257,29 @@
 
 .dropdown-item > svg {
   color: #007bff; /* Set icon color */
+}
+
+.hover-link {
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 1rem;
+  color: #007bff;
+  display: inline-flex;
+  align-items: center;
+  transition: transform 0.3s ease;
+}
+
+.hover-link:hover {
+  transform: translateX(3px); /* Moves the entire link slightly to the right */
+}
+
+.hover-link .arrow-icon {
+  margin-left: 5px;
+  font-size: 1.2rem;
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+
+.hover-link:hover .arrow-icon {
+  transform: translateX(5px); /* Arrow moves slightly farther to the right */
 }

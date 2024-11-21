@@ -5,7 +5,7 @@ import {
   useGetMovieByMovieIdQuery,
   useGetTheatersByMovieTitleQuery,
 } from "../../Slices/UserApiSlice";
-import { FaInfoCircle } from "react-icons/fa"; // Import info icon
+import { FaInfoCircle } from "react-icons/fa";
 import Loader from "../../Components/UserComponents/Loader";
 import { toast } from "react-toastify";
 import "react-datepicker/dist/react-datepicker.css";
@@ -76,6 +76,8 @@ const MovieTheaterScreen: React.FC = () => {
     isError: errorTheaters,
   } = useGetTheatersByMovieTitleQuery({ movieTitle, date: formattedDate });
 
+  const [loading, setLoading] = useState<boolean>(true); 
+
   const { data: movie } = useGetMovieByMovieIdQuery(movieTitle || "");
 
   const theaters = (data as TheaterData)?.theaters || [];
@@ -87,6 +89,14 @@ const MovieTheaterScreen: React.FC = () => {
   useEffect(() => {
     document.title = movieTitle ? `Movie - Theaters` : "Movie Details";
   }, [movieTitle, formattedDate]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const movieName = movie?.title?.trim().toLowerCase();
   const genres = movie?.genres || [];
@@ -121,7 +131,7 @@ const MovieTheaterScreen: React.FC = () => {
 
   console.log("selectedTheater", selectedTheater);
 
-  if (loadingTheaters) return <Loader />;
+  if (loading || loadingTheaters) return <Loader />;
   if (errorTheaters) {
     toast.error("Error fetching theaters");
     return <div>Error fetching theaters</div>;
@@ -283,7 +293,7 @@ const MovieTheaterScreen: React.FC = () => {
                       {screens
                         .filter(
                           (screen: Screen) => screen.theater._id === theater._id
-                        ) // Filter screens by matching theater ID
+                        )
                         .map((screen: Screen, idx: Key | null | undefined) => (
                           <div
                             style={{ display: "flex", flexWrap: "wrap" }}
@@ -405,7 +415,7 @@ const MovieTheaterScreen: React.FC = () => {
               <strong className="mt-5">Address</strong>{" "}
               <p
                 style={{
-                  fontSize: "0.875rem", // Smaller font size for the address
+                  fontSize: "0.875rem",
                   color: "#555",
                 }}
               >

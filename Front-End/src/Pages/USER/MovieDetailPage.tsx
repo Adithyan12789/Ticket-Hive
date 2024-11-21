@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Modal, Button, Container, Row, Col } from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom";
 import { useGetMovieByMovieIdQuery } from "../../Slices/UserApiSlice";
@@ -14,6 +14,7 @@ const MovieDetailScreen: React.FC = () => {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [, setSelectedLanguage] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true); 
 
   const {
     data: movie,
@@ -22,10 +23,19 @@ const MovieDetailScreen: React.FC = () => {
     refetch,
   } = useGetMovieByMovieIdQuery(id);
 
-  React.useEffect(() => {
+  useEffect(() => {
     document.title = movie ? `${movie.title} - Movie Details` : "Movie Details";
     refetch();
   }, [id, refetch, movie]);
+
+  useEffect(() => {
+    // Simulate a 4-second loading delay
+    const timer = setTimeout(() => {
+      setLoading(false);  // After 4 seconds, set loading to false
+    }, 2000);
+
+    return () => clearTimeout(timer); // Cleanup timer on unmount
+  }, []);
 
   const handleBookNow = () => {
     if (!movie || !movie.languages.length) {
@@ -48,7 +58,7 @@ const MovieDetailScreen: React.FC = () => {
     })
   };
 
-  if (loadingMovie) return <Loader />;
+  if (loading || loadingMovie) return <Loader />;
 
   if (errorMovie) {
     toast.error("Error fetching movie details");
