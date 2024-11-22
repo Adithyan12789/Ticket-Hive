@@ -14,6 +14,7 @@ import ThankYou from '../Pages/USER/ThankyouPage';
 import TicketsScreen from '../Pages/USER/TicketsPage';
 import TicketDetailsScreen from '../Pages/USER/TicketDetailsPage';
 import AllMoviesPage from '../Pages/USER/AllMoviesPage';
+import WalletPage from '../Pages/USER/WalletPage';
 
 export const UserRoutes = (
   <>
@@ -35,6 +36,7 @@ export const UserRoutes = (
       <Route path="/ticket/:bookingId" element={<TicketDetailsScreen />} />
 
       <Route path="/allMovies" element={<AllMoviesPage />} />
+      <Route path="/wallet" element={<WalletPage />} />
     </Route>
   </>
 );  

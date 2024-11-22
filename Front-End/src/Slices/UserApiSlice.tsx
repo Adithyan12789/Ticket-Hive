@@ -140,6 +140,21 @@ export const usersApiSlice = apiSlice.injectEndpoints({
       }),
     }),
 
+    getWalletDetails: builder.query({
+      query: (userId) => ({
+        url: `${USERS_URL}/wallet/${userId}`,
+        method: "GET",
+      }),
+    }),
+
+    createWalletTransaction: builder.mutation({
+      query: (data) => ({
+        url: `${USERS_URL}/create-wallet-transaction`,
+        method: "POST",
+        body: data,
+      }),
+    }),
+
     cancelBooking: builder.mutation({
       query: (bookingId) => ({
         url: `${USERS_URL}/cancel-ticket/${bookingId}`,
@@ -166,5 +181,7 @@ export const {
   useGetScreenByIdQuery,
   useCreateBookingMutation,
   useGetBookingDetailsQuery,
+  useGetWalletDetailsQuery,
+  useCreateWalletTransactionMutation,
   useCancelBookingMutation,
 } = usersApiSlice;

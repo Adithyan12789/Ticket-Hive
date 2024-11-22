@@ -6,6 +6,7 @@ import MovieController from '../Controllers/MovieController';
 import TheaterController from '../Controllers/TheaterController';
 import ScreenController from '../Controllers/ScreenController';
 import BookingController from '../Controllers/BookingController';
+import WalletController from '../Controllers/WalletController';
 
 const router = express.Router();
 
@@ -30,6 +31,9 @@ router.post('/book-ticket', AuthMiddleware.protect, BookingController.createBook
 router.get('/get-tickets/:userId', AuthMiddleware.protect, BookingController.getAllTickets);
 router.get("/tickets/:ticketId", AuthMiddleware.protect, BookingController.getTicketDetails);
 router.post('/cancel-ticket/:bookingId', AuthMiddleware.protect, BookingController.cancelTicket);
+
+router.post('/create-wallet-transaction', WalletController.addMoneyToWallet);
+router.post('/transaction-history', WalletController.getTransactionHistory);
 
 router.post('/logout', UserController.logoutUser);
 
