@@ -3,7 +3,10 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Container, Card, Button, Row, Col, Modal } from "react-bootstrap";
 import { FaRegCalendarAlt, FaFilm, FaTicketAlt } from "react-icons/fa";
 import Swal from "sweetalert2";
-import { useCreateBookingMutation } from "../../Slices/UserApiSlice";
+import {
+  useCreateBookingMutation,
+  useGetTransactionHistoryQuery,
+} from "../../Slices/UserApiSlice";
 import { loadScript } from "../../Utils/LoadScript";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import Loader from "../../Components/UserComponents/Loader";
@@ -19,6 +22,15 @@ interface LocationState {
   totalPrice?: number;
 }
 
+interface Transaction {
+  transactionId: string;
+  amount: number;
+  type: "credit" | "debit";
+  status: string;
+  date: string;
+  description: string;
+}
+
 const BookingPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -26,9 +38,28 @@ const BookingPage: React.FC = () => {
   const { userInfo } = useSelector((state: RootState) => state.auth);
 
   console.log("user info: ", userInfo);
-  
 
-  const { movieId, theaterId, screenId, showTime, movieTitle } = location.state || {};
+  const { movieId, theaterId, screenId, showTime, movieTitle } =
+    location.state || {};
+  const [insufficientFunds, setInsufficientFunds] = useState(false);
+
+  const { data } = useGetTransactionHistoryQuery(userInfo?.id);
+
+  const transactions: Transaction[] = Array.isArray(
+    data?.transactions?.transactions
+  )
+    ? data.transactions.transactions
+    : [];
+
+  const walletBalance: number =
+    data?.transactions?.balance ||
+    transactions.reduce(
+      (total, transaction) =>
+        transaction.type === "credit"
+          ? total + transaction.amount
+          : total - transaction.amount,
+      0
+    );
 
   console.log("booking page movieId: ", movieId);
   console.log("booking page theaterId: ", theaterId);
@@ -156,6 +187,44 @@ const BookingPage: React.FC = () => {
     }
   };
 
+  const handleWalletPayment = async () => {
+    if (walletBalance < finalPrice) {
+      setInsufficientFunds(true);
+      Swal.fire(
+        "Insufficient Funds",
+        "You don't have enough wallet balance to complete the payment.",
+        "error"
+      );
+      return;
+    }
+
+    // Proceed with Wallet Payment
+    setPaymentMethod("wallet");
+
+    try {
+      // Deduct wallet balance
+      await handleCreateBooking("wallet");
+      Swal.fire(
+        "Payment Successful",
+        "Your wallet payment has been completed.",
+        "success"
+      );
+
+      // Redirect to Thank You Page
+      navigate("/thankyou", {
+        state: { paymentId: `WALLET-${new Date().getTime()}` },
+      });
+    } catch (error) {
+      console.log("An error occurred during wallet payment. Please try again", error);
+      
+      Swal.fire(
+        "Payment Error",
+        "An error occurred during wallet payment. Please try again.",
+        "error"
+      );
+    }
+  };
+
   const handleProceed = (method: "razorpay" | "paypal" | "wallet") => {
     setPaymentMethod(method);
     setShowModal(false);
@@ -165,14 +234,23 @@ const BookingPage: React.FC = () => {
     <Container className="mt-5" style={{ maxWidth: "700px" }}>
       <h2
         className="text-center mb-5"
-        style={{ fontSize: "40px", fontWeight: "300", color: "rgb(1 85 108)", textTransform: "uppercase" }}
+        style={{
+          fontSize: "40px",
+          fontWeight: "300",
+          color: "rgb(1 85 108)",
+          textTransform: "uppercase",
+        }}
       >
         Booking Summary
       </h2>
 
       <Card
         className="rounded-lg border-0"
-        style={{ overflow: "hidden", borderRadius: "15px", boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.4)" }}
+        style={{
+          overflow: "hidden",
+          borderRadius: "15px",
+          boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.4)",
+        }}
       >
         <Card.Body>
           <Row>
@@ -305,10 +383,8 @@ const BookingPage: React.FC = () => {
               <Button
                 variant="outline-info"
                 className="w-100"
-                onClick={() => {
-                  setPaymentMethod("wallet");
-                  handleCreateBooking("wallet");
-                }}
+                onClick={handleWalletPayment}
+                disabled={insufficientFunds}
               >
                 Pay with Wallet
               </Button>

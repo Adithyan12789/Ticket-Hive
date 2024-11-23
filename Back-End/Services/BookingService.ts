@@ -2,6 +2,9 @@ import mongoose from "mongoose";
 import { Booking } from "../Models/bookingModel";
 import Screens from "../Models/ScreensModel";
 import BookingRepo from "../Repositories/BookingRepo";
+import WalletRepo from "../Repositories/WalletRepo";
+import { ITransaction } from "../Models/WalletModel";
+import { v4 as uuidv4 } from "uuid";
 
 export interface BookingDetails {
   totalPrice: number;
@@ -102,7 +105,7 @@ class BookingService {
       throw new Error("You are not authorized to cancel this ticket");
     }
 
-    const { screen, seats, showTime } = booking;
+    const { screen, seats, showTime, totalPrice } = booking;
     const screenId = screen._id;
 
     const screenDoc = await Screens.findById(screenId);
@@ -133,6 +136,24 @@ class BookingService {
 
     booking.paymentStatus = "cancelled";
     await booking.save();
+
+    const wallet = await WalletRepo.findWalletByUserId(userId);
+    if (!wallet) throw new Error("Wallet not found");
+  
+    const transaction: ITransaction = {
+      transactionId: uuidv4(),
+      amount: totalPrice,
+      type: "credit",
+      status: "success",
+      date: new Date(),
+      description: `Refund for cancelled ticket`,
+    };
+    
+    wallet.transactions.push(transaction);
+    
+    wallet.balance += totalPrice;
+  
+    await wallet.save();
 
     return { message: "Booking canceled successfully", booking };
   }

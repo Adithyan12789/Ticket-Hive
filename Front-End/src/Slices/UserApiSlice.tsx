@@ -140,20 +140,20 @@ export const usersApiSlice = apiSlice.injectEndpoints({
       }),
     }),
 
-    getWalletDetails: builder.query({
-      query: (userId) => ({
-        url: `${USERS_URL}/wallet/${userId}`,
-        method: "GET",
-      }),
-    }),
-
     createWalletTransaction: builder.mutation({
       query: (data) => ({
         url: `${USERS_URL}/create-wallet-transaction`,
         method: "POST",
         body: data,
       }),
-    }),
+    }),   
+
+    getTransactionHistory: builder.query({
+      query: (userId) => ({
+        url: `${USERS_URL}/transaction-history/${userId}`,
+        method: "GET",
+      }),
+    }),    
 
     cancelBooking: builder.mutation({
       query: (bookingId) => ({
@@ -181,7 +181,7 @@ export const {
   useGetScreenByIdQuery,
   useCreateBookingMutation,
   useGetBookingDetailsQuery,
-  useGetWalletDetailsQuery,
+  useGetTransactionHistoryQuery,
   useCreateWalletTransactionMutation,
   useCancelBookingMutation,
 } = usersApiSlice;

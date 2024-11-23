@@ -1,50 +1,73 @@
-import asyncHandler from 'express-async-handler';
-import { Request, Response } from 'express';
-import WalletService from '../Services/WalletService';
+import asyncHandler from "express-async-handler";
+import { Request, Response } from "express";
+import WalletService from "../Services/WalletService";
 
 class WalletController {
-
   addMoneyToWallet = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
-      const { userId, amount } = req.body;
+      console.log("Entered addMoneyToWallet controller");
+      console.log("Request body:", req.body);
+
+      const { userId, amount, description } = req.body;
+
+      console.log("description: ", description);
+      
 
       if (!userId || !amount) {
-        res.status(400).json({ message: 'User ID and amount are required' });
+        console.error("Missing required fields: userId or amount");
+        res.status(400).json({ message: "User ID and amount are required" });
         return;
       }
 
       try {
-        const cashbackDescription = 'Cashback after booking a ticket'; // Customize this message
-        await WalletService.addMoneyToWallet(userId, amount, cashbackDescription);
+        await WalletService.addMoneyToWallet(
+          userId,
+          amount,
+          description
+        );
 
         res.status(200).json({
-          message: 'Money added to wallet successfully',
+          message: "Money added to wallet successfully",
         });
       } catch (err: unknown) {
-        res.status(500).json({ message: 'An error occurred while adding money to wallet' });
+        console.error("Error adding money to wallet:", err);
+        res
+          .status(500)
+          .json({ message: "An error occurred while adding money to wallet" });
       }
     }
   );
 
-  // Get all transaction history for the user
   getTransactionHistory = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
-      const { userId } = req.body;
+
+      console.log("Entered to get transaction history controller");
+
+      // const { userId } = req.query;
+      const { userId } = req.params;
+
+      console.log("Request query:", req.params);
 
       if (!userId) {
-        res.status(400).json({ message: 'User ID is required' });
+        res.status(400).json({ message: "User ID is required" });
         return;
       }
 
       try {
-        const transactions = await WalletService.getTransactionHistory(userId);
+        const transactions = await WalletService.getTransactionHistory(
+          userId as string
+        );
         res.status(200).json({ transactions });
       } catch (err: unknown) {
-        res.status(500).json({ message: 'An error occurred while fetching transaction history' });
+        console.error("Error fetching transaction history:", err);
+        res
+          .status(500)
+          .json({
+            message: "An error occurred while fetching transaction history",
+          });
       }
     }
   );
-
 }
 
 export default new WalletController();

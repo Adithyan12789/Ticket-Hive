@@ -15,7 +15,7 @@ import {
 } from "react-bootstrap";
 import { useSelector } from "react-redux";
 import {
-  useGetWalletDetailsQuery,
+  useGetTransactionHistoryQuery,
   useCreateWalletTransactionMutation,
 } from "../../Slices/UserApiSlice";
 import { RootState } from "../../Store";
@@ -38,18 +38,37 @@ interface Transaction {
 }
 
 const WalletPage: React.FC = () => {
+
   const { userInfo } = useSelector((state: RootState) => state.auth);
 
-  const { data, isLoading } = useGetWalletDetailsQuery(userInfo?.id);
-  const walletBalance: number = data?.balance || 0;
-  const transactions: Transaction[] = data?.transactions || [];
+  const { data, isLoading, refetch: refetchTransactions, } = useGetTransactionHistoryQuery(userInfo?.id);
+
+  console.log("Wallet Data: ", data);
+  
+  const transactions: Transaction[] = Array.isArray(data?.transactions?.transactions)
+    ? data.transactions.transactions
+    : [];
+  
+  const balance: number = data?.transactions?.balance || transactions.reduce(
+    (total, transaction) =>
+      transaction.type === "credit" 
+        ? total + transaction.amount
+        : total - transaction.amount,
+    0
+  );
+  
+  console.log("Balance:", balance);
+  console.log("Transactions:", transactions);
+  
+  
+  
 
   const [currentPage, setCurrentPage] = useState(1); // Current page
   const [itemsPerPage] = useState(5); // Items per page
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("date"); // Sort by date or amount
   const [showAddMoneyModal, setShowAddMoneyModal] = useState<boolean>(false);
-  const [amountToAdd, setAmountToAdd] = useState<number>(0);
+  const [amount, setAmount] = useState<number>(0);
 
   const navigate = useNavigate();
 
@@ -57,7 +76,7 @@ const WalletPage: React.FC = () => {
   const [paymentMethod, setPaymentMethod] = useState<
     "razorpay" | "paypal" | "wallet" | null
   >(null);
-  const [amount, setAmount] = useState<number>(0); // Amount for wallet payment
+  // Amount for wallet payment
 
   const [createWalletTransaction] = useCreateWalletTransactionMutation();
 
@@ -109,7 +128,7 @@ const WalletPage: React.FC = () => {
       return;
     }
 
-    const razorpayApiKey = "rzp_test_Oks5Gpac00wL72"; // Replace with your Razorpay key
+    const razorpayApiKey = "rzp_test_Oks5Gpac00wL72";
 
     if (!razorpayApiKey) {
       Swal.fire(
@@ -151,6 +170,9 @@ const WalletPage: React.FC = () => {
       options: RazorpayOptions
     ) => RazorpayPaymentObject;
     const paymentObject = new RazorpayConstructor(options);
+
+    console.log("paymentObject: ", paymentObject);
+
     paymentObject.open();
   };
 
@@ -160,11 +182,12 @@ const WalletPage: React.FC = () => {
   ) => {
     try {
       const transactionData = {
-        userId: userInfo?.id, // Replace with user info
-        amount,
+        userId: userInfo?.id,
+        amount: amount,
         paymentMethod: method,
         paymentStatus: "pending",
         paymentId,
+        description: "Add funds to your wallet",
       };
 
       await createWalletTransaction(transactionData).unwrap();
@@ -173,6 +196,8 @@ const WalletPage: React.FC = () => {
         "Funds have been added to your wallet.",
         "success"
       );
+
+      refetchTransactions();
     } catch (error: unknown) {
       if (error instanceof Error) {
         // If error is an instance of the built-in Error class
@@ -201,9 +226,16 @@ const WalletPage: React.FC = () => {
   };
 
   const handleAddMoney = () => {
-    console.log("Adding money:", amountToAdd);
-    setShowAddMoneyModal(false); // Close the current modal
-    setShowModal(true); // Open the next modal
+    if (amount > 100) {
+      setShowAddMoneyModal(false); // Close the current modal
+      setShowModal(true); // Open the next modal
+    } else {
+      Swal.fire(
+        "Invalid Amount",
+        "Please enter a valid amount greater than 100.",
+        "warning"
+      );
+    }
   };
 
   return (
@@ -226,7 +258,7 @@ const WalletPage: React.FC = () => {
             {/* Wallet Balance */}
             <div className="text-center mb-4">
               <h4>Current Balance</h4>
-              <h2 className="text-success">₹{walletBalance.toFixed(2)}</h2>
+              <h2 className="text-success">₹{balance}</h2>
             </div>
 
             <div className="text-center mb-4">
@@ -502,8 +534,8 @@ const WalletPage: React.FC = () => {
               <FormLabel>Amount to Add</FormLabel>
               <FormControl
                 type="number"
-                value={amountToAdd}
-                onChange={(e) => setAmountToAdd(Number(e.target.value))}
+                value={amount}
+                onChange={(e) => setAmount(Number(e.target.value))}
                 placeholder="Enter amount"
                 min="1"
               />

@@ -33,7 +33,7 @@ router.get("/tickets/:ticketId", AuthMiddleware.protect, BookingController.getTi
 router.post('/cancel-ticket/:bookingId', AuthMiddleware.protect, BookingController.cancelTicket);
 
 router.post('/create-wallet-transaction', WalletController.addMoneyToWallet);
-router.post('/transaction-history', WalletController.getTransactionHistory);
+router.get('/transaction-history/:userId', WalletController.getTransactionHistory);
 
 router.post('/logout', UserController.logoutUser);
 

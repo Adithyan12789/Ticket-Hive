@@ -5,9 +5,10 @@ import { parse, format } from "date-fns";
 import BookingService from "../Services/BookingService";
 import { Movie } from "../Models/MoviesModel";
 import { CustomRequest } from "../Middlewares/AuthMiddleware";
+import WalletService from "../Services/WalletService";
+import WalletRepo from "../Repositories/WalletRepo";
 
 class BookingController {
-
   createBooking = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
       const {
@@ -61,6 +62,18 @@ class BookingController {
       }
 
       try {
+        if (paymentMethod === "wallet") {
+          const walletBalance = await WalletService.getWalletBalance(userId);
+          if (walletBalance < totalPrice) {
+            res.status(400).json({ message: "Insufficient wallet balance" });
+            return;
+          }
+
+          const description = "Ticket booking payment";
+
+          await WalletService.deductAmountFromWallet(userId, totalPrice, description);
+        }
+
         const booking = await BookingService.createBookingService(
           movieId,
           theaterId,
@@ -73,6 +86,15 @@ class BookingController {
           paymentMethod,
           convenienceFee,
           formattedBookingDate
+        );
+
+        const cashbackPercentage = 10; // Example: 10% cashback
+        const cashbackAmount = (totalPrice * cashbackPercentage) / 100;
+
+        await WalletService.addCashbackToWallet(
+          userId,
+          cashbackAmount,
+          `Cashback for ticket booking`
         );
 
         console.log("controller booking: ", booking);
@@ -98,14 +120,14 @@ class BookingController {
     async (req: Request, res: Response): Promise<void> => {
       try {
         const tickets = await BookingService.getAllTicketsService();
-  
+
         if (!tickets || tickets.length === 0) {
           res.status(404).json({ message: "No tickets found for this user" });
           return;
         }
-  
+
         const ticketsWithMovieDetails = await Promise.all(
-          tickets.map(async (ticket: { movieId: string; }) => {
+          tickets.map(async (ticket: { movieId: string }) => {
             const movie = await Movie.findById(ticket.movieId).exec();
             return {
               ticket,
@@ -120,7 +142,7 @@ class BookingController {
             };
           })
         );
-  
+
         res.status(200).json({
           success: true,
           tickets: ticketsWithMovieDetails,
@@ -133,11 +155,10 @@ class BookingController {
         });
       }
     }
-  );  
+  );
 
   cancelTicket = asyncHandler(
     async (req: CustomRequest, res: Response): Promise<void> => {
-
       console.log("entered to cancel controller");
 
       const { bookingId } = req.params;
@@ -146,7 +167,6 @@ class BookingController {
       console.log("bookingId: ", bookingId);
       console.log("req user Id: ", req.user?._id);
       console.log("userId: ", userId);
-      
 
       if (!bookingId || !userId) {
         res
@@ -157,7 +177,6 @@ class BookingController {
 
       try {
         console.log("jjjjj");
-        
 
         const cancellationResult = await BookingService.cancelTicketService(
           bookingId,
@@ -181,25 +200,26 @@ class BookingController {
     }
   );
 
-  getTicketDetails = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { ticketId } = req.params;
-      const ticket = await bookingService.getTicketDetails(ticketId);
+  getTicketDetails = asyncHandler(
+    async (req: Request, res: Response): Promise<void> => {
+      try {
+        const { ticketId } = req.params;
+        const ticket = await bookingService.getTicketDetails(ticketId);
 
-      if (ticket) {
-        res.status(200).json(ticket);
-      } else {
-        res.status(404).json({ message: "Ticket not found" });
+        if (ticket) {
+          res.status(200).json(ticket);
+        } else {
+          res.status(404).json({ message: "Ticket not found" });
+        }
+      } catch (error: any) {
+        console.error("Error fetching ticket details:", error.message);
+        res.status(500).json({ message: "Failed to fetch ticket details" });
       }
-    } catch (error: any) {
-      console.error("Error fetching ticket details:", error.message);
-      res.status(500).json({ message: "Failed to fetch ticket details" });
     }
-  });
+  );
 
   updateBookingStatus = asyncHandler(
     async (req: CustomRequest, res: Response): Promise<void> => {
-      
       console.log("Request received for bookingId:", req.params.bookingId);
 
       const { bookingId } = req.params;
@@ -207,7 +227,7 @@ class BookingController {
 
       console.log("Request received with bookingId:", bookingId);
       console.log("Request body:", req.body);
-      
+
       if (!status) {
         res.status(400).json({ message: "Status is required" });
         return;
@@ -224,9 +244,11 @@ class BookingController {
         }
 
         console.log("Inside updateBookingStatusService");
-        const updatedBooking = await BookingService.updateBookingStatusService(bookingId, status);
-        console.log("updatedBooking", updatedBooking);        
-        
+        const updatedBooking = await BookingService.updateBookingStatusService(
+          bookingId,
+          status
+        );
+        console.log("updatedBooking", updatedBooking);
 
         if (!updatedBooking) {
           res.status(404).json({ message: "Booking not found" });
@@ -246,47 +268,58 @@ class BookingController {
     }
   );
 
-  updateTicket = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { ticketId } = req.params;
-      const updatedData = req.body;
+  updateTicket = asyncHandler(
+    async (req: Request, res: Response): Promise<void> => {
+      try {
+        const { ticketId } = req.params;
+        const updatedData = req.body;
 
-      const updatedTicket = await bookingService.updateTicket(ticketId, updatedData);
+        const updatedTicket = await bookingService.updateTicket(
+          ticketId,
+          updatedData
+        );
 
-      if (updatedTicket) {
-        res.status(200).json({ message: "Ticket updated successfully", updatedTicket });
-      } else {
-        res.status(404).json({ message: "Ticket not found" });
+        if (updatedTicket) {
+          res
+            .status(200)
+            .json({ message: "Ticket updated successfully", updatedTicket });
+        } else {
+          res.status(404).json({ message: "Ticket not found" });
+        }
+      } catch (error: any) {
+        console.error("Error updating ticket:", error.message);
+        res.status(500).json({ message: "Failed to update ticket" });
       }
-    } catch (error: any) {
-      console.error("Error updating ticket:", error.message);
-      res.status(500).json({ message: "Failed to update ticket" });
     }
-  });
+  );
 
-  getUserBookings = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { userId } = req.params;
-      const bookings = await bookingService.getUserBookings(userId);
+  getUserBookings = asyncHandler(
+    async (req: Request, res: Response): Promise<void> => {
+      try {
+        const { userId } = req.params;
+        const bookings = await bookingService.getUserBookings(userId);
 
-      res.status(200).json(bookings);
-    } catch (error: any) {
-      console.error("Error fetching user bookings:", error.message);
-      res.status(500).json({ message: "Failed to fetch user bookings" });
+        res.status(200).json(bookings);
+      } catch (error: any) {
+        console.error("Error fetching user bookings:", error.message);
+        res.status(500).json({ message: "Failed to fetch user bookings" });
+      }
     }
-  });
+  );
 
-  getTheaterBookings = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { theaterId } = req.params;
-      const bookings = await bookingService.getTheaterBookings(theaterId);
+  getTheaterBookings = asyncHandler(
+    async (req: Request, res: Response): Promise<void> => {
+      try {
+        const { theaterId } = req.params;
+        const bookings = await bookingService.getTheaterBookings(theaterId);
 
-      res.status(200).json(bookings);
-    } catch (error: any) {
-      console.error("Error fetching theater bookings:", error.message);
-      res.status(500).json({ message: "Failed to fetch theater bookings" });
+        res.status(200).json(bookings);
+      } catch (error: any) {
+        console.error("Error fetching theater bookings:", error.message);
+        res.status(500).json({ message: "Failed to fetch theater bookings" });
+      }
     }
-  });
+  );
 }
 
 export default new BookingController();

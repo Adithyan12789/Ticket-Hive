@@ -1,52 +1,115 @@
-import Wallet from '../Models/WalletModel';
-import { v4 as uuidv4 } from 'uuid';
+import mongoose from "mongoose";
+import Wallet, { ITransaction, IWallet } from "../Models/WalletModel";
+import { v4 as uuidv4 } from "uuid";
+import WalletRepo from "../Repositories/WalletRepo";
 
 class WalletService {
+  static async addMoneyToWallet(
+    userId: string,
+    amount: number,
+    description: string
+  ) {
+    console.log("Adding money to wallet:", { userId, amount, description });
 
-  // Add money to the wallet (e.g., cashback after ticket booking)
-  static async addMoneyToWallet(userId: string, amount: number, description: string) {
     const wallet = await Wallet.findOne({ user: userId });
-
     if (!wallet) {
-      // If wallet doesn't exist, create one
+      console.log("No wallet found. Creating a new one...");
       await Wallet.create({
         user: userId,
         balance: amount,
         transactions: [
           {
-            type: 'credit',
+            type: "credit",
             amount,
             description,
             date: new Date(),
+            transactionId: uuidv4(),
+            status: "success",
           },
         ],
       });
     } else {
-      // If wallet exists, update it
+      console.log("Wallet found. Updating balance...");
       wallet.balance += amount;
       wallet.transactions.push({
-        type: 'credit',
+        type: "credit",
         amount,
         description,
         date: new Date(),
-        transactionId: uuidv4(), // Assign a unique transaction ID
-        status: 'success',
+        transactionId: uuidv4(),
+        status: "success",
       });
       await wallet.save();
     }
+    console.log("Transaction completed successfully.");
   }
 
-  // Fetch all transactions for the user
+  static async addCashbackToWallet(
+    userId: string,
+    amount: number,
+    description: string
+  ): Promise<void> {
+    const wallet = await Wallet.findOne({ user: userId });
+
+    if (!wallet) {
+      throw new Error("Wallet not found");
+    }
+
+    const transaction: ITransaction = {
+      transactionId: uuidv4(), // Unique ID for the transaction
+      amount,
+      type: "credit",
+      status: "success",
+      date: new Date(),
+      description,
+    };
+
+    wallet.transactions.push(transaction);
+    wallet.balance += amount;
+
+    await wallet.save();
+  }
+
+  static async getWalletBalance(userId: string): Promise<number> {
+    const wallet: IWallet | null = await WalletRepo.findWalletByUserId(userId);
+    if (!wallet) throw new Error("Wallet not found");
+    return wallet.balance; // Assuming the wallet document has a 'balance' field
+  }
+
+  // Deduct the specified amount from the user's wallet
+  static async deductAmountFromWallet(userId: string, amount: number, description: string): Promise<void> {
+    const wallet: IWallet | null = await WalletRepo.findWalletByUserId(userId);
+    if (!wallet) throw new Error("Wallet not found");
+
+    if (wallet.balance < amount) {
+      throw new Error("Insufficient funds in wallet");
+    }
+
+    wallet.balance -= amount;
+
+    const transaction: ITransaction = {
+      transactionId: uuidv4(),
+      type: "debit",
+      amount,
+      status: "success",
+      description,
+      date: new Date(),
+    };
+
+    wallet.transactions.push(transaction);
+
+    await wallet.save();
+  }
+
   static async getTransactionHistory(userId: string) {
     const wallet = await Wallet.findOne({ user: userId });
 
     if (!wallet) {
-      throw new Error('No wallet found for this user');
+      return { balance: 0, transactions: [] }; // Default values
     }
 
-    return wallet.transactions;
+    return { balance: wallet.balance, transactions: wallet.transactions };
   }
-
 }
 
 export default WalletService;
