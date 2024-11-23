@@ -38,30 +38,34 @@ interface Transaction {
 }
 
 const WalletPage: React.FC = () => {
-
   const { userInfo } = useSelector((state: RootState) => state.auth);
 
-  const { data, isLoading, refetch: refetchTransactions, } = useGetTransactionHistoryQuery(userInfo?.id);
+  const {
+    data,
+    isLoading,
+    refetch: refetchTransactions,
+  } = useGetTransactionHistoryQuery(userInfo?.id);
 
   console.log("Wallet Data: ", data);
-  
-  const transactions: Transaction[] = Array.isArray(data?.transactions?.transactions)
+
+  const transactions: Transaction[] = Array.isArray(
+    data?.transactions?.transactions
+  )
     ? data.transactions.transactions
     : [];
-  
-  const balance: number = data?.transactions?.balance || transactions.reduce(
-    (total, transaction) =>
-      transaction.type === "credit" 
-        ? total + transaction.amount
-        : total - transaction.amount,
-    0
-  );
-  
+
+  const balance: number =
+    data?.transactions?.balance ||
+    transactions.reduce(
+      (total, transaction) =>
+        transaction.type === "credit"
+          ? total + transaction.amount
+          : total - transaction.amount,
+      0
+    );
+
   console.log("Balance:", balance);
   console.log("Transactions:", transactions);
-  
-  
-  
 
   const [currentPage, setCurrentPage] = useState(1); // Current page
   const [itemsPerPage] = useState(5); // Items per page
@@ -368,23 +372,32 @@ const WalletPage: React.FC = () => {
               </Table>
             )}
 
-            <Modal show={showModal} onHide={() => setShowModal(false)} centered>
-              <Modal.Header closeButton>
-                <Modal.Title>Select Payment Method</Modal.Title>
+            <Modal
+              show={showModal}
+              onHide={() => setShowModal(false)}
+              centered
+              size="lg"
+            >
+              <Modal.Header closeButton className="border-bottom-0">
+                <Modal.Title className="w-100 text-center">
+                  Select Payment Method
+                </Modal.Title>
               </Modal.Header>
-              <Modal.Body>
-                <div className="d-flex justify-content-around">
+              <Modal.Body className="d-flex justify-content-center align-items-center">
+                <div className="d-flex justify-content-between w-100">
                   <Button
-                    variant="outline-primary"
+                    variant="outline-success"
+                    className="d-flex align-items-center justify-content-center p-4 w-100 mx-2"
                     onClick={handleRazorpayPayment}
                   >
-                    <FaCreditCard /> Razorpay
+                    <FaCreditCard className="me-2" /> Razorpay
                   </Button>
                   <Button
-                    variant="outline-primary"
+                    variant="outline-info"
+                    className="d-flex align-items-center justify-content-center p-4 w-100 mx-2"
                     onClick={() => handleProceed("paypal")}
                   >
-                    <FaPaypal /> PayPal
+                    <FaPaypal className="me-2" /> PayPal
                   </Button>
                 </div>
               </Modal.Body>
