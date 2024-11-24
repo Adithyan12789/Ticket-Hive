@@ -255,6 +255,53 @@ class UserController {
     }
   );
 
+  saveLocationController = asyncHandler(
+    async (req: CustomRequest, res: Response): Promise<void> => {
+      if (!req.user) {
+        res.status(401).json({ message: "Unauthorized" });
+        return;
+      }
+
+      const { city, latitude, longitude } = req.body;
+
+      console.log("req body: ", req.body);
+      
+
+      // Validate latitude and longitude
+      if (latitude == null || longitude == null) {
+        res
+          .status(400)
+          .json({ message: "Latitude and longitude are required" });
+        return;
+      }
+
+      try {
+        // Call the service to update the location
+        const updatedUser = await UserService.updateLocation(
+          req.user._id.toString(),
+          city,
+          latitude,
+          longitude
+        );
+
+        if (!updatedUser) {
+          res.status(404).json({ message: "User not found" });
+          return;
+        }
+
+        res.status(200).json({
+          message: "Location updated successfully",
+          latitude: updatedUser.latitude,
+          longitude: updatedUser.longitude,
+        });
+      } catch (err) {
+        res
+          .status(500)
+          .json({ message: "An error occurred while saving location" });
+      }
+    }
+  );
+
   getUserProfile = asyncHandler(
     async (req: CustomRequest, res: Response): Promise<void> => {
       if (!req.user) {

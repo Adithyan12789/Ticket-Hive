@@ -11,6 +11,18 @@ class UserRepository {
         return await user.save();
     }
 
+    public async updateLocation(userId: string, city: string, latitude: number, longitude: number): Promise<IUser | null> {
+        try {
+          return await User.findByIdAndUpdate(
+            userId,
+            { city, latitude, longitude },
+            { new: true }
+          );
+        } catch (error) {
+          throw new Error("Error updating location");
+        }
+      }
+
     public async findUserByResetToken(resetToken: string): Promise<IUser | null> {
         return await User.findOne({
             resetPasswordToken: resetToken,

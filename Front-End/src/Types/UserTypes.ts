@@ -52,6 +52,9 @@ export interface User {
     profileImage?: string;
     name: string;
     email: string;
+    city?: string;
+    latitude?: number;
+    longitude?: number;
   }
   
   /**  user login Credentials */

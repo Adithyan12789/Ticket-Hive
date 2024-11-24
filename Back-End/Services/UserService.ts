@@ -146,6 +146,20 @@ class UserService {
     return true;
   }
 
+  public async updateLocation(
+    userId: string,
+    city: string,
+    latitude: number,
+    longitude: number
+  ): Promise<IUser | null> {
+    try {
+      // Call the repository method to update the location
+      return await UserRepository.updateLocation(userId, city, latitude, longitude);
+    } catch (error) {
+      throw new Error("Service: Error updating location");
+    }
+  }
+
   public getUserProfile = async (userId: any) => {
     const user = await UserRepository.findUserById(userId);
 
@@ -198,7 +212,6 @@ class UserService {
 
     return await UserRepository.saveUser(user);
   };
-  
 
   public logoutUserService() {
     return true;

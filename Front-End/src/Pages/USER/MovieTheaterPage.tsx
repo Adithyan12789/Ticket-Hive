@@ -1,6 +1,11 @@
 import { Key, useEffect, useState } from "react";
 import { Container, Row, Col, Button, Modal } from "react-bootstrap";
-import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import {
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import {
   useGetMovieByMovieIdQuery,
   useGetTheatersByMovieTitleQuery,
@@ -9,6 +14,8 @@ import { FaInfoCircle } from "react-icons/fa";
 import Loader from "../../Components/UserComponents/Loader";
 import { toast } from "react-toastify";
 import "react-datepicker/dist/react-datepicker.css";
+import { RootState } from "../../Store";
+import { useSelector } from "react-redux";
 
 type ShowTime = {
   _id: string;
@@ -31,7 +38,8 @@ type TheaterManagement = {
   _id: string;
   name: string;
   address: string;
-  location: string;
+  latitude: number;
+  longitude: number;
   amenities: string[];
   description: string;
 };
@@ -52,10 +60,40 @@ const MovieTheaterScreen: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const { userInfo } = useSelector((state: RootState) => state.auth);
 
   const { moviePoster } = location.state || {};
 
   console.log(" second movie posters: ", moviePoster);
+
+  const userLocation = {
+    latitude: userInfo?.latitude,
+    longitude: userInfo?.longitude,
+  };
+
+  const calculateDistance = (
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number
+  ): number => {
+    const toRad = (value: number): number => (value * Math.PI) / 180; // Convert degrees to radians
+
+    const R = 6371; // Earth's radius in kilometers
+    const dLat = toRad(lat2 - lat1); // Latitude difference in radians
+    const dLon = toRad(lon2 - lon1); // Longitude difference in radians
+
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRad(lat1)) *
+        Math.cos(toRad(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return R * c; // Distance in kilometers
+  };
 
   const dates = [...Array(365)].map((_, index) => {
     const date = new Date();
@@ -76,7 +114,7 @@ const MovieTheaterScreen: React.FC = () => {
     isError: errorTheaters,
   } = useGetTheatersByMovieTitleQuery({ movieTitle, date: formattedDate });
 
-  const [loading, setLoading] = useState<boolean>(true); 
+  const [loading, setLoading] = useState<boolean>(true);
 
   const { data: movie } = useGetMovieByMovieIdQuery(movieTitle || "");
 
@@ -136,6 +174,34 @@ const MovieTheaterScreen: React.FC = () => {
     toast.error("Error fetching theaters");
     return <div>Error fetching theaters</div>;
   }
+  const sortedTheaters = theaters.map((theater) => {
+    const distance =
+      userLocation.latitude &&
+      userLocation.longitude &&
+      theater.latitude &&
+      theater.longitude
+        ? calculateDistance(
+            userLocation.latitude,
+            userLocation.longitude,
+            theater.latitude,
+            theater.longitude
+          )
+        : null;
+
+    return { ...theater, distance };
+  });
+
+  // Filter nearby theaters (e.g., within 10 km)
+  const nearbyTheaters = sortedTheaters
+    .filter((theater) => theater.distance !== null && theater.distance <= 10)
+    .sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity)); // Sort by distance
+
+  // Other theaters (outside the 10 km radius)
+  const otherTheaters = sortedTheaters
+    .filter((theater) => theater.distance === null || theater.distance > 10)
+    .sort((a, b) => a.name.localeCompare(b.name)); // Sort alphabetically
+
+  const allTheaters = [...nearbyTheaters, ...otherTheaters];
 
   return (
     <Container style={{ padding: "40px 20px" }}>
@@ -257,10 +323,10 @@ const MovieTheaterScreen: React.FC = () => {
         </Col>
       </Row>
 
-      {theaters.length > 0 ? (
+      {allTheaters.length > 0 ? (
         <div>
           <Row>
-            {theaters.map((theater, index) => (
+            {allTheaters.map((theater, index) => (
               <Col key={index} md={12} className="mb-4">
                 <div
                   style={{
@@ -325,9 +391,9 @@ const MovieTheaterScreen: React.FC = () => {
                                           showTime: filteredShow.time,
                                           moviePoster: moviePoster,
                                           showTimeId: filteredShow._id,
-                                        }
+                                        },
                                       })
-                                    }                                    
+                                    }
                                   >
                                     {filteredShow.time}
                                   </Button>

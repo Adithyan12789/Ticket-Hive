@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Navbar, Nav, Container, NavDropdown } from "react-bootstrap";
 import { FaSignInAlt, FaSignOutAlt } from "react-icons/fa";
 import { useSelector, useDispatch } from "react-redux";
@@ -11,19 +11,19 @@ import { logout } from "../../Slices/AuthSlice";
 import { useNavigate } from "react-router-dom";
 import { RootState, AppDispatch } from "../../Store";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUser, faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
+import {
+  faUser,
+  faSignOutAlt,
+  faMapMarkerAlt,
+} from "@fortawesome/free-solid-svg-icons";
+import CitiesModal from "./CitiesModal";
 
 const Header: React.FC = () => {
   const { userInfo } = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
 
-  console.log("userInfo: ", userInfo);
-
-  const { data: profileData } = useGetUserProfileQuery(
-    userInfo?.id
-  );
-
+  const { data: profileData } = useGetUserProfileQuery(userInfo?.id);
   const [logoutApiCall] = useLogoutMutation();
 
   const profileHandler = () => {
@@ -43,6 +43,29 @@ const Header: React.FC = () => {
       console.error(err);
     }
   };
+
+  const [showModal, setShowModal] = useState(false);
+
+  const [selectedCity, setSelectedCity] = useState<string>(
+    "Fetching location..."
+  );
+
+  const handleCityClick = () => {
+    console.log("Opening modal...");
+    setShowModal(true);
+  };
+
+  const handleCitySelect = (city: string) => {
+    console.log("City selected: ", city);
+    setSelectedCity(city);
+  };
+
+  const handleModalClose = () => {
+    console.log("Closing modal...");
+    setShowModal(false);
+  };
+
+  console.log("Modal visibility in Header:", showModal);
 
   return (
     <header style={{ backgroundColor: "#3A5E49" }}>
@@ -72,35 +95,41 @@ const Header: React.FC = () => {
             </Nav>
 
             <Nav className="ms-auto">
-              {userInfo ? (
-                <>
-                  <NavDropdown
-                    title={userInfo.name || userInfo.data.name}
-                    id="username"
-                  >
-                    <NavDropdown.Item
-                      onClick={profileHandler}
-                      className="dropdown-item"
-                    >
-                      <FontAwesomeIcon
-                        icon={faUser}
-                        style={{ marginRight: "8px" }}
-                      />
-                      Profile
-                    </NavDropdown.Item>
+              <Nav.Link className="city-info" onClick={handleCityClick}>
+                <FontAwesomeIcon
+                  icon={faMapMarkerAlt}
+                  style={{ marginRight: "8px" }}
+                />
+                {selectedCity ? selectedCity : "Location not selected"}
+              </Nav.Link>
 
-                    <NavDropdown.Item
-                      onClick={logoutHandler}
-                      className="dropdown-item"
-                    >
-                      <FontAwesomeIcon
-                        icon={faSignOutAlt}
-                        style={{ marginRight: "8px" }}
-                      />
-                      Logout
-                    </NavDropdown.Item>
-                  </NavDropdown>
-                </>
+              {userInfo ? (
+                <NavDropdown
+                  title={userInfo.name || userInfo.data.name}
+                  id="username"
+                >
+                  <NavDropdown.Item
+                    onClick={profileHandler}
+                    className="dropdown-item"
+                  >
+                    <FontAwesomeIcon
+                      icon={faUser}
+                      style={{ marginRight: "8px" }}
+                    />
+                    Profile
+                  </NavDropdown.Item>
+
+                  <NavDropdown.Item
+                    onClick={logoutHandler}
+                    className="dropdown-item"
+                  >
+                    <FontAwesomeIcon
+                      icon={faSignOutAlt}
+                      style={{ marginRight: "8px" }}
+                    />
+                    Logout
+                  </NavDropdown.Item>
+                </NavDropdown>
               ) : (
                 <>
                   <LinkContainer to="/login">
@@ -120,6 +149,14 @@ const Header: React.FC = () => {
           </Navbar.Collapse>
         </Container>
       </Navbar>
+
+      {showModal && (
+        <CitiesModal
+          show={showModal}
+          handleClose={handleModalClose}
+          onSelectCity={handleCitySelect}
+        />
+      )}
     </header>
   );
 };

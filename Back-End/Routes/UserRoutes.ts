@@ -18,6 +18,8 @@ router.post('/resend-otp', UserController.resendOtp);
 router.post('/forgot-password', UserController.forgotPassword);
 router.put('/reset-password/:token', UserController.resetPassword);
 
+router.post('/save-location', AuthMiddleware.protect, UserController.saveLocationController);
+
 router.route('/profile')
 .get( AuthMiddleware.protect, UserController.getUserProfile )
 .put( AuthMiddleware.protect, MulterConfig.multerUploadUserProfile.single('profileImage'), UserController.updateUserProfile);

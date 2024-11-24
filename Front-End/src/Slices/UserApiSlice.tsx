@@ -73,13 +73,13 @@ export const usersApiSlice = apiSlice.injectEndpoints({
       }),
     }),
 
-    saveUserLocation: builder.mutation<void, { latitude: number; longitude: number }>({
+    saveUserLocation: builder.mutation<void, { city: string, latitude: number; longitude: number }>({
       query: (location) => ({
         url: `${USERS_URL}/save-location`,
         method: "POST",
         body: location,
       }),
-    }),
+    }),    
 
     getUserProfile: builder.query({
       query: () => ({
@@ -173,6 +173,7 @@ export const {
   useResendOtpMutation,
   useSendPasswordResetEmailMutation,
   useResetPasswordMutation,
+  useSaveUserLocationMutation,
   useGetUserProfileQuery,
   useUpdateUserMutation,
   useGetMoviesMutation,

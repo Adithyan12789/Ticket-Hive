@@ -283,3 +283,15 @@
 .hover-link:hover .arrow-icon {
   transform: translateX(5px); /* Arrow moves slightly farther to the right */
 }
+
+.city-info{
+  color: white;
+}
+
+.city-info:hover{
+  color: white;
+}
+
+.city-info:focus{
+  color: white;
+}
