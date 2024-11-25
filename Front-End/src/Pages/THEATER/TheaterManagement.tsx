@@ -42,8 +42,8 @@ const AddTheaterScreen: React.FC = () => {
   ]);
   const [description, setDescription] = useState<string>("");
   const [amenities, setAmenities] = useState<string[]>([]);
-  const [latitude, setLatitude] = useState<string>("");
-  const [longitude, setLongitude] = useState<string>("");
+  const [latitude, setLatitude] = useState<number>(0);
+  const [longitude, setLongitude] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
   const [theaters, setTheaters] = useState<TheaterManagement[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -72,8 +72,8 @@ const AddTheaterScreen: React.FC = () => {
     setAddress("");
     setDescription("");
     setAmenities([""]);
-    setLatitude("");
-    setLongitude("");
+    setLatitude(0);
+    setLongitude(0);
     setSelectedImages([]);
     setShowTimes([{ hour: "01", minute: "00", ampm: "AM" }]);
   };
@@ -90,7 +90,6 @@ const AddTheaterScreen: React.FC = () => {
     setTicketPrice(theater.ticketPrice);
     setShowEditModal(true);
   };
-  
 
   const handleEditModalClose = () => {
     setShowEditModal(false);
@@ -188,29 +187,32 @@ const AddTheaterScreen: React.FC = () => {
 
   const validateCity = (value: string) => /^[A-Za-z\s'-]+$/.test(value);
 
-  const validateCoordinates = (lat: string, lng: string) => {
+  const validateCoordinates = (lat: number, lng: number) => {
     const latRegex = /^-?([1-8]?[1-9]|[1-9]0)\.{1}\d{1,6}$/;
     const lngRegex = /^-?(([-+]?)([\d]{1,3})((\.)(\d+))?)/;
-    return latRegex.test(lat) && lngRegex.test(lng);
-  };
 
-  const validateTicketPrice = (value: string) => /^[0-9]+(\.[0-9]{1,2})?$/.test(value);
+    return latRegex.test(lat.toFixed(6)) && lngRegex.test(lng.toFixed(6));
+  };
+  
+
+  const validateTicketPrice = (value: string) =>
+    /^[0-9]+(\.[0-9]{1,2})?$/.test(value);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
+  
     const formattedShowTimes = showTimes.map(
       ({ hour, minute, ampm }) => `${hour}:${minute} ${ampm}`
     );
-
+  
     const trimmedName = name.trim();
     const trimmedCity = city.trim();
     const trimmedAddress = address.trim();
     const trimmedDescription = description.trim();
     const trimmedAmenities = amenities.map((item) => item.trim()).join(", ");
-    const trimmedLatitude = latitude.trim();
-    const trimmedLongitude = longitude.trim();
-
+    const trimmedLatitude = latitude; // Keep as number
+    const trimmedLongitude = longitude; // Keep as number
+  
     if (
       !trimmedName ||
       !trimmedCity ||
@@ -218,8 +220,8 @@ const AddTheaterScreen: React.FC = () => {
       !selectedImages.length ||
       !trimmedDescription ||
       !trimmedAmenities ||
-      !trimmedLatitude ||
-      !trimmedLongitude ||
+      isNaN(trimmedLatitude) ||
+      isNaN(trimmedLongitude) ||
       showTimes.some(
         (time) => !time.hour.trim() || !time.minute.trim() || !time.ampm.trim()
       )
@@ -227,32 +229,32 @@ const AddTheaterScreen: React.FC = () => {
       toast.error("All fields are required");
       return;
     }
-
+  
     if (!validateName(trimmedName)) {
       toast.error("Invalid characters in name");
       return;
     }
-
+  
     if (!validateCity(trimmedCity)) {
       toast.error("Invalid characters in city");
       return;
     }
-
+  
     if (!validateCoordinates(trimmedLatitude, trimmedLongitude)) {
       toast.error("Invalid latitude or longitude");
       return;
     }
-
+  
     if (formattedShowTimes.some((time) => !time)) {
       toast.error("All show times are required");
       return;
     }
-
+  
     if (!validateTicketPrice(ticketPrice.trim())) {
       toast.error("Please enter a valid ticket price");
       return;
     }
-
+  
     try {
       setLoading(true);
       const formData = new FormData();
@@ -262,33 +264,34 @@ const AddTheaterScreen: React.FC = () => {
       formData.append("ticketPrice", ticketPrice.trim());
       formData.append("description", trimmedDescription);
       formData.append("amenities", trimmedAmenities);
-      formData.append("latitude", trimmedLatitude);
-      formData.append("longitude", trimmedLongitude);
-    
+      formData.append("latitude", trimmedLatitude.toString()); // Sending as number, converting to string for FormData
+      formData.append("longitude", trimmedLongitude.toString()); // Sending as number, converting to string for FormData
+  
       selectedImages.forEach((image) => formData.append("images", image));
-
+  
       formattedShowTimes.forEach((time) => {
         formData.append("showTimes[]", time);
       });
-
+  
       await addTheater(formData).unwrap();
       toast.success("Theater added successfully");
       handleModalClose();
       navigate("/theater/management");
       fetchData();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
+    }// eslint-disable-next-line @typescript-eslint/no-explicit-any
+    catch (err: any) {
       toast.error(err?.data?.message || err.error);
-    } finally {
+    }finally {
       setLoading(false);
     }
   };
+  
 
   const handleEditSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const lat = typeof latitude === "string" ? latitude.trim() : "";
-    const long = typeof longitude === "string" ? longitude.trim() : "";
+    const lat = typeof latitude === "string" ? latitude : 0;
+    const long = typeof longitude === "string" ? longitude : 0;
 
     const formData = new FormData();
     formData.append("name", name.trim());
@@ -296,8 +299,8 @@ const AddTheaterScreen: React.FC = () => {
     formData.append("address", address.trim());
     formData.append("description", description.trim());
     formData.append("amenities", amenities.join(", "));
-    formData.append("latitude", lat);
-    formData.append("longitude", long);
+    formData.append("latitude", lat.toString());
+    formData.append("longitude", long.toString());
     formData.append("ticketPrice", ticketPrice.trim());
 
     showTimes.forEach((time) => {
@@ -583,7 +586,9 @@ const AddTheaterScreen: React.FC = () => {
                       type="text"
                       placeholder="Enter latitude"
                       value={latitude}
-                      onChange={(e) => setLatitude(e.target.value)}
+                      onChange={(e) =>
+                        setLatitude(parseFloat(e.target.value) || 0)
+                      }
                     />
                   </Form.Group>
                   <Form.Group controlId="longitude" className="mb-3">
@@ -592,7 +597,9 @@ const AddTheaterScreen: React.FC = () => {
                       type="text"
                       placeholder="Enter longitude"
                       value={longitude}
-                      onChange={(e) => setLongitude(e.target.value)}
+                      onChange={(e) =>
+                        setLongitude(parseFloat(e.target.value) || 0)
+                      }
                     />
                   </Form.Group>
                 </Col>
@@ -788,7 +795,9 @@ const AddTheaterScreen: React.FC = () => {
                       type="text"
                       placeholder="Enter latitude"
                       value={latitude}
-                      onChange={(e) => setLatitude(e.target.value)}
+                      onChange={(e) =>
+                        setLatitude(parseFloat(e.target.value) || 0)
+                      }
                     />
                   </Form.Group>
                   <Form.Group controlId="longitude" className="mb-3">
@@ -797,7 +806,9 @@ const AddTheaterScreen: React.FC = () => {
                       type="text"
                       placeholder="Enter longitude"
                       value={longitude}
-                      onChange={(e) => setLongitude(e.target.value)}
+                      onChange={(e) =>
+                        setLongitude(parseFloat(e.target.value) || 0)
+                      }
                     />
                   </Form.Group>
                 </Col>
@@ -868,7 +879,10 @@ const AddTheaterScreen: React.FC = () => {
                   </Link>
                   <Card.Body>
                     <Card.Title>{theater.name}</Card.Title>
-                    <Card.Text>{theater.description}</Card.Text>
+                    <Card.Text>
+                      {theater.description.split(" ").slice(0, 20).join(" ")}...
+                    </Card.Text>
+
                     <div className="button-group">
                       {!theater.isVerified && (
                         <Button

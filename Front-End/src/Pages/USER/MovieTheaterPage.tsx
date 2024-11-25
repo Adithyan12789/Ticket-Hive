@@ -23,6 +23,13 @@ type ShowTime = {
   movieTitle: string;
 };
 
+type User = {
+  id: string;
+  city: string;
+  latitude: number;
+  longitude: number;
+};
+
 type Screen = {
   _id: string;
   screenNumber: number;
@@ -31,6 +38,7 @@ type Screen = {
     _id: string;
     name: string;
     address: string;
+    city: string;
   };
 };
 
@@ -42,11 +50,13 @@ type TheaterManagement = {
   longitude: number;
   amenities: string[];
   description: string;
+  city: string;
 };
 
 type TheaterData = {
   theaters: TheaterManagement[];
   screens: Screen[];
+  user: User;
 };
 
 const MovieTheaterScreen: React.FC = () => {
@@ -64,36 +74,8 @@ const MovieTheaterScreen: React.FC = () => {
 
   const { moviePoster } = location.state || {};
 
+  console.log(" userInfo: ", userInfo);
   console.log(" second movie posters: ", moviePoster);
-
-  const userLocation = {
-    latitude: userInfo?.latitude,
-    longitude: userInfo?.longitude,
-  };
-
-  const calculateDistance = (
-    lat1: number,
-    lon1: number,
-    lat2: number,
-    lon2: number
-  ): number => {
-    const toRad = (value: number): number => (value * Math.PI) / 180; // Convert degrees to radians
-
-    const R = 6371; // Earth's radius in kilometers
-    const dLat = toRad(lat2 - lat1); // Latitude difference in radians
-    const dLon = toRad(lon2 - lon1); // Longitude difference in radians
-
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(toRad(lat1)) *
-        Math.cos(toRad(lat2)) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
-
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-    return R * c; // Distance in kilometers
-  };
 
   const dates = [...Array(365)].map((_, index) => {
     const date = new Date();
@@ -108,11 +90,20 @@ const MovieTheaterScreen: React.FC = () => {
   const formattedDate = selectedDate
     ? selectedDate.toISOString().split("T")[0]
     : null;
+
+  const userId = userInfo?.id;
+
+  console.log("userId: ", userId);
+
   const {
     data,
     isLoading: loadingTheaters,
     isError: errorTheaters,
-  } = useGetTheatersByMovieTitleQuery({ movieTitle, date: formattedDate });
+  } = useGetTheatersByMovieTitleQuery({
+    movieTitle,
+    date: formattedDate,
+    userId,
+  });
 
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -120,9 +111,36 @@ const MovieTheaterScreen: React.FC = () => {
 
   const theaters = (data as TheaterData)?.theaters || [];
   const screens = (data as TheaterData)?.screens || [];
+  const user = (data as TheaterData)?.user || [];
+
   const selectedLanguage = searchParams.get("language") || "English";
 
+  console.log("user :", user);
+  console.log("theaters :", theaters);
   console.log("screens :", screens);
+
+  const userLocation = {
+    latitude: user?.latitude,
+    longitude: user?.longitude,
+    city: user?.city,
+  };
+
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+    const toRad = (value: number): number => (value * Math.PI) / 180; // Convert degrees to radians
+
+    const R = 6371; // Earth's radius in kilometers
+    const dLat = toRad(lat2 - lat1); // Latitude difference in radians
+    const dLon = toRad(lon2 - lon1); // Longitude difference in radians
+
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return R * c; // Distance in kilometers
+  };
+
 
   useEffect(() => {
     document.title = movieTitle ? `Movie - Theaters` : "Movie Details";
@@ -174,6 +192,7 @@ const MovieTheaterScreen: React.FC = () => {
     toast.error("Error fetching theaters");
     return <div>Error fetching theaters</div>;
   }
+
   const sortedTheaters = theaters.map((theater) => {
     const distance =
       userLocation.latitude &&
@@ -191,17 +210,39 @@ const MovieTheaterScreen: React.FC = () => {
     return { ...theater, distance };
   });
 
-  // Filter nearby theaters (e.g., within 10 km)
-  const nearbyTheaters = sortedTheaters
-    .filter((theater) => theater.distance !== null && theater.distance <= 10)
-    .sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity)); // Sort by distance
+  // Filter theaters by location: those in the same city and nearby theaters
+  const theatersInSameCity = theaters.filter(
+    (theater) =>
+      theater.city &&
+      user.city &&
+      theater.city.toLowerCase() === user.city.toLowerCase()
+  );
 
-  // Other theaters (outside the 10 km radius)
-  const otherTheaters = sortedTheaters
-    .filter((theater) => theater.distance === null || theater.distance > 10)
-    .sort((a, b) => a.name.localeCompare(b.name)); // Sort alphabetically
+  const theatersOutsideCity = sortedTheaters.filter(
+    (theater) =>
+      !(
+        theater.city &&
+        userLocation.city &&
+        theater.city.toLowerCase() === userLocation.city.toLowerCase()
+      )
+  );
 
-  const allTheaters = [...nearbyTheaters, ...otherTheaters];
+  const nearbyTheatersOutsideCity = theatersOutsideCity
+    .filter((theater) => theater.distance !== null && theater.distance <= 10) // Distance filter for nearby theaters
+    .sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity));
+
+  const otherTheatersOutsideCity = theatersOutsideCity
+    .filter((theater) => theater.distance === null || theater.distance > 10) // Exclude nearby theaters
+    .sort((a, b) => a.name.localeCompare(b.name)); // Sort alphabetically for others
+
+  // Combine all theaters: same city first, then nearby, then others
+  const allTheaters = [
+    ...theatersInSameCity, // Theaters in the user's city
+    ...nearbyTheatersOutsideCity, // Nearby theaters outside the city
+    ...otherTheatersOutsideCity, // Other theaters outside the city
+  ];
+
+  console.log("allTheaters: ", allTheaters);
 
   return (
     <Container style={{ padding: "40px 20px" }}>

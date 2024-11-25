@@ -17,17 +17,13 @@ import Loader from "./Loader";
 interface CitiesModalProps {
   show: boolean;
   handleClose: () => void;
-  onSelectCity: (
-    city: string,
-    latitude: number | null,
-    longitude: number | null
-  ) => void;
+  handleCitySelect: (city: string) => void;
 }
 
 const CitiesModal: React.FC<CitiesModalProps> = ({
   show,
   handleClose,
-  onSelectCity,
+  handleCitySelect,
 }) => {
   const [cities, setCities] = useState<string[]>([]);
   const [filteredCities, setFilteredCities] = useState<string[]>([]);
@@ -40,7 +36,7 @@ const CitiesModal: React.FC<CitiesModalProps> = ({
     latitude: number | null;
     longitude: number | null;
   }>({
-    city: "Fetching your location...",
+    city: "Select your city",
     latitude: null,
     longitude: null,
   });
@@ -78,8 +74,8 @@ const CitiesModal: React.FC<CitiesModalProps> = ({
             longitude,
           });
   
-          // Send both detected city and coordinates to onSelectCity
-          onSelectCity(cityName, latitude, longitude);
+          // // Send both detected city and coordinates to onSelectCity
+          // onSelectCity(cityName, latitude, longitude);
   
           // Save the user location to the backend
           await saveUserLocation({ city: cityName, latitude, longitude }).unwrap();
@@ -182,7 +178,7 @@ const CitiesModal: React.FC<CitiesModalProps> = ({
     }
   };
 
-  const handleCitySelect = async (city: string) => {
+  const handleCitySelectInternal = async (city: string) => {
     setLoading(true);
 
     try {
@@ -192,7 +188,7 @@ const CitiesModal: React.FC<CitiesModalProps> = ({
         const { latitude, longitude } = cityCoordinates;
 
         await saveUserLocation({ city, latitude, longitude }).unwrap();
-        onSelectCity(city, latitude, longitude );
+        handleCitySelect(city); // Call the parent handler to update the city
         handleClose();
       } else {
         alert("Failed to fetch coordinates for the selected city. Please try again.");
@@ -254,7 +250,7 @@ const CitiesModal: React.FC<CitiesModalProps> = ({
                   <Button
                     variant="outline-primary"
                     className="w-100"
-                    onClick={() => handleCitySelect(city)}
+                    onClick={() => handleCitySelectInternal(city)}
                   >
                     {city}
                   </Button>

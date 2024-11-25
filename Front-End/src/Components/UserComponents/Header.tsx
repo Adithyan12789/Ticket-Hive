@@ -26,6 +26,8 @@ const Header: React.FC = () => {
   const { data: profileData } = useGetUserProfileQuery(userInfo?.id);
   const [logoutApiCall] = useLogoutMutation();
 
+  const [city, setCity] = useState<string>("");
+
   const profileHandler = () => {
     if (userInfo && profileData) {
       navigate("/profile");
@@ -46,18 +48,11 @@ const Header: React.FC = () => {
 
   const [showModal, setShowModal] = useState(false);
 
-  const [selectedCity, setSelectedCity] = useState<string>(
-    "Fetching location..."
-  );
+  console.log("profileData: ", profileData);
 
   const handleCityClick = () => {
     console.log("Opening modal...");
     setShowModal(true);
-  };
-
-  const handleCitySelect = (city: string) => {
-    console.log("City selected: ", city);
-    setSelectedCity(city);
   };
 
   const handleModalClose = () => {
@@ -65,7 +60,10 @@ const Header: React.FC = () => {
     setShowModal(false);
   };
 
-  console.log("Modal visibility in Header:", showModal);
+  const handleCitySelect = (city: string) => {
+    setCity(city); // Set the new city and trigger re-render
+    setShowModal(false); // Close the modal
+  };
 
   return (
     <header style={{ backgroundColor: "#3A5E49" }}>
@@ -100,7 +98,7 @@ const Header: React.FC = () => {
                   icon={faMapMarkerAlt}
                   style={{ marginRight: "8px" }}
                 />
-                {selectedCity ? selectedCity : "Location not selected"}
+                {city || profileData?.city || "Location not selected"}
               </Nav.Link>
 
               {userInfo ? (
@@ -154,7 +152,7 @@ const Header: React.FC = () => {
         <CitiesModal
           show={showModal}
           handleClose={handleModalClose}
-          onSelectCity={handleCitySelect}
+          handleCitySelect={handleCitySelect}
         />
       )}
     </header>

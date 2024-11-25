@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Container, Card, Button, Row, Col, Modal } from "react-bootstrap";
 import { FaRegCalendarAlt, FaFilm, FaTicketAlt } from "react-icons/fa";
@@ -86,6 +86,10 @@ const BookingPage: React.FC = () => {
     month: "short",
     year: "numeric",
   });
+
+  useEffect(() => {
+    document.title = `Ticket Booking`
+  }, []);
 
   const handleRazorpayPayment = async () => {
     setPaymentMethod("razorpay");

@@ -172,6 +172,7 @@ class UserService {
       name: user.name,
       email: user.email,
       phone: user.phone,
+      city: user.city,
       profileImageName: user.profileImageName,
     };
   };

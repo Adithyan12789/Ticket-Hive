@@ -12,6 +12,10 @@ const ThankYou = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  useEffect(() => {
+    document.title = `Thankyou Page`
+  }, []);
+
   return (
     <div
       style={{

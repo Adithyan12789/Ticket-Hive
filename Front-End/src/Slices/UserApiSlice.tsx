@@ -111,9 +111,9 @@ export const usersApiSlice = apiSlice.injectEndpoints({
     }),
 
     getTheatersByMovieTitle: builder.query({
-      query: ({ movieTitle, date }) => ({
+      query: ({ movieTitle, date, userId }) => ({
         url: `${USERS_URL}/movie-theaters/${movieTitle}`,
-        params: { date },
+        params: { date, userId },
         method: "GET",
       }),
     }),

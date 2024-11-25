@@ -15,7 +15,7 @@ const SelectSeatPage: React.FC = () => {
   const [, setLayout] = useState<Seat[][]>([]);
   const [loading, setLoading] = useState<boolean>(true); 
 
-  const { data, isLoading, isError } = useGetScreenByIdQuery(screenId);
+  const { data, refetch, isLoading, isError } = useGetScreenByIdQuery(screenId);
 
   const screenDetails = data as Screen | null;
 
@@ -49,7 +49,8 @@ const SelectSeatPage: React.FC = () => {
     document.title = screenDetails
       ? `Screen - ${screenDetails.screenNumber} - Select Seats`
       : "Select Seats";
-  }, [screenDetails]);
+      refetch();
+  }, [screenDetails, refetch]);
 
   useEffect(() => {
     if (screenDetails && showTimeId) {
@@ -85,14 +86,22 @@ const SelectSeatPage: React.FC = () => {
 
   const handleSeatSelection = (seatLabel: string, isAvailable: boolean) => {
     if (!isAvailable) return;
+  
     const newSelectedSeats = new Set(selectedSeats);
     if (newSelectedSeats.has(seatLabel)) {
       newSelectedSeats.delete(seatLabel);
     } else {
       newSelectedSeats.add(seatLabel);
+      // Hold the seat for 10 minutes
+      setTimeout(() => {
+        // Remove seat from selected seats after 10 minutes if not booked
+        newSelectedSeats.delete(seatLabel);
+        setSelectedSeats(newSelectedSeats);
+      }, 10 * 60 * 1000); // 10 minutes timeout
     }
+  
     setSelectedSeats(newSelectedSeats);
-  };
+  };  
 
   const renderScreenLayout = () => {
     if (!screenDetails) return <p>No seat layout available for this screen.</p>;

@@ -9,6 +9,7 @@ import mongoose from "mongoose";
 import TheaterDetails from "../Models/TheaterDetailsModel";
 import { Movie } from "../Models/MoviesModel";
 import Screens from "../Models/ScreensModel";
+import User from "../Models/UserModel";
 
 class TheaterController {
   authTheaterOwner = asyncHandler(
@@ -366,6 +367,8 @@ class TheaterController {
 
   addTheaterController = asyncHandler(
     async (req: CustomRequest, res: Response): Promise<void> => {
+      console.log("enter");
+
       const {
         name,
         city,
@@ -377,6 +380,9 @@ class TheaterController {
         longitude,
         ticketPrice,
       } = req.body;
+
+      console.log("latitude: ", latitude);
+      console.log("longitude: ", longitude);
 
       if (
         !name ||
@@ -534,10 +540,18 @@ class TheaterController {
   getTheatersByMovieTitle = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
       const { movieTitle } = req.params;
+      const { userId } = req.query;
 
       console.log("movieTitle: ", movieTitle);
+      console.log("userId: ", userId);
 
       try {
+        const user = await User.findById(userId).select("-password");
+        if (!user) {
+          res.status(404).json({ message: "User not found" });
+          return;
+        }
+
         let movie;
 
         if (mongoose.Types.ObjectId.isValid(movieTitle)) {
@@ -558,7 +572,8 @@ class TheaterController {
         })
           .populate({
             path: "theater",
-            select: "name location amenities description ticketPrice owner address",
+            select:
+              "name location amenities description ticketPrice owner address city",
           })
           .populate({
             path: "showTimes.movie",
@@ -580,6 +595,7 @@ class TheaterController {
         console.log("theaters: ", theaters);
 
         res.status(200).json({
+          user,
           theaters,
           screens,
         });
