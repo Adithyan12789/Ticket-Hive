@@ -68,8 +68,7 @@ const TicketsScreen: React.FC = () => {
       return a.movieDetails.title.localeCompare(b.movieDetails.title);
     } else {
       return (
-        new Date(a.ticket.bookingTime).getTime() -
-        new Date(b.ticket.bookingTime).getTime()
+        new Date(b.ticket.bookingTime).getTime() - new Date(a.ticket.bookingTime).getTime()
       );
     }
   });

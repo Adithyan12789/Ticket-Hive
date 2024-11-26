@@ -1,5 +1,6 @@
 import MovieRepository from "../Repositories/MovieRepo";
 import { IMovie, Movie } from "../Models/MoviesModel";
+import { Review } from "../Models/ReviewModel";
 
 class MovieService {
   public async addMovie(movieData: Partial<IMovie>): Promise<IMovie> {
@@ -79,6 +80,22 @@ class MovieService {
   public async deleteMovieService(id: string): Promise<IMovie | null> {
     const deletedMovie = await Movie.findByIdAndDelete(id);
     return deletedMovie;
+  }
+
+  public async getReviewsByMovieId(movieId: string) {
+    return await Review.find({ movie: movieId }).populate("user", "name email");
+  }
+
+  public async addReview(data: { movieId: string; userId: string; rating: number; review: string }) {
+
+    const review = new Review({
+      movie: data.movieId,
+      user: data.userId,
+      rating: data.rating,
+      comment: data.review,
+    });
+    
+    return await review.save();
   }
 }
 

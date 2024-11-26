@@ -5,9 +5,19 @@ import { Container, Row, Col, Card, Button, Modal } from "react-bootstrap";
 import QRCode from "react-qr-code"; // For generating QR codes
 import { toast } from "react-toastify";
 import Loader from "../../Components/UserComponents/Loader";
-import { useGetBookingDetailsQuery, useCancelBookingMutation } from "../../Slices/UserApiSlice";
+import {
+  useGetBookingDetailsQuery,
+  useCancelBookingMutation,
+} from "../../Slices/UserApiSlice";
 import { RootState } from "../../Store";
-import { FaFilm, FaTheaterMasks, FaChair, FaClock, FaIdBadge, FaQrcode } from "react-icons/fa";
+import {
+  FaFilm,
+  FaTheaterMasks,
+  FaChair,
+  FaClock,
+  FaIdBadge,
+  FaQrcode,
+} from "react-icons/fa";
 
 const USER_MOVIE_POSTER = "http://localhost:5000/MoviePosters/";
 
@@ -48,11 +58,12 @@ const TicketDetailsScreen: React.FC = () => {
   );
 
   useEffect(() => {
-    document.title = `Ticket Details - ${ticket?.movieDetails.title || "Not Found"}`;
+    document.title = `Ticket Details - ${
+      ticket?.movieDetails.title || "Not Found"
+    }`;
   }, [ticket]);
 
   console.log("ticket bookingId: ", ticket?.ticket.bookingId);
-  
 
   const handleCancel = async () => {
     try {
@@ -65,7 +76,6 @@ const TicketDetailsScreen: React.FC = () => {
       toast.error("Failed to cancel the ticket. Please try again later."); // Pass a single argument
     }
   };
-  
 
   if (isLoading) return <Loader />;
   if (!ticket) {
@@ -96,7 +106,7 @@ const TicketDetailsScreen: React.FC = () => {
               }
               alt={ticket.movieDetails.title || "Movie Poster"}
               className="img-fluid rounded-3"
-              style={{  objectFit: "cover" }}
+              style={{ objectFit: "cover" }}
             />
           </Col>
           <Col md={8}>
@@ -108,16 +118,19 @@ const TicketDetailsScreen: React.FC = () => {
               <Row className="mb-3">
                 <Col md={6}>
                   <p>
-                    <strong>Genre:</strong> {ticket.movieDetails.genre.join(", ") || "N/A"}
+                    <strong>Genre:</strong>{" "}
+                    {ticket.movieDetails.genre.join(", ") || "N/A"}
                   </p>
                   <p>
-                    <strong>Duration:</strong> {ticket.movieDetails.duration || "N/A"}
+                    <strong>Duration:</strong>{" "}
+                    {ticket.movieDetails.duration || "N/A"}
                   </p>
                 </Col>
                 <Col md={6}>
                   <p>
                     <FaTheaterMasks className="me-2 text-secondary" />
-                    <strong>Theater:</strong> {ticket.ticket.theaterName || "N/A"}
+                    <strong>Theater:</strong>{" "}
+                    {ticket.ticket.theaterName || "N/A"}
                   </p>
                   <p>
                     <strong>Screen:</strong> {ticket.ticket.screenName || "N/A"}
@@ -130,12 +143,14 @@ const TicketDetailsScreen: React.FC = () => {
                 <Col md={6}>
                   <p>
                     <FaChair className="me-2 text-secondary" />
-                    <strong>Seats:</strong> {ticket.ticket.seats.join(", ") || "N/A"}
+                    <strong>Seats:</strong>{" "}
+                    {ticket.ticket.seats.join(", ") || "N/A"}
                   </p>
                   <p>
                     <FaClock className="me-2 text-secondary" />
                     <strong>Booking Date and Time:</strong>{" "}
-                    {new Date(ticket.ticket.bookingTime).toLocaleString() || "N/A"}
+                    {new Date(ticket.ticket.bookingDate).toLocaleString() ||
+                      "N/A"}
                   </p>
                 </Col>
                 <Col md={6}>
@@ -143,7 +158,7 @@ const TicketDetailsScreen: React.FC = () => {
                     <strong>Status:</strong>{" "}
                     <span
                       className={
-                        ticket.ticket.paymentStatus === "Paid"
+                        ticket.ticket.paymentStatus === "Confirmed"
                           ? "text-success"
                           : "text-danger"
                       }
@@ -153,7 +168,8 @@ const TicketDetailsScreen: React.FC = () => {
                   </p>
                   <p>
                     <FaIdBadge className="me-2 text-secondary" />
-                    <strong>Booking ID:</strong> {ticket.ticket.bookingId || "N/A"}
+                    <strong>Booking ID:</strong>{" "}
+                    {ticket.ticket.bookingId || "N/A"}
                   </p>
                 </Col>
               </Row>
@@ -182,9 +198,11 @@ const TicketDetailsScreen: React.FC = () => {
                   variant="danger"
                   className="me-3"
                   onClick={() => setShowModal(true)}
+                  disabled={ticket.ticket.paymentStatus === "cancelled"} // Disable button if the ticket is cancelled
                 >
                   Cancel Ticket
                 </Button>
+
                 {/* <Button variant="primary">Download Ticket</Button> */}
               </div>
             </Card.Body>
@@ -198,7 +216,8 @@ const TicketDetailsScreen: React.FC = () => {
           <Modal.Title>Cancel Ticket</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          Are you sure you want to cancel this ticket? This action cannot be undone.
+          Are you sure you want to cancel this ticket? This action cannot be
+          undone.
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowModal(false)}>

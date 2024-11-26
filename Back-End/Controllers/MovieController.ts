@@ -15,15 +15,18 @@ const languageMapping: { [key: string]: string } = {
 class MovieController {
   async addMovieController(req: Request, res: Response): Promise<void> {
     try {
-      
       const posterFile = (req.files as any)["poster"]?.[0];
       const movieImageFiles = (req.files as any)["movieImages"] || [];
       const castImageFiles = (req.files as any)["castImages"] || [];
 
-      if (!posterFile || movieImageFiles.length === 0 || castImageFiles.length === 0) {
+      if (
+        !posterFile ||
+        movieImageFiles.length === 0 ||
+        castImageFiles.length === 0
+      ) {
         res.status(400).json({ message: "Please upload all required files." });
         return;
-    }    
+      }
 
       const movieData: Partial<IMovie> = {
         title: req.body.title,
@@ -98,7 +101,7 @@ class MovieController {
       console.log("posterFile: ", posterFile);
       console.log("movieImageFiles: ", movieImageFiles);
       console.log("castImageFiles: ", castImageFiles);
-      
+
       try {
         const updatedMovie = await MovieService.updateMovieData(
           id,
@@ -145,6 +148,72 @@ class MovieController {
         res
           .status(500)
           .json({ message: "Error deleting Movie", error: error.message });
+      }
+    }
+  );
+
+  getReviewsController = asyncHandler(
+    async (req: Request, res: Response): Promise<void> => {
+      const { movieId } = req.params;
+  
+      if (!mongoose.Types.ObjectId.isValid(movieId)) {
+        res.status(400).json({ message: "Invalid Movie ID" });
+        return;
+      }
+  
+      try {
+        const reviews = await MovieService.getReviewsByMovieId(movieId);
+  
+        if (!reviews.length) {
+          res.status(404).json({ message: "No reviews found for this movie" });
+          return;
+        }
+  
+        res.status(200).json(reviews);
+      } catch (error) {
+        console.error("Error fetching reviews:", error);
+        res.status(500).json({ message: "Error fetching reviews", error });
+      }
+    }
+  );  
+
+  /**
+   * Add a new review for a specific movie
+   */
+  addReviewsController = asyncHandler(
+    async (req: Request, res: Response): Promise<void> => {
+
+      console.log("req body", req.body);
+
+      const { movieId, userId, rating, review } = req.body;
+
+      if (
+        !mongoose.Types.ObjectId.isValid(movieId) ||
+        !mongoose.Types.ObjectId.isValid(userId)
+      ) {
+        res.status(400).json({ message: "Invalid Movie or User ID" });
+        return;
+      }
+
+      if (!rating || !review) {
+        res.status(400).json({ message: "Rating and comment are required" });
+        return;
+      }
+
+      try {
+        const newReview = await MovieService.addReview({
+          movieId,
+          userId,
+          rating,
+          review,
+        });        
+
+        res
+          .status(201)
+          .json({ message: "Review added successfully", newReview });
+      } catch (error) {
+        console.error("Error adding review:", error);
+        res.status(500).json({ message: "Error adding review", error });
       }
     }
   );

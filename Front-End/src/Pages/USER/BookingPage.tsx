@@ -235,14 +235,15 @@ const BookingPage: React.FC = () => {
   };
 
   return (
-    <Container className="mt-5" style={{ maxWidth: "700px" }}>
+    <Container className="mt-5" style={{ maxWidth: "800px" }}>
       <h2
         className="text-center mb-5"
         style={{
-          fontSize: "40px",
-          fontWeight: "300",
-          color: "rgb(1 85 108)",
+          fontSize: "36px",
+          fontWeight: "500",
+          color: "#4e89ae",  // Subtle professional color
           textTransform: "uppercase",
+          letterSpacing: "1px",
         }}
       >
         Booking Summary
@@ -251,35 +252,34 @@ const BookingPage: React.FC = () => {
       <Card
         className="rounded-lg border-0"
         style={{
-          overflow: "hidden",
-          borderRadius: "15px",
-          boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.4)",
+          boxShadow: "0px 6px 18px rgba(0, 0, 0, 0.1)",
+          borderRadius: "12px",
+          backgroundColor: "#f8f9fa",  // Light background
         }}
       >
         <Card.Body>
           <Row>
-            <Col className="text-center mb-3">
+            <Col className="text-center mb-4">
               <div
                 style={{
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
+                  marginBottom: "20px",
                 }}
               >
                 <FaFilm
                   style={{
                     fontSize: "2.5rem",
                     color: "#e63946",
-                    marginRight: "10px",
-                    marginBottom: "20px",
+                    marginRight: "12px",
                   }}
                 />
                 <h4
                   style={{
                     fontWeight: "400",
-                    color: "#2c3e50",
+                    color: "#2c3e50",  // Darker text for professionalism
                     textTransform: "uppercase",
-                    marginBottom: "20px",
                   }}
                 >
                   {movieTitle}
@@ -289,13 +289,27 @@ const BookingPage: React.FC = () => {
           </Row>
           <Row className="mb-4">
             <Col>
-              <p>
+              <p
+                style={{
+                  fontSize: "16px",
+                  color: "#6c757d",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
                 <FaTicketAlt style={{ color: "#457b9d", marginRight: "8px" }} />
                 {theaterName}
               </p>
             </Col>
             <Col>
-              <p>
+              <p
+                style={{
+                  fontSize: "16px",
+                  color: "#6c757d",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
                 <FaRegCalendarAlt
                   style={{ color: "#457b9d", marginRight: "8px" }}
                 />
@@ -305,8 +319,8 @@ const BookingPage: React.FC = () => {
           </Row>
           <Row className="mb-4">
             <Col>
-              <p style={{ fontWeight: "500", color: "#1d3557" }}>Seats:</p>
-              <p>
+              <p style={{ fontWeight: "500", color: "#1d3557", fontSize: "16px" }}>Seats:</p>
+              <p style={{ color: "#6c757d", fontSize: "16px" }}>
                 {selectedSeats.length > 0
                   ? selectedSeats.join(", ")
                   : "No seats selected"}
@@ -316,11 +330,23 @@ const BookingPage: React.FC = () => {
           <hr />
           <Row className="mb-4">
             <Col>
-              <p>
+              <p
+                style={{
+                  fontSize: "16px",
+                  color: "#1d3557",
+                  fontWeight: "500",
+                }}
+              >
                 Total Price (excluding convenience fee):{" "}
                 <strong>Rs. {totalPrice}</strong>
               </p>
-              <p>
+              <p
+                style={{
+                  fontSize: "16px",
+                  color: "#1d3557",
+                  fontWeight: "500",
+                }}
+              >
                 Convenience Fee (10%):{" "}
                 <strong>Rs. {convenienceFee.toFixed(2)}</strong>
               </p>
@@ -328,7 +354,7 @@ const BookingPage: React.FC = () => {
               <p
                 style={{
                   fontWeight: "600",
-                  fontSize: "1.2rem",
+                  fontSize: "1.25rem",
                   color: "#1d3557",
                 }}
               >
@@ -349,23 +375,24 @@ const BookingPage: React.FC = () => {
               <Button
                 variant="primary"
                 size="lg"
-                className="px-4 py-2"
+                className="px-5 py-3"
                 onClick={() => setShowModal(true)}
                 style={{
-                  background: "rgb(61 141 255)",
+                  background: "#4e89ae", // Professional, soft blue
                   border: "none",
-                  borderRadius: "10px",
+                  borderRadius: "8px",
                   color: "white",
-                  width: "200px",
+                  width: "250px",
+                  fontSize: "17px",
                 }}
               >
-                Proceed
+                Proceed to Payment
               </Button>
             </div>
           )}
 
           {/* Payment Method Modal */}
-          <Modal show={showModal} onHide={() => setShowModal(false)}>
+          <Modal show={showModal} onHide={() => setShowModal(false)} centered>
             <Modal.Header closeButton>
               <Modal.Title>Select Payment Method</Modal.Title>
             </Modal.Header>
@@ -374,6 +401,7 @@ const BookingPage: React.FC = () => {
                 variant="outline-primary"
                 className="w-100 mb-3"
                 onClick={handleRazorpayPayment}
+                style={{ fontSize: "16px", padding: "12px" }}
               >
                 Pay with Razorpay
               </Button>
@@ -381,6 +409,7 @@ const BookingPage: React.FC = () => {
                 variant="outline-success"
                 className="w-100 mb-3"
                 onClick={() => handleProceed("paypal")}
+                style={{ fontSize: "16px", padding: "12px" }}
               >
                 Pay with PayPal
               </Button>
@@ -389,6 +418,7 @@ const BookingPage: React.FC = () => {
                 className="w-100"
                 onClick={handleWalletPayment}
                 disabled={insufficientFunds}
+                style={{ fontSize: "16px", padding: "12px" }}
               >
                 Pay with Wallet
               </Button>
