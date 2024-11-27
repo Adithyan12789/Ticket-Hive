@@ -4,7 +4,7 @@ export interface ShowTime {
   time: string;
   movie: mongoose.Types.ObjectId;
   movieTitle: string;
-  layout: { label: string; isAvailable: boolean }[][]; 
+  layout: { label: string; isAvailable: boolean, holdSeat: boolean }[][]; 
 }
 
 export interface IScreen extends Document {
@@ -39,7 +39,8 @@ const ScreenSchema: Schema<IScreen> = new Schema({
       },
       layout: [[{ 
         label: { type: String, required: true }, 
-        isAvailable: { type: Boolean, default: true } 
+        isAvailable: { type: Boolean, default: true } ,
+        holdSeat: { type: Boolean, default: false } 
       }]],
     }
   ],

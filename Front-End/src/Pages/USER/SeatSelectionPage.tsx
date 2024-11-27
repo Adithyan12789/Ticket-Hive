@@ -2,7 +2,10 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import { FaArrowLeft } from "react-icons/fa";
-import { useGetScreenByIdQuery } from "../../Slices/UserApiSlice";
+import {
+  useGetScreenByIdQuery,
+  useUpdateSeatAvailabilityMutation,
+} from "../../Slices/UserApiSlice";
 import Loader from "../../Components/UserComponents/Loader";
 import { toast } from "react-toastify";
 import React from "react";
@@ -13,7 +16,8 @@ const SelectSeatPage: React.FC = () => {
   const navigate = useNavigate();
   const [selectedSeats, setSelectedSeats] = useState<Set<string>>(new Set());
   const [, setLayout] = useState<Seat[][]>([]);
-  const [loading, setLoading] = useState<boolean>(true); 
+  const [loading, setLoading] = useState<boolean>(true);
+  const [updateSeatAvailability] = useUpdateSeatAvailabilityMutation();
 
   const { data, refetch, isLoading, isError } = useGetScreenByIdQuery(screenId);
 
@@ -49,7 +53,7 @@ const SelectSeatPage: React.FC = () => {
     document.title = screenDetails
       ? `Screen - ${screenDetails.screenNumber} - Select Seats`
       : "Select Seats";
-      refetch();
+    refetch();
   }, [screenDetails, refetch]);
 
   useEffect(() => {
@@ -77,6 +81,7 @@ const SelectSeatPage: React.FC = () => {
         row.push({
           label: `${rowPrefix}${j.toString().padStart(2, "0")}`,
           isAvailable: true,
+          holdSeat: false,
         });
       }
       layout.push(row);
@@ -84,9 +89,13 @@ const SelectSeatPage: React.FC = () => {
     return layout;
   };
 
-  const handleSeatSelection = (seatLabel: string, isAvailable: boolean) => {
-    if (!isAvailable) return;
-  
+  const handleSeatSelection = (
+    seatLabel: string,
+    isAvailable: boolean,
+    holdSeat: boolean
+  ) => {
+    if (!isAvailable && holdSeat) return;
+
     const newSelectedSeats = new Set(selectedSeats);
     if (newSelectedSeats.has(seatLabel)) {
       newSelectedSeats.delete(seatLabel);
@@ -99,9 +108,9 @@ const SelectSeatPage: React.FC = () => {
         setSelectedSeats(newSelectedSeats);
       }, 10 * 60 * 1000); // 10 minutes timeout
     }
-  
+
     setSelectedSeats(newSelectedSeats);
-  };  
+  };
 
   const renderScreenLayout = () => {
     if (!screenDetails) return <p>No seat layout available for this screen.</p>;
@@ -127,8 +136,7 @@ const SelectSeatPage: React.FC = () => {
               justifyContent: "center",
               alignItems: "center",
               marginBottom:
-                rowIndex ===
-                Math.floor(selectedShowTime?.layout.length / 2)
+                rowIndex === Math.floor(selectedShowTime?.layout.length / 2)
                   ? "20px"
                   : "5px",
               gap: "8px",
@@ -142,11 +150,11 @@ const SelectSeatPage: React.FC = () => {
                 <button
                   style={{
                     width: "30px",
-                    height: "30px", 
+                    height: "30px",
                     backgroundColor: selectedSeats.has(seat.label)
-                      ? "rgb(0 185 255)" 
-                      : seat.isAvailable
-                      ? "#f8f9fa" 
+                      ? "rgb(0 185 255)"
+                      : seat.isAvailable && !seat.holdSeat
+                      ? "#f8f9fa"
                       : "gray",
                     color: selectedSeats.has(seat.label) ? "#fff" : "#000",
                     display: "flex",
@@ -155,11 +163,18 @@ const SelectSeatPage: React.FC = () => {
                     border: "1px solid #007bff",
                     borderRadius: "4px",
                     fontSize: "0.7rem",
-                    cursor: seat.isAvailable ? "pointer" : "not-allowed",
+                    cursor:
+                      seat.isAvailable && !seat.holdSeat
+                        ? "pointer"
+                        : "not-allowed",
                     transition: "background-color 0.3s",
                   }}
                   onClick={() =>
-                    handleSeatSelection(seat.label, seat.isAvailable)
+                    handleSeatSelection(
+                      seat.label,
+                      seat.isAvailable,
+                      seat.holdSeat
+                    )
                   }
                   disabled={!seat.isAvailable}
                 >
@@ -203,11 +218,54 @@ const SelectSeatPage: React.FC = () => {
     return <div>Error fetching seat data.</div>;
   }
 
+  const handleSeatUpdate = async () => {
+    try {
+
+      await updateSeatAvailability({
+        screenId,
+        selectedSeats: [...selectedSeats],
+        holdSeat: true,
+        showTime,
+      }).unwrap();
+  
+      navigate('/booking', {
+        state: {
+          selectedSeats: [...selectedSeats],
+          theaterName: screenDetails?.theater.name,
+          date: formattedDate,
+          movieTitle: movieTitle,
+          totalPrice: totalPrice,
+          movieId: movieId,
+          theaterId: theaterId,
+          screenId: screenId,
+          showTime: showTime,
+        },
+      });
+
+      setTimeout(async () => {
+        try {
+          await updateSeatAvailability({
+            screenId,
+            selectedSeats: [...selectedSeats],
+            holdSeat: false,
+            showTime,
+          }).unwrap();
+          console.log('Seat availability reset to true.');
+        } catch (error) {
+          console.error('Error resetting seat availability:', error);
+        }
+      }, 60000);
+    } catch (error) {
+      console.log('error: ', error);
+      toast.error('Unable to update seat availability. Please try again.');
+    }
+  };
+  
+
   return (
     <Container
       style={{ padding: "30px 15px", position: "relative", minHeight: "100vh" }}
     >
-      {/* Row for Go Back Icon and Movie Title with UA Text */}
       <Row className="mb-3">
         <Col>
           <div
@@ -293,21 +351,7 @@ const SelectSeatPage: React.FC = () => {
               alignItems: "center",
             }}
             variant="primary"
-            onClick={() => {
-              navigate("/booking", {
-                state: {
-                  selectedSeats: [...selectedSeats],
-                  theaterName: screenDetails?.theater.name,
-                  date: formattedDate,
-                  movieTitle: movieTitle,
-                  totalPrice: totalPrice,
-                  movieId: movieId,
-                  theaterId: theaterId,
-                  screenId: screenId,
-                  showTime: showTime,
-                },
-              });
-            }}
+            onClick={handleSeatUpdate}
           >
             <div style={{ fontSize: "16px", textAlign: "center" }}>
               <div>Pay Rs.{totalPrice}</div>

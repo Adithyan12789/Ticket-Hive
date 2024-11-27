@@ -224,6 +224,45 @@ class ScreenController {
       }
     }
   );
+
+  updateSeatAvailability = asyncHandler(
+    async (req: CustomRequest, res: Response): Promise<void> => {
+
+      console.log("req body: ", req.body);
+      
+      const { screenId, selectedSeats, holdSeat, showTime } = req.body;
+  
+      if (!screenId || !Array.isArray(selectedSeats)) {
+        res.status(400).json({ error: "Invalid data. 'screenId' and 'selectedSeats' are required." });
+        return;
+      }
+  
+      try {
+        const updatedSeats = await ScreenService.updateSeatAvailabilityHandler(
+          screenId,
+          selectedSeats,
+          holdSeat,
+          showTime
+        );
+
+        console.log("updatedSeats: ", updatedSeats);
+  
+        if (!updatedSeats) {
+          res.status(404).json({ message: "Screen not found or unable to update seats." });
+          return;
+        }
+  
+        res.status(200).json({
+          message: "Seat availability updated successfully.",
+          updatedSeats,
+        });
+      } catch (error: any) {
+        console.error("Error updating seat availability:", error);
+        res.status(500).json({ message: error.message || "Internal server error" });
+      }
+    }
+  );
+  
 }
 
 export default new ScreenController();

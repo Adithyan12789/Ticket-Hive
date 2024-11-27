@@ -140,6 +140,14 @@ export const usersApiSlice = apiSlice.injectEndpoints({
       }),
     }),
 
+    updateSeatAvailability: builder.mutation({
+      query: ({ screenId, selectedSeats, holdSeat, showTime }) => ({
+        url: `${USERS_URL}/update-availability`,
+        method: 'POST',
+        body: { screenId, selectedSeats, holdSeat, showTime },
+      }),
+    }),
+
     createBooking: builder.mutation({
       query: (data) => ({
         url: `${USERS_URL}/book-ticket`,
@@ -197,6 +205,7 @@ export const {
   useGetReviewsQuery, 
   useAddReviewMutation,
   useGetScreenByIdQuery,
+  useUpdateSeatAvailabilityMutation,
   useCreateBookingMutation,
   useGetBookingDetailsQuery,
   useGetTransactionHistoryQuery,

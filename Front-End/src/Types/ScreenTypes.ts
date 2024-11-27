@@ -24,4 +24,5 @@ export interface ShowTime {
 export interface Seat {
   label: string;
   isAvailable: boolean;
+  holdSeat: boolean;
 }

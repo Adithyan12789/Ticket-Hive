@@ -12,8 +12,7 @@ class ScreenService {
     }
   ) {
     return await ScreenRepository.createScreen(ScreenData);
-  }   
-  
+  }
 
   public async editScreenHandler(
     theaterOwnerId: string,
@@ -74,6 +73,40 @@ class ScreenService {
       throw new Error("Error fetching theaters by movie name");
     }
   }
+
+  public updateSeatAvailabilityHandler = async (
+    screenId: string,
+    selectedSeats: string[],
+    holdSeat: boolean,
+    showTime: string
+  ): Promise<any> => {
+    const screen = await Screens.findById(screenId);
+
+    if (!screen) {
+      throw new Error("Screen not found.");
+    }
+
+    const targetShowTime = screen.showTimes.find(
+      (st) => String(st.time) === showTime
+    );
+
+    if (!targetShowTime) {
+      throw new Error("Show time not found.");
+    }
+
+    targetShowTime.layout.forEach((row) => {
+      row.forEach((seat) => {
+        if (selectedSeats.includes(seat.label)) {
+          seat.holdSeat = holdSeat;
+        }        
+      });
+    });
+
+    // Save the updated screen
+    await screen.save();
+
+    return screen;
+  };
 }
 
 export default new ScreenService();
