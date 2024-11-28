@@ -82,7 +82,6 @@ class TheaterController {
             },
           });
         } else {
-          console.log("Creating a new Theater Owner...");
           theaterOwner = await Theater.create({
             name,
             email,
@@ -90,7 +89,6 @@ class TheaterController {
             phone: "",
             password: "",
           });
-          console.log("Theater Owner created:", theaterOwner);
 
           if (theaterOwner) {
             TheaterTokenService.generateTheaterToken(
@@ -367,7 +365,6 @@ class TheaterController {
 
   addTheaterController = asyncHandler(
     async (req: CustomRequest, res: Response): Promise<void> => {
-      console.log("enter");
 
       const {
         name,
@@ -380,9 +377,6 @@ class TheaterController {
         longitude,
         ticketPrice,
       } = req.body;
-
-      console.log("latitude: ", latitude);
-      console.log("longitude: ", longitude);
 
       if (
         !name ||
@@ -478,14 +472,8 @@ class TheaterController {
 
   updateTheaterHandler = asyncHandler(
     async (req: CustomRequest, res: Response): Promise<void> => {
-      console.log("req.body: ", req.body);
-      console.log("req.files: ", req.files);
       const { id } = req.params;
       const updateData = req.body;
-
-      console.log("id: ", id);
-      console.log("req.body: ", req.body);
-      console.log("updateData: ", updateData);
 
       try {
         const updatedTheater = await TheaterOwnerService.updateTheaterData(
@@ -493,8 +481,6 @@ class TheaterController {
           updateData,
           req.files
         );
-
-        console.log("updatedTheater: ", updatedTheater);
 
         if (!updatedTheater) {
           res.status(404).json({ message: "Theater not found for updating" });
@@ -542,9 +528,6 @@ class TheaterController {
       const { movieTitle } = req.params;
       const { userId } = req.query;
 
-      console.log("movieTitle: ", movieTitle);
-      console.log("userId: ", userId);
-
       try {
         const user = await User.findById(userId).select("-password");
         if (!user) {
@@ -560,8 +543,6 @@ class TheaterController {
           movie = await Movie.findOne({ title: movieTitle });
         }
 
-        console.log("movie: ", movie);
-
         if (!movie) {
           res.status(404).json({ message: "Movie not found" });
           return;
@@ -573,14 +554,12 @@ class TheaterController {
           .populate({
             path: "theater",
             select:
-              "name location amenities description ticketPrice owner address city",
+              "name location amenities description ticketPrice owner address city longitude latitude",
           })
           .populate({
             path: "showTimes.movie",
             select: "title",
           });
-
-        console.log("screens: ", screens);
 
         const theaters = screens
           .map((screen) => screen.theater)
@@ -591,8 +570,6 @@ class TheaterController {
                 (t) => t._id.toString() === value._id.toString()
               ) === index
           );
-
-        console.log("theaters: ", theaters);
 
         res.status(200).json({
           user,

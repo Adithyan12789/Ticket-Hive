@@ -1,11 +1,7 @@
-import React, { ReactNode } from 'react';
+import React from 'react';
 import AdminSidebar from '../../Components/AdminComponents/AdminSideBar';
 import { Container, Row, Col } from 'react-bootstrap';
-
-interface AdminLayoutProps {
-  children: ReactNode;
-  adminName: string;
-}
+import { AdminLayoutProps } from '../../Types/AdminTypes';
 
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children, adminName }) => {
   return (

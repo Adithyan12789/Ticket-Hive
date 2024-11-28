@@ -26,13 +26,11 @@ class ScreenService {
     const screen: IScreen | null = await ScreenRepository.getScreenById(
       screenId
     );
-    console.log("Retrieved Screen: ", screen);
 
     const updatedScreen = await ScreenRepository.updateScreen(
       screenId,
       updateData
     );
-    console.log("Updated Screen: ", updatedScreen);
     return updatedScreen;
   }
 

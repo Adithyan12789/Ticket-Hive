@@ -73,7 +73,7 @@ class BookingService {
 
   public async getAllTicketsService() {
     const bookings = await BookingRepo.findAllBookings();
-
+    
     if (!bookings.length) throw new Error("No tickets found");
 
     return bookings.map((booking: BookingDetails) => ({
@@ -173,7 +173,6 @@ class BookingService {
         bookingId,
         status
       );
-      console.log("service updatedBooking: ", updatedBooking);
 
       return updatedBooking;
     } catch (error: any) {

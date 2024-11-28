@@ -27,15 +27,7 @@ import { FaCreditCard, FaPaypal } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { loadScript } from "../../Utils/LoadScript";
 import { Form, useNavigate } from "react-router-dom";
-
-interface Transaction {
-  transactionId: string;
-  amount: number;
-  type: "credit" | "debit";
-  status: string;
-  date: string;
-  description: string;
-}
+import { Transaction } from "../../Types/WalletTypes";
 
 const WalletPage: React.FC = () => {
   const { userInfo } = useSelector((state: RootState) => state.auth);
@@ -67,10 +59,10 @@ const WalletPage: React.FC = () => {
   console.log("Balance:", balance);
   console.log("Transactions:", transactions);
 
-  const [currentPage, setCurrentPage] = useState(1); // Current page
-  const [itemsPerPage] = useState(5); // Items per page
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5);
   const [filterStatus, setFilterStatus] = useState<string>("all");
-  const [sortBy, setSortBy] = useState<string>("date"); // Sort by date or amount
+  const [sortBy, setSortBy] = useState<string>("date");
   const [showAddMoneyModal, setShowAddMoneyModal] = useState<boolean>(false);
   const [amount, setAmount] = useState<number>(0);
 
@@ -80,7 +72,6 @@ const WalletPage: React.FC = () => {
   const [paymentMethod, setPaymentMethod] = useState<
     "razorpay" | "paypal" | "wallet" | null
   >(null);
-  // Amount for wallet payment
 
   const [createWalletTransaction] = useCreateWalletTransactionMutation();
 
@@ -88,7 +79,6 @@ const WalletPage: React.FC = () => {
     document.title = "Ticket Hive - Wallet";
   }, []);
 
-  // Apply filtering
   const filteredTransactions =
     filterStatus === "all"
       ? transactions
@@ -96,19 +86,18 @@ const WalletPage: React.FC = () => {
           (transaction) => transaction.status === filterStatus
         );
 
-  // Apply sorting
+
   const sortedTransactions = [...filteredTransactions].sort((a, b) => {
     if (sortBy === "amount") {
-      return b.amount - a.amount; // Sort by amount (highest to lowest)
+      return b.amount - a.amount; 
     } else {
-      return new Date(b.date).getTime() - new Date(a.date).getTime(); // Sort by date (newest to oldest)
+      return new Date(b.date).getTime() - new Date(a.date).getTime();
     }
   });
 
-  const totalTransactions = sortedTransactions.length; // Total filtered & sorted transactions
-  const totalPages = Math.ceil(totalTransactions / itemsPerPage); // Total pages
+  const totalTransactions = sortedTransactions.length;
+  const totalPages = Math.ceil(totalTransactions / itemsPerPage);
 
-  // Logic to slice the transactions based on the current page
   const indexOfLastTransaction = currentPage * itemsPerPage;
   const indexOfFirstTransaction = indexOfLastTransaction - itemsPerPage;
   const currentTransactions = sortedTransactions.slice(
@@ -145,7 +134,7 @@ const WalletPage: React.FC = () => {
 
     const options: RazorpayOptions = {
       key: razorpayApiKey,
-      amount: amount * 100, // Convert to paise
+      amount: amount * 100,
       currency: "INR",
       name: "TicketHive Wallet",
       description: "Add funds to your wallet",
@@ -204,14 +193,12 @@ const WalletPage: React.FC = () => {
       refetchTransactions();
     } catch (error: unknown) {
       if (error instanceof Error) {
-        // If error is an instance of the built-in Error class
         Swal.fire(
           "Transaction Failed",
           `There was an error processing your transaction: ${error.message}`,
           "error"
         );
       } else {
-        // Handle non-Error cases (e.g., network error)
         Swal.fire("Transaction Failed", "An unknown error occurred", "error");
       }
     }
@@ -224,15 +211,14 @@ const WalletPage: React.FC = () => {
 
   if (isLoading) return <Loader />;
 
-  // Handler for changing pages
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
 
   const handleAddMoney = () => {
     if (amount > 100) {
-      setShowAddMoneyModal(false); // Close the current modal
-      setShowModal(true); // Open the next modal
+      setShowAddMoneyModal(false);
+      setShowModal(true);
     } else {
       Swal.fire(
         "Invalid Amount",
@@ -250,16 +236,12 @@ const WalletPage: React.FC = () => {
         marginTop: "30px",
       }}
     >
-      {/* User Navigation Bar */}
       <UserNavBar />
 
-      {/* Main Content */}
       <Container className="py-4">
         <Card className="shadow-sm">
           <Card.Body>
             <h3 className="mb-4 text-center text-primary">Wallet</h3>
-
-            {/* Wallet Balance */}
             <div className="text-center mb-4">
               <h4>Current Balance</h4>
               <h2 className="text-success">₹{balance}</h2>
@@ -274,9 +256,7 @@ const WalletPage: React.FC = () => {
               </Button>
             </div>
 
-            {/* Filters and Sort Options */}
             <div className="d-flex justify-content-between mb-3">
-              {/* Filter by Status */}
               <DropdownButton
                 id="dropdown-filter"
                 variant="outline-secondary"
@@ -295,7 +275,6 @@ const WalletPage: React.FC = () => {
                 <Dropdown.Item eventKey="failed">Failed</Dropdown.Item>
               </DropdownButton>
 
-              {/* Sort Options */}
               <DropdownButton
                 id="dropdown-sort"
                 variant="outline-secondary"
@@ -508,7 +487,6 @@ const WalletPage: React.FC = () => {
               </div>
             )}
 
-            {/* Pagination */}
             <Pagination>
               <Pagination.Prev
                 onClick={() => handlePageChange(currentPage - 1)}

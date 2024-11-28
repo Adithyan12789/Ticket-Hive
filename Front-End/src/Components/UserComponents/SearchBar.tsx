@@ -4,11 +4,7 @@ import { SearchOutlined } from "@ant-design/icons";
 import './SearchBar.css';
 
 const { Search } = Input;
-
-interface SearchBarProps {
-  searchTerm: string;
-  setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
-}
+import { SearchBarProps } from "../../Types/UserTypes";
 
 const SearchBar: React.FC<SearchBarProps> = ({ searchTerm, setSearchTerm }) => {
   return (

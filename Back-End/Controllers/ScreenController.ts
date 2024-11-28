@@ -33,7 +33,6 @@ class ScreenController {
 
   addScreen = asyncHandler(
     async (req: CustomRequest, res: Response): Promise<void> => {
-      console.log("dfbxcvbxd");
 
       const { theaterId } = req.params;
       const theaterOwnerId = req.theaterOwner?._id;
@@ -58,8 +57,6 @@ class ScreenController {
         theater: theaterId,
       };
 
-      console.log("Screen Data:", ScreenData);
-
       const createdScreen = await ScreenService.addScreenHandler(
         theaterOwnerId,
         ScreenData
@@ -73,14 +70,9 @@ class ScreenController {
 
   updateScreen = asyncHandler(
     async (req: CustomRequest, res: Response): Promise<void> => {
-      console.log("dfbcvbdhdfb");
       
       const { screenId } = req.params;
       const theaterOwnerId = req.theaterOwner?._id;
-
-      console.log("screenId: ", screenId);
-      console.log("theaterOwnerId: ", theaterOwnerId);
-      
 
       if (!theaterOwnerId) {
         res.status(400).json({ error: "Theater owner ID is required." });
@@ -95,25 +87,17 @@ class ScreenController {
 
       const { screenNumber, capacity, showTimes } = req.body;
 
-      console.log("req.body", req.body);
-
       const updateData = {
         screenNumber,
         capacity,
         showTimes,
       };
 
-      console.log("updateData", updateData);
-      
-
       const updatedScreen = await ScreenService.editScreenHandler(
         theaterOwnerId,
         screenId,
         updateData
       );
-
-      console.log("updatedScreen: ", updatedScreen);
-      
 
       if (updatedScreen) {
         res
@@ -130,8 +114,6 @@ class ScreenController {
   deleteScreen = asyncHandler(
     async (req: CustomRequest, res: Response): Promise<void> => {
       const { screenId } = req.params;
-
-      console.log("screenId: ", screenId);
 
       try {
         const deletedScreen = await ScreenService.deleteScreenHandler(screenId);
@@ -155,10 +137,8 @@ class ScreenController {
 
   getScreensByTheaterId = asyncHandler(
     async (req: CustomRequest, res: Response): Promise<void> => {
-      console.log("hello");
 
       const { id } = req.params;
-      console.log(id);
 
       try {
         const screen = await ScreenService.getScreensByTheaterIdsService(id);
@@ -177,15 +157,11 @@ class ScreenController {
 
   getScreensById = asyncHandler(
     async (req: CustomRequest, res: Response): Promise<void> => {
-      console.log("hello");
       
       const { screenId } = req.params;
 
-      console.log(screenId);
-
       try {
         const screen = await ScreenService.getScreensByIdService(screenId);
-        console.log("screen: ", screen);
         
         if (!screen) {
           res.status(404).json({ message: "Screen not found" });
@@ -227,8 +203,6 @@ class ScreenController {
 
   updateSeatAvailability = asyncHandler(
     async (req: CustomRequest, res: Response): Promise<void> => {
-
-      console.log("req body: ", req.body);
       
       const { screenId, selectedSeats, holdSeat, showTime } = req.body;
   
@@ -244,8 +218,6 @@ class ScreenController {
           holdSeat,
           showTime
         );
-
-        console.log("updatedSeats: ", updatedSeats);
   
         if (!updatedSeats) {
           res.status(404).json({ message: "Screen not found or unable to update seats." });

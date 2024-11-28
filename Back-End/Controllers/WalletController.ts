@@ -5,12 +5,8 @@ import WalletService from "../Services/WalletService";
 class WalletController {
   addMoneyToWallet = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
-      console.log("Entered addMoneyToWallet controller");
-      console.log("Request body:", req.body);
 
       const { userId, amount, description } = req.body;
-
-      console.log("description: ", description);
       
 
       if (!userId || !amount) {
@@ -40,13 +36,8 @@ class WalletController {
 
   getTransactionHistory = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
-
-      console.log("Entered to get transaction history controller");
-
-      // const { userId } = req.query;
+      
       const { userId } = req.params;
-
-      console.log("Request query:", req.params);
 
       if (!userId) {
         res.status(400).json({ message: "User ID is required" });

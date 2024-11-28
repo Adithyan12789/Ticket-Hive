@@ -1,3 +1,5 @@
+import { ReactNode } from "react";
+
 /** admin login Credentials */
 export interface AdminCredentials {
     email: string;
@@ -29,4 +31,20 @@ export interface AdminCredentials {
   
   export interface AdminSidebarProps {
     adminName: string;
+  }
+
+  export interface AdminLayoutProps {
+    children: ReactNode;
+    adminName: string;
+  }
+
+  export interface FetchBaseQueryError {
+    status: number;
+    data: {
+      message?: string;
+    };
+  }
+
+  export interface SerializedError {
+    message: string;
   }

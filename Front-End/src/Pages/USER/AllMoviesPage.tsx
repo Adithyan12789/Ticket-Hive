@@ -1,26 +1,17 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Row, Col, Card, Form, InputGroup } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { useGetMoviesMutation } from "../../Slices/UserApiSlice"; // Assuming this is where the hook is located
+import { useGetMoviesMutation } from "../../Slices/UserApiSlice";
 import Loader from "../../Components/UserComponents/Loader";
-
-// Define types for props
-interface Movie {
-  _id: string;
-  title: string;
-  posters: string | null;
-  languages: string[];
-  genres: string[];
-}
+import { MovieManagement } from "../../Types/MoviesTypes";
 
 const MOVIE_IMAGES_DIR_PATH = "http://localhost:5000/MoviePosters/";
 
 const AllMoviesPage: React.FC = () => {
-  // States for filters and movie data
   const [selectedLanguage, setSelectedLanguage] = useState<string>("");
   const [selectedGenre, setSelectedGenre] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [movies, setMovies] = useState<Movie[]>([]);
+  const [movies, setMovies] = useState<MovieManagement[]>([]);
   const [languages, setLanguages] = useState<string[]>([]);
   const [genres, setGenres] = useState<string[]>([]);
 
@@ -30,17 +21,17 @@ const AllMoviesPage: React.FC = () => {
     try {
       const response = await getMovies({}).unwrap();
   
-      const movies = response.movies as Movie[];
+      const movies = response.movies as MovieManagement[];
       setMovies(movies);
   
       if (movies) {
         const uniqueLanguages: string[] = [
-          ...new Set(movies.flatMap((movie: Movie) => movie.languages || [])),
+          ...new Set(movies.flatMap((movie: MovieManagement) => movie.languages || [])),
         ];
         setLanguages(uniqueLanguages);
   
         const uniqueGenres: string[] = [
-          ...new Set(movies.flatMap((movie: Movie) => movie.genres || [])),
+          ...new Set(movies.flatMap((movie: MovieManagement) => movie.genres || [])),
         ];
         setGenres(uniqueGenres);
       }
@@ -53,7 +44,6 @@ const AllMoviesPage: React.FC = () => {
     fetchData();
   }, [fetchData]);
 
-  // Filter movies based on selected language, genre, and search term
   const filteredMovies = movies.filter((movie) => {
     const matchesLanguage = !selectedLanguage || movie.languages.includes(selectedLanguage);
     const matchesGenre = !selectedGenre || movie.genres.includes(selectedGenre);
@@ -70,9 +60,7 @@ const AllMoviesPage: React.FC = () => {
         All Movies
       </h1>
 
-      {/* Filter Section */}
       <Row style={{ marginBottom: "30px" }}>
-        {/* Search Bar */}
         <Col md={4}>
           <InputGroup>
             <Form.Control

@@ -4,8 +4,6 @@ import { Review } from "../Models/ReviewModel";
 
 class MovieService {
   public async addMovie(movieData: Partial<IMovie>): Promise<IMovie> {
-    console.log("Inside addMovie service method.");
-    console.log("Movie data being added:", movieData);
     return await MovieRepository.addMovieRepo(movieData);
   }
 
@@ -22,18 +20,11 @@ class MovieService {
   ) {
     try {
       const movie = await MovieRepository.findMovieById(id);
-
-      console.log("movie: ", movie);
       
 
       if (!movie) {
         throw new Error("Movie not found");
       }
-
-      console.log("updateData: ", updateData);
-      console.log("posterFile: ", posterFile);
-      console.log("movieImageFiles: ", movieImageFiles);
-      console.log("castImageFiles: ", castImageFiles);
       
       movie.title = updateData.title || movie.title;
       movie.genres =
@@ -53,8 +44,6 @@ class MovieService {
           : movie.languages;
       movie.releaseDate = updateData.releaseDate || movie.releaseDate;
 
-      console.log("Type of posterFile:", typeof posterFile);
-
       if (posterFile) {
           movie.posters = posterFile.filename;
       }
@@ -68,7 +57,6 @@ class MovieService {
       }      
 
       const updatedMovie = await movie.save();
-      console.log("service updated movie: ", updatedMovie);
       
       return updatedMovie;
     } catch (error) {

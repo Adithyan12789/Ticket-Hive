@@ -9,11 +9,9 @@ class WalletService {
     amount: number,
     description: string
   ) {
-    console.log("Adding money to wallet:", { userId, amount, description });
 
     const wallet = await Wallet.findOne({ user: userId });
     if (!wallet) {
-      console.log("No wallet found. Creating a new one...");
       await Wallet.create({
         user: userId,
         balance: amount,
@@ -29,7 +27,6 @@ class WalletService {
         ],
       });
     } else {
-      console.log("Wallet found. Updating balance...");
       wallet.balance += amount;
       wallet.transactions.push({
         type: "credit",
@@ -41,7 +38,6 @@ class WalletService {
       });
       await wallet.save();
     }
-    console.log("Transaction completed successfully.");
   }
 
   static async addCashbackToWallet(

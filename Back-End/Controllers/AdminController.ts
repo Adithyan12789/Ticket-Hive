@@ -44,7 +44,6 @@ class AdminController {
     async (req: Request, res: Response, next: NextFunction): Promise<void> => {
       try {
         const user = await adminService.blockUser(req);
-        console.log("Blocked User", user);
 
         if (user) {
           res.status(200).json({ message: "User blocked successfully", user });
@@ -62,7 +61,6 @@ class AdminController {
     async (req: Request, res: Response, next: NextFunction): Promise<void> => {
       try {
         const user = await adminService.unblockUser(req);
-        console.log("Unblocked User", user);
 
         if (user) {
           res
@@ -82,7 +80,6 @@ class AdminController {
     async (req: Request, res: Response, next: NextFunction): Promise<void> => {
       try {
         const theaterOwner = await adminService.blockTheaterOwner(req);
-        console.log("Blocked Theater Owner", theaterOwner);
 
         if (theaterOwner) {
           res.status(200).json({
@@ -103,7 +100,6 @@ class AdminController {
     async (req: Request, res: Response, next: NextFunction): Promise<void> => {
       try {
         const theaterOwner = await adminService.unblockTheaterOwner(req);
-        console.log("Unblocked Theater Owner", theaterOwner);
 
         if (theaterOwner) {
           res.status(200).json({

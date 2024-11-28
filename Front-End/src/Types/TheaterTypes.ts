@@ -104,3 +104,11 @@ export interface GoogleJwtPayload extends JwtPayload {
   email: string;
   picture?: string;
 }
+
+export interface LocationProps {
+  location: {
+    latitude: number;
+    longitude: number;
+    theaterName: string;
+  };
+}

@@ -15,27 +15,11 @@ import { useSelector } from "react-redux";
 import { useGetBookingDetailsQuery } from "../../Slices/UserApiSlice";
 import { RootState } from "../../Store";
 import UserNavBar from "../../Components/UserComponents/UserNavBar";
-
-interface MovieDetails {
-  title: string;
-  poster: string;
-  duration: string;
-  genre: string[];
-}
-
-interface Ticket {
-  bookingId: string;
-  movieId: string;
-  movieTitle: string;
-  theaterName: string;
-  screenName: string;
-  seats: string[];
-  bookingTime: string;
-  paymentStatus: string;
-}
+import { MovieManagement } from "../../Types/MoviesTypes";
+import { Ticket } from "../../Types/BookingTypes";
 
 interface TicketEntry {
-  movieDetails: MovieDetails;
+  movieDetails: MovieManagement;
   ticket: Ticket;
 }
 
@@ -46,16 +30,24 @@ const TicketsScreen: React.FC = () => {
   const { data, isLoading } = useGetBookingDetailsQuery(userInfo?.id);
   const tickets: TicketEntry[] = data?.tickets || [];
 
-  const [currentPage, setCurrentPage] = useState(1); // Current page
-  const [itemsPerPage] = useState(5); // Items per page
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5);
   const [filterStatus, setFilterStatus] = useState<string>("all");
-  const [sortBy, setSortBy] = useState<string>("movieTitle"); // Sort by movie title or booking time
+  const [sortBy, setSortBy] = useState<string>("movieTitle");
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     document.title = "Ticket Hive - Booking Details";
   }, []);
 
-  // Apply filtering
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   const filteredTickets =
     filterStatus === "all"
       ? tickets
@@ -73,10 +65,9 @@ const TicketsScreen: React.FC = () => {
     }
   });
 
-  const totalTickets = sortedTickets.length; // Total number of filtered and sorted tickets
-  const totalPages = Math.ceil(totalTickets / itemsPerPage); // Total number of pages
+  const totalTickets = sortedTickets.length;
+  const totalPages = Math.ceil(totalTickets / itemsPerPage);
 
-  // Logic to slice the tickets based on current page
   const indexOfLastTicket = currentPage * itemsPerPage;
   const indexOfFirstTicket = indexOfLastTicket - itemsPerPage;
   const currentTickets = sortedTickets.slice(
@@ -84,12 +75,15 @@ const TicketsScreen: React.FC = () => {
     indexOfLastTicket
   );
 
-  if (isLoading) return <Loader />;
+  if (loading || isLoading) return <Loader />;
 
-  // Handler for changing pages
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
+
+  console.log("tickets: ", tickets);
+  console.log("currentTickets: ", currentTickets);
+  
 
   return (
     <div
@@ -99,18 +93,13 @@ const TicketsScreen: React.FC = () => {
         marginTop: "30px",
       }}
     >
-      {/* User Navigation Bar */}
       <UserNavBar />
 
-      {/* Main Content */}
       <Container className="py-4">
         <Card className="shadow-sm">
           <Card.Body>
             <h3 className="mb-4 text-center text-primary">Your Tickets</h3>
-
-            {/* Filters and Sort Options */}
             <div className="d-flex justify-content-between mb-3">
-              {/* Filter by Payment Status */}
               <DropdownButton
                 id="dropdown-filter"
                 variant="outline-secondary"
@@ -129,7 +118,6 @@ const TicketsScreen: React.FC = () => {
                 <Dropdown.Item eventKey="cancelled">Cancelled</Dropdown.Item>
               </DropdownButton>
 
-              {/* Sort Options */}
               <DropdownButton
                 id="dropdown-sort"
                 variant="outline-secondary"
@@ -219,7 +207,6 @@ const TicketsScreen: React.FC = () => {
               </Table>
             )}
 
-            {/* Pagination */}
             <Pagination>
               <Pagination.Prev
                 onClick={() => handlePageChange(currentPage - 1)}

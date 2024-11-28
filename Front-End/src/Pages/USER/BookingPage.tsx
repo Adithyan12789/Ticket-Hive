@@ -13,23 +13,7 @@ import Loader from "../../Components/UserComponents/Loader";
 import { RazorpayOptions, RazorpayPaymentObject } from "../../Global";
 import { useSelector } from "react-redux";
 import { RootState } from "../../Store";
-
-interface LocationState {
-  selectedSeats?: string[];
-  theaterName?: string;
-  date?: string;
-  movieTitle?: string;
-  totalPrice?: number;
-}
-
-interface Transaction {
-  transactionId: string;
-  amount: number;
-  type: "credit" | "debit";
-  status: string;
-  date: string;
-  description: string;
-}
+import { LocationState, Transaction } from "../../Types/WalletTypes";
 
 const BookingPage: React.FC = () => {
   const location = useLocation();
@@ -42,6 +26,7 @@ const BookingPage: React.FC = () => {
   const { movieId, theaterId, screenId, showTime, movieTitle } =
     location.state || {};
   const [insufficientFunds, setInsufficientFunds] = useState(false);
+  const [loading, setLoading] = useState<boolean>(true);
 
   const { data } = useGetTransactionHistoryQuery(userInfo?.id);
 
@@ -86,6 +71,14 @@ const BookingPage: React.FC = () => {
     month: "short",
     year: "numeric",
   });
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     document.title = `Ticket Booking`
@@ -367,7 +360,7 @@ const BookingPage: React.FC = () => {
           </Row>
 
           {/* Loading state */}
-          {isLoading && <Loader />}
+          {loading || isLoading && <Loader />}
 
           {/* Proceed Button */}
           {!paymentMethod && (

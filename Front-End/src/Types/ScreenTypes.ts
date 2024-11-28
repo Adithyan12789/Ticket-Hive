@@ -10,6 +10,9 @@ export interface Screen {
 
 export interface Theater {
   name: string;
+  _id: string;
+  address: string;
+  city: string;
   ticketPrice: number;
 }
 

@@ -98,10 +98,6 @@ class MovieController {
       const movieImageFiles = (req.files as any)["movieImages"] || [];
       const castImageFiles = (req.files as any)["castImages"] || [];
 
-      console.log("posterFile: ", posterFile);
-      console.log("movieImageFiles: ", movieImageFiles);
-      console.log("castImageFiles: ", castImageFiles);
-
       try {
         const updatedMovie = await MovieService.updateMovieData(
           id,
@@ -110,8 +106,6 @@ class MovieController {
           movieImageFiles,
           castImageFiles
         );
-
-        console.log("updatedMovie: ", updatedMovie);
 
         if (!updatedMovie) {
           res.status(404).json({ message: "Movie not found for updating" });
@@ -182,8 +176,6 @@ class MovieController {
    */
   addReviewsController = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
-
-      console.log("req body", req.body);
 
       const { movieId, userId, rating, review } = req.body;
 

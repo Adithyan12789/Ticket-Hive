@@ -21,7 +21,7 @@ export interface User {
   }
   
 
-  export interface Ticket {
+  export interface TicketFullDetails {
     movieDetails: {
       title: string;
       duration: string;
@@ -46,5 +46,15 @@ export interface User {
       userId: string;
       userName: string;
     };
+  }
+
+  export interface Ticket {
+    bookingId: string;
+    movieId: string;
+    theaterName: string;
+    screenName: string;
+    seats: string[];
+    bookingTime: string;
+    paymentStatus: string;
   }
   

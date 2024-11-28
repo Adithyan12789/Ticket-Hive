@@ -25,10 +25,6 @@ class BookingController {
         bookingDate,
       } = req.body;
 
-      console.log("Raw bookingDate: ", bookingDate);
-      console.log("payment Method: ", paymentMethod);
-      console.log("showTime: ", showTime);
-
       let formattedBookingDate: Date;
       try {
         const parsedDate = parse(bookingDate, "EEEE dd MMM yyyy", new Date());
@@ -41,9 +37,6 @@ class BookingController {
         res.status(400).json({ message: "Invalid bookingDate format" });
         return;
       }
-
-      console.log("Formatted bookingDate: ", formattedBookingDate);
-      console.log("user id: ", userId);
 
       if (
         !movieId ||
@@ -88,7 +81,7 @@ class BookingController {
           formattedBookingDate
         );
 
-        const cashbackPercentage = 10; // Example: 10% cashback
+        const cashbackPercentage = 10;
         const cashbackAmount = (totalPrice * cashbackPercentage) / 100;
 
         await WalletService.addCashbackToWallet(
@@ -96,8 +89,6 @@ class BookingController {
           cashbackAmount,
           `Cashback for ticket booking`
         );
-
-        console.log("controller booking: ", booking);
 
         res.status(201).json({
           message: "Booking successful",
@@ -159,14 +150,9 @@ class BookingController {
 
   cancelTicket = asyncHandler(
     async (req: CustomRequest, res: Response): Promise<void> => {
-      console.log("entered to cancel controller");
 
       const { bookingId } = req.params;
       const userId = req.user?._id;
-
-      console.log("bookingId: ", bookingId);
-      console.log("req user Id: ", req.user?._id);
-      console.log("userId: ", userId);
 
       if (!bookingId || !userId) {
         res
@@ -176,14 +162,11 @@ class BookingController {
       }
 
       try {
-        console.log("jjjjj");
 
         const cancellationResult = await BookingService.cancelTicketService(
           bookingId,
           userId
         );
-
-        console.log("cancellationResult: ", cancellationResult);
 
         res.status(200).json({
           success: true,
@@ -220,13 +203,9 @@ class BookingController {
 
   updateBookingStatus = asyncHandler(
     async (req: CustomRequest, res: Response): Promise<void> => {
-      console.log("Request received for bookingId:", req.params.bookingId);
 
       const { bookingId } = req.params;
       const { status } = req.body;
-
-      console.log("Request received with bookingId:", bookingId);
-      console.log("Request body:", req.body);
 
       if (!status) {
         res.status(400).json({ message: "Status is required" });
@@ -236,19 +215,15 @@ class BookingController {
       try {
         const validStatuses = ["Pending", "Confirmed", "Cancelled"];
 
-        console.log("validStatuses: ", validStatuses);
-
         if (!validStatuses.includes(status)) {
           res.status(400).json({ message: "Invalid status" });
           return;
         }
 
-        console.log("Inside updateBookingStatusService");
         const updatedBooking = await BookingService.updateBookingStatusService(
           bookingId,
           status
         );
-        console.log("updatedBooking", updatedBooking);
 
         if (!updatedBooking) {
           res.status(404).json({ message: "Booking not found" });

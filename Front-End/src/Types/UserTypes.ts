@@ -22,20 +22,6 @@ export interface User {
     userInfo: UserInfo | null;
   }
   
-  /** Movie */
-  export interface Movie {
-    posters: string;
-    _id: string;
-    title: string;
-    genres: string[];
-    images: string[];
-    description: string;
-    vote_average: number;
-    releaseDate: string;
-    poster_path?: string;
-    backdrop_path?: string;
-  }
-  
   /** Google authentication */
   export interface GoogleJwtPayload extends JwtPayload {
     name: string;
@@ -89,4 +75,9 @@ export interface User {
   export interface UsersTableProps {
     users: User[];
     refetchData: () => void;
+  }
+
+  export interface SearchBarProps {
+    searchTerm: string;
+    setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
   }

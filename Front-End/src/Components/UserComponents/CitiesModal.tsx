@@ -13,12 +13,7 @@ import {
 import { useSaveUserLocationMutation } from "../../Slices/UserApiSlice";
 
 import Loader from "./Loader";
-
-interface CitiesModalProps {
-  show: boolean;
-  handleClose: () => void;
-  handleCitySelect: (city: string) => void;
-}
+import { CitiesModalProps } from "../../Types/CitiesTypes";
 
 const CitiesModal: React.FC<CitiesModalProps> = ({
   show,
@@ -74,10 +69,6 @@ const CitiesModal: React.FC<CitiesModalProps> = ({
             longitude,
           });
   
-          // // Send both detected city and coordinates to onSelectCity
-          // onSelectCity(cityName, latitude, longitude);
-  
-          // Save the user location to the backend
           await saveUserLocation({ city: cityName, latitude, longitude }).unwrap();
         } catch (err) {
           console.log("err: ", err);

@@ -12,7 +12,7 @@ import {
 import axios from "axios";
 import "./HomePage.css";
 import Footer from "../../Components/UserComponents/Footer";
-import { Movie } from "../../Types/UserTypes";
+import { MovieManagement } from "../../Types/MoviesTypes";
 import { useGetMoviesMutation } from "../../Slices/UserApiSlice";
 import Loader from "../../Components/UserComponents/Loader";
 import { FaSearch } from "react-icons/fa";
@@ -23,8 +23,8 @@ const RECOMMENDED_API_URL = `https://api.themoviedb.org/3/movie/top_rated?api_ke
 
 const HomePage: React.FC = () => {
   const [getMovies, { isLoading: loadingTrending }] = useGetMoviesMutation();
-  const [trendingMovies, setTrendingMovies] = useState<Movie[]>([]);
-  const [recommendedMovies, setRecommendedMovies] = useState<Movie[]>([]);
+  const [trendingMovies, setTrendingMovies] = useState<MovieManagement[]>([]);
+  const [recommendedMovies, setRecommendedMovies] = useState<MovieManagement[]>([]);
   const [loadingRecommended, setLoadingRecommended] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [sortOption, setSortOption] = useState<string>("newest");
@@ -287,8 +287,8 @@ const HomePage: React.FC = () => {
                     style={{ height: "300px" }}
                     variant="top"
                     src={
-                      movie.poster_path
-                        ? IMAGE_BASE_URL + movie.poster_path
+                      movie.posters
+                        ? IMAGE_BASE_URL + movie.posters
                         : "/default-poster.jpg"
                     }
                     alt={movie.title}

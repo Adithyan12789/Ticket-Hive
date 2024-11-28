@@ -143,8 +143,6 @@ class TheaterOwnerService {
     public getTheaterOwnerProfile = async (theaterOwnerId: string) => {
         const theaterOwner = await TheaterRepository.findTheaterOwnerById(theaterOwnerId);
 
-        console.log("theaterOwner Service:", theaterOwner);
-
         if (!theaterOwner) {
             throw new Error('theater Owner not found');
         }
@@ -234,9 +232,6 @@ class TheaterOwnerService {
         try {
             const theater = await TheaterRepository.findTheaterById(theaterId);
 
-            console.log("service theater: ", theater);
-            
-    
             if (!theater) {
                 throw new Error("Theater not found");
             }
@@ -266,7 +261,6 @@ class TheaterOwnerService {
             }
     
             const updatedTheater = await theater.save();
-            console.log("service updated theater: ", updatedTheater);
             return updatedTheater;
         } catch (error) {
             throw error;

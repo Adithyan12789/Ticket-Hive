@@ -263,8 +263,6 @@ class UserController {
       }
 
       const { city, latitude, longitude } = req.body;
-
-      console.log("req body: ", req.body);
       
 
       // Validate latitude and longitude
@@ -323,9 +321,7 @@ class UserController {
 
       try {
         const updateData = { ...req.body };
-
-        console.log("updateData: ", updateData);
-
+        
         const fileData = req.file
           ? { filename: req.file.filename }
           : { filename: undefined };

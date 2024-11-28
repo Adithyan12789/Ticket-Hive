@@ -44,14 +44,12 @@ class AdminService {
 
   public async blockUser(req: Request): Promise<any> {
     const userId = req.body.userId;
-    console.log("User Id: ", userId);
 
     if (!mongoose.Types.ObjectId.isValid(userId)) {
       throw new Error("Invalid userId format");
     }
 
     try {
-      console.log(`Updating user with ID: ${userId}`);
       const updatedUser = await AdminRepository.updateUser(userId, {
         isBlocked: true,
       });
@@ -65,14 +63,12 @@ class AdminService {
 
   public async unblockUser(req: Request): Promise<any> {
     const userId = req.body.userId;
-    console.log("User Id: ", userId);
 
     if (!mongoose.Types.ObjectId.isValid(userId)) {
       throw new Error("Invalid userId format");
     }
 
     try {
-      console.log(`Updating user with ID: ${userId}`);
       const updatedUser = await AdminRepository.updateUser(userId, {
         isBlocked: false,
       });
@@ -86,20 +82,17 @@ class AdminService {
 
   public async blockTheaterOwner(req: Request): Promise<any> {
     const theaterOwnerId = req.body.theaterOwnerId;
-    console.log("Theater Owner Id: ", theaterOwnerId);
 
     if (!mongoose.Types.ObjectId.isValid(theaterOwnerId)) {
       throw new Error("Invalid theaterOwnerId format");
     }
 
     try {
-      console.log(`Updating theater OwnerId with ID: ${theaterOwnerId}`);
       const updatedTheaterOwner = await AdminRepository.updatedTheaterOwner(
         theaterOwnerId,
         { isBlocked: true }
       );
 
-      console.log("updatedTheaterOwner: ", updatedTheaterOwner);
       return updatedTheaterOwner;
     } catch (error) {
       console.error(`Error updating theater Owner: ${error}`);
@@ -109,14 +102,12 @@ class AdminService {
 
   public async unblockTheaterOwner(req: Request): Promise<any> {
     const theaterOwnerId = req.body.theaterOwnerId;
-    console.log("Theater Owner Id: ", theaterOwnerId);
 
     if (!mongoose.Types.ObjectId.isValid(theaterOwnerId)) {
       throw new Error("Invalid theaterOwnerId format");
     }
 
     try {
-      console.log(`Updating theater Owner with ID: ${theaterOwnerId}`);
       const updatedTheaterOwner = await AdminRepository.updatedTheaterOwner(
         theaterOwnerId,
         { isBlocked: false }

@@ -10,6 +10,7 @@ import { toast } from "react-toastify";
 import Loader from "../../Components/UserComponents/Loader";
 import { TheaterVerification } from "../../Types/TheaterTypes";
 import { FaCheck, FaTimes, FaFileAlt } from "react-icons/fa";
+import { FetchBaseQueryError, SerializedError } from "../../Types/AdminTypes";
 
 
 const AdminVerificationScreen = () => {
@@ -28,17 +29,6 @@ const AdminVerificationScreen = () => {
   const [selectedCertificate, setSelectedCertificate] = useState("");
   const [selectedTheaterId, setSelectedTheaterId] = useState("");
   const [rejectionReason, setRejectionReason] = useState("");
-
-  interface FetchBaseQueryError {
-    status: number;
-    data: {
-      message?: string;
-    };
-  }
-
-  interface SerializedError {
-    message: string;
-  }
 
   useEffect(() => {
     document.title = "Admin Verification";

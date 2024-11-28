@@ -18,28 +18,13 @@ import {
   FaIdBadge,
   FaQrcode,
 } from "react-icons/fa";
+import { MovieManagement } from "../../Types/MoviesTypes";
+import { Ticket } from "../../Types/BookingTypes";
 
 const USER_MOVIE_POSTER = "http://localhost:5000/MoviePosters/";
 
-interface MovieDetails {
-  title: string;
-  poster: string;
-  duration: string;
-  genre: string[];
-}
-
-interface Ticket {
-  bookingId: string;
-  movieId: string;
-  theaterName: string;
-  screenName: string;
-  seats: string[];
-  bookingTime: string;
-  paymentStatus: string;
-}
-
 interface TicketEntry {
-  movieDetails: MovieDetails;
+  movieDetails: MovieManagement;
   ticket: Ticket;
 }
 
@@ -56,6 +41,16 @@ const TicketDetailsScreen: React.FC = () => {
   const ticket = data?.tickets?.find(
     (t: TicketEntry) => t.ticket.bookingId === bookingId
   );
+
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     document.title = `Ticket Details - ${
@@ -77,7 +72,7 @@ const TicketDetailsScreen: React.FC = () => {
     }
   };
 
-  if (isLoading) return <Loader />;
+  if (loading || isLoading) return <Loader />;
   if (!ticket) {
     return (
       <Container>

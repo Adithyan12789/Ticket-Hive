@@ -5,6 +5,7 @@ export interface MovieManagement {
     genres: string[];
     duration: string;
     description: string;
+    languages: string[];
     posters: string;
     images: string[];
     casts: string[];
@@ -12,6 +13,7 @@ export interface MovieManagement {
     director: string;
     releaseDate: Date;
     language: string;
+    vote_average: string;
     createdAt: string;
     updatedAt: string;
 }

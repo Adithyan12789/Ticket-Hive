@@ -16,47 +16,15 @@ import { toast } from "react-toastify";
 import "react-datepicker/dist/react-datepicker.css";
 import { RootState } from "../../Store";
 import { useSelector } from "react-redux";
-
-type ShowTime = {
-  _id: string;
-  time: string;
-  movieTitle: string;
-};
-
-type User = {
-  id: string;
-  city: string;
-  latitude: number;
-  longitude: number;
-};
-
-type Screen = {
-  _id: string;
-  screenNumber: number;
-  showTimes: ShowTime[];
-  theater: {
-    _id: string;
-    name: string;
-    address: string;
-    city: string;
-  };
-};
-
-type TheaterManagement = {
-  _id: string;
-  name: string;
-  address: string;
-  latitude: number;
-  longitude: number;
-  amenities: string[];
-  description: string;
-  city: string;
-};
+import TheaterLocation from "../../Components/UserComponents/TheaterLocation";
+import { UserInfo } from "../../Types/UserTypes";
+import { Screen } from "../../Types/ScreenTypes";
+import { TheaterManagement } from "../../Types/TheaterTypes";
 
 type TheaterData = {
   theaters: TheaterManagement[];
   screens: Screen[];
-  user: User;
+  user: UserInfo;
 };
 
 const MovieTheaterScreen: React.FC = () => {
@@ -74,9 +42,6 @@ const MovieTheaterScreen: React.FC = () => {
 
   const { moviePoster } = location.state || {};
 
-  console.log(" userInfo: ", userInfo);
-  console.log(" second movie posters: ", moviePoster);
-
   const dates = [...Array(365)].map((_, index) => {
     const date = new Date();
     date.setDate(date.getDate() + index);
@@ -92,8 +57,6 @@ const MovieTheaterScreen: React.FC = () => {
     : null;
 
   const userId = userInfo?.id;
-
-  console.log("userId: ", userId);
 
   const {
     data,
@@ -115,10 +78,6 @@ const MovieTheaterScreen: React.FC = () => {
 
   const selectedLanguage = searchParams.get("language") || "English";
 
-  console.log("user :", user);
-  console.log("theaters :", theaters);
-  console.log("screens :", screens);
-
   const userLocation = {
     latitude: user?.latitude,
     longitude: user?.longitude,
@@ -126,11 +85,11 @@ const MovieTheaterScreen: React.FC = () => {
   };
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
-    const toRad = (value: number): number => (value * Math.PI) / 180; // Convert degrees to radians
+    const toRad = (value: number): number => (value * Math.PI) / 180;
 
-    const R = 6371; // Earth's radius in kilometers
-    const dLat = toRad(lat2 - lat1); // Latitude difference in radians
-    const dLon = toRad(lon2 - lon1); // Longitude difference in radians
+    const R = 6371;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
 
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
@@ -138,7 +97,7 @@ const MovieTheaterScreen: React.FC = () => {
 
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-    return R * c; // Distance in kilometers
+    return R * c;
   };
 
 
@@ -185,14 +144,6 @@ const MovieTheaterScreen: React.FC = () => {
     setModalVisible(true);
   };
 
-  console.log("selectedTheater", selectedTheater);
-
-  if (loading || loadingTheaters) return <Loader />;
-  if (errorTheaters) {
-    toast.error("Error fetching theaters");
-    return <div>Error fetching theaters</div>;
-  }
-
   const sortedTheaters = theaters.map((theater) => {
     const distance =
       userLocation.latitude &&
@@ -210,7 +161,6 @@ const MovieTheaterScreen: React.FC = () => {
     return { ...theater, distance };
   });
 
-  // Filter theaters by location: those in the same city and nearby theaters
   const theatersInSameCity = theaters.filter(
     (theater) =>
       theater.city &&
@@ -228,21 +178,25 @@ const MovieTheaterScreen: React.FC = () => {
   );
 
   const nearbyTheatersOutsideCity = theatersOutsideCity
-    .filter((theater) => theater.distance !== null && theater.distance <= 10) // Distance filter for nearby theaters
+    .filter((theater) => theater.distance !== null && theater.distance <= 10)
     .sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity));
 
   const otherTheatersOutsideCity = theatersOutsideCity
-    .filter((theater) => theater.distance === null || theater.distance > 10) // Exclude nearby theaters
-    .sort((a, b) => a.name.localeCompare(b.name)); // Sort alphabetically for others
+    .filter((theater) => theater.distance === null || theater.distance > 10)
+    .sort((a, b) => a.name.localeCompare(b.name));
 
-  // Combine all theaters: same city first, then nearby, then others
   const allTheaters = [
-    ...theatersInSameCity, // Theaters in the user's city
-    ...nearbyTheatersOutsideCity, // Nearby theaters outside the city
-    ...otherTheatersOutsideCity, // Other theaters outside the city
+    ...theatersInSameCity,
+    ...nearbyTheatersOutsideCity,
+    ...otherTheatersOutsideCity,
   ];
 
-  console.log("allTheaters: ", allTheaters);
+  if (loading || loadingTheaters) return <Loader />;
+
+  if (errorTheaters) {
+    toast.error("Error fetching theaters");
+    return <div>Error fetching theaters</div>;
+  }
 
   return (
     <Container style={{ padding: "40px 20px" }}>
@@ -294,7 +248,7 @@ const MovieTheaterScreen: React.FC = () => {
               gap: "10px",
             }}
           >
-            {/* Backward Button */}
+
             <Button
               variant="outline-secondary"
               size="sm"
@@ -310,7 +264,7 @@ const MovieTheaterScreen: React.FC = () => {
               {"<"}
             </Button>
 
-            {/* Dates */}
+
             <div
               style={{
                 display: "flex",
@@ -345,7 +299,7 @@ const MovieTheaterScreen: React.FC = () => {
                 ))}
             </div>
 
-            {/* Forward Button */}
+
             <Button
               variant="outline-secondary"
               size="sm"
@@ -453,7 +407,6 @@ const MovieTheaterScreen: React.FC = () => {
         <p>No theaters available for the selected movie.</p>
       )}
 
-      {/* Modal to show Theater Info */}
       <Modal
         show={modalVisible}
         onHide={() => setModalVisible(false)}
@@ -466,11 +419,10 @@ const MovieTheaterScreen: React.FC = () => {
         <Modal.Body>
           {selectedTheater ? (
             <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
-              {/* Theater Name and Address Block */}
               <div style={{ marginBottom: "20px" }}>
                 <h5
                   style={{
-                    fontSize: "1.5rem", // Name font size
+                    fontSize: "1.5rem", 
                     fontWeight: "bold",
                     marginBottom: "5px",
                   }}
@@ -478,7 +430,6 @@ const MovieTheaterScreen: React.FC = () => {
                   {selectedTheater.name}
                 </h5>
               </div>
-              {/* Description Section */}
               <p
                 style={{
                   fontSize: "1rem",
@@ -489,7 +440,6 @@ const MovieTheaterScreen: React.FC = () => {
                 <strong>Description:</strong>{" "}
                 {selectedTheater.description || "No description available."}
               </p>
-              {/* Available Facilities Section */}
               <h1
                 style={{
                   color: "#333",
@@ -528,6 +478,26 @@ const MovieTheaterScreen: React.FC = () => {
               >
                 {selectedTheater.address}
               </p>
+
+              <div style={{ marginTop: "20px" }}>
+              <h2
+                style={{
+                  fontSize: "1.25rem",
+                  marginBottom: "10px",
+                  fontWeight: "bold",
+                  color: "#333",
+                }}
+              >
+                Location
+              </h2>
+              <TheaterLocation
+                location={{
+                  latitude: selectedTheater.latitude,
+                  longitude: selectedTheater.longitude,
+                  theaterName: selectedTheater.name,
+                }}
+              />
+            </div>
             </div>
           ) : (
             <p style={{ fontSize: "1rem", color: "#888" }}>Loading...</p>
