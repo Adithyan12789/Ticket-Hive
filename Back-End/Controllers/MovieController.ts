@@ -146,6 +146,28 @@ class MovieController {
     }
   );
 
+  getAllReviewsController = asyncHandler(
+    async (req: Request, res: Response): Promise<void> => {
+  
+      try {
+        const reviews = await MovieService.getAllReviewsService();
+
+        console.log("first reviews: ", reviews);
+        
+  
+        if (!reviews.length) {
+          res.status(404).json({ message: "No reviews found for this movie" });
+          return;
+        }
+  
+        res.status(200).json(reviews);
+      } catch (error) {
+        console.error("Error fetching reviews:", error);
+        res.status(500).json({ message: "Error fetching reviews", error });
+      }
+    }
+  );  
+  
   getReviewsController = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
       const { movieId } = req.params;
@@ -171,44 +193,37 @@ class MovieController {
     }
   );  
 
-  /**
-   * Add a new review for a specific movie
-   */
   addReviewsController = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
-
       const { movieId, userId, rating, review } = req.body;
-
-      if (
-        !mongoose.Types.ObjectId.isValid(movieId) ||
-        !mongoose.Types.ObjectId.isValid(userId)
-      ) {
+  
+      if (!mongoose.Types.ObjectId.isValid(movieId) || !mongoose.Types.ObjectId.isValid(userId)) {
         res.status(400).json({ message: "Invalid Movie or User ID" });
         return;
       }
-
+  
       if (!rating || !review) {
         res.status(400).json({ message: "Rating and comment are required" });
         return;
       }
-
+  
       try {
-        const newReview = await MovieService.addReview({
-          movieId,
-          userId,
-          rating,
-          review,
-        });        
-
-        res
-          .status(201)
-          .json({ message: "Review added successfully", newReview });
+        const newReview = await MovieService.addReview({ movieId, userId, rating, review });
+  
+        // Recalculate and update average rating
+        await MovieService.updateAverageRating(movieId);
+  
+        res.status(201).json({
+          message: "Review added successfully",
+          review: newReview,
+        });
       } catch (error) {
         console.error("Error adding review:", error);
         res.status(500).json({ message: "Error adding review", error });
       }
     }
   );
+  
 }
 
 export default new MovieController();

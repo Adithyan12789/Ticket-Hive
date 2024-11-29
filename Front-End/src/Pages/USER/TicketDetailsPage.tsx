@@ -20,6 +20,7 @@ import {
 } from "react-icons/fa";
 import { MovieManagement } from "../../Types/MoviesTypes";
 import { Ticket } from "../../Types/BookingTypes";
+import Footer from "../../Components/UserComponents/Footer";
 
 const USER_MOVIE_POSTER = "http://localhost:5000/MoviePosters/";
 
@@ -89,20 +90,18 @@ const TicketDetailsScreen: React.FC = () => {
   }
 
   return (
-    <Container className="mt-5">
+    <><Container className="mt-5">
       <Card className="shadow border-0 p-4 rounded-4">
         <Row>
           <Col md={4} className="text-center">
             <Card.Img
-              src={
-                ticket.movieDetails.poster
-                  ? `${USER_MOVIE_POSTER}${ticket.movieDetails.poster}`
-                  : "/placeholder-image.png" // Provide a fallback image
+              src={ticket.movieDetails.poster
+                ? `${USER_MOVIE_POSTER}${ticket.movieDetails.poster}`
+                : "/placeholder-image.png" // Provide a fallback image
               }
               alt={ticket.movieDetails.title || "Movie Poster"}
               className="img-fluid rounded-3"
-              style={{ objectFit: "cover" }}
-            />
+              style={{ objectFit: "cover" }} />
           </Col>
           <Col md={8}>
             <Card.Body>
@@ -152,11 +151,9 @@ const TicketDetailsScreen: React.FC = () => {
                   <p>
                     <strong>Status:</strong>{" "}
                     <span
-                      className={
-                        ticket.ticket.paymentStatus === "Confirmed"
-                          ? "text-success"
-                          : "text-danger"
-                      }
+                      className={ticket.ticket.paymentStatus === "Confirmed"
+                        ? "text-success"
+                        : "text-danger"}
                     >
                       {ticket.ticket.paymentStatus || "N/A"}
                     </span>
@@ -177,8 +174,7 @@ const TicketDetailsScreen: React.FC = () => {
                 <QRCode
                   value={ticket.ticket.bookingId || "N/A"}
                   size={128}
-                  className="mt-3"
-                />
+                  className="mt-3" />
               </div>
 
               <div className="d-flex justify-content-end mt-4">
@@ -223,7 +219,7 @@ const TicketDetailsScreen: React.FC = () => {
           </Button>
         </Modal.Footer>
       </Modal>
-    </Container>
+    </Container><Footer /></>
   );
 };
 

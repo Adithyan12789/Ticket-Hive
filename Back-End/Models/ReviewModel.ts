@@ -16,8 +16,8 @@ const ReviewSchema = new Schema<IReview>(
     movie: { type: mongoose.Schema.Types.ObjectId, ref: "Movie", required: true },
     rating: { type: Number, required: true, min: 0, max: 10 },
     comment: { type: String, required: false },
-    likes: { type: Number, default: 0 }, // Initialize likes with default value of 0
-    dislikes: { type: Number, default: 0 }, // Initialize dislikes with default value of 0
+    likes: { type: Number, default: 0 },
+    dislikes: { type: Number, default: 0 },
     createdAt: { type: Date, default: Date.now },
   },  
   { timestamps: true }

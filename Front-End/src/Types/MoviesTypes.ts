@@ -9,6 +9,7 @@ export interface MovieManagement {
     posters: string;
     images: string[];
     casts: string[];
+    averageRating: number;
     castsImages: string[];
     director: string;
     releaseDate: Date;

@@ -9,26 +9,22 @@ import {
   Dropdown,
   InputGroup,
 } from "react-bootstrap";
-import axios from "axios";
 import "./HomePage.css";
 import Footer from "../../Components/UserComponents/Footer";
 import { MovieManagement } from "../../Types/MoviesTypes";
-import { useGetMoviesMutation } from "../../Slices/UserApiSlice";
+import {
+  useGetMoviesMutation,
+} from "../../Slices/UserApiSlice";
 import Loader from "../../Components/UserComponents/Loader";
-import { FaSearch } from "react-icons/fa";
+import { FaSearch, FaStar } from "react-icons/fa";
 import { Link } from "react-router-dom";
-
-const API_KEY = "0ffb386a852dbf070ac6b977313d8039";
-const RECOMMENDED_API_URL = `https://api.themoviedb.org/3/movie/top_rated?api_key=${API_KEY}&language=en-US&page=1;`;
 
 const HomePage: React.FC = () => {
   const [getMovies, { isLoading: loadingTrending }] = useGetMoviesMutation();
   const [trendingMovies, setTrendingMovies] = useState<MovieManagement[]>([]);
-  const [recommendedMovies, setRecommendedMovies] = useState<MovieManagement[]>([]);
-  const [loadingRecommended, setLoadingRecommended] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [sortOption, setSortOption] = useState<string>("newest");
-  const [loading, setLoading] = useState<boolean>(true); 
+  const [loading, setLoading] = useState<boolean>(true);
 
   const fetchData = useCallback(async () => {
     try {
@@ -44,52 +40,42 @@ const HomePage: React.FC = () => {
   }, [fetchData]);
 
   useEffect(() => {
-    const fetchRecommendedMovies = async () => {
-      try {
-        const response = await axios.get(RECOMMENDED_API_URL);
-        setRecommendedMovies(response.data.results);
-      } catch (error) {
-        console.error("Error fetching recommended movies:", error);
-      } finally {
-        setLoadingRecommended(false);
-      }
-    };
-
-    fetchRecommendedMovies();
-  }, []);
-
-  useEffect(() => {
-    // Simulate a 4-second loading delay
     const timer = setTimeout(() => {
-      setLoading(false);  // After 4 seconds, set loading to false
+      setLoading(false);
     }, 2000);
 
-    return () => clearTimeout(timer); // Cleanup timer on unmount
+    return () => clearTimeout(timer);
   }, []);
 
-  const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500/";
   const BACKDROP_BASE_URL = "http://localhost:5000/movieImages/";
   const MOVIE_IMAGES_DIR_PATH = "http://localhost:5000/MoviePosters/";
 
-  if (loading || loadingTrending || loadingRecommended) return <Loader />;
-
-  const filteredMovies = trendingMovies
+  const filteredTrendingMovies = trendingMovies
     .filter((movie) =>
       movie.title.toLowerCase().includes(searchQuery.toLowerCase())
     )
     .sort((a, b) => {
-      const dateA = new Date(a.releaseDate || "").getTime();
-      const dateB = new Date(b.releaseDate || "").getTime();
-      return sortOption === "newest" ? dateB - dateA : dateA - dateB;
+      // Sort by recently added (createdAt)
+      const dateA = new Date(a.createdAt || "").getTime();
+      const dateB = new Date(b.createdAt || "").getTime();
+      return dateB - dateA;
     });
 
-  console.log("movie id: ", filteredMovies);
+  const filteredRecommendedMovies = trendingMovies
+    .filter((movie) =>
+      movie.title.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    .sort((a, b) => {
+      return (b.averageRating || 0) - (a.averageRating || 0);
+    });
+
+  if (loading || loadingTrending) return <Loader />;
 
   return (
     <div>
-      {filteredMovies.length > 0 ? (
+      {filteredTrendingMovies.length > 0 ? (
         <Carousel className="image-slider">
-          {filteredMovies.slice(0, 5).map((movie) => (
+          {filteredTrendingMovies.slice(0, 5).map((movie) => (
             <Carousel.Item key={movie._id}>
               <Link to={`/movie-detail/${movie._id}`}>
                 <img
@@ -195,7 +181,7 @@ const HomePage: React.FC = () => {
           style={{ marginRight: "20px" }}
         >
           <div></div> {/* Empty div to maintain space */}
-          {filteredMovies.length > 4 && (
+          {filteredTrendingMovies.length > 4 && (
             <div className="text-end">
               <Link
                 to="/allMovies"
@@ -227,10 +213,10 @@ const HomePage: React.FC = () => {
           )}
         </div>
 
-        {filteredMovies.length > 0 ? (
+        {filteredTrendingMovies.length > 0 ? (
           <>
             <Row>
-              {filteredMovies.slice(0, 4).map((movie) => (
+              {filteredTrendingMovies.slice(0, 4).map((movie) => (
                 <Col key={movie._id} md={3} className="mb-5">
                   <Link
                     to={`/movie-detail/${movie._id}`}
@@ -252,10 +238,20 @@ const HomePage: React.FC = () => {
                         <Card.Title className="movie-title">
                           {movie.title}
                         </Card.Title>
-                        <Card.Text>
+                        <Card.Text style={{ fontSize: "13px" }}>
                           {movie.genres && movie.genres.length > 0
                             ? movie.genres.join(", ")
                             : "Genres not available"}
+                        </Card.Text>
+                        <Card.Text>
+                          <div
+                            style={{ display: "flex", alignItems: "center" }}
+                          >
+                            <FaStar
+                              style={{ color: "#f39c12", marginRight: "5px" }}
+                            />
+                            <span>{movie.averageRating}/10</span>
+                          </div>
                         </Card.Text>
                       </Card.Body>
                     </Card>
@@ -275,43 +271,95 @@ const HomePage: React.FC = () => {
             className="banner-image"
           />
         </div>
+
         <h1 className="text-center my-5" style={{ color: "black" }}>
           Recommended Movies
         </h1>
-        {recommendedMovies.length > 0 ? (
-          <Row>
-            {recommendedMovies.slice(0, 8).map((movie) => (
-              <Col key={movie._id} md={3} className="mb-5">
-                <Card style={{ height: "500px" }} className="movie-card">
-                  <Card.Img
-                    style={{ height: "300px" }}
-                    variant="top"
-                    src={
-                      movie.posters
-                        ? IMAGE_BASE_URL + movie.posters
-                        : "/default-poster.jpg"
-                    }
-                    alt={movie.title}
-                    className="movie-poster"
-                  />
-                  <Card.Body>
-                    <Card.Title className="movie-title">
-                      {movie.title}
-                    </Card.Title>
-                    <Card.Text>
-                      <strong>Rating:</strong> {movie.vote_average}/10
-                    </Card.Text>
-                    <Card.Text>
-                      <strong>Release Date:</strong>{" "}
-                      {movie.releaseDate
-                        ? new Date(movie.releaseDate).toLocaleDateString()
-                        : "N/A"}
-                    </Card.Text>
-                  </Card.Body>
-                </Card>
-              </Col>
-            ))}
-          </Row>
+
+        <div
+          className="d-flex justify-content-between align-items-center mb-3"
+          style={{ marginRight: "20px" }}
+        >
+          <div></div> {/* Empty div to maintain space */}
+          {filteredRecommendedMovies.length > 4 && (
+            <div className="text-end">
+              <Link
+                to="/allMovies"
+                style={{
+                  textDecoration: "none",
+                  fontWeight: "bold",
+                  fontSize: "1rem",
+                  color: "#007BFF",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  transition: "transform 0.3s ease, color 0.3s ease",
+                }}
+                className="hover-link"
+              >
+                See All
+                <span
+                  style={{
+                    marginLeft: "5px",
+                    fontSize: "1.2rem",
+                    display: "inline-block",
+                    transition: "transform 0.3s ease",
+                  }}
+                  className="arrow-icon"
+                >
+                  →
+                </span>
+              </Link>
+            </div>
+          )}
+        </div>
+
+        {filteredRecommendedMovies.length > 0 ? (
+          <>
+            <Row>
+              {filteredRecommendedMovies.slice(4, 8).map((movie) => (
+                <Col key={movie._id} md={3} className="mb-5">
+                  <Link
+                    to={`/movie-detail/${movie._id}`}
+                    style={{ textDecoration: "none" }}
+                  >
+                    <Card style={{ height: "500px" }} className="movie-card">
+                      <Card.Img
+                        style={{ height: "350px" }}
+                        variant="top"
+                        src={
+                          movie.posters
+                            ? MOVIE_IMAGES_DIR_PATH + movie.posters
+                            : "/default-poster.jpg"
+                        }
+                        alt={movie.title}
+                        className="movie-poster"
+                      />
+                      <Card.Body>
+                        <Card.Title className="movie-title">
+                          {movie.title}
+                        </Card.Title>
+                        <Card.Text style={{ fontSize: "13px" }}>
+                          {movie.genres && movie.genres.length > 0
+                            ? movie.genres.join(", ")
+                            : "Genres not available"}
+                        </Card.Text>
+                        <Card.Text>
+                          <div
+                            style={{ display: "flex", alignItems: "center" }}
+                          >
+                            <FaStar
+                              style={{ color: "#f39c12", marginRight: "5px" }}
+                            />
+                            <span>{movie.averageRating}/10</span>
+                          </div>
+                        </Card.Text>
+                      </Card.Body>
+                    </Card>
+                  </Link>
+                </Col>
+              ))}
+            </Row>
+          </>
         ) : (
           <p>No recommended movies found</p>
         )}

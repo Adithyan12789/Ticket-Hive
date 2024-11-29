@@ -118,13 +118,20 @@ export const usersApiSlice = apiSlice.injectEndpoints({
       }),
     }),
 
+    getAllReviews: builder.mutation({
+      query: () => ({
+        url: `${USERS_URL}/allReviews`,
+        method: "GET",
+      }),
+    }),
+    
     getReviews: builder.query({
       query: (movieId) => ({
         url: `${USERS_URL}/reviews/${movieId}`,
         method: "GET",
       }),
-    }),    
-
+    }), 
+    
     addReview: builder.mutation({
       query: (data) => ({
         url: `${USERS_URL}/reviews`,
@@ -202,6 +209,7 @@ export const {
   useGetMoviesMutation,
   useGetMovieByMovieIdQuery,
   useGetTheatersByMovieTitleQuery,
+  useGetAllReviewsMutation, 
   useGetReviewsQuery, 
   useAddReviewMutation,
   useGetScreenByIdQuery,

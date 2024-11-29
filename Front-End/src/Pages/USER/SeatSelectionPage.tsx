@@ -10,6 +10,7 @@ import Loader from "../../Components/UserComponents/Loader";
 import { toast } from "react-toastify";
 import React from "react";
 import { Seat, Screen } from "../../Types/ScreenTypes";
+import Footer from "../../Components/UserComponents/Footer";
 
 const SelectSeatPage: React.FC = () => {
   const { screenId } = useParams<{ screenId: string }>();
@@ -101,12 +102,10 @@ const SelectSeatPage: React.FC = () => {
       newSelectedSeats.delete(seatLabel);
     } else {
       newSelectedSeats.add(seatLabel);
-      // Hold the seat for 10 minutes
       setTimeout(() => {
-        // Remove seat from selected seats after 10 minutes if not booked
         newSelectedSeats.delete(seatLabel);
         setSelectedSeats(newSelectedSeats);
-      }, 10 * 60 * 1000); // 10 minutes timeout
+      }, 10 * 60 * 1000);
     }
 
     setSelectedSeats(newSelectedSeats);
@@ -263,7 +262,7 @@ const SelectSeatPage: React.FC = () => {
   
 
   return (
-    <Container
+    <><Container
       style={{ padding: "30px 15px", position: "relative", minHeight: "100vh" }}
     >
       <Row className="mb-3">
@@ -279,8 +278,7 @@ const SelectSeatPage: React.FC = () => {
           >
             <FaArrowLeft
               onClick={() => navigate(-1)}
-              style={{ cursor: "pointer", fontSize: "1.5rem" }}
-            />
+              style={{ cursor: "pointer", fontSize: "1.5rem" }} />
             <div>
               <span style={{ fontSize: "1.2rem" }}>
                 {movieTitle || "Movie Title"} {/* Movie title */}
@@ -362,7 +360,7 @@ const SelectSeatPage: React.FC = () => {
           </Button>
         </div>
       )}
-    </Container>
+    </Container><Footer /></>
   );
 };
 

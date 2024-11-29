@@ -14,6 +14,7 @@ import { RazorpayOptions, RazorpayPaymentObject } from "../../Global";
 import { useSelector } from "react-redux";
 import { RootState } from "../../Store";
 import { LocationState, Transaction } from "../../Types/WalletTypes";
+import Footer from "../../Components/UserComponents/Footer";
 
 const BookingPage: React.FC = () => {
   const location = useLocation();
@@ -228,13 +229,13 @@ const BookingPage: React.FC = () => {
   };
 
   return (
-    <Container className="mt-5" style={{ maxWidth: "800px" }}>
+    <><Container className="mt-5" style={{ maxWidth: "800px" }}>
       <h2
         className="text-center mb-5"
         style={{
           fontSize: "36px",
           fontWeight: "500",
-          color: "#4e89ae",  // Subtle professional color
+          color: "#4e89ae", // Subtle professional color
           textTransform: "uppercase",
           letterSpacing: "1px",
         }}
@@ -247,7 +248,7 @@ const BookingPage: React.FC = () => {
         style={{
           boxShadow: "0px 6px 18px rgba(0, 0, 0, 0.1)",
           borderRadius: "12px",
-          backgroundColor: "#f8f9fa",  // Light background
+          backgroundColor: "#f8f9fa", // Light background
         }}
       >
         <Card.Body>
@@ -266,12 +267,11 @@ const BookingPage: React.FC = () => {
                     fontSize: "2.5rem",
                     color: "#e63946",
                     marginRight: "12px",
-                  }}
-                />
+                  }} />
                 <h4
                   style={{
                     fontWeight: "400",
-                    color: "#2c3e50",  // Darker text for professionalism
+                    color: "#2c3e50", // Darker text for professionalism
                     textTransform: "uppercase",
                   }}
                 >
@@ -304,8 +304,7 @@ const BookingPage: React.FC = () => {
                 }}
               >
                 <FaRegCalendarAlt
-                  style={{ color: "#457b9d", marginRight: "8px" }}
-                />
+                  style={{ color: "#457b9d", marginRight: "8px" }} />
                 {formattedDate}
               </p>
             </Col>
@@ -422,8 +421,7 @@ const BookingPage: React.FC = () => {
             <div className="mt-3">
               <PayPalScriptProvider
                 options={{
-                  clientId:
-                    "AXyOd3ZlDDoSe8nOeC_frUV-ZpEkIgzQtECddqkh91w04xHxYdsZr8LXxIzKHq0_Tnk87DQlR0UaEitm",
+                  clientId: "AXyOd3ZlDDoSe8nOeC_frUV-ZpEkIgzQtECddqkh91w04xHxYdsZr8LXxIzKHq0_Tnk87DQlR0UaEitm",
                   currency: "USD",
                 }}
               >
@@ -446,7 +444,7 @@ const BookingPage: React.FC = () => {
                         console.error("Error creating order:", error);
                         return Promise.reject(error);
                       });
-                  }}
+                  } }
                   onApprove={async (_data, actions) => {
                     if (actions.order) {
                       try {
@@ -482,7 +480,7 @@ const BookingPage: React.FC = () => {
                         "error"
                       );
                     }
-                  }}
+                  } }
                   onError={(error) => {
                     console.error("PayPal Buttons error:", error);
                     Swal.fire(
@@ -490,14 +488,13 @@ const BookingPage: React.FC = () => {
                       "An error occurred during payment. Please try again.",
                       "error"
                     );
-                  }}
-                />
+                  } } />
               </PayPalScriptProvider>
             </div>
           )}
         </Card.Body>
       </Card>
-    </Container>
+    </Container><Footer /></>
   );
 };
 

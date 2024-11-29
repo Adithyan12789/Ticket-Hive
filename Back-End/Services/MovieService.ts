@@ -70,21 +70,46 @@ class MovieService {
     return deletedMovie;
   }
 
+  public async getAllReviewsService() {
+    return await Review.find({}).populate('user', 'name').populate('movie', 'title');
+  }  
+  
   public async getReviewsByMovieId(movieId: string) {
     return await Review.find({ movie: movieId }).populate("user", "name email");
   }
 
   public async addReview(data: { movieId: string; userId: string; rating: number; review: string }) {
-
-    const review = new Review({
-      movie: data.movieId,
-      user: data.userId,
-      rating: data.rating,
-      comment: data.review,
+    const { movieId, userId, rating, review } = data;
+  
+    const newReview = new Review({
+      movie: movieId,
+      user: userId,
+      rating: rating,
+      comment: review,
     });
-    
-    return await review.save();
+  
+    const savedReview = await newReview.save();
+  
+    await Movie.findByIdAndUpdate(movieId, {
+      $push: { reviews: savedReview._id },
+    });
+  
+    return savedReview;
   }
+  
+  public async updateAverageRating(movieId: string) {
+    const reviews = await Review.find({ movie: movieId });
+  
+    if (reviews.length > 0) {
+      const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
+      const averageRating = totalRating / reviews.length;
+  
+      await Movie.findByIdAndUpdate(movieId, { averageRating });
+    } else {
+      await Movie.findByIdAndUpdate(movieId, { averageRating: 0 });
+    }
+  }
+  
 }
 
 export default new MovieService();

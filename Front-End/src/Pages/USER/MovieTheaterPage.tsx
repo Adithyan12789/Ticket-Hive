@@ -20,6 +20,7 @@ import TheaterLocation from "../../Components/UserComponents/TheaterLocation";
 import { UserInfo } from "../../Types/UserTypes";
 import { Screen } from "../../Types/ScreenTypes";
 import { TheaterManagement } from "../../Types/TheaterTypes";
+import Footer from "../../Components/UserComponents/Footer";
 
 type TheaterData = {
   theaters: TheaterManagement[];
@@ -199,7 +200,7 @@ const MovieTheaterScreen: React.FC = () => {
   }
 
   return (
-    <Container style={{ padding: "40px 20px" }}>
+    <><Container style={{ padding: "40px 20px" }}>
       <Row className="mb-4">
         <Col md={8}>
           <h2 className="text-dark font-weight-bold">
@@ -278,12 +279,10 @@ const MovieTheaterScreen: React.FC = () => {
                 .map((date, index) => (
                   <Button
                     key={index}
-                    variant={
-                      selectedDate?.toISOString().split("T")[0] ===
+                    variant={selectedDate?.toISOString().split("T")[0] ===
                       date.toISOString().split("T")[0]
-                        ? "primary"
-                        : "outline-secondary"
-                    }
+                      ? "primary"
+                      : "outline-secondary"}
                     onClick={() => setSelectedDate(date)}
                     style={{
                       padding: "10px 15px",
@@ -341,8 +340,7 @@ const MovieTheaterScreen: React.FC = () => {
                       {theater.name}{" "}
                       <FaInfoCircle
                         style={{ color: "#007bff", cursor: "pointer" }}
-                        onClick={() => handleShowModal(theater)}
-                      />
+                        onClick={() => handleShowModal(theater)} />
                     </h5>
                     <p className="text-muted" style={{ fontSize: "0.85rem" }}>
                       {theater.address}
@@ -362,8 +360,7 @@ const MovieTheaterScreen: React.FC = () => {
                           >
                             {screen.showTimes
                               .filter(
-                                (show) =>
-                                  show.movieTitle.trim().toLowerCase() ===
+                                (show) => show.movieTitle.trim().toLowerCase() ===
                                   movieName
                               )
                               .map((filteredShow, timeIdx) => (
@@ -376,19 +373,17 @@ const MovieTheaterScreen: React.FC = () => {
                                       marginRight: "40px",
                                       transition: "all 0.3s ease-in-out",
                                     }}
-                                    onClick={() =>
-                                      navigate(`/seat-select/${screen._id}`, {
-                                        state: {
-                                          date: selectedDate,
-                                          movieTitle: movie?.title,
-                                          movieId: movie?._id,
-                                          theaterId: theater?._id,
-                                          showTime: filteredShow.time,
-                                          moviePoster: moviePoster,
-                                          showTimeId: filteredShow._id,
-                                        },
-                                      })
-                                    }
+                                    onClick={() => navigate(`/seat-select/${screen._id}`, {
+                                      state: {
+                                        date: selectedDate,
+                                        movieTitle: movie?.title,
+                                        movieId: movie?._id,
+                                        theaterId: theater?._id,
+                                        showTime: filteredShow.time,
+                                        moviePoster: moviePoster,
+                                        showTimeId: filteredShow._id,
+                                      },
+                                    })}
                                   >
                                     {filteredShow.time}
                                   </Button>
@@ -422,7 +417,7 @@ const MovieTheaterScreen: React.FC = () => {
               <div style={{ marginBottom: "20px" }}>
                 <h5
                   style={{
-                    fontSize: "1.5rem", 
+                    fontSize: "1.5rem",
                     fontWeight: "bold",
                     marginBottom: "5px",
                   }}
@@ -480,31 +475,30 @@ const MovieTheaterScreen: React.FC = () => {
               </p>
 
               <div style={{ marginTop: "20px" }}>
-              <h2
-                style={{
-                  fontSize: "1.25rem",
-                  marginBottom: "10px",
-                  fontWeight: "bold",
-                  color: "#333",
-                }}
-              >
-                Location
-              </h2>
-              <TheaterLocation
-                location={{
-                  latitude: selectedTheater.latitude,
-                  longitude: selectedTheater.longitude,
-                  theaterName: selectedTheater.name,
-                }}
-              />
-            </div>
+                <h2
+                  style={{
+                    fontSize: "1.25rem",
+                    marginBottom: "10px",
+                    fontWeight: "bold",
+                    color: "#333",
+                  }}
+                >
+                  Location
+                </h2>
+                <TheaterLocation
+                  location={{
+                    latitude: selectedTheater.latitude,
+                    longitude: selectedTheater.longitude,
+                    theaterName: selectedTheater.name,
+                  }} />
+              </div>
             </div>
           ) : (
             <p style={{ fontSize: "1rem", color: "#888" }}>Loading...</p>
           )}
         </Modal.Body>
       </Modal>
-    </Container>
+    </Container><Footer /></>
   );
 };
 

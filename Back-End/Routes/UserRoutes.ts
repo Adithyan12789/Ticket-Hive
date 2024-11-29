@@ -28,6 +28,7 @@ router.get('/get-movies',AuthMiddleware.protect, MovieController.getAllMoviesCon
 router.get('/movie-detail/:id',AuthMiddleware.protect, MovieController.getMovieByIdHandler);
 
 router.get('/reviews/:movieId',AuthMiddleware.protect, MovieController.getReviewsController);
+router.get('/allReviews',AuthMiddleware.protect, MovieController.getAllReviewsController);
 router.post('/reviews',AuthMiddleware.protect, MovieController.addReviewsController);
 
 router.get('/movie-theaters/:movieTitle', AuthMiddleware.protect, TheaterController.getTheatersByMovieTitle);

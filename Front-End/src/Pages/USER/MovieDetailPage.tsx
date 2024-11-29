@@ -29,6 +29,7 @@ import {
   FaThumbsUp,
   FaUserAlt,
 } from "react-icons/fa";
+import Footer from "../../Components/UserComponents/Footer";
 
 const USER_MOVIE_POSTER = "http://localhost:5000/MoviePosters/";
 const USER_MOVIE_IMAGES = "http://localhost:5000/movieImages/";
@@ -37,6 +38,7 @@ const USER_MOVIE_CAST_IMAGES = "http://localhost:5000/CastsImages/";
 interface Review {
   _id: string;
   user: {
+    _id: string;
     name: string;
   };
   comment: string;
@@ -65,14 +67,15 @@ const MovieDetailScreen: React.FC = () => {
     isError: errorMovie,
     refetch,
   } = useGetMovieByMovieIdQuery(id);
+
   const {
     data: reviews,
     isLoading: loadingReviews,
     refetch: refetchReviews,
   } = useGetReviewsQuery(id);
+  
   const [addReview, { isLoading: addingReview }] = useAddReviewMutation();
 
-  // After fetching reviews, initialize the state
   useEffect(() => {
     if (reviews) {
       setReviewsState(reviews);
@@ -115,6 +118,10 @@ const MovieDetailScreen: React.FC = () => {
 
   const userId = userInfo?.id;
 
+  const hasReviewed = reviews?.some(
+    (review: Review) => review.user && review.user._id === userId
+  );
+
   const handleAddReview = async () => {
     if (!reviewText || rating === 0) {
       toast.error("Please provide both a review and a rating.");
@@ -152,7 +159,6 @@ const MovieDetailScreen: React.FC = () => {
 
   const averageRating = getAverageRating();
 
-  // Render only 1 star, but show rating in the "x/10" format
   const renderStars = (rating: number) => {
     return (
       <div style={{ display: "flex", alignItems: "center" }}>
@@ -166,7 +172,6 @@ const MovieDetailScreen: React.FC = () => {
     [reviewId: string]: string;
   }>({});
 
-  // Handler for liking a review
   const handleLike = (reviewId: string) => {
     setReviewsState((prevReviews) =>
       prevReviews.map((review) =>
@@ -320,11 +325,12 @@ const MovieDetailScreen: React.FC = () => {
                   </span>
                 )}
 
+                {!hasReviewed && (
                 <Button
                   variant="secondary"
                   style={{
                     backgroundColor: "#fff",
-                    color: "#007bff", // Button text color
+                    color: "#007bff",
                     border: "1px solid #007bff",
                     borderRadius: "5px",
                     padding: "5px 15px",
@@ -340,6 +346,7 @@ const MovieDetailScreen: React.FC = () => {
                 >
                   Rate now
                 </Button>
+                )}
               </div>
 
               <button
@@ -579,6 +586,9 @@ const MovieDetailScreen: React.FC = () => {
           </>
         )}
       </Container>
+
+      <Footer/>
+
       <Modal
         show={showReviewModal}
         onHide={() => setShowReviewModal(false)}
