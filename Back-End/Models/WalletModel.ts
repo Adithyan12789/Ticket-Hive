@@ -7,7 +7,6 @@ export interface ITransaction {
   date: Date;
   description: string;
 }
-
 export interface IWallet extends Document {
   user: mongoose.Types.ObjectId;
   balance: number;
