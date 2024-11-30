@@ -1,6 +1,4 @@
 import mongoose, { Document, Model, Schema } from 'mongoose';
-
-// Transaction interface for the wallet
 export interface ITransaction {
   transactionId: string;
   amount: number;
@@ -11,9 +9,9 @@ export interface ITransaction {
 }
 
 export interface IWallet extends Document {
-  user: mongoose.Types.ObjectId; // Reference to the user
-  balance: number; // Current wallet balance
-  transactions: ITransaction[]; // Array of transactions
+  user: mongoose.Types.ObjectId;
+  balance: number;
+  transactions: ITransaction[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -22,7 +20,7 @@ const WalletSchema: Schema<IWallet> = new Schema(
   {
     user: { 
       type: mongoose.Schema.Types.ObjectId, 
-      ref: 'User', // Assuming you have a 'User' model to reference
+      ref: 'User',
       required: true 
     },
     balance: { 
@@ -43,10 +41,9 @@ const WalletSchema: Schema<IWallet> = new Schema(
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
   },
-  { timestamps: true } // Automatically manages createdAt and updatedAt
+  { timestamps: true }
 );
 
-// Update the updatedAt field on save
 WalletSchema.pre<IWallet>('save', function (next) {
   this.updatedAt = new Date();
   next();

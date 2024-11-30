@@ -112,3 +112,20 @@ export interface LocationProps {
     theaterName: string;
   };
 }
+
+export interface Offer {
+  _id: string;
+  offerName: string;
+  paymentMethod: string;
+  description: string;
+  discountValue?: number;
+  offerPrice?: number;
+  minPurchaseAmount?: number;
+  applicableTheaters: string[];
+  validityStart: string;
+  validityEnd: string;
+  createdBy: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+

@@ -10,6 +10,7 @@ import TheaterPrivateRoute from '../Components/TheaterComponents/TheaterPrivateR
 import TheaterDetailPage from '../Pages/THEATER/TheaterDetailPage';
 import AddScreenPage from '../Pages/THEATER/AddScreenPage';
 import EditScreenPage from '../Pages/THEATER/EditScreenPage';
+import OffersManagementPage from '../Pages/THEATER/OffersManagementPage';
 
 export const TheaterRoutes = (
   <>
@@ -27,6 +28,7 @@ export const TheaterRoutes = (
       <Route path="/theater/edit/:id" element={<TheaterManagement />} />
       <Route path="/theater/add-screen/:theaterId" element={<AddScreenPage />} />
       <Route path="/theater/edit-screen/:screenId" element={<EditScreenPage />} />
+      <Route path="/theater/offer-management" element={<OffersManagementPage />} />
     </Route>
   </>
 );

@@ -7,6 +7,7 @@ import { Request, Response, NextFunction } from "express";
 import { IUser } from "../Models/UserModel";
 import { CustomRequest } from "../Middlewares/AuthMiddleware";
 import { Movie } from "../Models/MoviesModel";
+import { Booking } from "../Models/bookingModel";
 
 class UserController {
   authUser = asyncHandler(
@@ -352,6 +353,38 @@ class UserController {
       }
     }
   );
+
+  getOffersByTheaterId = asyncHandler(
+    async (req: CustomRequest, res: Response): Promise<void> => {
+      const { theaterId } = req.params;
+      const userId = req.user?._id;
+  
+      try {
+        const offers = await UserService.getOffersByTheaterIdService(theaterId);
+        if (!offers || offers.length === 0) {
+          res.status(404).json({ message: "Offers not found" });
+          return;
+        }
+  
+        const bookings = await Booking.find({ user: userId }).select("offer").exec();
+  
+        const usedOfferIds = bookings
+        .map((booking) => booking.offer?.toString())
+        .filter((offerId): offerId is string => !!offerId);    
+
+        const filteredOffers = offers.filter(
+          (offer) => !usedOfferIds.includes(offer.id.toString())
+        );
+  
+        res.status(200).json(filteredOffers);
+      } catch (error: any) {
+        res
+          .status(500)
+          .json({ message: error?.message || "Internal server error" });
+      }
+    }
+  );  
+  
 
   logoutUser = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {

@@ -214,6 +214,14 @@ class UserService {
     return await UserRepository.saveUser(user);
   };
 
+  public getOffersByTheaterIdService = async (theaterId: string) => {
+    try {
+      return await UserRepository.getOffersByTheaterId(theaterId);
+    } catch (error) {
+      throw new Error("Error fetching Offers");
+    }
+  };
+
   public logoutUserService() {
     return true;
   }

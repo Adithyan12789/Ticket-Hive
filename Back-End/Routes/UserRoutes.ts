@@ -36,6 +36,8 @@ router.get('/movie-theaters/:movieTitle', AuthMiddleware.protect, TheaterControl
 router.get('/screen/:screenId', AuthMiddleware.protect, ScreenController.getScreensById);
 
 router.post('/update-availability', AuthMiddleware.protect, ScreenController.updateSeatAvailability);
+
+router.get('/offers/:theaterId', AuthMiddleware.protect, UserController.getOffersByTheaterId);
   
 router.post('/book-ticket', AuthMiddleware.protect, BookingController.createBooking);
 router.get('/get-tickets/:userId', AuthMiddleware.protect, BookingController.getAllTickets);

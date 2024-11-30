@@ -1,4 +1,5 @@
 import { Booking } from "../Models/bookingModel";
+import { Offer } from "../Models/OffersModel";
 import User, { IUser } from "../Models/UserModel";
 
 class UserRepository {
@@ -49,6 +50,14 @@ class UserRepository {
     public async deleteBookingById(bookingId: string): Promise<any | null> {
         return await Booking.findByIdAndDelete(bookingId);
     }
+
+    public async getOffersByTheaterId(theaterId: string) {
+        return await Offer.find({ applicableTheaters: theaterId })
+            .populate('applicableTheaters', 'name location')
+            .populate('createdBy', 'name email ')
+            .exec();
+    }
+    
 }
 
 export default new UserRepository();

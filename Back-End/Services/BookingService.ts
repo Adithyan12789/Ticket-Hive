@@ -29,6 +29,7 @@ class BookingService {
     screenId: string,
     seatIds: string[],
     userId: string,
+    offerId: string,
     totalPrice: number,
     showTime: string,
     paymentStatus: string,
@@ -36,10 +37,12 @@ class BookingService {
     convenienceFee: number,
     bookingDate: Date
   ) {
+
     const newBooking = await BookingRepo.createBooking({
       movie: new mongoose.Types.ObjectId(movieId),
       theater: new mongoose.Types.ObjectId(theaterId),
       screen: new mongoose.Types.ObjectId(screenId),
+      offer: new mongoose.Types.ObjectId(offerId),
       seats: seatIds,
       bookingDate,
       showTime: showTime,

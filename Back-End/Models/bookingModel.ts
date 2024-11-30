@@ -5,6 +5,7 @@ export interface IBooking extends Document {
   movie: mongoose.Types.ObjectId;
   theater: mongoose.Types.ObjectId;
   screen: mongoose.Types.ObjectId; 
+  offer?: mongoose.Types.ObjectId; 
   seats: string[];
   showTime: string;
   totalPrice: number;
@@ -19,6 +20,7 @@ const bookingSchema = new mongoose.Schema({
   movie: { type: mongoose.Schema.Types.ObjectId, ref: 'Movie', required: true },
   theater: { type: mongoose.Schema.Types.ObjectId, ref: 'TheaterDetails', required: true },
   screen: { type: mongoose.Schema.Types.ObjectId, ref: 'Screens', required: true },
+  offer: { type: mongoose.Schema.Types.ObjectId, ref: 'Offer'},
   seats: { type: [String], required: true },
   bookingDate: { type: Date, required: true },
   showTime: { type: String, required: true },

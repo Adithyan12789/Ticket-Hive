@@ -4,6 +4,7 @@ import ScreenController from '../Controllers/ScreenController';
 import { TheaterAuthMiddleware } from '../Middlewares/TheaterAuthMiddleware';
 import MulterConfig from '../Config/Multer/TheaterMulter';
 import MovieController from '../Controllers/MovieController';
+import OffersController from '../Controllers/OffersController';
 
 const router = express.Router();
 
@@ -38,6 +39,10 @@ router.get('/screen/:screenId', TheaterAuthMiddleware.protect, ScreenController.
 
 router.get('/get-movies',TheaterAuthMiddleware.protect, MovieController.getAllMoviesController);
 
+router.post('/add-offer',TheaterAuthMiddleware.protect, OffersController.addOfferController);
+router.put('/update-offer/:offerId', TheaterAuthMiddleware.protect, OffersController.updateOfferController);
+router.delete('/delete-offer/:offerId', TheaterAuthMiddleware.protect, OffersController.deleteOfferController);
+router.get('/get-offers',TheaterAuthMiddleware.protect, OffersController.getOffersController);
 
 router.post('/theater-logout', TheaterController.logoutTheaterOwner);
 

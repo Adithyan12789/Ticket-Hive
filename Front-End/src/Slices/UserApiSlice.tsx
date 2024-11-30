@@ -155,6 +155,14 @@ export const usersApiSlice = apiSlice.injectEndpoints({
       }),
     }),
 
+
+    getOffersByTheaterId: builder.query({
+      query: (theaterId) => ({
+        url: `${USERS_URL}/offers/${theaterId}`,
+        method: "GET",
+      }),
+    }),
+
     createBooking: builder.mutation({
       query: (data) => ({
         url: `${USERS_URL}/book-ticket`,
@@ -214,6 +222,7 @@ export const {
   useAddReviewMutation,
   useGetScreenByIdQuery,
   useUpdateSeatAvailabilityMutation,
+  useGetOffersByTheaterIdQuery,
   useCreateBookingMutation,
   useGetBookingDetailsQuery,
   useGetTransactionHistoryQuery,

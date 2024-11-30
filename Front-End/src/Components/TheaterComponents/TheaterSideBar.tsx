@@ -58,7 +58,7 @@ const TheaterOwnerSidebar: React.FC = () => {
           <Link
             to="/admin/bookings"
             className={
-              location.pathname === "/admin/bookings"
+              location.pathname === "/theater/bookings"
                 ? "active sidebar-link"
                 : "sidebar-link"
             }
@@ -68,14 +68,14 @@ const TheaterOwnerSidebar: React.FC = () => {
         </li>
         <li>
           <Link
-            to="/admin/coupons"
+            to="/theater/offer-management"
             className={
-              location.pathname === "/admin/coupons"
+              location.pathname === "/theater/offer-management"
                 ? "active sidebar-link"
                 : "sidebar-link"
             }
           >
-            <FaTag className="sidebar-icon" /> Coupon Management
+            <FaTag className="sidebar-icon" /> Offers Management
           </Link>
         </li>
         <li>

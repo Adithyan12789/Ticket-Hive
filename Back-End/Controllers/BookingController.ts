@@ -18,6 +18,7 @@ class BookingController {
         seatIds,
         showTime,
         userId,
+        offerId,
         totalPrice,
         paymentStatus,
         paymentMethod,
@@ -25,6 +26,9 @@ class BookingController {
         bookingDate,
       } = req.body;
 
+      console.log("con req body: ", req.body);
+      
+  
       let formattedBookingDate: Date;
       try {
         const parsedDate = parse(bookingDate, "EEEE dd MMM yyyy", new Date());
@@ -37,7 +41,7 @@ class BookingController {
         res.status(400).json({ message: "Invalid bookingDate format" });
         return;
       }
-
+  
       if (
         !movieId ||
         !theaterId ||
@@ -53,7 +57,7 @@ class BookingController {
         res.status(400).json({ message: "Missing required fields" });
         return;
       }
-
+  
       try {
         if (paymentMethod === "wallet") {
           const walletBalance = await WalletService.getWalletBalance(userId);
@@ -61,18 +65,18 @@ class BookingController {
             res.status(400).json({ message: "Insufficient wallet balance" });
             return;
           }
-
+  
           const description = "Ticket booking payment";
-
           await WalletService.deductAmountFromWallet(userId, totalPrice, description);
         }
-
+  
         const booking = await BookingService.createBookingService(
           movieId,
           theaterId,
           screenId,
           seatIds,
           userId,
+          offerId,
           totalPrice,
           showTime,
           paymentStatus,
@@ -81,15 +85,19 @@ class BookingController {
           formattedBookingDate
         );
 
-        const cashbackPercentage = 10;
-        const cashbackAmount = (totalPrice * cashbackPercentage) / 100;
-
-        await WalletService.addCashbackToWallet(
-          userId,
-          cashbackAmount,
-          `Cashback for ticket booking`
-        );
-
+        console.log("con booking: ", booking);
+        
+        if (paymentMethod === "wallet") {
+          const cashbackPercentage = 10;
+          const cashbackAmount = (totalPrice * cashbackPercentage) / 100;
+  
+          await WalletService.addCashbackToWallet(
+            userId,
+            cashbackAmount,
+            `Cashback for ticket booking`
+          );
+        }
+  
         res.status(201).json({
           message: "Booking successful",
           booking,
@@ -106,6 +114,7 @@ class BookingController {
       }
     }
   );
+  
 
   getAllTickets = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {

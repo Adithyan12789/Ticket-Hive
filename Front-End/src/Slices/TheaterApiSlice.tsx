@@ -170,6 +170,36 @@ export const theaterApiSlice = apiSlice.injectEndpoints({
     getScreensById: builder.query({
       query: (screenId) => `${THEATER_URL}/screen/${screenId}`,
     }),
+
+    addOffer: builder.mutation({
+      query: (data) => ({
+        url: `${THEATER_URL}/add-offer`,
+        method: "POST",
+        body: data,
+      }),
+    }),
+
+    updateOffer: builder.mutation({
+      query: ({ offerId, data }) => ({
+        url: `/api/theater/update-offer/${offerId}`,
+        method: "PUT",
+        body: data,
+      }),
+    }),  
+
+    deleteOffer: builder.mutation({
+      query: ({ offerId }) => ({
+        url: `${THEATER_URL}/delete-offer/${offerId}`,
+        method: "DELETE",
+      }),
+    }),
+
+    getOffers: builder.query({
+      query: () => ({
+        url: `${THEATER_URL}/get-offers`,
+        method: "GET",
+      }),
+    }),
   }),
 });
 
@@ -196,4 +226,8 @@ export const {
   useGetScreensByIdQuery,
   useDeleteScreenMutation,
   useDeleteTheaterMutation,
+  useGetOffersQuery,
+  useAddOfferMutation,
+  useUpdateOfferMutation,
+  useDeleteOfferMutation,
 } = theaterApiSlice;

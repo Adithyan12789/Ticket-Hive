@@ -10,6 +10,7 @@ import TheaterDetails from "../Models/TheaterDetailsModel";
 import { Movie } from "../Models/MoviesModel";
 import Screens from "../Models/ScreensModel";
 import User from "../Models/UserModel";
+import { Offer } from "../Models/OffersModel";
 
 class TheaterController {
   authTheaterOwner = asyncHandler(
@@ -584,6 +585,129 @@ class TheaterController {
         } else {
           res.status(500).json({ message: "An unexpected error occurred" });
         }
+      }
+    }
+  );
+
+  addOfferController = asyncHandler(
+    async (req: CustomRequest, res: Response): Promise<void> => {
+      console.log("Request body: ", req.body);
+  
+      const {
+        ownerId,
+        offerName,
+        paymentMethod,
+        offerDescription,
+        discountValue,
+        minPurchaseAmount,
+        validityStart,
+        validityEnd,
+        applicableTheaters,
+      } = req.body;
+  
+      if (
+        !ownerId ||
+        !offerName ||
+        !paymentMethod ||
+        !offerDescription ||
+        !discountValue ||
+        minPurchaseAmount === undefined ||
+        !validityStart ||
+        !validityEnd ||
+        !Array.isArray(applicableTheaters) || 
+        applicableTheaters.length === 0
+      ) {
+        res.status(400).json({ message: "All fields are required" });
+        return;
+      }
+  
+      try {
+        const parsedValidityStart = new Date(validityStart);
+        const parsedValidityEnd = new Date(validityEnd);
+  
+        const newOffer = new Offer({
+          createdBy: ownerId,
+          offerName,
+          paymentMethod,
+          description: offerDescription,
+          discountValue,
+          minPurchaseAmount,
+          validityStart: parsedValidityStart,
+          validityEnd: parsedValidityEnd,
+          applicableTheaters,
+        });
+  
+        const createdOffer = await newOffer.save();
+  
+        res.status(201).json({
+          message: "Offer created successfully",
+          offer: createdOffer,
+        });
+      } catch (error) {
+        console.error("Error creating offer:", error);
+        res.status(500).json({ message: "Server error. Please try again." });
+      }
+    }
+  );
+
+  updateOfferController = asyncHandler(
+    async (req: CustomRequest, res: Response): Promise<void> => {
+      const { offerId } = req.params;
+      const offerData = req.body;
+  
+      if (!offerId) {
+        res.status(400).json({ message: "Offer ID is required" });
+        return;
+      }
+  
+      try {
+        const updatedOffer = await TheaterOwnerService.updateOfferService(offerId, offerData);
+        res.status(200).json({
+          message: "Offer updated successfully",
+          offer: updatedOffer,
+        });
+      } catch (error: any) {
+        console.error("Error updating offer:", error);
+        res.status(error.statusCode || 500).json({ message: error.message || "Internal server error" });
+      }
+    }
+  );  
+
+
+  deleteOfferController = asyncHandler(
+    async (req: CustomRequest, res: Response): Promise<void> => {
+      const { offerId } = req.params;
+
+      try {
+        const deletedOffer = await TheaterOwnerService.deleteOfferHandler(offerId);
+
+        if (!deletedOffer) {
+          res.status(404).json({ message: "Offer not found for deletion" });
+          return;
+        }
+
+        res
+          .status(200)
+          .json({ message: "Offer deleted successfully", deletedOffer });
+      } catch (error: any) {
+        console.error("Error deleting Offer:", error);
+        res
+          .status(500)
+          .json({ message: "Error deleting Offer", error: error.message });
+      }
+    }
+  );
+  
+
+  getOffersController = asyncHandler(
+    async (req: Request, res: Response): Promise<void> => {
+      try {
+        const offers = await Offer.find();
+  
+        res.status(200).json(offers);
+      } catch (error) {
+        console.error("Error fetching offers:", error);
+        res.status(500).json({ message: "Server error. Please try again." });
       }
     }
   );

@@ -6,6 +6,7 @@ import Swal from "sweetalert2";
 import {
   useCreateBookingMutation,
   useGetTransactionHistoryQuery,
+  useGetOffersByTheaterIdQuery,
 } from "../../Slices/UserApiSlice";
 import { loadScript } from "../../Utils/LoadScript";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
@@ -15,6 +16,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../Store";
 import { LocationState, Transaction } from "../../Types/WalletTypes";
 import Footer from "../../Components/UserComponents/Footer";
+import { Offer } from "../../Types/TheaterTypes";
 
 const BookingPage: React.FC = () => {
   const location = useLocation();
@@ -58,14 +60,13 @@ const BookingPage: React.FC = () => {
     totalPrice = 0,
   } = location.state as LocationState;
 
-  const [createBooking, { isLoading }] = useCreateBookingMutation();
+  const [createBooking, { isLoading: isBookingLoading }] =
+    useCreateBookingMutation();
   const [showModal, setShowModal] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<
     "razorpay" | "paypal" | "wallet" | null
   >(null);
 
-  const convenienceFee = totalPrice * 0.1;
-  const finalPrice = totalPrice + convenienceFee;
   const formattedDate = new Date(date || "").toLocaleDateString("en-GB", {
     weekday: "long",
     day: "numeric",
@@ -82,8 +83,21 @@ const BookingPage: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    document.title = `Ticket Booking`
+    document.title = `Ticket Booking`;
   }, []);
+
+  const convenienceFee = totalPrice * 0.1;
+
+  const { data: offers, isLoading: offersLoading } =
+    useGetOffersByTheaterIdQuery(theaterId);
+
+  const [showOfferModal, setShowOfferModal] = useState(false);
+  const [selectedOffer, setSelectedOffer] = useState<Offer | null>(null);
+  const [finalPrice, setFinalPrice] = useState<number>(
+    totalPrice + convenienceFee
+  );
+  const [selectedPaymentMethods, setSelectedPaymentMethods] =
+    useState<string>("");
 
   const handleRazorpayPayment = async () => {
     setPaymentMethod("razorpay");
@@ -146,6 +160,10 @@ const BookingPage: React.FC = () => {
     paymentObject.open();
   };
 
+  const offerId = selectedOffer?._id;
+
+  console.log("offerI: ", offerId);
+  
   const handleCreateBooking = async (method: string) => {
     try {
       console.log("entered to booking function");
@@ -156,6 +174,7 @@ const BookingPage: React.FC = () => {
         theaterId: theaterId,
         seatIds: selectedSeats,
         screenId: screenId,
+        offerId: offerId,
         bookingDate: formattedDate,
         showTime,
         totalPrice,
@@ -196,11 +215,9 @@ const BookingPage: React.FC = () => {
       return;
     }
 
-    // Proceed with Wallet Payment
     setPaymentMethod("wallet");
 
     try {
-      // Deduct wallet balance
       await handleCreateBooking("wallet");
       Swal.fire(
         "Payment Successful",
@@ -208,13 +225,15 @@ const BookingPage: React.FC = () => {
         "success"
       );
 
-      // Redirect to Thank You Page
       navigate("/thankyou", {
         state: { paymentId: `WALLET-${new Date().getTime()}` },
       });
     } catch (error) {
-      console.log("An error occurred during wallet payment. Please try again", error);
-      
+      console.log(
+        "An error occurred during wallet payment. Please try again",
+        error
+      );
+
       Swal.fire(
         "Payment Error",
         "An error occurred during wallet payment. Please try again.",
@@ -228,273 +247,504 @@ const BookingPage: React.FC = () => {
     setShowModal(false);
   };
 
-  return (
-    <><Container className="mt-5" style={{ maxWidth: "800px" }}>
-      <h2
-        className="text-center mb-5"
-        style={{
-          fontSize: "36px",
-          fontWeight: "500",
-          color: "#4e89ae", // Subtle professional color
-          textTransform: "uppercase",
-          letterSpacing: "1px",
-        }}
-      >
-        Booking Summary
-      </h2>
+  const handleOfferSelect = (offer: Offer | null) => {
+    setSelectedOffer(offer);
+  
+    if (offer) {
+      setShowOfferModal(true);
+      const discount = offer.discountValue ? offer.discountValue : 0;
+      const offerPrice = totalPrice - (totalPrice * discount) / 100;
+      const newFinalPrice = offerPrice + convenienceFee;
+      setFinalPrice(newFinalPrice);
+      setSelectedPaymentMethods(offer.paymentMethod || "");
+    } else {
+      setShowOfferModal(false);
+      setFinalPrice(totalPrice + convenienceFee);
+      setSelectedPaymentMethods("");
+    }
+  };
+  
 
-      <Card
-        className="rounded-lg border-0"
-        style={{
-          boxShadow: "0px 6px 18px rgba(0, 0, 0, 0.1)",
-          borderRadius: "12px",
-          backgroundColor: "#f8f9fa", // Light background
-        }}
-      >
-        <Card.Body>
-          <Row>
-            <Col className="text-center mb-4">
-              <div
+  if (loading || isBookingLoading || offersLoading) return <Loader />;
+
+  return (
+    <>
+      <Container className="mt-5">
+        <Row>
+          {offers && offers.length > 0 && (
+            <Col md={4} className="mb-4">
+              <Card
+                className="rounded-lg border-0"
                 style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  marginBottom: "20px",
+                  boxShadow: "0px 6px 18px rgba(0, 0, 0, 0.1)",
+                  borderRadius: "12px",
+                  backgroundColor: "#ffffff",
+                  padding: "20px",
                 }}
               >
-                <FaFilm
-                  style={{
-                    fontSize: "2.5rem",
-                    color: "#e63946",
-                    marginRight: "12px",
-                  }} />
                 <h4
+                  className="text-center mb-4"
                   style={{
-                    fontWeight: "400",
-                    color: "#2c3e50", // Darker text for professionalism
-                    textTransform: "uppercase",
+                    fontSize: "22px",
+                    fontWeight: "600",
+                    color: "#4e89ae",
+                    borderBottom: "2px solid #e3f2fd",
+                    paddingBottom: "10px",
                   }}
                 >
-                  {movieTitle}
+                  Exclusive Offers
                 </h4>
-              </div>
-            </Col>
-          </Row>
-          <Row className="mb-4">
-            <Col>
-              <p
-                style={{
-                  fontSize: "16px",
-                  color: "#6c757d",
-                  display: "flex",
-                  alignItems: "center",
-                }}
-              >
-                <FaTicketAlt style={{ color: "#457b9d", marginRight: "8px" }} />
-                {theaterName}
-              </p>
-            </Col>
-            <Col>
-              <p
-                style={{
-                  fontSize: "16px",
-                  color: "#6c757d",
-                  display: "flex",
-                  alignItems: "center",
-                }}
-              >
-                <FaRegCalendarAlt
-                  style={{ color: "#457b9d", marginRight: "8px" }} />
-                {formattedDate}
-              </p>
-            </Col>
-          </Row>
-          <Row className="mb-4">
-            <Col>
-              <p style={{ fontWeight: "500", color: "#1d3557", fontSize: "16px" }}>Seats:</p>
-              <p style={{ color: "#6c757d", fontSize: "16px" }}>
-                {selectedSeats.length > 0
-                  ? selectedSeats.join(", ")
-                  : "No seats selected"}
-              </p>
-            </Col>
-          </Row>
-          <hr />
-          <Row className="mb-4">
-            <Col>
-              <p
-                style={{
-                  fontSize: "16px",
-                  color: "#1d3557",
-                  fontWeight: "500",
-                }}
-              >
-                Total Price (excluding convenience fee):{" "}
-                <strong>Rs. {totalPrice}</strong>
-              </p>
-              <p
-                style={{
-                  fontSize: "16px",
-                  color: "#1d3557",
-                  fontWeight: "500",
-                }}
-              >
-                Convenience Fee (10%):{" "}
-                <strong>Rs. {convenienceFee.toFixed(2)}</strong>
-              </p>
-              <hr />
-              <p
-                style={{
-                  fontWeight: "600",
-                  fontSize: "1.25rem",
-                  color: "#1d3557",
-                }}
-              >
-                Amount Payable:{" "}
-                <span style={{ color: "#e63946" }}>
-                  Rs. {finalPrice.toFixed(2)}
-                </span>
-              </p>
-            </Col>
-          </Row>
 
-          {/* Loading state */}
-          {loading || isLoading && <Loader />}
+                <div>
+                  {offers.map((offer: Offer, index: number) => (
+                    <div
+                      key={index}
+                      className={`offer-card ${
+                        selectedOffer === offer ? "selected" : ""
+                      }`}
+                      style={{
+                        marginBottom: "15px",
+                        padding: "15px",
+                        border: `2px solid ${
+                          selectedOffer === offer ? "#4e89ae" : "#e3f2fd"
+                        }`,
+                        borderRadius: "12px",
+                        backgroundColor: "#f8f9fa",
+                        cursor: "pointer",
+                        transition: "all 0.3s ease",
+                        position: "relative",
+                        boxShadow:
+                          selectedOffer === offer
+                            ? "0px 6px 18px rgba(0, 0, 0, 0.15)"
+                            : "none",
+                      }}
+                      onClick={() => handleOfferSelect(selectedOffer === offer ? null : offer)}
+                    >
+                      {/* Custom Radio Indicator */}
+                      <div
+                        style={{
+                          position: "absolute",
+                          top: "15px",
+                          right: "15px",
+                          height: "20px",
+                          width: "20px",
+                          borderRadius: "50%",
+                          border: `2px solid ${
+                            selectedOffer === offer
+                              ? "rgb(135 135 135)"
+                              : "#e3f2fd"
+                          }`,
+                          backgroundColor:
+                            selectedOffer === offer ? "#4e89ae" : "white",
+                          transition: "all 0.3s ease",
+                        }}
+                      />
 
-          {/* Proceed Button */}
-          {!paymentMethod && (
-            <div className="text-center">
-              <Button
-                variant="primary"
-                size="lg"
-                className="px-5 py-3"
-                onClick={() => setShowModal(true)}
-                style={{
-                  background: "#4e89ae", // Professional, soft blue
-                  border: "none",
-                  borderRadius: "8px",
-                  color: "white",
-                  width: "250px",
-                  fontSize: "17px",
-                }}
+                      <h5
+                        style={{
+                          fontSize: "18px",
+                          fontWeight: "500",
+                          color: "#1d3557",
+                          marginBottom: "5px",
+                          textDecoration: "none",
+                        }}
+                      >
+                        {offer.offerName}
+                      </h5>
+                      <p
+                        style={{
+                          fontSize: "14px",
+                          color: "#6c757d",
+                          marginBottom: "4px",
+                        }}
+                      >
+                        Payment Method: {offer.paymentMethod}
+                      </p>
+                      <p
+                        style={{
+                          fontSize: "14px",
+                          color: "#2a9d8f",
+                          fontWeight: "600",
+                        }}
+                      >
+                        {offer.discountValue
+                          ? `Discount: ${offer.discountValue}%`
+                          : "Special Offer"}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+
+              <Modal
+                show={showOfferModal}
+                onHide={() => setShowOfferModal(false)}
+                centered
               >
-                Proceed to Payment
-              </Button>
-            </div>
+                <Modal.Header closeButton>
+                  <Modal.Title>Offer Details</Modal.Title>
+                </Modal.Header>
+                {selectedOffer && (
+                  <Modal.Body>
+                    <h5
+                      style={{
+                        fontSize: "18px",
+                        fontWeight: "600",
+                        color: "#1d3557",
+                        marginBottom: "10px",
+                      }}
+                    >
+                      {selectedOffer.offerName} - {selectedOffer.paymentMethod}
+                    </h5>
+                    <p style={{ fontSize: "14px", color: "#6c757d" }}>
+                      {selectedOffer.description}
+                    </p>
+                    <p
+                      style={{
+                        fontSize: "14px",
+                        color: "#457b9d",
+                        marginTop: "20px",
+                      }}
+                    >
+                      Validity:{" "}
+                      {new Date(
+                        selectedOffer.validityStart
+                      ).toLocaleDateString()}{" "}
+                      -{" "}
+                      {new Date(selectedOffer.validityEnd).toLocaleDateString()}
+                    </p>
+                    <p
+                      style={{
+                        fontSize: "14px",
+                        color: "#2a9d8f",
+                        fontWeight: "600",
+                      }}
+                    >
+                      {selectedOffer.discountValue
+                        ? `Discount: ${selectedOffer.discountValue}%`
+                        : "Special Offer"}
+                    </p>
+                  </Modal.Body>
+                )}
+              </Modal>
+            </Col>
           )}
 
-          {/* Payment Method Modal */}
-          <Modal show={showModal} onHide={() => setShowModal(false)} centered>
-            <Modal.Header closeButton>
-              <Modal.Title>Select Payment Method</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              <Button
-                variant="outline-primary"
-                className="w-100 mb-3"
-                onClick={handleRazorpayPayment}
-                style={{ fontSize: "16px", padding: "12px" }}
-              >
-                Pay with Razorpay
-              </Button>
-              <Button
-                variant="outline-success"
-                className="w-100 mb-3"
-                onClick={() => handleProceed("paypal")}
-                style={{ fontSize: "16px", padding: "12px" }}
-              >
-                Pay with PayPal
-              </Button>
-              <Button
-                variant="outline-info"
-                className="w-100"
-                onClick={handleWalletPayment}
-                disabled={insufficientFunds}
-                style={{ fontSize: "16px", padding: "12px" }}
-              >
-                Pay with Wallet
-              </Button>
-            </Modal.Body>
-          </Modal>
+          <Col md={8}>
+            <Card
+              className="rounded-lg border-0"
+              style={{
+                boxShadow: "0px 6px 18px rgba(0, 0, 0, 0.1)",
+                borderRadius: "12px",
+                backgroundColor: "#f8f9fa",
+              }}
+            >
+              <Card.Body>
+                <Row>
+                  <Col className="text-center mb-4">
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        marginBottom: "20px",
+                      }}
+                    >
+                      <FaFilm
+                        style={{
+                          fontSize: "2.5rem",
+                          color: "#e63946",
+                          marginRight: "12px",
+                        }}
+                      />
+                      <h4
+                        style={{
+                          fontWeight: "400",
+                          color: "#2c3e50",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        {movieTitle}
+                      </h4>
+                    </div>
+                  </Col>
+                </Row>
+                <Row className="mb-4">
+                  <Col>
+                    <p
+                      style={{
+                        fontSize: "16px",
+                        color: "#6c757d",
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                    >
+                      <FaTicketAlt
+                        style={{ color: "#457b9d", marginRight: "8px" }}
+                      />
+                      {theaterName}
+                    </p>
+                  </Col>
+                  <Col>
+                    <p
+                      style={{
+                        fontSize: "16px",
+                        color: "#6c757d",
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                    >
+                      <FaRegCalendarAlt
+                        style={{ color: "#457b9d", marginRight: "8px" }}
+                      />
+                      {formattedDate}
+                    </p>
+                  </Col>
+                </Row>
+                <Row className="mb-4">
+                  <Col>
+                    <p
+                      style={{
+                        fontWeight: "500",
+                        color: "#1d3557",
+                        fontSize: "16px",
+                      }}
+                    >
+                      Seats:
+                    </p>
+                    <p style={{ color: "#6c757d", fontSize: "16px" }}>
+                      {selectedSeats.length > 0
+                        ? selectedSeats.join(", ")
+                        : "No seats selected"}
+                    </p>
+                  </Col>
+                </Row>
+                <hr />
+                <Row className="mb-4">
+                  <Col>
+                    <p
+                      style={{
+                        fontSize: "16px",
+                        color: "#1d3557",
+                        fontWeight: "500",
+                      }}
+                    >
+                      Total Price (excluding convenience fee):{" "}
+                      <strong>Rs. {totalPrice}</strong>
+                    </p>
+                    <p
+                      style={{
+                        fontSize: "16px",
+                        color: "#1d3557",
+                        fontWeight: "500",
+                      }}
+                    >
+                      Convenience Fee (10%):{" "}
+                      <strong>Rs. {convenienceFee.toFixed(2)}</strong>
+                    </p>
+                    <hr />
+                    <p
+                      style={{
+                        fontWeight: "600",
+                        fontSize: "1.25rem",
+                        color: "#1d3557",
+                      }}
+                    >
+                      Amount Payable:{" "}
+                      <span style={{ color: "#e63946" }}>
+                        Rs. {finalPrice.toFixed(2)}
+                      </span>
+                    </p>
+                  </Col>
+                </Row>
 
-          {paymentMethod === "paypal" && (
-            <div className="mt-3">
-              <PayPalScriptProvider
-                options={{
-                  clientId: "AXyOd3ZlDDoSe8nOeC_frUV-ZpEkIgzQtECddqkh91w04xHxYdsZr8LXxIzKHq0_Tnk87DQlR0UaEitm",
-                  currency: "USD",
-                }}
-              >
-                <PayPalButtons
-                  createOrder={(_data, actions) => {
-                    setPaymentMethod("paypal");
-                    return actions.order
-                      .create({
-                        purchase_units: [
-                          {
-                            amount: {
-                              value: finalPrice.toString(),
-                              currency_code: "USD",
-                            },
-                          },
-                        ],
-                        intent: "CAPTURE",
-                      })
-                      .catch((error) => {
-                        console.error("Error creating order:", error);
-                        return Promise.reject(error);
-                      });
-                  } }
-                  onApprove={async (_data, actions) => {
-                    if (actions.order) {
-                      try {
-                        const details = await actions.order.capture();
-                        console.log("PayPal Payment Details:", details);
+                {/* Proceed Button */}
+                {!paymentMethod && (
+                  <div className="text-center">
+                    <Button
+                      variant="primary"
+                      size="lg"
+                      className="px-5 py-3"
+                      onClick={() => setShowModal(true)}
+                      style={{
+                        background: "#4e89ae",
+                        border: "none",
+                        borderRadius: "8px",
+                        color: "white",
+                        width: "250px",
+                        fontSize: "17px",
+                      }}
+                    >
+                      Proceed to Payment
+                    </Button>
+                  </div>
+                )}
 
-                        Swal.fire(
-                          "Payment Successful",
-                          "Your PayPal payment has been completed.",
-                          "success"
-                        );
+                <Modal
+                  show={showModal}
+                  onHide={() => setShowModal(false)}
+                  centered
+                >
+                  <Modal.Header closeButton>
+                    <Modal.Title>Select Payment Method</Modal.Title>
+                  </Modal.Header>
+                  <Modal.Body>
+                    {selectedPaymentMethods ? (
+                      // Render modal with a specific payment method
+                      <>
+                        {selectedPaymentMethods === "Razorpay" && (
+                          <Button
+                            variant="outline-primary"
+                            className="w-100 mb-3"
+                            onClick={handleRazorpayPayment}
+                            style={{ fontSize: "16px", padding: "12px" }}
+                          >
+                            Pay with Razorpay
+                          </Button>
+                        )}
+                        {selectedPaymentMethods === "Paypal" && (
+                          <Button
+                            variant="outline-success"
+                            className="w-100 mb-3"
+                            onClick={() => handleProceed("paypal")}
+                            style={{ fontSize: "16px", padding: "12px" }}
+                          >
+                            Pay with PayPal
+                          </Button>
+                        )}
+                        {selectedPaymentMethods === "Wallet" && (
+                          <Button
+                            variant="outline-info"
+                            className="w-100"
+                            onClick={handleWalletPayment}
+                            disabled={insufficientFunds}
+                            style={{ fontSize: "16px", padding: "12px" }}
+                          >
+                            Pay with Wallet
+                          </Button>
+                        )}
+                      </>
+                    ) : (
+                      // Render modal with all payment methods
+                      <>
+                        <Button
+                          variant="outline-primary"
+                          className="w-100 mb-3"
+                          onClick={handleRazorpayPayment}
+                          style={{ fontSize: "16px", padding: "12px" }}
+                        >
+                          Pay with Razorpay
+                        </Button>
+                        <Button
+                          variant="outline-success"
+                          className="w-100 mb-3"
+                          onClick={() => handleProceed("paypal")}
+                          style={{ fontSize: "16px", padding: "12px" }}
+                        >
+                          Pay with PayPal
+                        </Button>
+                        <Button
+                          variant="outline-info"
+                          className="w-100"
+                          onClick={handleWalletPayment}
+                          disabled={insufficientFunds}
+                          style={{ fontSize: "16px", padding: "12px" }}
+                        >
+                          Pay with Wallet
+                        </Button>
+                      </>
+                    )}
+                  </Modal.Body>
+                </Modal>
 
-                        await handleCreateBooking("paypal");
+                {paymentMethod === "paypal" && (
+                  <div className="mt-3">
+                    <PayPalScriptProvider
+                      options={{
+                        clientId:
+                          "AXyOd3ZlDDoSe8nOeC_frUV-ZpEkIgzQtECddqkh91w04xHxYdsZr8LXxIzKHq0_Tnk87DQlR0UaEitm",
+                        currency: "USD",
+                      }}
+                    >
+                      <PayPalButtons
+                        createOrder={(_data, actions) => {
+                          setPaymentMethod("paypal");
+                          return actions.order
+                            .create({
+                              purchase_units: [
+                                {
+                                  amount: {
+                                    value: finalPrice.toString(),
+                                    currency_code: "USD",
+                                  },
+                                },
+                              ],
+                              intent: "CAPTURE",
+                            })
+                            .catch((error) => {
+                              console.error("Error creating order:", error);
+                              return Promise.reject(error);
+                            });
+                        }}
+                        onApprove={async (_data, actions) => {
+                          if (actions.order) {
+                            try {
+                              const details = await actions.order.capture();
+                              console.log("PayPal Payment Details:", details);
 
-                        navigate("/thankyou", {
-                          state: {
-                            paymentId: details.id,
-                            paymentDetails: details,
-                          },
-                        });
-                      } catch (error) {
-                        console.error("Error capturing PayPal order:", error);
-                        Swal.fire(
-                          "Payment Error",
-                          "There was an issue processing your payment. Please try again.",
-                          "error"
-                        );
-                      }
-                    } else {
-                      Swal.fire(
-                        "Payment Error",
-                        "PayPal payment could not be processed. Please try again.",
-                        "error"
-                      );
-                    }
-                  } }
-                  onError={(error) => {
-                    console.error("PayPal Buttons error:", error);
-                    Swal.fire(
-                      "Payment Error",
-                      "An error occurred during payment. Please try again.",
-                      "error"
-                    );
-                  } } />
-              </PayPalScriptProvider>
-            </div>
-          )}
-        </Card.Body>
-      </Card>
-    </Container><Footer /></>
+                              Swal.fire(
+                                "Payment Successful",
+                                "Your PayPal payment has been completed.",
+                                "success"
+                              );
+
+                              await handleCreateBooking("paypal");
+
+                              navigate("/thankyou", {
+                                state: {
+                                  paymentId: details.id,
+                                  paymentDetails: details,
+                                },
+                              });
+                            } catch (error) {
+                              console.error(
+                                "Error capturing PayPal order:",
+                                error
+                              );
+                              Swal.fire(
+                                "Payment Error",
+                                "There was an issue processing your payment. Please try again.",
+                                "error"
+                              );
+                            }
+                          } else {
+                            Swal.fire(
+                              "Payment Error",
+                              "PayPal payment could not be processed. Please try again.",
+                              "error"
+                            );
+                          }
+                        }}
+                        onError={(error) => {
+                          console.error("PayPal Buttons error:", error);
+                          Swal.fire(
+                            "Payment Error",
+                            "An error occurred during payment. Please try again.",
+                            "error"
+                          );
+                        }}
+                      />
+                    </PayPalScriptProvider>
+                  </div>
+                )}
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+      </Container>
+
+      <Footer />
+    </>
   );
 };
 
