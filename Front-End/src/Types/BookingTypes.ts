@@ -49,12 +49,40 @@ export interface User {
   }
 
   export interface Ticket {
-    bookingId: string;
-    movieId: string;
-    theaterName: string;
-    screenName: string;
-    seats: string[];
-    bookingTime: string;
-    paymentStatus: string;
+    ticket: {
+      bookingId: string;
+      movieId: string;
+      theaterName: string;
+      screenName: string;
+      seats: string[];
+      bookingTime: string;
+      paymentStatus: string;
+      userName: string; // Add missing fields
+      userEmail: string;
+      images: string[];
+      showTime: string;
+      paymentMethod: string;
+    };
+    movieDetails: {
+      poster: string; // Ensure this matches your actual data structure
+    };
+  }  
+  
+  export interface Ticket2 {
+      bookingId: string;
+      movieId: string;
+      theaterName: string;
+      screenName: string;
+      seats: string[];
+      bookingTime: string;
+      paymentStatus: string;
+      userName: string; // Add missing fields
+      userEmail: string;
+      images: string[];
+      showTime: string;
+      paymentMethod: string;
+    movieDetails: {
+      poster: string;
+    };
   }
   

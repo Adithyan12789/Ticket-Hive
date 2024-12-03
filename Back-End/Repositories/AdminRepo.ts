@@ -3,6 +3,7 @@ import User, { IUser } from "../Models/UserModel";
 import TheaterOwner, { ITheaterOwner } from "../Models/TheaterOwnerModel";
 import Theater from "../Models/TheaterDetailsModel";
 import mongoose from "mongoose";
+import { Booking } from "../Models/bookingModel";
 
 dotenv.config();
 
@@ -37,6 +38,13 @@ class AdminRepository {
       console.error("Error fetching theater owners:", error);
       throw new Error("Error fetching theater owners");
     }
+  }
+
+  public static async findAllBookings(): Promise<any[]> {
+    return await Booking.find({})
+      .populate("user", "name email")
+      .populate("movie theater screen offer")
+      .lean();
   }
 
   public static async updateUser(
@@ -120,6 +128,7 @@ class AdminRepository {
       throw new Error("Error saving Theater");
     }
   }
+  
 }
 
 export default AdminRepository;

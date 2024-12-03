@@ -44,10 +44,9 @@ router.put('/movie-edit/:id',
 
 router.delete('/movie-delete/:id',AdminAuthMiddleware.protect, MovieController.deleteMovieHandler);
 
-router.get('/getAlltickets', AdminAuthMiddleware.protect, BookingController.getAllTickets);
+router.get('/getAlltickets', AdminAuthMiddleware.protect, AdminController.getAllTickets);
 router.get("/tickets/:ticketId", AdminAuthMiddleware.protect, BookingController.getTicketDetails);
 router.put("/tickets/:ticketId", AdminAuthMiddleware.protect, BookingController.updateTicket);
-router.get('/get-tickets/:userId', AdminAuthMiddleware.protect, BookingController.getAllTickets);
 router.get("/theater/:theaterId/bookings", AdminAuthMiddleware.protect, BookingController.getTheaterBookings);
 router.patch('/statusChange/:bookingId', AdminAuthMiddleware.protect, BookingController.updateBookingStatus);
 

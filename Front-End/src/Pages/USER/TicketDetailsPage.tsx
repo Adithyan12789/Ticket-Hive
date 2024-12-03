@@ -40,7 +40,7 @@ const TicketDetailsScreen: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
 
   const ticket = data?.tickets?.find(
-    (t: TicketEntry) => t.ticket.bookingId === bookingId
+    (t: TicketEntry) => t.ticket.ticket.bookingId === bookingId
   );
 
   const [loading, setLoading] = useState<boolean>(true);

@@ -29,6 +29,7 @@
     "axios": "^1.7.7",
     "bcryptjs": "^2.4.3",
     "busboy": "^1.6.0",
+    "chart.js": "^4.4.7",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
@@ -49,6 +50,7 @@
     "paypal": "^1.0.1",
     "razorpay": "^2.9.5",
     "react": "^18.3.1",
+    "react-chartjs-2": "^5.2.0",
     "react-datepicker": "^7.5.0",
     "react-dom": "^18.3.1",
     "react-google-login": "^5.2.2",
@@ -61,6 +63,7 @@
     "react-slick": "^0.30.2",
     "react-table": "^7.8.0",
     "react-time-picker": "^7.0.0",
+    "recharts": "^2.13.3",
     "slick-carousel": "^1.8.1",
     "sweetalert2": "^11.14.4",
     "uuid": "^11.0.3"

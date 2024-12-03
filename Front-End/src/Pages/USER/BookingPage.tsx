@@ -163,7 +163,7 @@ const BookingPage: React.FC = () => {
   const offerId = selectedOffer?._id;
 
   console.log("offerI: ", offerId);
-  
+
   const handleCreateBooking = async (method: string) => {
     try {
       console.log("entered to booking function");
@@ -249,7 +249,7 @@ const BookingPage: React.FC = () => {
 
   const handleOfferSelect = (offer: Offer | null) => {
     setSelectedOffer(offer);
-  
+
     if (offer) {
       setShowOfferModal(true);
       const discount = offer.discountValue ? offer.discountValue : 0;
@@ -263,7 +263,6 @@ const BookingPage: React.FC = () => {
       setSelectedPaymentMethods("");
     }
   };
-  
 
   if (loading || isBookingLoading || offersLoading) return <Loader />;
 
@@ -318,7 +317,11 @@ const BookingPage: React.FC = () => {
                             ? "0px 6px 18px rgba(0, 0, 0, 0.15)"
                             : "none",
                       }}
-                      onClick={() => handleOfferSelect(selectedOffer === offer ? null : offer)}
+                      onClick={() =>
+                        handleOfferSelect(
+                          selectedOffer === offer ? null : offer
+                        )
+                      }
                     >
                       {/* Custom Radio Indicator */}
                       <div
@@ -554,6 +557,18 @@ const BookingPage: React.FC = () => {
                       <span style={{ color: "#e63946" }}>
                         Rs. {finalPrice.toFixed(2)}
                       </span>
+                    </p>
+                    <p
+                      style={{
+                        fontSize: "16px",
+                        color: "#28a745",
+                        fontWeight: "500",
+                        marginTop: "10px",
+                      }}
+                    >
+                      <strong>
+                        Use your wallet to pay and get 10% cashback!
+                      </strong>
                     </p>
                   </Col>
                 </Row>

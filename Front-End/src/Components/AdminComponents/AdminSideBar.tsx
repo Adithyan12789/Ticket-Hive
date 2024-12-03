@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { FaHome, FaFilm, FaUsers, FaTicketAlt, FaTag, FaCogs, FaCheck } from "react-icons/fa";
+import { FaHome, FaFilm, FaUsers, FaTicketAlt, FaCogs, FaCheck } from "react-icons/fa";
 import "./AdminSidebar.css";
 import { AdminSidebarProps } from "../../Types/AdminTypes";
 import { MdMovie } from "react-icons/md";
@@ -37,11 +37,6 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ adminName }) => {
         <li>
           <NavLink to="/admin/bookings" className={({ isActive }) => (isActive ? "active" : "")}>
             <FaTicketAlt className="sidebar-icon" /> Bookings
-          </NavLink>
-        </li>
-        <li>
-          <NavLink to="/admin/coupons" className={({ isActive }) => (isActive ? "active" : "")}>
-            <FaTag className="sidebar-icon" /> Coupon Management
           </NavLink>
         </li>
         <li>

@@ -7,6 +7,7 @@ import { Movie } from "../Models/MoviesModel";
 import { CustomRequest } from "../Middlewares/AuthMiddleware";
 import WalletService from "../Services/WalletService";
 import WalletRepo from "../Repositories/WalletRepo";
+import { Offer } from "../Models/OffersModel";
 
 class BookingController {
   createBooking = asyncHandler(
@@ -121,6 +122,9 @@ class BookingController {
       try {
         const tickets = await BookingService.getAllTicketsService();
 
+        console.log("tickets: ", tickets);
+        
+
         if (!tickets || tickets.length === 0) {
           res.status(404).json({ message: "No tickets found for this user" });
           return;
@@ -129,6 +133,7 @@ class BookingController {
         const ticketsWithMovieDetails = await Promise.all(
           tickets.map(async (ticket: { movieId: string }) => {
             const movie = await Movie.findById(ticket.movieId).exec();
+            
             return {
               ticket,
               movieDetails: movie

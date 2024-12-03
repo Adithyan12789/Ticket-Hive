@@ -40,55 +40,62 @@ const CitiesModal: React.FC<CitiesModalProps> = ({
 
   const itemsPerPage = 12;
 
-  const fetchUserLocation = async () => {
-    setLoading(true);
-  
-    if (!navigator.geolocation) {
-      setUserLocation((prev) => ({
-        ...prev,
-        city: "Geolocation not supported",
-      }));
-      setLoading(false);
-      return;
-    }
-  
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords;
-  
-        try {
-          const response = await fetch(
-            `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
-          );
-          const data = await response.json();
-          const cityName = data.city || "Unknown Location";
-  
-          setUserLocation({
-            city: cityName,
-            latitude,
-            longitude,
-          });
-  
-          await saveUserLocation({ city: cityName, latitude, longitude }).unwrap();
-        } catch (err) {
-          console.log("err: ", err);
-          setUserLocation((prev) => ({
-            ...prev,
-            city: "Failed to fetch location",
-          }));
-        } finally {
-          setLoading(false);
-        }
-      },
-      () => {
+  useEffect(() => {
+    const fetchUserLocation = async () => {
+      setLoading(true);
+      if (!navigator.geolocation) {
         setUserLocation((prev) => ({
           ...prev,
-          city: "Location permission denied",
+          city: "Geolocation not supported",
         }));
         setLoading(false);
+        return;
       }
-    );
-  };  
+
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+
+          try {
+            const response = await fetch(
+              `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+            );
+            const data = await response.json();
+            const cityName = data.city || "Unknown Location";
+
+            setUserLocation({
+              city: cityName,
+              latitude,
+              longitude,
+            });
+
+            await saveUserLocation({
+              city: cityName,
+              latitude,
+              longitude,
+            }).unwrap();
+          } catch (err) {
+            console.log("err: ", err);
+            setUserLocation((prev) => ({
+              ...prev,
+              city: "Failed to fetch location",
+            }));
+          } finally {
+            setLoading(false);
+          }
+        },
+        () => {
+          setUserLocation((prev) => ({
+            ...prev,
+            city: "Location permission denied",
+          }));
+          setLoading(false);
+        }
+      );
+    };
+
+    fetchUserLocation();
+  }, [saveUserLocation]); // Empty dependency array ensures this runs only once on mount
 
   useEffect(() => {
     const fetchCities = async () => {
@@ -182,7 +189,9 @@ const CitiesModal: React.FC<CitiesModalProps> = ({
         handleCitySelect(city); // Call the parent handler to update the city
         handleClose();
       } else {
-        alert("Failed to fetch coordinates for the selected city. Please try again.");
+        alert(
+          "Failed to fetch coordinates for the selected city. Please try again."
+        );
       }
     } catch (err) {
       console.error("Error fetching coordinates for city:", err);
@@ -215,7 +224,7 @@ const CitiesModal: React.FC<CitiesModalProps> = ({
         </Form.Group>
         <Button
           variant="primary"
-          onClick={fetchUserLocation}
+          onClick={() => handleCitySelectInternal(userLocation.city)}
           className="mb-3 w-100"
         >
           Detect My Location
@@ -275,6 +284,5 @@ const CitiesModal: React.FC<CitiesModalProps> = ({
     </Modal>
   );
 };
-
 
 export default CitiesModal;

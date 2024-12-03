@@ -73,11 +73,14 @@ const MovieDetailScreen: React.FC = () => {
     isLoading: loadingReviews,
     refetch: refetchReviews,
   } = useGetReviewsQuery(id);
+
+  console.log("reviews: ", reviews);
+  
   
   const [addReview, { isLoading: addingReview }] = useAddReviewMutation();
 
-  useEffect(() => {
-    if (reviews) {
+    useEffect(() => {
+      if (reviews) {
       setReviewsState(reviews);
     }
   }, [reviews]);

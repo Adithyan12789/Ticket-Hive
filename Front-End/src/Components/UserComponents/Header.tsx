@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Navbar, Nav, Container, NavDropdown } from "react-bootstrap";
 import { FaSignInAlt, FaSignOutAlt } from "react-icons/fa";
 import { useSelector, useDispatch } from "react-redux";
@@ -23,8 +23,12 @@ const Header: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
 
-  const { data: profileData } = useGetUserProfileQuery(userInfo?.id);
+  const { data: profileData, refetch } = useGetUserProfileQuery(userInfo?.id);
   const [logoutApiCall] = useLogoutMutation();
+
+  useEffect(() => {
+    refetch()
+  }, [refetch, profileData])
 
   const [city, setCity] = useState<string>("");
 

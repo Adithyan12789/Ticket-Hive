@@ -79,6 +79,10 @@ const WalletPage: React.FC = () => {
     document.title = "Ticket Hive - Wallet";
   }, []);
 
+  useEffect(() => {
+    refetchTransactions();
+  }, [data, refetchTransactions]);
+
   const filteredTransactions =
     filterStatus === "all"
       ? transactions

@@ -3,6 +3,22 @@ import AdminRepository from "../Repositories/AdminRepo";
 import AdminTokenService from "../Utils/GenerateAdminToken";
 import { Request, Response } from "express";
 import nodemailer from "nodemailer";
+export interface BookingDetails {
+  totalPrice: number;
+  paymentStatus: string;
+  paymentMethod: string;
+  bookingDate: Date;
+  movie: any;
+  screen: any;
+  offer: any;
+  _id: string;
+  bookingId: string;
+  user: { _id: string; name: string; email: string };
+  theater: { _id: string; name: string; images: string[]; address: string };
+  showTime: string;
+  seats: string[];
+  status: "pending" | "completed" | "cancelled" | "failed";
+}
 
 const transporter = nodemailer.createTransport({
   service: "Gmail",
@@ -173,6 +189,35 @@ class AdminService {
       message
     );
     return { message: "Verification rejected and email sent." };
+  }
+
+  public async getAllTicketsService() {
+    const bookings = await AdminRepository.findAllBookings();
+
+    console.log("s bookings: ", bookings);
+    
+    if (!bookings.length) throw new Error("No tickets found");
+
+    return bookings.map((booking: BookingDetails) => ({
+      bookingId: booking._id,
+      userId: booking.user._id,
+      userName: booking.user.name,
+      userEmail: booking.user.email,
+      screenId: booking.screen._id,
+      movieId: booking.movie._id,
+      offerId: booking.offer?._id,
+      movieTitle: booking.movie.title,
+      theaterName: booking.theater.name,
+      images: booking.theater.images,
+      address: booking.theater.address,
+      screenName: booking.screen.screenNumber,
+      seats: booking.seats,
+      showTime: booking.showTime,
+      bookingDate: booking.bookingDate,
+      paymentStatus: booking.paymentStatus,
+      paymentMethod: booking.paymentMethod,
+      totalPrice: booking.totalPrice,
+    }));
   }
 
   public adminLogoutService(res: Response) {

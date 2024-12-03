@@ -2,6 +2,8 @@ import asyncHandler from "express-async-handler";
 import { NextFunction, Request, Response } from "express";
 import adminService from "../Services/AdminService";
 import expressAsyncHandler from "express-async-handler";
+import { Movie } from "../Models/MoviesModel";
+import { Offer } from "../Models/OffersModel";
 
 class AdminController {
   adminLogin = asyncHandler(
@@ -143,6 +145,62 @@ class AdminController {
       res.status(500).json({ message: "Server Error" });
     }
   });
+
+  getAllTickets = asyncHandler(
+    async (req: Request, res: Response): Promise<void> => {
+      try {
+        const tickets = await adminService.getAllTicketsService();
+
+        if (!tickets || tickets.length === 0) {
+          res.status(404).json({ message: "No tickets found for this user" });
+          return;
+        }
+
+        const ticketsWithMovieDetails = await Promise.all(
+          tickets.map(async (ticket: { movieId: string, offerId: string }) => {
+            const movie = await Movie.findById(ticket.movieId).exec();
+            const offer = await Offer.findById(ticket.offerId).exec();
+
+            console.log("offer: ", offer);
+            
+            return {
+              ticket,
+              movieDetails: movie
+                ? {
+                    title: movie.title,
+                    poster: movie.posters,
+                    duration: movie.duration,
+                    genre: movie.genres,
+                  }
+                : null,
+
+              offerDetails: offer
+                ? {
+                  offerName: offer.offerName,
+                  description: offer.description,
+                  discountValue: offer.discountValue,
+                  minPurchaseAmount: offer.minPurchaseAmount,
+                  validityStart: offer.validityStart,
+                  validityEnd: offer.validityEnd,
+                  }
+                : null,
+            };
+          })
+        );
+
+        res.status(200).json({
+          success: true,
+          tickets: ticketsWithMovieDetails,
+        });
+      } catch (error: unknown) {
+        res.status(500).json({
+          success: false,
+          message: "Failed to retrieve tickets",
+          error: error instanceof Error ? error.message : "Unknown error",
+        });
+      }
+    }
+  );
 
   adminLogout = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {

@@ -138,8 +138,12 @@ class OffersService {
   }
 
   public async getOffersService(): Promise<IOffer[]> {
+    const currentDate = new Date();
+    
+    await Offer.deleteMany({ validUntil: { $lt: currentDate } });
     return Offer.find();
   }
+  
 }
 
 export default new OffersService();

@@ -16,18 +16,18 @@ import { useGetBookingDetailsQuery } from "../../Slices/UserApiSlice";
 import { RootState } from "../../Store";
 import UserNavBar from "../../Components/UserComponents/UserNavBar";
 import { MovieManagement } from "../../Types/MoviesTypes";
-import { Ticket } from "../../Types/BookingTypes";
+import { Ticket2 } from "../../Types/BookingTypes";
 
 interface TicketEntry {
   movieDetails: MovieManagement;
-  ticket: Ticket;
+  ticket: Ticket2;
 }
 
 const TicketsScreen: React.FC = () => {
   const navigate = useNavigate();
   const { userInfo } = useSelector((state: RootState) => state.auth);
 
-  const { data, isLoading } = useGetBookingDetailsQuery(userInfo?.id);
+  const { data, isLoading, refetch } = useGetBookingDetailsQuery(userInfo?.id);
   const tickets: TicketEntry[] = data?.tickets || [];
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -38,7 +38,11 @@ const TicketsScreen: React.FC = () => {
 
   useEffect(() => {
     document.title = "Ticket Hive - Booking Details";
-  }, []);
+  }, []);  
+  
+  useEffect(() => {
+    refetch()
+  }, [refetch, data]);
 
   useEffect(() => {
     const timer = setTimeout(() => {

@@ -76,6 +76,8 @@ class BookingService {
 
   public async getAllTicketsService() {
     const bookings = await BookingRepo.findAllBookings();
+
+    console.log("s bookings: ", bookings);
     
     if (!bookings.length) throw new Error("No tickets found");
 
