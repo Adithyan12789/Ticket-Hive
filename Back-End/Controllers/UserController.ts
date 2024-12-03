@@ -10,10 +10,108 @@ import { Movie } from "../Models/MoviesModel";
 import { Booking } from "../Models/bookingModel";
 
 class UserController {
+  // authUser = asyncHandler(
+  //   async (req: Request, res: Response): Promise<void> => {
+  //     console.log("header: ",req.header);
+
+  //     const { email, password } = req.body;
+
+  //     if (!email || !password) {
+  //       res.status(400).json({ message: "Email and password are required" });
+  //       return;
+  //     }
+
+  //     try {
+  //       const user = await UserService.authenticateUser(email, password);
+
+  //       const accessToken = TokenService.generateToken(res, user._id.toString());
+
+  //       res.status(200).json({
+  //         id: user._id,
+  //         name: user.name,
+  //         email: user.email,
+  //         token: accessToken,
+  //       });
+  //     } catch (err: unknown) {
+  //       if (err instanceof Error) {
+  //         if (err.message === "Your account is blocked") {
+  //           res.status(401).json({
+  //             message: "Your account is blocked. Please contact support.",
+  //           });
+  //         } else if (err.message === "Invalid Email or Password") {
+  //           res.status(401).json({ message: "Invalid email or password" });
+  //         } else {
+  //           res
+  //             .status(500)
+  //             .json({ message: "An error occurred during authentication" });
+  //         }
+  //       } else {
+  //         res
+  //           .status(500)
+  //           .json({ message: "An error occurred during authentication" });
+  //       }
+  //     }
+  //   }
+  // );
+
+  refreshToken = async (req: Request, res: Response) => {
+    // Log to check if cookies are being sent
+    console.log("Request Cookies:", req.cookies);
+
+    const refreshToken = req.cookies["jwt_refresh"]; // Ensure it's the correct name
+
+    // Check if refresh token exists
+    if (!refreshToken) {
+      res.status(401).json({ message: "No refresh token provided" });
+      return;
+    }
+
+    // Verify the refresh token using TokenService
+    const decoded = TokenService.verifyRefreshToken(refreshToken);
+
+    // Log to check the decoded token (this will give you insights if it's null or malformed)
+    console.log("Decoded Token:", decoded);
+
+    if (!decoded || typeof decoded === 'string') {
+      res.status(401).json({ message: "Invalid or expired refresh token" });
+      return;
+  }
+
+    // Find the user using the userId from the decoded token
+    try {
+      const user = await User.findById(decoded.userId);
+
+      // Log user object to ensure it's being fetched
+      console.log("Found User:", user);
+
+      if (!user) {
+        res.status(404).json({ message: "User not found" });
+        return;
+      }
+
+      // Generate new access token
+      const newAccessToken = TokenService.generateAccessToken(
+        user._id.toString()
+      );
+
+      // Set the new access token in cookies
+      res.cookie("jwt_access", newAccessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV !== "development",
+        sameSite: "strict",
+        maxAge: 15 * 60 * 1000, // 15 minutes
+      });
+
+      res.status(200).json({ message: "Token refreshed successfully" });
+    } catch (error) {
+      // Handle errors during user lookup (database issues, etc.)
+      console.error("Error finding user:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  };
+
   authUser = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
-      console.log("header: ",req.header);
-       
       const { email, password } = req.body;
 
       if (!email || !password) {
@@ -24,13 +122,18 @@ class UserController {
       try {
         const user = await UserService.authenticateUser(email, password);
 
-        const accessToken = TokenService.generateToken(res, user._id.toString());
+        const { accessToken, refreshToken } = TokenService.generateTokens(
+          res,
+          user._id.toString()
+        );
 
+        // Send tokens along with the user data
         res.status(200).json({
           id: user._id,
-          name: user.name,  
+          name: user.name,
           email: user.email,
-          token: accessToken,
+          accessToken, // Add accessToken here
+          refreshToken, // Add refreshToken here
         });
       } catch (err: unknown) {
         if (err instanceof Error) {
@@ -54,46 +157,6 @@ class UserController {
     }
   );
 
-
-  // authUser = asyncHandler(
-  //   async (req: Request, res: Response): Promise<void> => {
-  //     const { email, password } = req.body;
-  
-  //     if (!email || !password) {
-  //       res.status(400).json({ message: "Email and password are required" });
-  //       return;
-  //     }
-  
-  //     try {
-  //       const user = await UserService.authenticateUser(email, password);
-  
-  //       // Generate both access and refresh tokens
-  //       TokenService.generateTokens(res, user._id.toString());
-  
-  //       res.status(200).json({
-  //         id: user._id,
-  //         name: user.name,
-  //         email: user.email,
-  //       });
-  //     } catch (err: unknown) {
-  //       if (err instanceof Error) {
-  //         if (err.message === "Your account is blocked") {
-  //           res.status(401).json({
-  //             message: "Your account is blocked. Please contact support.",
-  //           });
-  //         } else if (err.message === "Invalid Email or Password") {
-  //           res.status(401).json({ message: "Invalid email or password" });
-  //         } else {
-  //           res.status(500).json({ message: "An error occurred during authentication" });
-  //         }
-  //       } else {
-  //         res.status(500).json({ message: "An error occurred during authentication" });
-  //       }
-  //     }
-  //   }
-  // );
-  
-
   googleLogin = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
       const { googleName: name, googleEmail: email } = req.body;
@@ -107,7 +170,7 @@ class UserController {
         let user = await User.findOne({ email });
 
         if (user) {
-          TokenService.generateToken(res, user._id.toString());
+          TokenService.generateTokens(res, user._id.toString());
           res.status(200).json({
             success: true,
             data: {
@@ -125,7 +188,7 @@ class UserController {
             password: "",
           });
           if (user) {
-            TokenService.generateToken(res, user._id.toString());
+            TokenService.generateTokens(res, user._id.toString());
             res.status(201).json({
               success: true,
               data: {
@@ -146,6 +209,49 @@ class UserController {
     }
   );
 
+  // registerUser = asyncHandler(
+  //   async (req: Request, res: Response): Promise<void> => {
+  //     const { name, email, password, phone } = req.body;
+
+  //     try {
+  //       const user = await UserService.registerUserService(
+  //         name,
+  //         email,
+  //         password,
+  //         phone
+  //       );
+  //       const otpSent = !user.otpVerified;
+  //       res.status(201).json({
+  //         id: user._id.toString(),
+  //         name: user.name,
+  //         email: user.email,
+  //         otpSent,
+  //         message: otpSent
+  //           ? "User registered successfully. OTP sent."
+  //           : "User already registered but OTP not verified.",
+  //       });
+  //     } catch (err: unknown) {
+  //       if (err instanceof Error) {
+  //         if (err.message === "Email already exists.") {
+  //           res
+  //             .status(400)
+  //             .json({ message: "User with this email already exists" });
+  //         } else if (err.message === "Email exists but OTP is not verified.") {
+  //           res
+  //             .status(400)
+  //             .json({ message: "Email exists but OTP is not verified." });
+  //         } else {
+  //           res
+  //             .status(500)
+  //             .json({ message: "An error occurred during registration" });
+  //         }
+  //       } else {
+  //         res.status(500).json({ message: "An unexpected error occurred" });
+  //       }
+  //     }
+  //   }
+  // );
+
   registerUser = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
       const { name, email, password, phone } = req.body;
@@ -158,6 +264,13 @@ class UserController {
           phone
         );
         const otpSent = !user.otpVerified;
+
+        // If you want to log the user in after registration and send tokens
+        if (!otpSent) {
+          // Generate both access and refresh tokens for new user
+          TokenService.generateTokens(res, user._id.toString());
+        }
+
         res.status(201).json({
           id: user._id.toString(),
           name: user.name,
@@ -188,55 +301,6 @@ class UserController {
       }
     }
   );
-
-  // registerUser = asyncHandler(
-  //   async (req: Request, res: Response): Promise<void> => {
-  //     const { name, email, password, phone } = req.body;
-  
-  //     try {
-  //       const user = await UserService.registerUserService(
-  //         name,
-  //         email,
-  //         password,
-  //         phone
-  //       );
-  //       const otpSent = !user.otpVerified;
-  
-  //       // If you want to log the user in after registration and send tokens
-  //       if (!otpSent) {
-  //         // Generate both access and refresh tokens for new user
-  //         TokenService.generateTokens(res, user._id.toString());
-  //       }
-  
-  //       res.status(201).json({
-  //         id: user._id.toString(),
-  //         name: user.name,
-  //         email: user.email,
-  //         otpSent,
-  //         message: otpSent
-  //           ? "User registered successfully. OTP sent."
-  //           : "User already registered but OTP not verified.",
-  //       });
-  //     } catch (err: unknown) {
-  //       if (err instanceof Error) {
-  //         if (err.message === "Email already exists.") {
-  //           res
-  //             .status(400)
-  //             .json({ message: "User with this email already exists" });
-  //         } else if (err.message === "Email exists but OTP is not verified.") {
-  //           res
-  //             .status(400)
-  //             .json({ message: "Email exists but OTP is not verified." });
-  //         } else {
-  //           res.status(500).json({ message: "An error occurred during registration" });
-  //         }
-  //       } else {
-  //         res.status(500).json({ message: "An unexpected error occurred" });
-  //       }
-  //     }
-  //   }
-  // );
-  
 
   verifyOTP = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
@@ -356,7 +420,6 @@ class UserController {
       }
 
       const { city, latitude, longitude } = req.body;
-      
 
       // Validate latitude and longitude
       if (latitude == null || longitude == null) {
@@ -414,7 +477,7 @@ class UserController {
 
       try {
         const updateData = { ...req.body };
-        
+
         const fileData = req.file
           ? { filename: req.file.filename }
           : { filename: undefined };
@@ -450,24 +513,26 @@ class UserController {
     async (req: CustomRequest, res: Response): Promise<void> => {
       const { theaterId } = req.params;
       const userId = req.user?._id;
-  
+
       try {
         const offers = await UserService.getOffersByTheaterIdService(theaterId);
         if (!offers || offers.length === 0) {
           res.status(404).json({ message: "Offers not found" });
           return;
         }
-  
-        const bookings = await Booking.find({ user: userId }).select("offer").exec();
-  
+
+        const bookings = await Booking.find({ user: userId })
+          .select("offer")
+          .exec();
+
         const usedOfferIds = bookings
-        .map((booking) => booking.offer?.toString())
-        .filter((offerId): offerId is string => !!offerId);    
+          .map((booking) => booking.offer?.toString())
+          .filter((offerId): offerId is string => !!offerId);
 
         const filteredOffers = offers.filter(
           (offer) => !usedOfferIds.includes(offer.id.toString())
         );
-  
+
         res.status(200).json(filteredOffers);
       } catch (error: any) {
         res
@@ -475,48 +540,45 @@ class UserController {
           .json({ message: error?.message || "Internal server error" });
       }
     }
-  );  
-  
-
-  logoutUser = asyncHandler(
-    async (req: Request, res: Response): Promise<void> => {
-      await UserService.logoutUserService();
-      res.cookie("jwt", "", {
-        httpOnly: true,
-        secure: process.env.NODE_ENV !== "development",
-        sameSite: "strict",
-        expires: new Date(0),
-      });
-      res.status(200).json({ message: "User Logged out" });
-    }
   );
-
 
   // logoutUser = asyncHandler(
   //   async (req: Request, res: Response): Promise<void> => {
-  //     // Optionally, you can perform any other cleanup actions related to the user session here
   //     await UserService.logoutUserService();
-  
-  //     // Clear the access token cookie (jwt)
   //     res.cookie("jwt", "", {
   //       httpOnly: true,
   //       secure: process.env.NODE_ENV !== "development",
   //       sameSite: "strict",
-  //       expires: new Date(0), // Expire the cookie immediately
+  //       expires: new Date(0),
   //     });
-  
-  //     // Clear the refresh token cookie
-  //     res.cookie("refreshToken", "", {
-  //       httpOnly: true,
-  //       secure: process.env.NODE_ENV !== "development",
-  //       sameSite: "strict",
-  //       expires: new Date(0), // Expire the cookie immediately
-  //     });
-  
   //     res.status(200).json({ message: "User Logged out" });
   //   }
   // );
-  
+
+  logoutUser = asyncHandler(
+    async (req: Request, res: Response): Promise<void> => {
+      // Optionally, you can perform any other cleanup actions related to the user session here
+      await UserService.logoutUserService();
+
+      // Clear the access token cookie (jwt)
+      res.cookie("jwt", "", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV !== "development",
+        sameSite: "strict",
+        expires: new Date(0), // Expire the cookie immediately
+      });
+
+      // Clear the refresh token cookie
+      res.cookie("refreshToken", "", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV !== "development",
+        sameSite: "strict",
+        expires: new Date(0), // Expire the cookie immediately
+      });
+
+      res.status(200).json({ message: "User Logged out" });
+    }
+  );
 }
 
 export default new UserController();

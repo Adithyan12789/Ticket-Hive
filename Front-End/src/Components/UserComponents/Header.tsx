@@ -23,6 +23,9 @@ const Header: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
 
+  console.log("userInfo: ", userInfo);
+  
+
   const { data: profileData, refetch } = useGetUserProfileQuery(userInfo?.id);
   const [logoutApiCall] = useLogoutMutation();
 
@@ -107,7 +110,7 @@ const Header: React.FC = () => {
 
               {userInfo ? (
                 <NavDropdown
-                  title={userInfo.name || userInfo.data.name}
+                  title={userInfo.name}
                   id="username"
                 >
                   <NavDropdown.Item

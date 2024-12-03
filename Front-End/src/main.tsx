@@ -13,6 +13,7 @@ import store from './Store';
 import { AdminRoutes, AdminLoginRoute } from './Routes/AdminRoutes';
 import { UserRoutes } from './Routes/UserRoutes';
 import { TheaterRoutes } from './Routes/TheaterRoutes';
+import AuthProvider from './Components/UserComponents/AuthProvider';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -33,7 +34,9 @@ const router = createBrowserRouter(
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <Provider store={store}>
     <React.StrictMode>
+      <AuthProvider>
       <RouterProvider router={router} />
+      </AuthProvider>
     </React.StrictMode>
   </Provider>
 );

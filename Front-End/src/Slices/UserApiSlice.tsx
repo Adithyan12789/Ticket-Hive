@@ -73,6 +73,16 @@ export const usersApiSlice = apiSlice.injectEndpoints({
       }),
     }),
 
+    refreshToken: builder.mutation<void, void>({
+      query: () => {
+        console.log('Sending refresh token request to:', `${USERS_URL}/refresh-token`);
+        return {
+          url: `${USERS_URL}/refresh-token`,
+          method: "POST",
+        };
+      },
+    }),    
+
     saveUserLocation: builder.mutation<void, { city: string, latitude: number; longitude: number }>({
       query: (location) => ({
         url: `${USERS_URL}/save-location`,
@@ -211,6 +221,7 @@ export const {
   useResendOtpMutation,
   useSendPasswordResetEmailMutation,
   useResetPasswordMutation,
+  useRefreshTokenMutation,
   useSaveUserLocationMutation,
   useGetUserProfileQuery,
   useUpdateUserMutation,

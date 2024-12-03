@@ -32,8 +32,8 @@ export interface User {
   /** General user information */
   export interface UserInfo {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    data: any;
-    id: string;
+    data?: any;
+    id?: string;
     _id: string;
     profileImage?: string;
     name: string;
@@ -41,7 +41,10 @@ export interface User {
     city?: string;
     latitude?: number;
     longitude?: number;
+    accessToken: string; // Add this
+    refreshToken?: string; // Add this
   }
+  
   
   /**  user login Credentials */
   export interface UserCredentials {
@@ -69,7 +72,8 @@ export interface User {
     id: string;
     name: string;
     email: string;
-    token: string;
+    accessToken: string;
+    refreshToken: string;
   }
 
   export interface UsersTableProps {

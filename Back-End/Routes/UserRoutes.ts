@@ -18,6 +18,8 @@ router.post('/resend-otp', UserController.resendOtp);
 router.post('/forgot-password', UserController.forgotPassword);
 router.put('/reset-password/:token', UserController.resetPassword);
 
+router.post('/refresh-token', UserController.refreshToken);
+
 router.post('/save-location', AuthMiddleware.protect, UserController.saveLocationController);
 
 router.route('/profile')

@@ -14,6 +14,7 @@ export const apiSlice = createApi({
 // import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
 // import type { RootState } from '../Store';
 // import { setCredentials, logout } from '../Slices/AuthSlice';
+// import { UserInfo } from '../Types/UserTypes';
 
 // const baseQuery = fetchBaseQuery({
 //   baseUrl: '',
@@ -48,7 +49,7 @@ export const apiSlice = createApi({
 //       );
 
 //       if (refreshResult.data) {
-//         api.dispatch(setCredentials(refreshResult.data as { accessToken: string; refreshToken: string }));
+//         api.dispatch(setCredentials(refreshResult.data as UserInfo));
 
 //         result = await baseQuery(args, api, extraOptions);
 //       } else {
@@ -63,7 +64,7 @@ export const apiSlice = createApi({
 // };
 
 // export const apiSlice = createApi({
-//   baseQuery: baseQueryWithReauth,  // This ensures your refresh token logic is used across all endpoints
+//   baseQuery: baseQueryWithReauth,
 //   tagTypes: ['User'],
 //   endpoints: () => ({}),
 // });

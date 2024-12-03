@@ -10,18 +10,34 @@ const PrivateRoute: React.FC = () => {
   const dispatch = useDispatch();
 
   const userId = userInfo?.id;
-  const { error } = useGetUserProfileQuery(userId);
+  const accessToken = userInfo?.accessToken;
+
+  console.log("Private Route - User Info:", userInfo);
+  console.log("Private Route - Access Token:", accessToken);
+  
+  // Check for token validity
+  useEffect(() => {
+    if (!accessToken) {
+      console.log("No access token, logging out.");
+      dispatch(logout());
+    }
+  }, [accessToken, dispatch]);
+
+  const { error } = useGetUserProfileQuery(userId, {
+    skip: !userId,
+  });
 
   useEffect(() => {
     if (error) {
-      if ('status' in error) {
-        if (error.status === 401) {
-          dispatch(logout());
-        }
+      console.log("Error fetching user profile:", error);
+      if ('status' in error && error.status === 401) {
+        console.log("Unauthorized - Logging out.");
+        dispatch(logout());
       }
     }
   }, [error, dispatch]);
 
+  // Redirect to login if no userInfo is available
   return userInfo ? <Outlet /> : <Navigate to='/login' replace />;
 };
 

@@ -77,17 +77,21 @@ const LoginPage = () => {
 
     try {
       const res = await login({ email, password }).unwrap();
+      console.log("res.accessToken: ", res.accessToken);
+      console.log("res.refreshToken: ", res.refreshToken);
+      
       dispatch(setCredentials({
         ...res,
-        data: undefined,
-        _id: ""
+        accessToken: res.accessToken, 
+        refreshToken: res.refreshToken,
       }));
       navigate("/");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       toast.error(err?.data?.message || err?.message || "An error occurred");
     }
-  };
+};
+
 
   const handleGoogleSuccess = async (credentialResponse: CredentialResponse) => {
     if (!credentialResponse.credential) {
