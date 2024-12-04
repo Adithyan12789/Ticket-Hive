@@ -41,8 +41,6 @@ export interface User {
     city?: string;
     latitude?: number;
     longitude?: number;
-    accessToken: string; // Add this
-    refreshToken?: string; // Add this
   }
   
   

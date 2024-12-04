@@ -20,34 +20,34 @@ router.put('/reset-password/:token', UserController.resetPassword);
 
 router.post('/refresh-token', UserController.refreshToken);
 
-router.post('/save-location', AuthMiddleware.protect, UserController.saveLocationController);
+router.post('/save-location', AuthMiddleware, UserController.saveLocationController);
 
 router.route('/profile')
-.get( AuthMiddleware.protect, UserController.getUserProfile )
-.put( AuthMiddleware.protect, MulterConfig.multerUploadUserProfile.single('profileImage'), UserController.updateUserProfile);
+.get( AuthMiddleware, UserController.getUserProfile )
+.put( AuthMiddleware, MulterConfig.multerUploadUserProfile.single('profileImage'), UserController.updateUserProfile);
 
-router.get('/get-movies',AuthMiddleware.protect, MovieController.getAllMoviesController);
-router.get('/movie-detail/:id',AuthMiddleware.protect, MovieController.getMovieByIdHandler);
+router.get('/get-movies',AuthMiddleware, MovieController.getAllMoviesController);
+router.get('/movie-detail/:id',AuthMiddleware, MovieController.getMovieByIdHandler);
 
-router.get('/reviews/:movieId',AuthMiddleware.protect, MovieController.getReviewsController);
-router.get('/allReviews',AuthMiddleware.protect, MovieController.getAllReviewsController);
-router.post('/reviews',AuthMiddleware.protect, MovieController.addReviewsController);
+router.get('/reviews/:movieId',AuthMiddleware, MovieController.getReviewsController);
+router.get('/allReviews',AuthMiddleware, MovieController.getAllReviewsController);
+router.post('/reviews',AuthMiddleware, MovieController.addReviewsController);
 
-router.get('/movie-theaters/:movieTitle', AuthMiddleware.protect, TheaterController.getTheatersByMovieTitle);
+router.get('/movie-theaters/:movieTitle', AuthMiddleware, TheaterController.getTheatersByMovieTitle);
 
-router.get('/screen/:screenId', AuthMiddleware.protect, ScreenController.getScreensById);
+router.get('/screen/:screenId', AuthMiddleware, ScreenController.getScreensById);
 
-router.post('/update-availability', AuthMiddleware.protect, ScreenController.updateSeatAvailability);
+router.post('/update-availability', AuthMiddleware, ScreenController.updateSeatAvailability);
 
-router.get('/offers/:theaterId', AuthMiddleware.protect, UserController.getOffersByTheaterId);
+router.get('/offers/:theaterId', AuthMiddleware, UserController.getOffersByTheaterId);
   
-router.post('/book-ticket', AuthMiddleware.protect, BookingController.createBooking);
-router.get('/get-tickets/:userId', AuthMiddleware.protect, BookingController.getAllTickets);
-router.get("/tickets/:ticketId", AuthMiddleware.protect, BookingController.getTicketDetails);
-router.post('/cancel-ticket/:bookingId', AuthMiddleware.protect, BookingController.cancelTicket);
+router.post('/book-ticket', AuthMiddleware, BookingController.createBooking);
+router.get('/get-tickets/:userId', AuthMiddleware, BookingController.getAllTickets);
+router.get("/tickets/:ticketId", AuthMiddleware, BookingController.getTicketDetails);
+router.post('/cancel-ticket/:bookingId', AuthMiddleware, BookingController.cancelTicket);
 
-router.post('/create-wallet-transaction', WalletController.addMoneyToWallet);
-router.get('/transaction-history/:userId', WalletController.getTransactionHistory);
+router.post('/create-wallet-transaction', AuthMiddleware, WalletController.addMoneyToWallet);
+router.get('/transaction-history/:userId', AuthMiddleware, WalletController.getTransactionHistory);
 
 router.post('/logout', UserController.logoutUser);
 

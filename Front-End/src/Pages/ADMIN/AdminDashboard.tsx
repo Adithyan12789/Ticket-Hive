@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "../../Components/AdminComponents/AdminSideBar";
+import ReportModal from "../../Components/AdminComponents/ReportModal";
 import {
   useGetUserDataMutation,
   useGetBookingDetailsQuery,
@@ -17,14 +18,54 @@ import {
   BarChart,
   Bar,
   Legend,
+  LineChart,
+  Line,
 } from "recharts";
 import Loader from "../../Components/UserComponents/Loader";
 import AdminLayout from "../../Components/AdminComponents/AdminLayout";
-import "./AdminDashboard.css";
+import { Box, Typography, Grid, Button } from "@mui/material";
+import styled from "@emotion/styled";
+
+const DashboardContainer = styled(Box)`
+  display: flex;
+  height: 100vh;
+  background-color: #f4f7fb;
+`;
+
+const StatsCard = styled(Box)<{ bgColor: string }>`
+  background-color: ${(props) => props.bgColor};
+  padding: 20px;
+  text-align: center;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  height: 150px;
+  width: 150px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+`;
+
+const StatTitle = styled(Typography)`
+  font-size: 1rem;
+  color: #ffffff;
+  font-weight: 600;
+`;
+
+const StatValue = styled(Typography)`
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ffffff;
+`;
 
 interface Stats {
   users: number;
   theaterOwners: number;
+  totalEarnings: number;
   bookings: number;
   movies: number;
 }
@@ -32,6 +73,7 @@ interface Stats {
 interface Ticket {
   bookingDate: string;
   movieTitle: string;
+  totalPrice: number;
 }
 
 interface Booking {
@@ -47,20 +89,38 @@ const AdminDashboard: React.FC = () => {
   const [getTheaterOwnersData] = useGetTheaterOwnerDataMutation();
   const [getMovies] = useGetMoviesMutation();
   const { data: bookings, isLoading, refetch } = useGetBookingDetailsQuery({});
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [stats, setStats] = useState<Stats>({
     users: 0,
     theaterOwners: 0,
+    totalEarnings: 0,
     bookings: 0,
     movies: 0,
   });
 
   const [bookingTrendsData, setBookingTrendsData] = useState<
-    { date: string; count: number }[]
+    {
+      date: string;
+      count: number;
+    }[]
   >([]);
+
   const [mostBookedMoviesData, setMostBookedMoviesData] = useState<
-    { movie: string; count: number }[]
+    {
+      movie: string;
+      count: number;
+    }[]
   >([]);
+
+  const [earningsData, setEarningsData] = useState<
+    {
+      date: string;
+      earnings: number;
+    }[]
+  >([]);
+
+  const cardColors = ["#ff9b61", "#86d0a1", "#82aaee", "#ff8398", "#bb72ff"];
 
   useEffect(() => {
     const fetchData = async () => {
@@ -71,14 +131,21 @@ const AdminDashboard: React.FC = () => {
 
         refetch();
 
+        const bookingsData: BookingsData = bookings;
+
+        // Compute total earnings
+        const totalEarnings = bookingsData?.tickets?.reduce(
+          (sum, booking) => sum + (booking.ticket.totalPrice || 0),
+          0
+        );
+
         setStats({
           users: userResponse?.length || 0,
           theaterOwners: theaterOwnerResponse?.length || 0,
-          bookings: bookings?.tickets?.length || 0,
+          bookings: bookingsData?.tickets?.length || 0,
           movies: moviesResponse?.movies?.length || 0,
+          totalEarnings: totalEarnings || 0, // Add total earnings to stats
         });
-
-        const bookingsData: BookingsData = bookings;
 
         // Process Booking Trends Data
         const bookingDates =
@@ -96,7 +163,8 @@ const AdminDashboard: React.FC = () => {
 
         // Process Most Booked Movies Data
         const movieTitles =
-          bookingsData?.tickets?.map((ticket) => ticket.ticket.movieTitle) || [];
+          bookingsData?.tickets?.map((ticket) => ticket.ticket.movieTitle) ||
+          [];
         const uniqueMovies = Array.from(new Set(movieTitles));
         const moviesData = uniqueMovies.map((movie) => ({
           movie,
@@ -104,6 +172,25 @@ const AdminDashboard: React.FC = () => {
         }));
 
         setMostBookedMoviesData(moviesData);
+
+        // Process Earnings Data for Chart
+        const earningsByDate = bookingsData?.tickets?.reduce(
+          (acc: Record<string, number>, booking) => {
+            const date = booking?.ticket?.bookingDate?.split("T")[0];
+            const earnings = booking?.ticket?.totalPrice || 0;
+            if (date) {
+              acc[date] = (acc[date] || 0) + earnings;
+            }
+            return acc;
+          },
+          {}
+        );
+
+        const earningsDataArray = Object.entries(earningsByDate || {}).map(
+          ([date, earnings]) => ({ date, earnings })
+        );
+
+        setEarningsData(earningsDataArray);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -116,102 +203,133 @@ const AdminDashboard: React.FC = () => {
 
   return (
     <AdminLayout adminName={""}>
-      <div style={{ display: "flex" }}>
+      <DashboardContainer>
         <Sidebar adminName={"Adithyan"} />
-        <div style={{ flex: 1, padding: "20px", backgroundColor: "#f4f7fb" }}>
-          <h1
-            style={{
-              fontSize: "2rem",
-              marginBottom: "20px",
+        <Box
+          sx={{
+            flex: 1,
+            padding: "20px",
+            backgroundColor: "#f4f7fb",
+            overflowY: "auto",
+          }}
+        >
+          <Typography
+            variant="h4"
+            sx={{
               textAlign: "center",
               color: "#333",
+              marginBottom: "80px",
+              marginTop: "50px",
+              fontWeight: 700,
             }}
           >
             Admin Dashboard
-          </h1>
+          </Typography>
 
-          {/* Stats Section */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
-              gap: "15px",
-              marginBottom: "30px",
-            }}
+          <Grid
+            container
+            spacing={3}
+            sx={{ marginLeft: "50px", marginBottom: "30px" }}
           >
             {[
               { title: "Users", value: stats.users },
               { title: "Theater Owners", value: stats.theaterOwners },
+              {
+                title: "Total Earnings",
+                value: stats.totalEarnings.toLocaleString("en-US", {
+                  style: "currency",
+                  currency: "INR",
+                }),
+              },
               { title: "Bookings", value: stats.bookings },
               { title: "Movies", value: stats.movies },
             ].map((stat, index) => (
-              <div
+              <Grid
+                item
+                xs={12}
+                sm={6}
+                md={4} // Ensures cards align in rows
+                lg={2} // Adjusts alignment for larger screens
+                display="flex"
+                justifyContent="center"
                 key={index}
-                className="stat-card"
-                style={{
-                  background: "#ffffff",
-                  padding: "15px",
-                  textAlign: "center",
-                  borderRadius: "8px",
-                  boxShadow: "0 2px 6px rgba(0, 0, 0, 0.1)",
-                  transition: "transform 0.2s ease-in-out, box-shadow 0.2s ease",
-                }}
-                onMouseEnter={(e) => e.currentTarget.classList.add("hover")}
-                onMouseLeave={(e) => e.currentTarget.classList.remove("hover")}
               >
-                <h2
-                  style={{
-                    fontSize: "1.4rem",
-                    marginBottom: "10px",
-                    color: "#4b4b4b",
-                  }}
-                >
-                  {stat.title}
-                </h2>
-                <p
-                  style={{
-                    fontSize: "2rem",
-                    fontWeight: "bold",
-                    color: "#333",
-                  }}
-                >
-                  {stat.value}
-                </p>
-              </div>
+                <StatsCard bgColor={cardColors[index % cardColors.length]}>
+                  <StatTitle>{stat.title}</StatTitle>
+                  <StatValue>{stat.value}</StatValue>
+                </StatsCard>
+              </Grid>
             ))}
-          </div>
+          </Grid>
 
-          {/* Booking Trends Section */}
-          <div
-            style={{
-              background: "#fff",
+          {/* Total Earnings Section */}
+          <Box
+            sx={{
               padding: "20px",
               borderRadius: "8px",
               boxShadow: "0 2px 6px rgba(0, 0, 0, 0.1)",
               marginBottom: "30px",
+              backgroundColor: "#ffffff",
             }}
           >
-            <h2
-              style={{
-                fontSize: "1.6rem",
+            <Typography
+              variant="h6"
+              sx={{
                 marginBottom: "15px",
+                fontWeight: 600,
+                color: "#333",
+              }}
+            >
+              Total Earnings
+            </Typography>
+            {earningsData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart
+                  data={earningsData}
+                  margin={{ top: 20, right: 20, left: 20, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <Tooltip />
+                  <Line
+                    type="monotone"
+                    dataKey="earnings"
+                    stroke="#ff6384"
+                    strokeWidth={2}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <Typography>No earnings data available</Typography>
+            )}
+          </Box>
+          {/* Booking Trends Section */}
+          <Box
+            sx={{
+              padding: "20px",
+              borderRadius: "8px",
+              boxShadow: "0 2px 6px rgba(0, 0, 0, 0.1)",
+              marginBottom: "30px",
+              backgroundColor: "#ffffff",
+            }}
+          >
+            <Typography
+              variant="h6"
+              sx={{
+                marginBottom: "15px",
+                fontWeight: 600,
                 color: "#333",
               }}
             >
               Booking Trends
-            </h2>
+            </Typography>
             {bookingTrendsData.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
                 <AreaChart
                   data={bookingTrendsData}
                   margin={{ top: 20, right: 20, left: 20, bottom: 5 }}
                 >
-                  <defs>
-                    <linearGradient id="colorTrends" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#36a2eb" stopOpacity={0.8} />
-                      <stop offset="100%" stopColor="#36a2eb" stopOpacity={0.1} />
-                    </linearGradient>
-                  </defs>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="date" />
                   <YAxis />
@@ -220,51 +338,74 @@ const AdminDashboard: React.FC = () => {
                     type="monotone"
                     dataKey="count"
                     stroke="#36a2eb"
-                    fill="url(#colorTrends)"
+                    fill="#36a2eb"
                     strokeWidth={2}
                   />
                 </AreaChart>
               </ResponsiveContainer>
             ) : (
-              <p>No booking trend data available</p>
+              <Typography>No booking trend data available</Typography>
             )}
-          </div>
-
+          </Box>
           {/* Most Booked Movies Section */}
-          <div
-            style={{
-              background: "#fff",
+          <Box
+            sx={{
               padding: "20px",
               borderRadius: "8px",
               boxShadow: "0 2px 6px rgba(0, 0, 0, 0.1)",
+              marginBottom: "30px",
+              backgroundColor: "#ffffff",
             }}
           >
-            <h2
-              style={{
-                fontSize: "1.6rem",
+            <Typography
+              variant="h6"
+              sx={{
                 marginBottom: "15px",
+                fontWeight: 600,
                 color: "#333",
               }}
             >
               Most Booked Movies
-            </h2>
+            </Typography>
             {mostBookedMoviesData.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={mostBookedMoviesData} barSize={20}>
+                <BarChart
+                  data={mostBookedMoviesData}
+                  margin={{ top: 20, right: 20, left: 20, bottom: 5 }}
+                >
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="movie" />
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                  <Bar dataKey="count" fill="#ff6384" />
+                  <Bar dataKey="count" fill="#4bc0c0" />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <p>No movie data available</p>
+              <Typography>No data for most booked movies</Typography>
             )}
-          </div>
-        </div>
-      </div>
+          </Box>
+          {/* Generate Report Button */}
+          <Box sx={{ textAlign: "center", marginTop: "50px" }}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => setIsModalOpen(true)}
+            >
+              Generate Report
+            </Button>
+
+            <ReportModal
+              open={isModalOpen}
+              onClose={() => setIsModalOpen(false)}
+              stats={stats}
+              earningsData={earningsData}
+              bookingTrendsData={bookingTrendsData}
+              mostBookedMoviesData={mostBookedMoviesData}
+            />
+          </Box>
+        </Box>
+      </DashboardContainer>
     </AdminLayout>
   );
 };

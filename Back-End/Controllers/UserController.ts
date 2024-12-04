@@ -10,49 +10,6 @@ import { Movie } from "../Models/MoviesModel";
 import { Booking } from "../Models/bookingModel";
 
 class UserController {
-  // authUser = asyncHandler(
-  //   async (req: Request, res: Response): Promise<void> => {
-  //     console.log("header: ",req.header);
-
-  //     const { email, password } = req.body;
-
-  //     if (!email || !password) {
-  //       res.status(400).json({ message: "Email and password are required" });
-  //       return;
-  //     }
-
-  //     try {
-  //       const user = await UserService.authenticateUser(email, password);
-
-  //       const accessToken = TokenService.generateToken(res, user._id.toString());
-
-  //       res.status(200).json({
-  //         id: user._id,
-  //         name: user.name,
-  //         email: user.email,
-  //         token: accessToken,
-  //       });
-  //     } catch (err: unknown) {
-  //       if (err instanceof Error) {
-  //         if (err.message === "Your account is blocked") {
-  //           res.status(401).json({
-  //             message: "Your account is blocked. Please contact support.",
-  //           });
-  //         } else if (err.message === "Invalid Email or Password") {
-  //           res.status(401).json({ message: "Invalid email or password" });
-  //         } else {
-  //           res
-  //             .status(500)
-  //             .json({ message: "An error occurred during authentication" });
-  //         }
-  //       } else {
-  //         res
-  //           .status(500)
-  //           .json({ message: "An error occurred during authentication" });
-  //       }
-  //     }
-  //   }
-  // );
 
   refreshToken = async (req: Request, res: Response) => {
     // Log to check if cookies are being sent
@@ -72,10 +29,10 @@ class UserController {
     // Log to check the decoded token (this will give you insights if it's null or malformed)
     console.log("Decoded Token:", decoded);
 
-    if (!decoded || typeof decoded === 'string') {
+    if (!decoded || typeof decoded === "string") {
       res.status(401).json({ message: "Invalid or expired refresh token" });
       return;
-  }
+    }
 
     // Find the user using the userId from the decoded token
     try {
@@ -122,10 +79,19 @@ class UserController {
       try {
         const user = await UserService.authenticateUser(email, password);
 
-        const { accessToken, refreshToken } = TokenService.generateTokens(
-          res,
+        const accessToken = TokenService.generateAccessToken(
           user._id.toString()
         );
+
+        console.log("controller accessToken: ", accessToken);
+        
+        const refreshToken = TokenService.generateRefreshToken(
+          user._id.toString()
+        );
+
+        const test = TokenService.setTokenCookies(res, accessToken, refreshToken);
+        console.log("test: ", test);
+        
 
         // Send tokens along with the user data
         res.status(200).json({
@@ -170,7 +136,14 @@ class UserController {
         let user = await User.findOne({ email });
 
         if (user) {
-          TokenService.generateTokens(res, user._id.toString());
+          const accessToken = TokenService.generateAccessToken(
+            user._id.toString()
+          );
+          const refreshToken = TokenService.generateRefreshToken(
+            user._id.toString()
+          );
+  
+          TokenService.setTokenCookies(res, accessToken, refreshToken);
           res.status(200).json({
             success: true,
             data: {
@@ -188,7 +161,14 @@ class UserController {
             password: "",
           });
           if (user) {
-            TokenService.generateTokens(res, user._id.toString());
+            const accessToken = TokenService.generateAccessToken(
+              user._id.toString()
+            );
+            const refreshToken = TokenService.generateRefreshToken(
+              user._id.toString()
+            );
+    
+            TokenService.setTokenCookies(res, accessToken, refreshToken);
             res.status(201).json({
               success: true,
               data: {
@@ -209,48 +189,6 @@ class UserController {
     }
   );
 
-  // registerUser = asyncHandler(
-  //   async (req: Request, res: Response): Promise<void> => {
-  //     const { name, email, password, phone } = req.body;
-
-  //     try {
-  //       const user = await UserService.registerUserService(
-  //         name,
-  //         email,
-  //         password,
-  //         phone
-  //       );
-  //       const otpSent = !user.otpVerified;
-  //       res.status(201).json({
-  //         id: user._id.toString(),
-  //         name: user.name,
-  //         email: user.email,
-  //         otpSent,
-  //         message: otpSent
-  //           ? "User registered successfully. OTP sent."
-  //           : "User already registered but OTP not verified.",
-  //       });
-  //     } catch (err: unknown) {
-  //       if (err instanceof Error) {
-  //         if (err.message === "Email already exists.") {
-  //           res
-  //             .status(400)
-  //             .json({ message: "User with this email already exists" });
-  //         } else if (err.message === "Email exists but OTP is not verified.") {
-  //           res
-  //             .status(400)
-  //             .json({ message: "Email exists but OTP is not verified." });
-  //         } else {
-  //           res
-  //             .status(500)
-  //             .json({ message: "An error occurred during registration" });
-  //         }
-  //       } else {
-  //         res.status(500).json({ message: "An unexpected error occurred" });
-  //       }
-  //     }
-  //   }
-  // );
 
   registerUser = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
@@ -268,7 +206,14 @@ class UserController {
         // If you want to log the user in after registration and send tokens
         if (!otpSent) {
           // Generate both access and refresh tokens for new user
-          TokenService.generateTokens(res, user._id.toString());
+          const accessToken = TokenService.generateAccessToken(
+            user._id.toString()
+          );
+          const refreshToken = TokenService.generateRefreshToken(
+            user._id.toString()
+          );
+  
+          TokenService.setTokenCookies(res, accessToken, refreshToken);
         }
 
         res.status(201).json({
@@ -541,19 +486,6 @@ class UserController {
       }
     }
   );
-
-  // logoutUser = asyncHandler(
-  //   async (req: Request, res: Response): Promise<void> => {
-  //     await UserService.logoutUserService();
-  //     res.cookie("jwt", "", {
-  //       httpOnly: true,
-  //       secure: process.env.NODE_ENV !== "development",
-  //       sameSite: "strict",
-  //       expires: new Date(0),
-  //     });
-  //     res.status(200).json({ message: "User Logged out" });
-  //   }
-  // );
 
   logoutUser = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {

@@ -20,6 +20,10 @@ import CitiesModal from "./CitiesModal";
 
 const Header: React.FC = () => {
   const { userInfo } = useSelector((state: RootState) => state.auth);
+
+  console.log("userInfo: ", userInfo);
+  
+
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
 

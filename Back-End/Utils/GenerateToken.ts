@@ -1,127 +1,92 @@
-// import jwt from 'jsonwebtoken';
-// import { Response } from 'express';
 
-// class TokenService {
-//     private jwtSecret: string;
+import jwt from "jsonwebtoken";
+import { Response } from "express";
 
-//     constructor() {
-//         if (!process.env.JWT_SECRET) {
-//             throw new Error('JWT_SECRET is not defined');
-//         }
-//         this.jwtSecret = process.env.JWT_SECRET;
-//     }
-
-//     public generateToken(res: Response, userId: string): void {
-//         const token = jwt.sign({ userId }, this.jwtSecret, {
-//             expiresIn: '30d',
-//         });
-
-//         res.cookie('jwt', token, {
-//             httpOnly: true,
-//             secure: process.env.NODE_ENV !== 'development',
-//             sameSite: 'strict',
-//             maxAge: 30 * 24 * 60 * 60 * 1000, 
-//         });
-//     }
-// }
-
-// export default new TokenService();
-
-
-
-import jwt from 'jsonwebtoken';
-import { Response, Request } from 'express';
-
-class TokenService {
-    private jwtSecret: string;
-    private jwtRefreshSecret: string;
-
-    constructor() {
-        if (!process.env.JWT_SECRET || !process.env.JWT_REFRESH_SECRET) {
-            throw new Error('JWT_SECRET or JWT_REFRESH_SECRET is not defined');
-        }
-        this.jwtSecret = process.env.JWT_SECRET;
-        this.jwtRefreshSecret = process.env.JWT_REFRESH_SECRET;
-    }
-
-    public generateTokens(res: Response, userId: string): { accessToken: string, refreshToken: string } {
-        const accessToken = jwt.sign({ userId }, this.jwtSecret, {
-            expiresIn: '15m',
-        });
-    
-        const refreshToken = jwt.sign({ userId }, this.jwtRefreshSecret, {
-            expiresIn: '30d',
-        });
-    
-        // Set the access and refresh tokens in cookies
-        res.cookie('jwt_access', accessToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV !== 'development', // Ensure secure flag for production
-            sameSite: 'strict', // Restrict cross-site cookie sending
-            maxAge: 15 * 60 * 1000, // Access token expiry time (15 minutes)
-        });
-    
-        res.cookie('jwt_refresh', refreshToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV !== 'development',
-            sameSite: 'strict',
-            maxAge: 30 * 24 * 60 * 60 * 1000,
-        });
-    
-        return { accessToken, refreshToken };
-    }    
-
-    public verifyAccessToken(token: string) {
-        try {
-            return jwt.verify(token, this.jwtSecret);
-        } catch (error) {
-            return null;
-        }
-    }
-
-    public verifyRefreshToken(token: string) {
-        try {
-            return jwt.verify(token, this.jwtRefreshSecret);
-        } catch (error) {
-            return null;
-        }
-    }
-
-    public refreshAccessToken(req: Request, res: Response): void {
-        const refreshToken = req.cookies['jwt_refresh'];
-    
-        if (!refreshToken) {
-            res.status(401).json({ message: 'Refresh token is required' });
-            return;
-        }
-
-        const decoded = this.verifyRefreshToken(refreshToken);
-    
-        if (!decoded || typeof decoded === 'string') {
-            res.status(401).json({ message: 'Invalid or expired refresh token' });
-            return;
-        }
-
-        const accessToken = jwt.sign({ userId: decoded.userId }, this.jwtSecret, {
-            expiresIn: '15m',
-        });
-    
-        res.cookie('jwt_access', accessToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV !== 'development',
-            sameSite: 'strict',
-            maxAge: 15 * 60 * 1000,
-        });
-    
-        res.status(200).json({ message: 'Access token refreshed' });
-    }   
-    
-    
-    public generateAccessToken(userId: string): string {
-        return jwt.sign({ userId }, this.jwtSecret, {
-            expiresIn: '15m',
-        });
-    }
+interface TokenPayload {
+  userId: string;
+  tokenType: "access" | "refresh";
 }
 
-export default new TokenService();
+class TokenService {
+  static generateAccessToken(userId: string): string {
+    return jwt.sign(
+      { userId, tokenType: "access" },
+      process.env.JWT_SECRET as string,
+      { expiresIn: "15m" }
+    );
+  }
+
+  static generateRefreshToken(userId: string): string {
+    return jwt.sign(
+      { userId, tokenType: "refresh" },
+      process.env.JWT_REFRESH_SECRET as string,
+      { expiresIn: "7d" }
+    );
+  }
+
+  static setTokenCookies(
+    res: Response,
+    accessToken: string,
+    refreshToken: string
+  ): void {
+    console.log("entered setTokenCookies");
+  
+    // Debug tokens
+    console.log("Access Token:", accessToken);
+    console.log("Refresh Token:", refreshToken);
+  
+    // Debug environment
+    console.log("Environment:", process.env.NODE_ENV);
+    console.log("Secure flag:", process.env.NODE_ENV !== "development");
+  
+    // Set access token cookie
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV !== "development",
+      sameSite: "strict",
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    });
+    console.log("Access Token cookie set");
+  
+    // Set refresh token cookie
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV !== "development",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+    console.log("Refresh Token cookie set");
+  
+    // Optional: Log Set-Cookie header
+    console.log("Set-Cookie Header:", res.getHeaders()["set-cookie"]);
+  }
+  
+
+  static verifyAccessToken(token: string): TokenPayload | null {
+    try {
+      const decoded = jwt.verify(
+        token,
+        process.env.JWT_SECRET as string
+      ) as TokenPayload;
+      return decoded.tokenType === "access" ? decoded : null;
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
+  }
+
+  static verifyRefreshToken(token: string): TokenPayload | null {
+    try {
+      const decoded = jwt.verify(
+        token,
+        process.env.JWT_REFRESH_SECRET as string
+      ) as TokenPayload;
+      return decoded.tokenType === "refresh" ? decoded : null;
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
+  }
+}
+
+export default TokenService;
