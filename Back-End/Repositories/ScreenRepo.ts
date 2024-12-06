@@ -15,17 +15,18 @@ class ScreenRepository {
     });
   
     return await newScreen.save();
-  }
-  
-
+  }  
   
 
   public async getScreensByTheater(id: string) {
     return await Screens.find({ theater: id });
   }
 
-  public async getScreenById(screenId: string) {
-    return await Screens.findById(screenId).populate("theater", "name ticketPrice");
+  public async  getScreenById(screenId: string) {
+    let screen =  await Screens.findById(screenId).populate("theater", "name ticketPrice");
+    console.log("screen repo: ", screen);
+    
+    return screen
   }
 
   public async updateScreen(screenId: string, updateData: any) {

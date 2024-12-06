@@ -4,8 +4,28 @@ import { useGetBookingDetailsQuery } from "../../Slices/AdminApiSlice";
 import AdminLayout from "../../Components/AdminComponents/AdminLayout";
 import Loader from "../../Components/UserComponents/Loader";
 import { FaInfoCircle } from "react-icons/fa";
-import { BookingDetails, Ticket } from "../../Types/BookingTypes";
+import { BookingDetails } from "../../Types/BookingTypes";
 import { useNavigate } from "react-router-dom";
+
+interface Ticket {
+  ticket: {
+    bookingId: string;
+    movieId: string;
+    theaterName: string;
+    screenName: string;
+    seats: string[];
+    bookingTime: string;
+    paymentStatus: string;
+    userName: string; // Add missing fields
+    userEmail: string;
+    images: string[];
+    showTime: string;
+    paymentMethod: string;
+  };
+  movieDetails: {
+    poster: string; // Ensure this matches your actual data structure
+  };
+}
 
 const AdminBookingDetailsScreen: React.FC = () => {
   const navigate = useNavigate();
@@ -43,7 +63,7 @@ const AdminBookingDetailsScreen: React.FC = () => {
       images: ticket.ticket.images,
       showTime: ticket.ticket.showTime,
       paymentMethod: ticket.ticket.paymentMethod,
-      seats: ticket.ticket.seats || [], 
+      seats: ticket.ticket.seats || [],
       status: ticket.ticket.paymentStatus || "Unknown",
     })) || [];
 
@@ -70,30 +90,35 @@ const AdminBookingDetailsScreen: React.FC = () => {
         {transformedBookings.length === 0 ? (
           <p className="text-muted">No bookings available at the moment.</p>
         ) : (
-          <Table striped bordered hover responsive className="text-center">
+          <Table
+            striped
+            bordered
+            hover
+            responsive
+            className="text-center"
+            style={{ tableLayout: "fixed", wordWrap: "break-word" }}
+          >
             <thead className="table-dark">
               <tr>
-                <th>Booking ID</th>
-                <th>User</th>
-                <th>Email</th>
-                <th>Theater</th>
-                <th>Payment Method</th>
-                <th>Status</th>
-                <th>Actions</th>
+                <th style={{ padding: "12px" }}>Booking ID</th>
+                <th style={{ padding: "12px" }}>User</th>
+                <th style={{ padding: "12px" }}>Theater</th>
+                <th style={{ padding: "12px" }}>Payment Method</th>
+                <th style={{ padding: "12px" }}>Status</th>
+                <th style={{ padding: "12px" }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {paginatedBookings.map((booking: BookingDetails) => (
                 <tr key={booking.bookingId}>
-                  <td>{`${booking.bookingId.slice(
+                  <td style={{ padding: "10px" }}>{`${booking.bookingId.slice(
                     0,
                     6
                   )}...${booking.bookingId.slice(-4)}`}</td>
-                  <td>{booking.user.name}</td>
-                  <td>{booking.user.email}</td>
-                  <td>{booking.theater.name}</td>
-                  <td>{booking.paymentMethod}</td>
-                  <td>
+                  <td style={{ padding: "10px" }}>{booking.user.name}</td>
+                  <td style={{ padding: "10px" }}>{booking.theater.name}</td>
+                  <td style={{ padding: "10px" }}>{booking.paymentMethod}</td>
+                  <td style={{ padding: "10px" }}>
                     <span
                       className={`badge ${
                         booking.status === "confirmed"
@@ -104,7 +129,7 @@ const AdminBookingDetailsScreen: React.FC = () => {
                       {booking.status}
                     </span>
                   </td>
-                  <td>
+                  <td style={{ padding: "10px" }}>
                     <Button
                       variant="info"
                       size="sm"

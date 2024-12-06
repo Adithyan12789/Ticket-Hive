@@ -31,6 +31,9 @@ interface TicketEntry {
 
 const TicketDetailsScreen: React.FC = () => {
   const { bookingId } = useParams<{ bookingId: string }>();
+
+  console.log("bookingId: ", bookingId);
+  
   const navigate = useNavigate();
 
   const { userInfo } = useSelector((state: RootState) => state.auth);
@@ -38,11 +41,15 @@ const TicketDetailsScreen: React.FC = () => {
   const [cancelBooking] = useCancelBookingMutation();
 
   const [showModal, setShowModal] = useState(false);
+ 
+  console.log("data: ", data);
 
   const ticket = data?.tickets?.find(
-    (t: TicketEntry) => t.ticket.ticket.bookingId === bookingId
+    (t: TicketEntry) => t.ticket.bookingId === bookingId
   );
 
+  console.log("ticket: ", ticket);
+  
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {

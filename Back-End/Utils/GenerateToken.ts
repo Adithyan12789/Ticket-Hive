@@ -29,24 +29,13 @@ class TokenService {
     accessToken: string,
     refreshToken: string
   ): void {
-    console.log("entered setTokenCookies");
-  
-    // Debug tokens
-    console.log("Access Token:", accessToken);
-    console.log("Refresh Token:", refreshToken);
-  
-    // Debug environment
-    console.log("Environment:", process.env.NODE_ENV);
-    console.log("Secure flag:", process.env.NODE_ENV !== "development");
-  
-    // Set access token cookie
+
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV !== "development",
       sameSite: "strict",
       maxAge: 15 * 60 * 1000, // 15 minutes
     });
-    console.log("Access Token cookie set");
   
     // Set refresh token cookie
     res.cookie("refreshToken", refreshToken, {
@@ -55,10 +44,7 @@ class TokenService {
       sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
-    console.log("Refresh Token cookie set");
   
-    // Optional: Log Set-Cookie header
-    console.log("Set-Cookie Header:", res.getHeaders()["set-cookie"]);
   }
   
 

@@ -200,7 +200,7 @@ const MovieTheaterScreen: React.FC = () => {
   }
 
   return (
-    <><Container style={{ padding: "40px 20px" }}>
+    <><Container style={{ padding: "40px 20px" , marginBottom: "170px" }}>
       <Row className="mb-4">
         <Col md={8}>
           <h2 className="text-dark font-weight-bold">

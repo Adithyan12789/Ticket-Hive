@@ -16,13 +16,6 @@ const AuthMiddleware = asyncHandler(
     const accessToken = req.cookies?.accessToken;
     const refreshToken = req.cookies?.refreshToken;
 
-    console.log("req.cookies: ", req.cookies);
-    
-
-    console.log("accessToken received: ", accessToken);
-    console.log("refreshToken received: ", refreshToken);
-    
-
     if (accessToken) {
       const decodedAccess = TokenService.verifyAccessToken(accessToken);
       if (decodedAccess) {
@@ -30,9 +23,6 @@ const AuthMiddleware = asyncHandler(
         const user = await User.findById(decodedAccess.userId).select(
           "-password"
         );
-
-        console.log("user auth: ", user);
-        
 
         if (!user) {
           res.status(401);
@@ -43,9 +33,6 @@ const AuthMiddleware = asyncHandler(
           _id: user._id.toString(),
           isBlocked: user.isBlocked ?? false,
         };
-
-        console.log("req.user: ", req.user);
-        
 
         return next();
       }

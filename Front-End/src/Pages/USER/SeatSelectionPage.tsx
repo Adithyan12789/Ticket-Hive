@@ -22,9 +22,15 @@ const SelectSeatPage: React.FC = () => {
 
   const { data, refetch, isLoading, isError } = useGetScreenByIdQuery(screenId);
 
-  const screenDetails = data as Screen | null;
-
+  let screenDetails: Screen | null = null;
+  
+  if (data) {
+    screenDetails = data as Screen;
+  }
+  
   console.log("screenDetails: ", screenDetails);
+  console.log("screenId: ", screenId);
+  
 
   const location = useLocation();
 
@@ -81,8 +87,8 @@ const SelectSeatPage: React.FC = () => {
       for (let j = 1; j <= cols; j++) {
         row.push({
           label: `${rowPrefix}${j.toString().padStart(2, "0")}`,
-          isAvailable: true,
           holdSeat: false,
+          isAvailable: false
         });
       }
       layout.push(row);

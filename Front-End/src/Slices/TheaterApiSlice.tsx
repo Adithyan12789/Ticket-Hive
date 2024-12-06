@@ -200,6 +200,14 @@ export const theaterApiSlice = apiSlice.injectEndpoints({
         method: "GET",
       }),
     }),
+
+    getTheaterStats: builder.mutation({
+      query: (ownerId) => ({
+        url: `${THEATER_URL}/stats/${ownerId}`,
+        method: "GET",
+      }),
+    }),
+    
   }),
 });
 
@@ -230,4 +238,5 @@ export const {
   useAddOfferMutation,
   useUpdateOfferMutation,
   useDeleteOfferMutation,
+  useGetTheaterStatsMutation,
 } = theaterApiSlice;

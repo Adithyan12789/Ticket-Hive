@@ -11,6 +11,7 @@ import { Movie } from "../Models/MoviesModel";
 import Screens from "../Models/ScreensModel";
 import User from "../Models/UserModel";
 import { Offer } from "../Models/OffersModel";
+import { Booking } from "../Models/bookingModel";
 
 class TheaterController {
   authTheaterOwner = asyncHandler(
@@ -366,7 +367,6 @@ class TheaterController {
 
   addTheaterController = asyncHandler(
     async (req: CustomRequest, res: Response): Promise<void> => {
-
       const {
         name,
         city,
@@ -589,10 +589,51 @@ class TheaterController {
     }
   );
 
+  getStatsController = asyncHandler(
+    async (req: Request, res: Response): Promise<void> => {
+      try {
+        const { ownerId } = req.params;
+
+        const theaters = await TheaterDetails.find({ theaterOwnerId: ownerId });
+
+        console.log("theaters: ", theaters);
+
+        const bookings = await Booking.find({
+          theater: { $in: theaters.map((t) => t._id) },
+        }).populate("user", "_id name email");
+
+        console.log("bookings: ", bookings);
+
+        const totalEarnings = bookings.reduce(
+          (sum, booking) => sum + booking.totalPrice,
+          0
+        );
+
+        console.log("totalEarnings: ", totalEarnings);
+
+        const uniqueUsers = new Set(
+          bookings.map((booking) => booking.user._id.toString())
+        );
+
+        const stats = {
+          theaters: theaters.length,
+          users: uniqueUsers.size, // Count of unique users
+          bookings: bookings.length,
+          totalEarnings,
+        };
+
+        res.status(200).json({ stats, theaters, bookings });
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+        res.status(500).json({ message: "Error fetching data", error: error });
+      }
+    }
+  );
+
   addOfferController = asyncHandler(
     async (req: CustomRequest, res: Response): Promise<void> => {
       console.log("Request body: ", req.body);
-  
+
       const {
         ownerId,
         offerName,
@@ -604,7 +645,7 @@ class TheaterController {
         validityEnd,
         applicableTheaters,
       } = req.body;
-  
+
       if (
         !ownerId ||
         !offerName ||
@@ -614,17 +655,17 @@ class TheaterController {
         minPurchaseAmount === undefined ||
         !validityStart ||
         !validityEnd ||
-        !Array.isArray(applicableTheaters) || 
+        !Array.isArray(applicableTheaters) ||
         applicableTheaters.length === 0
       ) {
         res.status(400).json({ message: "All fields are required" });
         return;
       }
-  
+
       try {
         const parsedValidityStart = new Date(validityStart);
         const parsedValidityEnd = new Date(validityEnd);
-  
+
         const newOffer = new Offer({
           createdBy: ownerId,
           offerName,
@@ -636,9 +677,9 @@ class TheaterController {
           validityEnd: parsedValidityEnd,
           applicableTheaters,
         });
-  
+
         const createdOffer = await newOffer.save();
-  
+
         res.status(201).json({
           message: "Offer created successfully",
           offer: createdOffer,
@@ -654,32 +695,38 @@ class TheaterController {
     async (req: CustomRequest, res: Response): Promise<void> => {
       const { offerId } = req.params;
       const offerData = req.body;
-  
+
       if (!offerId) {
         res.status(400).json({ message: "Offer ID is required" });
         return;
       }
-  
+
       try {
-        const updatedOffer = await TheaterOwnerService.updateOfferService(offerId, offerData);
+        const updatedOffer = await TheaterOwnerService.updateOfferService(
+          offerId,
+          offerData
+        );
         res.status(200).json({
           message: "Offer updated successfully",
           offer: updatedOffer,
         });
       } catch (error: any) {
         console.error("Error updating offer:", error);
-        res.status(error.statusCode || 500).json({ message: error.message || "Internal server error" });
+        res
+          .status(error.statusCode || 500)
+          .json({ message: error.message || "Internal server error" });
       }
     }
-  );  
-
+  );
 
   deleteOfferController = asyncHandler(
     async (req: CustomRequest, res: Response): Promise<void> => {
       const { offerId } = req.params;
 
       try {
-        const deletedOffer = await TheaterOwnerService.deleteOfferHandler(offerId);
+        const deletedOffer = await TheaterOwnerService.deleteOfferHandler(
+          offerId
+        );
 
         if (!deletedOffer) {
           res.status(404).json({ message: "Offer not found for deletion" });
@@ -697,13 +744,12 @@ class TheaterController {
       }
     }
   );
-  
 
   getOffersController = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
       try {
         const offers = await Offer.find();
-  
+
         res.status(200).json(offers);
       } catch (error) {
         console.error("Error fetching offers:", error);

@@ -16,6 +16,8 @@ router.post('/theater-resend-otp', TheaterController.resendTheaterOwnerOtp);
 router.post('/theater-forgot-password', TheaterController.forgotTheaterOwnerPassword);
 router.put('/theater-reset-password/:token', TheaterController.resetTheaterOwnerPassword);
 
+router.get('/stats/:ownerId', TheaterAuthMiddleware.protect, TheaterController.getStatsController);
+
 router.route('/theater-profile')
 .get( TheaterAuthMiddleware.protect, TheaterController.getTheaterProfile )
 .put( TheaterAuthMiddleware.protect, MulterConfig.multerUploadTheaterProfile.single('profileImage'), TheaterController.updateTheaterProfile);

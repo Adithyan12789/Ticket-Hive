@@ -39,7 +39,7 @@ const ScreenSchema: Schema<IScreen> = new Schema({
       },
       layout: [[{ 
         label: { type: String, required: true }, 
-        isAvailable: { type: Boolean, default: true } ,
+        isAvailable: { type: Boolean, default: true },
         holdSeat: { type: Boolean, default: false } 
       }]],
     }
@@ -47,6 +47,8 @@ const ScreenSchema: Schema<IScreen> = new Schema({
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
+
+
 
 ScreenSchema.pre<IScreen>('save', function (next) {
   this.updatedAt = new Date();

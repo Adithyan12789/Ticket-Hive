@@ -58,7 +58,10 @@ class ScreenService {
 
   public getScreensByIdService = async (screenId: string) => {
     try {
-      return await ScreenRepository.getScreenById(screenId);
+      let screen = await ScreenRepository.getScreenById(screenId);
+      console.log("service screen: ", screen);
+      return screen
+      
     } catch (error) {
       throw new Error("Error fetching Screens");
     }

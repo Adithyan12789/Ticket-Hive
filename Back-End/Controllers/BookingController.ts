@@ -28,20 +28,7 @@ class BookingController {
       } = req.body;
 
       console.log("con req body: ", req.body);
-      
-  
-      let formattedBookingDate: Date;
-      try {
-        const parsedDate = parse(bookingDate, "EEEE dd MMM yyyy", new Date());
-        if (isNaN(parsedDate.getTime())) {
-          throw new Error("Invalid date");
-        }
-        formattedBookingDate = parsedDate;
-      } catch (error) {
-        console.error("Error parsing bookingDate:", error);
-        res.status(400).json({ message: "Invalid bookingDate format" });
-        return;
-      }
+      console.log("bookingDate: ", bookingDate);
   
       if (
         !movieId ||
@@ -53,7 +40,7 @@ class BookingController {
         !totalPrice ||
         !paymentStatus ||
         !convenienceFee ||
-        !formattedBookingDate
+        !bookingDate
       ) {
         res.status(400).json({ message: "Missing required fields" });
         return;
@@ -83,7 +70,7 @@ class BookingController {
           paymentStatus,
           paymentMethod,
           convenienceFee,
-          formattedBookingDate
+          bookingDate
         );
 
         console.log("con booking: ", booking);

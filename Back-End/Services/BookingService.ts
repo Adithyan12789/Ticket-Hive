@@ -5,6 +5,8 @@ import BookingRepo from "../Repositories/BookingRepo";
 import WalletRepo from "../Repositories/WalletRepo";
 import { ITransaction } from "../Models/WalletModel";
 import { v4 as uuidv4 } from "uuid";
+import TheaterDetails from "../Models/TheaterDetailsModel";
+import { Movie } from "../Models/MoviesModel";
 
 export interface BookingDetails {
   totalPrice: number;
@@ -77,8 +79,6 @@ class BookingService {
   public async getAllTicketsService() {
     const bookings = await BookingRepo.findAllBookings();
 
-    console.log("s bookings: ", bookings);
-    
     if (!bookings.length) throw new Error("No tickets found");
 
     return bookings.map((booking: BookingDetails) => ({
@@ -144,7 +144,7 @@ class BookingService {
 
     const wallet = await WalletRepo.findWalletByUserId(userId);
     if (!wallet) throw new Error("Wallet not found");
-  
+
     const transaction: ITransaction = {
       transactionId: uuidv4(),
       amount: totalPrice,
@@ -153,11 +153,11 @@ class BookingService {
       date: new Date(),
       description: `Refund for cancelled ticket`,
     };
-    
+
     wallet.transactions.push(transaction);
-    
+
     wallet.balance += totalPrice;
-  
+
     await wallet.save();
 
     return { message: "Booking canceled successfully", booking };
