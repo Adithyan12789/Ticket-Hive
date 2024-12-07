@@ -23,7 +23,7 @@
 }
 
 .user-image-section {
-  display: none; /* Hide the previous static image */
+  display: none; /* Hide the -evious static image */
 }
 
 
@@ -257,6 +257,10 @@
 
 .dropdown-item > svg {
   color: #007bff; /* Set icon color */
+}
+
+.custom-dropdown .dropdown-toggle::after {
+  display: none !important;  /* Hides the default caret */
 }
 
 .hover-link {

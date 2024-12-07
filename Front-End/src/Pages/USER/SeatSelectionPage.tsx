@@ -2,16 +2,12 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import { FaArrowLeft } from "react-icons/fa";
-import {
-  useGetScreenByIdQuery,
-  useUpdateSeatAvailabilityMutation,
-} from "../../Slices/UserApiSlice";
+import {useGetScreenByIdQuery,useUpdateSeatAvailabilityMutation,} from "../../Slices/UserApiSlice";
 import Loader from "../../Components/UserComponents/Loader";
 import { toast } from "react-toastify";
 import React from "react";
 import { Seat, Screen } from "../../Types/ScreenTypes";
 import Footer from "../../Components/UserComponents/Footer";
-
 const SelectSeatPage: React.FC = () => {
   const { screenId } = useParams<{ screenId: string }>();
   const navigate = useNavigate();
@@ -19,90 +15,35 @@ const SelectSeatPage: React.FC = () => {
   const [, setLayout] = useState<Seat[][]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [updateSeatAvailability] = useUpdateSeatAvailabilityMutation();
-
   const { data, refetch, isLoading, isError } = useGetScreenByIdQuery(screenId);
-
   let screenDetails: Screen | null = null;
-  
-  if (data) {
-    screenDetails = data as Screen;
-  }
-  
-  console.log("screenDetails: ", screenDetails);
-  console.log("screenId: ", screenId);
-  
-
+  if (data) {screenDetails = data as Screen;}
   const location = useLocation();
-
-  const { date, movieTitle, movieId, theaterId, showTime, showTimeId } =
-    location.state || {};
-
-  console.log("movieId: ", movieId);
-  console.log("theaterId: ", theaterId);
-  console.log("showTimeId: ", showTimeId);
-
-  const formattedDate = `${
-    date.getMonth() + 1
-  }/${date.getDate()}/${date.getFullYear()}`;
-
-  console.log(formattedDate);
-  console.log(screenId, date, movieTitle);
-
+  const { date, movieTitle, movieId, theaterId, showTime, showTimeId } = location.state || {};
+  const formattedDate = `${ date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 2000);
-
+    const timer = setTimeout(() => {setLoading(false);}, 2000);
     return () => clearTimeout(timer);
   }, []);
-
-  useEffect(() => {
-    document.title = screenDetails
-      ? `Screen - ${screenDetails.screenNumber} - Select Seats`
-      : "Select Seats";
-    refetch();
-  }, [screenDetails, refetch]);
-
+  useEffect(() => {document.title = screenDetails? `Screen - ${screenDetails.screenNumber} - Select Seats`: "Select Seats";refetch();}, [screenDetails, refetch]);
   useEffect(() => {
     if (screenDetails && showTimeId) {
-      const selectedShowTime = screenDetails.showTimes.find(
-        (showTime) => showTime._id === showTimeId
-      );
-
-      if (selectedShowTime) {
-        setLayout(selectedShowTime.layout);
-      } else {
-        toast.error("Show time not found.");
-      }
-    } else {
-      setLayout(generateSeatNames(5, 8));
-    }
+      const selectedShowTime = screenDetails.showTimes.find((showTime) => showTime._id === showTimeId);
+      if (selectedShowTime) {setLayout(selectedShowTime.layout);
+      } else {toast.error("Show time not found.");}
+    } else {setLayout(generateSeatNames(5, 8));}
   }, [screenDetails, showTimeId]);
-
   const generateSeatNames = (rows: number, cols: number): Seat[][] => {
     const layout: Seat[][] = [];
     for (let i = 0; i < rows; i++) {
       const row: Seat[] = [];
       const rowPrefix = String.fromCharCode(65 + (i % 26));
       for (let j = 1; j <= cols; j++) {
-        row.push({
-          label: `${rowPrefix}${j.toString().padStart(2, "0")}`,
-          holdSeat: false,
-          isAvailable: false
-        });
-      }
-      layout.push(row);
-    }
+        row.push({label: `${rowPrefix}${j.toString().padStart(2, "0")}`,holdSeat: false,isAvailable: false});}layout.push(row);}
     return layout;
   };
-
-  const handleSeatSelection = (
-    seatLabel: string,
-    isAvailable: boolean,
-    holdSeat: boolean
-  ) => {
+  const handleSeatSelection = (seatLabel: string,isAvailable: boolean,holdSeat: boolean) => {
     if (!isAvailable && holdSeat) return;
-
     const newSelectedSeats = new Set(selectedSeats);
     if (newSelectedSeats.has(seatLabel)) {
       newSelectedSeats.delete(seatLabel);
@@ -113,17 +54,15 @@ const SelectSeatPage: React.FC = () => {
         setSelectedSeats(newSelectedSeats);
       }, 10 * 60 * 1000);
     }
-
     setSelectedSeats(newSelectedSeats);
   };
-
   const renderScreenLayout = () => {
     if (!screenDetails) return <p>No seat layout available for this screen.</p>;
-
+  
     const selectedShowTime = screenDetails.showTimes.find(
       (showTime) => showTime._id === showTimeId
     );
-
+  
     return (
       <div
         style={{
@@ -141,9 +80,11 @@ const SelectSeatPage: React.FC = () => {
               justifyContent: "center",
               alignItems: "center",
               marginBottom:
-                rowIndex === Math.floor(selectedShowTime?.layout.length / 2)
-                  ? "20px"
-                  : "5px",
+                rowIndex === 1
+                  ? "30px" // Add 30px margin for the second row
+                  : rowIndex === Math.floor(selectedShowTime.layout.length / 2)
+                  ? "50px" // Add 50px margin for the middle row
+                  : "10px", // Default 10px margin for other rows
               gap: "8px",
             }}
           >
@@ -168,18 +109,11 @@ const SelectSeatPage: React.FC = () => {
                     border: "1px solid #007bff",
                     borderRadius: "4px",
                     fontSize: "0.7rem",
-                    cursor:
-                      seat.isAvailable && !seat.holdSeat
-                        ? "pointer"
-                        : "not-allowed",
+                    cursor: seat.isAvailable && !seat.holdSeat ? "pointer" : "not-allowed",
                     transition: "background-color 0.3s",
                   }}
                   onClick={() =>
-                    handleSeatSelection(
-                      seat.label,
-                      seat.isAvailable,
-                      seat.holdSeat
-                    )
+                    handleSeatSelection(seat.label, seat.isAvailable, seat.holdSeat)
                   }
                   disabled={!seat.isAvailable}
                 >
@@ -189,7 +123,6 @@ const SelectSeatPage: React.FC = () => {
             ))}
           </div>
         ))}
-
         <div
           style={{
             width: "50%",
@@ -212,6 +145,7 @@ const SelectSeatPage: React.FC = () => {
       </div>
     );
   };
+  
 
   const totalSeats = selectedSeats.size;
   const ticketPrice = screenDetails?.theater?.ticketPrice || 0;
@@ -250,11 +184,7 @@ const SelectSeatPage: React.FC = () => {
       setTimeout(async () => {
         try {
           await updateSeatAvailability({
-            screenId,
-            selectedSeats: [...selectedSeats],
-            holdSeat: false,
-            showTime,
-          }).unwrap();
+            screenId,selectedSeats: [...selectedSeats],holdSeat: false,showTime,}).unwrap();
           console.log('Seat availability reset to true.');
         } catch (error) {
           console.error('Error resetting seat availability:', error);
@@ -266,97 +196,38 @@ const SelectSeatPage: React.FC = () => {
     }
   };
   
-
   return (
     <><Container
       style={{ padding: "30px 15px", position: "relative", minHeight: "100vh" }}
     >
       <Row className="mb-3">
         <Col>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              fontSize: "1.2rem",
-              fontWeight: "bold",
-            }}
-          >
-            <FaArrowLeft
-              onClick={() => navigate(-1)}
-              style={{ cursor: "pointer", fontSize: "1.5rem" }} />
+          <div style={{display: "flex",alignItems: "center",gap: "10px",fontSize: "1.2rem",fontWeight: "bold",}}>
+            <FaArrowLeft onClick={() => navigate(-1)} style={{ cursor: "pointer", fontSize: "1.5rem" }} />
             <div>
-              <span style={{ fontSize: "1.2rem" }}>
-                {movieTitle || "Movie Title"} {/* Movie title */}
-              </span>
-              <span
-                style={{
-                  backgroundColor: "#f8f9fa",
-                  padding: "3px 8px",
-                  borderRadius: "12px",
-                  fontSize: "0.8rem",
-                  marginLeft: "10px",
-                  color: "#007bff",
-                  fontWeight: "600",
-                }}
-              >
+              <span style={{ fontSize: "1.2rem" }}>{movieTitle || "Movie Title"}</span>
+              <span style={{backgroundColor: "#f8f9fa",padding: "3px 8px",borderRadius: "12px",fontSize: "0.8rem",marginLeft: "10px",color: "#007bff",fontWeight: "600",}}>
                 UA
               </span>
             </div>
           </div>
         </Col>
       </Row>
-
-      {/* Row for Screen Number, Theater Name and Date */}
       <Row className="mb-3">
         <Col>
-          <div
-            style={{
-              fontSize: "0.9rem",
-              color: "#343a40",
-              fontWeight: "500",
-              textAlign: "center",
-              marginBottom: "20px",
-            }}
-          >
-            Screen {screenDetails?.screenNumber} {/* Screen number */}
+          <div style={{fontSize: "0.9rem",color: "#343a40",fontWeight: "500",textAlign: "center",marginBottom: "20px",}}>
+            Screen {screenDetails?.screenNumber}
             <br />
             {screenDetails?.theater.name || "Theater Name"} |{" "}
-            {formattedDate || "Show Date"} {/* Theater name and date */}
+            {formattedDate || "Show Date"}
           </div>
         </Col>
       </Row>
-
-      {/* Render Screen Layout */}
       <Row>{renderScreenLayout()}</Row>
-      {/* Pay Button */}
       {selectedSeats.size > 0 && (
-        <div
-          style={{
-            position: "fixed",
-            width: "100%",
-            backgroundColor: "rgb(225 225 225)",
-            height: "80px",
-            bottom: "20px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            zIndex: 1000,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
-          }}
-        >
-          <Button
-            style={{
-              width: "200px",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-            variant="primary"
-            onClick={handleSeatUpdate}
-          >
+        <div style={{ position: "fixed",width: "100%",backgroundColor: "rgb(225 225 225)",height: "80px",bottom: "20px",left: "50%",transform: "translateX(-50%)",
+            zIndex: 1000,display: "flex",justifyContent: "center",alignItems: "center",boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",}}>
+          <Button style={{width: "200px",display: "flex",justifyContent: "center",alignItems: "center",}} variant="primary" onClick={handleSeatUpdate} >
             <div style={{ fontSize: "16px", textAlign: "center" }}>
               <div>Pay Rs.{totalPrice}</div>
               <div style={{ fontSize: "10px", color: "whitesmoke" }}>

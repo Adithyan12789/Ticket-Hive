@@ -180,10 +180,10 @@ class UserService {
   public updateUserProfileService = async (
     userId: string,
     updateData: {
-      currentPassword: string;
+      currentPassword?: string;  // Optional field
       name: string;
       phone: string;
-      password: string;
+      password?: string;  // Optional field
     },
     profileImage: { filename: string | undefined }
   ) => {
@@ -191,28 +191,32 @@ class UserService {
     if (!user) {
       throw new Error("User not found");
     }
-
-    if (updateData.currentPassword) {
+  
+    // Only check current password if user is updating their password
+    if (updateData.password && updateData.currentPassword) {
       const isMatch = await user.matchPassword(updateData.currentPassword);
       if (!isMatch) {
         throw new Error("Current password is incorrect");
       }
     }
-
+  
     user.name = updateData.name || user.name;
     user.phone = updateData.phone || user.phone;
-
+  
+    // If a new password is provided, hash it
     if (updateData.password) {
       const salt = await bcrypt.genSalt(10);
       user.password = await bcrypt.hash(updateData.password, salt);
     }
-
+  
+    // If a new profile image is uploaded, update the image filename
     if (profileImage) {
       user.profileImageName = profileImage.filename || user.profileImageName;
     }
-
+  
     return await UserRepository.saveUser(user);
   };
+  
 
   public getOffersByTheaterIdService = async (theaterId: string) => {
     try {

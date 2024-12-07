@@ -15,7 +15,7 @@ class UserController {
     // Log to check if cookies are being sent
     console.log("Request Cookies:", req.cookies);
 
-    const refreshToken = req.cookies["jwt_refresh"]; // Ensure it's the correct name
+    const refreshToken = req.cookies["refreshToken"]; // Ensure it's the correct name
 
     // Check if refresh token exists
     if (!refreshToken) {
@@ -419,20 +419,28 @@ class UserController {
         res.status(401).json({ message: "Unauthorized" });
         return;
       }
-
+  
       try {
         const updateData = { ...req.body };
-
+  
         const fileData = req.file
           ? { filename: req.file.filename }
           : { filename: undefined };
-
+  
+        // If password is being changed, validate currentPassword
+        if (updateData.password) {
+          if (!updateData.currentPassword) {
+            res.status(400).json({ message: "Current password is required" });
+            return;
+          }
+        }
+  
         const updatedUser = await UserService.updateUserProfileService(
           req.user._id,
           updateData,
           fileData
         );
-
+  
         res.status(200).json({
           _id: updatedUser._id,
           name: updatedUser.name,
@@ -453,6 +461,7 @@ class UserController {
       }
     }
   );
+  
 
   getOffersByTheaterId = asyncHandler(
     async (req: CustomRequest, res: Response): Promise<void> => {

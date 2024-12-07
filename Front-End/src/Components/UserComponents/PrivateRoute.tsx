@@ -2,26 +2,36 @@ import { useEffect } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../Store';
-import { useGetUserProfileQuery } from '../../Slices/UserApiSlice';
+import { useGetUserProfileQuery, useRefreshTokenMutation } from '../../Slices/UserApiSlice';
 import { logout } from '../../Slices/AuthSlice';
 
 const PrivateRoute: React.FC = () => {
   const { userInfo } = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch();
+  const [refreshToken] = useRefreshTokenMutation();
 
   const userId = userInfo?.id;
-  const accessToken = userInfo?.accessToken;
 
   console.log("Private Route - User Info:", userInfo);
-  console.log("Private Route - Access Token:", accessToken);
   
-  // Check for token validity
   useEffect(() => {
-    if (!accessToken) {
-      console.log("No access token, logging out.");
-      dispatch(logout());
-    }
-  }, [accessToken, dispatch]);
+    const verifyToken = async () => {
+      if (userInfo) {
+        console.log('private route checked the refresh Token')
+        try {
+          await refreshToken().unwrap();
+        } catch (error) {
+          console.log(error)
+          dispatch(logout());
+        }
+      }
+    };
+
+    verifyToken();
+    const intervalId = setInterval(verifyToken, 14 * 60 * 1000); 
+
+    return () => clearInterval(intervalId);
+  }, [refreshToken, dispatch, userInfo]);
 
   const { error } = useGetUserProfileQuery(userId, {
     skip: !userId,
@@ -42,3 +52,4 @@ const PrivateRoute: React.FC = () => {
 };
 
 export default PrivateRoute;
+

@@ -6,7 +6,6 @@ import {
   Card,
   Carousel,
   Form,
-  Dropdown,
   InputGroup,
 } from "react-bootstrap";
 import "./HomePage.css";
@@ -23,7 +22,6 @@ const HomePage: React.FC = () => {
   const [getMovies, { isLoading: loadingTrending }] = useGetMoviesMutation();
   const [trendingMovies, setTrendingMovies] = useState<MovieManagement[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [sortOption, setSortOption] = useState<string>("newest");
   const [loading, setLoading] = useState<boolean>(true);
 
   const fetchData = useCallback(async () => {
@@ -116,32 +114,8 @@ const HomePage: React.FC = () => {
           className="d-flex mt-5"
           style={{ gap: "0.5rem", justifyContent: "space-evenly" }}
         >
-          {/* Sort Dropdown on the Left */}
-          <Dropdown
-            onSelect={(eventKey) => setSortOption(eventKey || "newest")}
-          >
-            <Dropdown.Toggle
-              variant="outline-secondary"
-              id="dropdown-sort"
-              style={{
-                border: "1px solid #008bb3",
-                borderRadius: "0.5rem",
-                color: "#008bb3",
-                boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)",
-                padding: "0.5rem 1rem",
-              }}
-            >
-              Sort by:{" "}
-              {sortOption === "newest" ? "Newest First" : "Oldest First"}
-            </Dropdown.Toggle>
-            <Dropdown.Menu>
-              <Dropdown.Item eventKey="newest">Newest First</Dropdown.Item>
-              <Dropdown.Item eventKey="oldest">Oldest First</Dropdown.Item>
-            </Dropdown.Menu>
-          </Dropdown>
-
           {/* Search Bar on the Right with Limited Width */}
-          <InputGroup style={{ maxWidth: "400px", flexGrow: 1 }}>
+          <InputGroup style={{ maxWidth: "700px", flexGrow: 1 }}>
             <Form.Control
               style={{
                 border: "1px solid #008bb3",
@@ -272,7 +246,7 @@ const HomePage: React.FC = () => {
           />
         </div>
 
-        <h1 className="text-center my-5" style={{ color: "black" }}>
+        <h1 className="text-center my-5 text-primary" style={{ color: "black" }}>
           Recommended Movies
         </h1>
 

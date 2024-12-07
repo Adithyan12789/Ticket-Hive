@@ -75,12 +75,11 @@ const MovieDetailScreen: React.FC = () => {
   } = useGetReviewsQuery(id);
 
   console.log("reviews: ", reviews);
-  
-  
+
   const [addReview, { isLoading: addingReview }] = useAddReviewMutation();
 
-    useEffect(() => {
-      if (reviews) {
+  useEffect(() => {
+    if (reviews) {
       setReviewsState(reviews);
     }
   }, [reviews]);
@@ -329,26 +328,26 @@ const MovieDetailScreen: React.FC = () => {
                 )}
 
                 {!hasReviewed && (
-                <Button
-                  variant="secondary"
-                  style={{
-                    backgroundColor: "#fff",
-                    color: "#007bff",
-                    border: "1px solid #007bff",
-                    borderRadius: "5px",
-                    padding: "5px 15px",
-                    fontSize: "1rem",
-                    fontWeight: "600",
-                    transition: "all 0.3s ease",
-                  }}
-                  onClick={() => setShowReviewModal(true)}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = "#007bff";
-                    e.currentTarget.style.color = "#ddd";
-                  }}
-                >
-                  Rate now
-                </Button>
+                  <Button
+                    variant="secondary"
+                    style={{
+                      backgroundColor: "#fff",
+                      color: "#007bff",
+                      border: "1px solid #007bff",
+                      borderRadius: "5px",
+                      padding: "5px 15px",
+                      fontSize: "1rem",
+                      fontWeight: "600",
+                      transition: "all 0.3s ease",
+                    }}
+                    onClick={() => setShowReviewModal(true)}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = "#007bff";
+                      e.currentTarget.style.color = "#ddd";
+                    }}
+                  >
+                    Rate now
+                  </Button>
                 )}
               </div>
 
@@ -411,187 +410,189 @@ const MovieDetailScreen: React.FC = () => {
           ))}
         </Row>
       </Container>
-      <Container className="mt-5" style={{ padding: "30px 20px" }}>
-        <h1 style={{ color: "#5c5c5c" }}>Top Reviews</h1>
-
-        {loadingReviews ? (
-          <Loader />
-        ) : (
-          <>
-            {/* Reviews Carousel */}
-            <Carousel
-              indicators={false}
-              controls={true}
-              interval={null}
-              prevIcon={
-                <FaChevronLeft size={30} style={{ color: "#007bff" }} />
-              }
-              nextIcon={
-                <FaChevronRight size={30} style={{ color: "#007bff" }} />
-              }
-            >
-              {reviewsState.map((review: Review) => (
-                <Carousel.Item key={review._id}>
-                  <Row className="justify-content-center">
-                    <Col md={8} sm={12}>
-                      <Card
-                        style={{
-                          borderRadius: "10px",
-                          boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
-                          padding: "20px",
-                        }}
-                      >
-                        <Card.Body>
-                          <div className="d-flex justify-content-between">
-                            <div className="d-flex align-items-center">
-                              <FaUserAlt size={30} color="#007bff" />
-                              <strong style={{ paddingLeft: "20px" }}>
-                                {review.user.name}
-                              </strong>
-                              <Badge
-                                pill
-                                bg="info"
-                                style={{
-                                  marginLeft: "10px",
-                                  fontSize: "0.8rem",
-                                }}
-                              >
-                                {"User"}
-                              </Badge>
-                            </div>
-                            <div
-                              style={{
-                                color: `hsl(${
-                                  (review.rating / 10) * 120
-                                }, 70%, 50%)`,
-                              }}
-                            >
-                              {Array.from(
-                                { length: review.rating },
-                                () => "⭐"
-                              ).join("")}
-                            </div>
-                          </div>
-                          <p
-                            className="mt-5"
-                            style={{ fontSize: "1rem", color: "#6c757d" }}
-                          >
-                            {review.comment}
-                          </p>
-                          <div className="d-flex mt-5">
-                            {/* Like Button */}
-                            <div
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                marginRight: "40px",
-                              }}
-                            >
-                              <Button
-                                variant="light"
-                                style={{
-                                  borderRadius: "50%",
-                                  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-                                  border: "2px solid rgb(0, 123, 255)",
-                                  backgroundColor:
-                                    userActions[review._id] === "like"
-                                      ? "rgb(0, 123, 255)"
-                                      : "transparent",
-                                  transition:
-                                    "transform 0.2s, background-color 0.3s",
-                                }}
-                                onClick={() => handleLike(review._id)}
-                                onMouseEnter={(e) =>
-                                  (e.currentTarget.style.transform =
-                                    "scale(1.2)")
-                                }
-                                onMouseLeave={(e) =>
-                                  (e.currentTarget.style.transform = "scale(1)")
-                                }
-                              >
-                                <FaThumbsUp
+      {reviewsState.length > 0 && (
+        <Container className="mt-5" style={{ padding: "30px 20px" }}>
+          <h1 style={{ color: "#5c5c5c" }}>Top Reviews</h1>
+          {loadingReviews ? (
+            <Loader />
+          ) : (
+            <>
+              {/* Reviews Carousel */}
+              <Carousel
+                indicators={false}
+                controls={true}
+                interval={null}
+                prevIcon={
+                  <FaChevronLeft size={30} style={{ color: "#007bff" }} />
+                }
+                nextIcon={
+                  <FaChevronRight size={30} style={{ color: "#007bff" }} />
+                }
+              >
+                {reviewsState.map((review: Review) => (
+                  <Carousel.Item key={review._id}>
+                    <Row className="justify-content-center">
+                      <Col md={8} sm={12}>
+                        <Card
+                          style={{
+                            borderRadius: "10px",
+                            boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
+                            padding: "20px",
+                          }}
+                        >
+                          <Card.Body>
+                            <div className="d-flex justify-content-between">
+                              <div className="d-flex align-items-center">
+                                <FaUserAlt size={30} color="#007bff" />
+                                <strong style={{ paddingLeft: "20px" }}>
+                                  {review.user.name}
+                                </strong>
+                                <Badge
+                                  pill
+                                  bg="info"
                                   style={{
-                                    color:
+                                    marginLeft: "10px",
+                                    fontSize: "0.8rem",
+                                  }}
+                                >
+                                  {"User"}
+                                </Badge>
+                              </div>
+                              <div
+                                style={{
+                                  color: `hsl(${
+                                    (review.rating / 10) * 120
+                                  }, 70%, 50%)`,
+                                }}
+                              >
+                                {Array.from(
+                                  { length: review.rating },
+                                  () => "⭐"
+                                ).join("")}
+                              </div>
+                            </div>
+                            <p
+                              className="mt-5"
+                              style={{ fontSize: "1rem", color: "#6c757d" }}
+                            >
+                              {review.comment}
+                            </p>
+                            <div className="d-flex mt-5">
+                              {/* Like Button */}
+                              <div
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  marginRight: "40px",
+                                }}
+                              >
+                                <Button
+                                  variant="light"
+                                  style={{
+                                    borderRadius: "50%",
+                                    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                                    border: "2px solid rgb(0, 123, 255)",
+                                    backgroundColor:
                                       userActions[review._id] === "like"
-                                        ? "#fff"
-                                        : "rgb(0, 123, 255)",
+                                        ? "rgb(0, 123, 255)"
+                                        : "transparent",
+                                    transition:
+                                      "transform 0.2s, background-color 0.3s",
                                   }}
-                                />
-                              </Button>
-                              <span
-                                style={{
-                                  fontSize: "0.9rem",
-                                  color: "rgb(108, 117, 125)",
-                                  fontWeight: "bold",
-                                  marginLeft: "5px",
-                                  transition: "all 0.2s",
-                                }}
-                              >
-                                {review.likes || 0}
-                              </span>
-                            </div>
-
-                            {/* Dislike Button */}
-                            <div
-                              style={{ display: "flex", alignItems: "center" }}
-                            >
-                              <Button
-                                variant="light"
-                                size="sm"
-                                style={{
-                                  borderRadius: "50%",
-                                  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-                                  border: "2px solid #dc3545",
-                                  backgroundColor:
-                                    userActions[review._id] === "dislike"
-                                      ? "#dc3545"
-                                      : "transparent",
-                                  transition:
-                                    "transform 0.2s, background-color 0.3s",
-                                }}
-                                onClick={() => handleDislike(review._id)}
-                                onMouseEnter={(e) =>
-                                  (e.currentTarget.style.transform =
-                                    "scale(1.2)")
-                                }
-                                onMouseLeave={(e) =>
-                                  (e.currentTarget.style.transform = "scale(1)")
-                                }
-                              >
-                                <FaThumbsDown
+                                  onClick={() => handleLike(review._id)}
+                                  onMouseEnter={(e) =>
+                                    (e.currentTarget.style.transform =
+                                      "scale(1.2)")
+                                  }
+                                  onMouseLeave={(e) =>
+                                    (e.currentTarget.style.transform =
+                                      "scale(1)")
+                                  }
+                                >
+                                  <FaThumbsUp
+                                    style={{
+                                      color:
+                                        userActions[review._id] === "like"
+                                          ? "#fff"
+                                          : "rgb(0, 123, 255)",
+                                    }}
+                                  />
+                                </Button>
+                                <span
                                   style={{
-                                    color:
-                                      userActions[review._id] === "dislike"
-                                        ? "#fff"
-                                        : "#dc3545",
+                                    fontSize: "0.9rem",
+                                    color: "rgb(108, 117, 125)",
+                                    fontWeight: "bold",
+                                    marginLeft: "5px",
+                                    transition: "all 0.2s",
                                   }}
-                                />
-                              </Button>
-                              <span
+                                >
+                                  {review.likes || 0}
+                                </span>
+                              </div>
+                              {/* Dislike Button */}
+                              <div
                                 style={{
-                                  fontSize: "0.9rem",
-                                  color: "#dc3545",
-                                  fontWeight: "bold",
-                                  marginLeft: "5px",
-                                  transition: "all 0.2s",
+                                  display: "flex",
+                                  alignItems: "center",
                                 }}
                               >
-                              </span>
+                                <Button
+                                  variant="light"
+                                  size="sm"
+                                  style={{
+                                    borderRadius: "50%",
+                                    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                                    border: "2px solid #dc3545",
+                                    backgroundColor:
+                                      userActions[review._id] === "dislike"
+                                        ? "#dc3545"
+                                        : "transparent",
+                                    transition:
+                                      "transform 0.2s, background-color 0.3s",
+                                  }}
+                                  onClick={() => handleDislike(review._id)}
+                                  onMouseEnter={(e) =>
+                                    (e.currentTarget.style.transform =
+                                      "scale(1.2)")
+                                  }
+                                  onMouseLeave={(e) =>
+                                    (e.currentTarget.style.transform =
+                                      "scale(1)")
+                                  }
+                                >
+                                  <FaThumbsDown
+                                    style={{
+                                      color:
+                                        userActions[review._id] === "dislike"
+                                          ? "#fff"
+                                          : "#dc3545",
+                                    }}
+                                  />
+                                </Button>
+                                <span
+                                  style={{
+                                    fontSize: "0.9rem",
+                                    color: "#dc3545",
+                                    fontWeight: "bold",
+                                    marginLeft: "5px",
+                                    transition: "all 0.2s",
+                                  }}
+                                ></span>
+                              </div>
                             </div>
-                          </div>
-                        </Card.Body>
-                      </Card>
-                    </Col>
-                  </Row>
-                </Carousel.Item>
-              ))}
-            </Carousel>
-          </>
-        )}
-      </Container>
-
-      <Footer/>
-
+                          </Card.Body>
+                        </Card>
+                      </Col>
+                    </Row>
+                  </Carousel.Item>
+                ))}
+              </Carousel>
+            </>
+          )}
+        </Container>
+      )}
+      <Footer />
       <Modal
         show={showReviewModal}
         onHide={() => setShowReviewModal(false)}
@@ -753,48 +754,58 @@ const MovieDetailScreen: React.FC = () => {
         <Modal.Header
           closeButton
           style={{
-            color: "#fff",
             borderBottom: "none",
+            color: "#fff",
+            borderTopLeftRadius: "10px",
+            borderTopRightRadius: "10px",
           }}
         >
-          <Modal.Title style={{ fontWeight: "bold", fontSize: "1.5rem" }}>
+          <Modal.Title
+            style={{
+              fontWeight: "bold",
+              fontSize: "1.8rem",
+              textShadow: "1px 1px 2px rgba(0, 0, 0, 0.3)",
+            }}
+          >
             Select Language
           </Modal.Title>
         </Modal.Header>
         <Modal.Body
           style={{
-            backgroundColor: "#f9f9f9",
-            borderRadius: "10px",
-            padding: "20px 15px",
+            backgroundColor: "#f8f9fa",
+            padding: "30px 25px",
+            borderBottomLeftRadius: "10px",
+            borderBottomRightRadius: "10px",
+            boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
           }}
         >
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "15px",
+              gridTemplateColumns: "repeat(auto-fit, minmax(100px, 1fr))",
+              gap: "20px",
             }}
           >
             {movie.languages.map((language: string) => (
               <Button
                 key={language}
                 style={{
-                  backgroundColor: "rgb(147, 147, 147)",
+                  background: "linear-gradient(135deg, #6f42c1, #e83e8c)",
                   color: "#fff",
                   border: "none",
-                  borderRadius: "25px",
-                  padding: "10px 20px",
+                  borderRadius: "50px",
+                  padding: "12px 20px",
                   fontSize: "1rem",
-                  fontWeight: "bold",
-                  boxShadow: "0 4px 10px rgba(255, 64, 129, 0.4)",
-                  transition: "transform 0.3s, background-color 0.3s",
+                  fontWeight: "500",
+                  boxShadow: "0 8px 15px rgba(0, 0, 0, 0.1)",
+                  transition: "all 0.3s ease",
                 }}
                 onClick={() => handleLanguageSelect(language)}
                 onMouseEnter={(e) =>
-                  (e.currentTarget.style.backgroundColor = "#0d6efd")
+                  (e.currentTarget.style.transform = "scale(1.1)")
                 }
                 onMouseLeave={(e) =>
-                  (e.currentTarget.style.backgroundColor = "rgb(147, 147, 147)")
+                  (e.currentTarget.style.transform = "scale(1)")
                 }
               >
                 {language}
