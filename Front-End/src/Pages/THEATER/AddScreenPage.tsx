@@ -70,44 +70,37 @@ const AddScreenPage: React.FC = () => {
     if (numRows > 0 && seatsPerRow > 0) {
       const newLayout = Array.from({ length: numRows }, (_, rowIndex) =>
         Array.from({ length: seatsPerRow }, (_, seatIndex) => {
-          const rowLabel = String.fromCharCode(65 + rowIndex);
-          const seatLabel = `${rowLabel}${String(seatIndex + 1).padStart(
-            2,
-            "0"
-          )}`;
-          return { label: seatLabel };
+          const rowLabel = String.fromCharCode(65 + rowIndex); // Generate row label as A, B, C...
+          const seatLabel = `${rowLabel}${String(seatIndex + 1).padStart(2, "0")}`; // Label seats as A01, A02...
+          return { label: seatLabel }; // Return seat object
         })
       );
       setLayout(newLayout);
     } else {
-      toast.warn(
-        "Please set both rows and seats per row to generate a layout."
-      );
+      toast.warn("Please set both rows and seats per row to generate a layout.");
     }
-  };
-
+  };  
+  
   const deleteRow = (rowIndex: number) => {
     setLayout((prevLayout) => {
       const newLayout = [...prevLayout];
-      newLayout.splice(rowIndex, 1);
+      newLayout.splice(rowIndex, 1); // Remove the specified row
       return newLayout;
     });
-  };
-
+  };  
+  
   const deleteSeat = (rowIndex: number, seatIndex: number) => {
     setLayout((prevLayout) => {
       const newLayout = [...prevLayout];
-      newLayout[rowIndex].splice(seatIndex, 1);
-
+      newLayout[rowIndex].splice(seatIndex, 1); // Remove the specific seat
       newLayout[rowIndex] = newLayout[rowIndex].map((seat, index) => {
-        const rowLabel = String.fromCharCode(65 + rowIndex); 
-        seat.label = `${rowLabel}${String(index + 1).padStart(2, "0")}`;
+        const rowLabel = String.fromCharCode(65 + rowIndex);
+        seat.label = `${rowLabel}${String(index + 1).padStart(2, "0")}`; // Recalculate seat labels in the row
         return seat;
       });
-
       return newLayout;
     });
-  };
+  };  
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -119,14 +112,19 @@ const AddScreenPage: React.FC = () => {
       return;
     }
 
+    if (layout.some(row => row.some(seat => !seat.label))) {
+      toast.error("Some seats are missing labels. Please regenerate the layout.");
+      return;
+    }    
+
     const formattedShowTimes = showTimesWithMovies.map(
       ({ showTime, movieId, movieTitle }) => ({
         time: showTime,
         movie: movieId,
         movieTitle: movieTitle,
-        layout,
+        layout: layout, // Use the current state of the layout
       })
-    );
+    );    
 
     try {
       await addScreen({

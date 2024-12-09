@@ -1,12 +1,13 @@
 import mongoose from "mongoose";
 import { Booking } from "../Models/bookingModel";
-import Screens from "../Models/ScreensModel";
+import { Screens } from "../Models/ScreensModel";
 import BookingRepo from "../Repositories/BookingRepo";
 import WalletRepo from "../Repositories/WalletRepo";
 import { ITransaction } from "../Models/WalletModel";
 import { v4 as uuidv4 } from "uuid";
 import TheaterDetails from "../Models/TheaterDetailsModel";
 import { Movie } from "../Models/MoviesModel";
+import { Schedule } from "../Models/ScheduleModel";
 
 export interface BookingDetails {
   totalPrice: number;
@@ -24,9 +25,18 @@ export interface BookingDetails {
   status: "pending" | "completed" | "cancelled" | "failed";
 }
 
+async function getMovieTitleById(movieId: string): Promise<string> {
+  const movie = await Movie.findById(movieId);
+  if (!movie) {
+    throw new Error("Movie not found.");
+  }
+  return movie.title;
+}
+
 class BookingService {
   public async createBookingService(
     movieId: string,
+    scheduleId: string,
     theaterId: string,
     screenId: string,
     seatIds: string[],
@@ -39,15 +49,67 @@ class BookingService {
     convenienceFee: number,
     bookingDate: Date
   ) {
+    let schedule = await Schedule.findOne({
+      screen: screenId,
+      date: bookingDate,
+      "showTimes.time": showTime,
+    });
+
+    console.log("before schedule: ", schedule);
+  
+    if (!schedule) {
+      const existingSchedule = await Schedule.findOne({ screen: screenId });
+  
+      if (!existingSchedule) {
+        throw new Error("No existing schedule found for the screen to use its layout.");
+      }
+
+      const layoutToUse = existingSchedule.showTimes[0].layout;
+
+      schedule = new Schedule({
+        screen: screenId,
+        date: bookingDate,
+        showTimes: [
+          {
+            time: showTime,
+            movie: movieId,
+            movieTitle: await getMovieTitleById(movieId),
+            layout: layoutToUse,
+          },
+        ],
+      });
+  
+      await schedule.save();
+    }
+
+    console.log("schedule after: ", schedule);
+
+    const targetShowTime = schedule.showTimes.find(
+      (show) => show.time === showTime
+    );
+  
+    if (!targetShowTime) {
+      throw new Error("Show time not found in the schedule.");
+    }
+
+    console.log("targetShowTime: ", targetShowTime);
+
+    targetShowTime.layout = targetShowTime.layout.map((row) =>
+      row.map((seat) =>
+        seatIds.includes(seat.label) ? { ...seat, isAvailable: false } : seat
+      )
+    );
+  
+    await schedule.save();
 
     const newBooking = await BookingRepo.createBooking({
       movie: new mongoose.Types.ObjectId(movieId),
       theater: new mongoose.Types.ObjectId(theaterId),
       screen: new mongoose.Types.ObjectId(screenId),
-      offer: new mongoose.Types.ObjectId(offerId),
+      offer: offerId ? new mongoose.Types.ObjectId(offerId) : null,
       seats: seatIds,
-      bookingDate,
-      showTime: showTime,
+      bookingDate: schedule.date,
+      showTime,
       paymentStatus: paymentStatus as
         | "pending"
         | "confirmed"
@@ -58,21 +120,7 @@ class BookingService {
       user: new mongoose.Types.ObjectId(userId),
       totalPrice,
     });
-
-    const screen = await Screens.findById(screenId);
-    if (!screen) throw new Error("Screen not found");
-
-    const show = screen.showTimes.find((s) => s.time === showTime);
-    if (!show) throw new Error("Show time not found");
-
-    show.layout = show.layout.map((row) =>
-      row.map((seat) =>
-        seatIds.includes(seat.label) ? { ...seat, isAvailable: false } : seat
-      )
-    );
-
-    await screen.save();
-
+  
     return newBooking;
   }
 
@@ -103,48 +151,57 @@ class BookingService {
   }
 
   public async cancelTicketService(bookingId: string, userId: string) {
+    // Find the booking
     const booking = await BookingRepo.findBookingById(bookingId);
     if (!booking) throw new Error("Booking not found");
-
+  
+    // Check if the booking belongs to the user
     if (String(booking.user) !== userId) {
       throw new Error("You are not authorized to cancel this ticket");
     }
-
-    const { screen, seats, showTime, totalPrice } = booking;
-    const screenId = screen._id;
-
-    const screenDoc = await Screens.findById(screenId);
-    if (!screenDoc) throw new Error("Screen not found");
-
-    const showTimeIndex = screenDoc.showTimes.findIndex(
-      (s) => s.time === showTime
-    );
-    if (showTimeIndex === -1) throw new Error("Show time not found");
-
-    const showTimeDoc = screenDoc.showTimes[showTimeIndex];
+  
+    const { seats, showTime, totalPrice, bookingDate, screen } = booking;
+  
+    // Find the relevant schedule
+    const schedule = await Schedule.findOne({
+      screen: screen._id,
+      date: bookingDate,
+    });
+  
+    if (!schedule) throw new Error("Schedule not found for the specified screen and date.");
+  
+    // Find the showtime in the schedule
+    const targetShowTime = schedule.showTimes.find((s) => s.time === showTime);
+  
+    if (!targetShowTime) throw new Error("Show time not found in the schedule.");
+  
+    // Update seat availability in the layout
     let seatFound = false;
-
-    for (let row of showTimeDoc.layout) {
-      for (let seat of row) {
+    targetShowTime.layout = targetShowTime.layout.map((row) =>
+      row.map((seat) => {
         if (seats.includes(seat.label)) {
-          seat.isAvailable = true;
           seatFound = true;
+          return { ...seat, isAvailable: true }; // Mark the seat as available
         }
-      }
-    }
-
+        return seat;
+      })
+    );
+  
     if (!seatFound) {
-      throw new Error("Seats not found in layout");
+      throw new Error("Seats not found in the layout for the specified show time.");
     }
-
-    await screenDoc.save();
-
+  
+    // Save the updated schedule
+    await schedule.save();
+  
+    // Update the booking status to "cancelled"
     booking.paymentStatus = "cancelled";
     await booking.save();
-
+  
+    // Process the wallet refund
     const wallet = await WalletRepo.findWalletByUserId(userId);
     if (!wallet) throw new Error("Wallet not found");
-
+  
     const transaction: ITransaction = {
       transactionId: uuidv4(),
       amount: totalPrice,
@@ -153,16 +210,15 @@ class BookingService {
       date: new Date(),
       description: `Refund for cancelled ticket`,
     };
-
+  
     wallet.transactions.push(transaction);
-
     wallet.balance += totalPrice;
-
+  
     await wallet.save();
-
+  
     return { message: "Booking canceled successfully", booking };
   }
-
+  
   public async getTicketDetails(ticketId: string) {
     const ticket = await BookingRepo.findBookingById(ticketId);
     if (!ticket) throw new Error("Ticket not found");

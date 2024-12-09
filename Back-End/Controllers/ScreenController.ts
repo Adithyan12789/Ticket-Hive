@@ -3,8 +3,13 @@ import { body, validationResult } from "express-validator";
 import ScreenService from "../Services/ScreenService";
 import { CustomRequest } from "../Middlewares/TheaterAuthMiddleware";
 import { Request, Response } from "express";
+import { Screens } from "../Models/ScreensModel";
+import TheaterDetails from "../Models/TheaterDetailsModel";
+import { ISeat, IShowTime, Schedule } from "../Models/ScheduleModel";
+import mongoose from "mongoose";
 
 class ScreenController {
+  // Validation for adding/updating screens
   validateScreenData = [
     body("screenNumber")
       .isInt({ min: 1 })
@@ -12,107 +17,202 @@ class ScreenController {
     body("capacity")
       .isInt({ min: 1 })
       .withMessage("Capacity must be at least 1"),
-    body("layout").isArray().withMessage("Layout must be an array"),
-    body("showTimes")
-      .isArray()
-      .withMessage("Show times must be an array")
-      .custom((value) => {
-        if (!Array.isArray(value)) {
-          throw new Error("Show times must be an array");
-        }
-        value.forEach((item) => {
-          if (typeof item !== "object" || !item.time || !item.movie) {
-            throw new Error(
-              "Each show time must be an object with 'time' and 'movie' properties"
-            );
-          }
-        });
-        return true;
-      }),
+    body("layout")
+      .isArray({ min: 1 })
+      .withMessage("Layout must be a non-empty array")
+      .custom((layout) =>
+        layout.every(
+          (row: any[]) =>
+            Array.isArray(row) &&
+            row.every(
+              (seat) =>
+                typeof seat.label === "string" &&
+                typeof seat.isAvailable === "boolean"
+            )
+        )
+      )
+      .withMessage(
+        "Each layout row must be an array of objects with label and isAvailable properties"
+      ),
   ];
-
+  
   addScreen = asyncHandler(
     async (req: CustomRequest, res: Response): Promise<void> => {
       const { theaterId } = req.params;
-      const theaterOwnerId = req.theaterOwner?._id;
+      const { screenNumber, capacity, showTimes } = req.body;
+  
+      try {
+        const theater = await TheaterDetails.findById(theaterId);
+  
+        if (!theater) {
+          res.status(404).json({ message: 'Theater not found' });
+          return;
+        }
+  
+        const existingScreen = await Screens.findOne({ theater: theaterId, screenNumber });
+  
+        if (existingScreen) {
+          res.status(400).json({ message: 'Screen number already exists in this theater' });
+          return;
+        }
+  
+        // Create a new screen
+        const newScreen = new Screens({
+          theater: theaterId,
+          screenNumber,
+          capacity,
+          layout: [], // Empty layout, can be updated later
+        });
+  
+        const savedScreen = await newScreen.save();
+  
+        // Format and save the schedule
+        const formattedShowTimes: IShowTime[] = showTimes.map((showTime: any) => ({
+          time: showTime.time,
+          movie: showTime.movie,
+          movieTitle: showTime.movieTitle,
+          layout: showTime.layout?.map((row: ISeat[]) =>
+            row.map((seat: ISeat) => ({
+              label: seat.label,
+              isAvailable: true,
+            }))
+          ) || [], // Initialize layout if provided
+        }));
+  
+        const newSchedule = new Schedule({
+          screen: savedScreen._id,
+          date: new Date(), // Today's date, can be adjusted
+          showTimes: formattedShowTimes,
+        });
+  
+        await newSchedule.save();
+  
+        // Optionally add the schedule ID to the screen (if needed)
+        savedScreen.schedule = [newSchedule._id as mongoose.Types.ObjectId];
 
-      if (!theaterOwnerId) {
-        res.status(400).json({ error: "Theater owner ID is required." });
-        return;
+        await savedScreen.save();
+  
+        res.status(201).json({
+          message: 'Screen and schedule added successfully',
+          screen: savedScreen,
+          schedule: newSchedule,
+        });
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Failed to add screen', error: error });
       }
+    }
+  );  
+  
+  // Update screen details
+  updateScreen = asyncHandler(
+    async (req: CustomRequest, res: Response): Promise<void> => {
+      const { theaterId, screenId } = req.params; // Get theater ID and screen ID from URL
+      const { screenNumber, capacity, showTimes } = req.body; // Get screen details and showtimes from the request body
+    
+      try {
+        // Check if the theater exists
+        const theater = await TheaterDetails.findById(theaterId);
+        if (!theater) {
+          res.status(404).json({ message: 'Theater not found' });
+          return;
+        }
+    
+        // Check if the screen exists
+        const screen = await Screens.findById(screenId);
+        if (!screen) {
+          res.status(404).json({ message: 'Screen not found' });
+          return;
+        }
+    
+        // Check if the new screen number already exists in the theater (if the screen number is being updated)
+        if (screenNumber !== screen.screenNumber) {
+          const existingScreen = await Screens.findOne({ theater: theaterId, screenNumber });
+          if (existingScreen) {
+            res.status(400).json({ message: 'Screen number already exists in this theater' });
+            return;
+          }
+        }
+    
+        // Update the screen with the new details
+        screen.screenNumber = screenNumber;
+        screen.capacity = capacity;
+    
+        // Save the updated screen
+        const updatedScreen = await screen.save();
+    
+        // If showtimes are provided, update the schedule for the screen
+        if (showTimes) {
+          // Format the showtimes
+          const formattedShowTimes: IShowTime[] = showTimes.map((showTime: { time: any; movie: any; movieTitle: any; layout: ISeat[][]; }) => ({
+            time: showTime.time,
+            movie: showTime.movie,
+            movieTitle: showTime.movieTitle,
+            layout: showTime.layout.map((row: ISeat[]) =>
+              row.map((seat: ISeat) => ({
+                label: seat.label,
+                isAvailable: true, // All seats are available by default
+              }))
+            ),
+          }));
+    
+          // Find the existing schedule and update the showtimes
+          const schedule = await Schedule.findOne({ screen: screenId });
+          if (!schedule) {
+            res.status(404).json({ message: 'Schedule not found for the specified screen' });
+            return;
+          }
+    
+          schedule.showTimes = formattedShowTimes;
+    
+          // Save the updated schedule
+          await schedule.save();
+        }
+    
+        // Respond with the updated screen and schedule
+        res.status(200).json({
+          message: 'Screen updated successfully',
+          screen: updatedScreen,
+        });
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Failed to update screen', error: error });
+      }
+    }
+  );
+  
 
+  // Validation for schedules
+  validateScheduleData = [
+    body("screen").isMongoId().withMessage("Screen ID must be valid"),
+    body("date").isISO8601().withMessage("Date must be in ISO format"),
+    body("showTimes").isArray().withMessage("Show times must be an array"),
+    body("showTimes.*.time").notEmpty().withMessage("Show time is required"),
+    body("showTimes.*.movie").isMongoId().withMessage("Movie ID must be valid"),
+    body("showTimes.*.movieTitle")
+      .notEmpty()
+      .withMessage("Movie title is required"),
+  ];
+
+  addSchedule = asyncHandler(
+    async (req: CustomRequest, res: Response): Promise<void> => {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         res.status(400).json({ errors: errors.array() });
         return;
       }
 
-      const { screenNumber, capacity, layout, showTimes } = req.body;
+      const { screen, date, showTimes } = req.body;
 
-      const currentDate = new Date().toISOString().split("T")[0];
-      
-      const updatedShowTimes = showTimes.map((show: any) => ({
-        ...show,
-        date: currentDate,
-      }));
-
-      const ScreenData = {
-        screenNumber,
-        capacity,
-        showTimes: updatedShowTimes,
-        theater: theaterId,
-      };
-
-      const createdScreen = await ScreenService.addScreenHandler(
-        theaterOwnerId,
-        ScreenData
-      );
+      // Pass screenId and scheduleData to the service method
+      const createdSchedule = await ScreenService.addScheduleHandler(screen, {
+        date,
+        showTimes,
+      });
 
       res
         .status(201)
-        .json({ message: "Screen created successfully", createdScreen });
-    }
-  );
-
-  updateScreen = asyncHandler(
-    async (req: CustomRequest, res: Response): Promise<void> => {
-      const { screenId } = req.params;
-      const theaterOwnerId = req.theaterOwner?._id;
-
-      if (!theaterOwnerId) {
-        res.status(400).json({ error: "Theater owner ID is required." });
-        return;
-      }
-
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        res.status(400).json({ errors: errors.array() });
-        return;
-      }
-
-      const { screenNumber, capacity, showTimes } = req.body;
-
-      const updateData = {
-        screenNumber,
-        capacity,
-        showTimes,
-      };
-
-      const updatedScreen = await ScreenService.editScreenHandler(
-        theaterOwnerId,
-        screenId,
-        updateData
-      );
-
-      if (updatedScreen) {
-        res
-          .status(200)
-          .json({ message: "Screen updated successfully", updatedScreen });
-      } else {
-        res
-          .status(404)
-          .json({ error: "Screen not found or unauthorized access" });
-      }
+        .json({ message: "Schedule created successfully", createdSchedule });
     }
   );
 
@@ -145,16 +245,14 @@ class ScreenController {
       const { id } = req.params;
 
       try {
-        const screen = await ScreenService.getScreensByTheaterIdsService(id);
-        if (!screen) {
-          res.status(404).json({ message: "Screen not found" });
+        const screenDetails = await ScreenService.getScreensWithSchedulesByTheaterIdsService(id);
+        if (!screenDetails || screenDetails.length === 0) {
+          res.status(404).json({ message: "Screens not found" });
           return;
         }
-        res.status(200).json(screen);
+        res.status(200).json(screenDetails);
       } catch (error: any) {
-        res
-          .status(500)
-          .json({ message: error?.message || "Internal server error" });
+        res.status(500).json({ message: error?.message || "Internal server error" });
       }
     }
   );
@@ -162,15 +260,16 @@ class ScreenController {
   getScreensById = asyncHandler(
     async (req: CustomRequest, res: Response): Promise<void> => {
       const { screenId } = req.params;
-
-      console.log('screenId: ', screenId);
-
+  
+      console.log("screenId: ", screenId);
+  
       try {
-        const screen = await ScreenService.getScreensByIdService(screenId);
-
-        console.log('screen: ', screen);
-
-        res.status(200).json(screen);
+        // Fetch screen with schedules
+        const screenWithSchedules = await ScreenService.getScreensByIdService(screenId);
+  
+        console.log("screenWithSchedules: ", screenWithSchedules);
+  
+        res.status(200).json(screenWithSchedules);
       } catch (error: any) {
         res
           .status(500)
@@ -178,6 +277,7 @@ class ScreenController {
       }
     }
   );
+  
 
   getTheatersByMovieName = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
@@ -211,20 +311,20 @@ class ScreenController {
 
   updateSeatAvailability = asyncHandler(
     async (req: CustomRequest, res: Response): Promise<void> => {
-      const { screenId, selectedSeats, holdSeat, showTime } = req.body;
+      console.log("req.body: ", req.body);
 
-      if (!screenId || !Array.isArray(selectedSeats)) {
-        res
-          .status(400)
-          .json({
-            error: "Invalid data. 'screenId' and 'selectedSeats' are required.",
-          });
+      const { scheduleId, selectedSeats, holdSeat, showTime } = req.body;
+
+      if (!scheduleId || !Array.isArray(selectedSeats)) {
+        res.status(400).json({
+          error: "Invalid data. 'scheduleId' and 'selectedSeats' are required.",
+        });
         return;
       }
 
       try {
         const updatedSeats = await ScreenService.updateSeatAvailabilityHandler(
-          screenId,
+          scheduleId,
           selectedSeats,
           holdSeat,
           showTime

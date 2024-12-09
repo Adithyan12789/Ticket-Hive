@@ -10,28 +10,30 @@ import WalletRepo from "../Repositories/WalletRepo";
 import { Offer } from "../Models/OffersModel";
 
 class BookingController {
-  createBooking = asyncHandler(
+  // Controller to create booking
+  public createBooking = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
       const {
-        movieId,
-        theaterId,
-        screenId,
-        seatIds,
-        showTime,
         userId,
-        offerId,
+        scheduleId,
+        theaterId,
+        seatIds,
+        screenId,
+        bookingDate,
+        showTime,
         totalPrice,
         paymentStatus,
         paymentMethod,
         convenienceFee,
-        bookingDate,
+        offerId,
+        movieId
       } = req.body;
 
-      console.log("con req body: ", req.body);
-      console.log("bookingDate: ", bookingDate);
-  
+      console.log("body: ", req.body);
+      
       if (
         !movieId ||
+        !scheduleId ||
         !theaterId ||
         !screenId ||
         !seatIds ||
@@ -39,13 +41,14 @@ class BookingController {
         !userId ||
         !totalPrice ||
         !paymentStatus ||
+        !paymentMethod ||
         !convenienceFee ||
         !bookingDate
       ) {
         res.status(400).json({ message: "Missing required fields" });
         return;
       }
-  
+
       try {
         if (paymentMethod === "wallet") {
           const walletBalance = await WalletService.getWalletBalance(userId);
@@ -53,13 +56,18 @@ class BookingController {
             res.status(400).json({ message: "Insufficient wallet balance" });
             return;
           }
-  
+
           const description = "Ticket booking payment";
-          await WalletService.deductAmountFromWallet(userId, totalPrice, description);
+          await WalletService.deductAmountFromWallet(
+            userId,
+            totalPrice,
+            description
+          );
         }
-  
+
         const booking = await BookingService.createBookingService(
           movieId,
+          scheduleId,
           theaterId,
           screenId,
           seatIds,
@@ -73,19 +81,17 @@ class BookingController {
           bookingDate
         );
 
-        console.log("con booking: ", booking);
-        
         if (paymentMethod === "wallet") {
           const cashbackPercentage = 10;
           const cashbackAmount = (totalPrice * cashbackPercentage) / 100;
-  
+
           await WalletService.addCashbackToWallet(
             userId,
             cashbackAmount,
             `Cashback for ticket booking`
           );
         }
-  
+
         res.status(201).json({
           message: "Booking successful",
           booking,
@@ -102,7 +108,6 @@ class BookingController {
       }
     }
   );
-  
 
   getAllTickets = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
@@ -110,7 +115,6 @@ class BookingController {
         const tickets = await BookingService.getAllTicketsService();
 
         console.log("tickets: ", tickets);
-        
 
         if (!tickets || tickets.length === 0) {
           res.status(404).json({ message: "No tickets found for this user" });
@@ -120,7 +124,7 @@ class BookingController {
         const ticketsWithMovieDetails = await Promise.all(
           tickets.map(async (ticket: { movieId: string }) => {
             const movie = await Movie.findById(ticket.movieId).exec();
-            
+
             return {
               ticket,
               movieDetails: movie
@@ -151,7 +155,6 @@ class BookingController {
 
   cancelTicket = asyncHandler(
     async (req: CustomRequest, res: Response): Promise<void> => {
-
       const { bookingId } = req.params;
       const userId = req.user?._id;
 
@@ -163,7 +166,6 @@ class BookingController {
       }
 
       try {
-
         const cancellationResult = await BookingService.cancelTicketService(
           bookingId,
           userId
@@ -204,7 +206,6 @@ class BookingController {
 
   updateBookingStatus = asyncHandler(
     async (req: CustomRequest, res: Response): Promise<void> => {
-
       const { bookingId } = req.params;
       const { status } = req.body;
 

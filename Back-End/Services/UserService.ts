@@ -3,7 +3,6 @@ import crypto from "crypto";
 import UserRepository from "../Repositories/UserRepo";
 import EmailUtil from "../Utils/EmailUtil";
 import User, { IUser } from "../Models/UserModel";
-import Screens from "../Models/ScreensModel";
 import { Booking } from "../Models/bookingModel";
 import { Movie } from "../Models/MoviesModel";
 import TheaterDetails from "../Models/TheaterDetailsModel";

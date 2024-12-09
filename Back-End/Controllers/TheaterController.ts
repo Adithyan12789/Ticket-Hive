@@ -5,13 +5,14 @@ import EmailUtil from "../Utils/EmailUtil";
 import Theater from "../Models/TheaterOwnerModel";
 import TheaterTokenService from "../Utils/GenerateTheaterToken";
 import { CustomRequest } from "../Middlewares/TheaterAuthMiddleware";
-import mongoose from "mongoose";
+import mongoose, { ObjectId } from "mongoose";
 import TheaterDetails from "../Models/TheaterDetailsModel";
 import { Movie } from "../Models/MoviesModel";
-import Screens from "../Models/ScreensModel";
+import { IScreen, Screens } from "../Models/ScreensModel";
 import User from "../Models/UserModel";
 import { Offer } from "../Models/OffersModel";
 import { Booking } from "../Models/bookingModel";
+import { ISchedule, Schedule } from "../Models/ScheduleModel";
 
 class TheaterController {
   authTheaterOwner = asyncHandler(
@@ -527,30 +528,31 @@ class TheaterController {
   getTheatersByMovieTitle = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
       const { movieTitle } = req.params;
-      const { userId } = req.query;
-
+      const { userId, date } = req.query;
+  
+      console.log("date: ", date);
+  
       try {
         const user = await User.findById(userId).select("-password");
         if (!user) {
           res.status(404).json({ message: "User not found" });
           return;
         }
-
+  
         let movie;
-
         if (mongoose.Types.ObjectId.isValid(movieTitle)) {
           movie = await Movie.findById(movieTitle);
         } else {
           movie = await Movie.findOne({ title: movieTitle });
         }
-
+  
         if (!movie) {
           res.status(404).json({ message: "Movie not found" });
           return;
         }
-
+  
         const screens = await Screens.find({
-          "showTimes.movie": movie._id,
+          schedule: { $exists: true, $ne: [] },
         })
           .populate({
             path: "theater",
@@ -558,11 +560,29 @@ class TheaterController {
               "name location amenities description ticketPrice owner address city longitude latitude",
           })
           .populate({
-            path: "showTimes.movie",
-            select: "title",
+            path: "schedule",
+            populate: {
+              path: "showTimes.movie",
+              select: "title",
+            },
           });
-
-        const theaters = screens
+  
+        console.log("screens: ", screens);
+  
+        const screensWithMovie = screens.filter((screen) =>
+          (screen.schedule as unknown as ISchedule[]).some((schedule) =>
+            schedule.showTimes.some(
+              (showTime) =>
+                (showTime.movie as unknown as mongoose.Types.ObjectId).equals(
+                  movie._id as mongoose.Types.ObjectId
+                )
+            )
+          )
+        );
+  
+        console.log("screensWithMovie: ", screensWithMovie);
+  
+        const theaters = screensWithMovie
           .map((screen) => screen.theater)
           .filter(
             (value, index, self) =>
@@ -572,23 +592,43 @@ class TheaterController {
               ) === index
           );
 
+        let filteredSchedules = await Schedule.find({
+          screen: { $in: screensWithMovie.map((screen) => screen._id) },
+          "showTimes.movie": movie._id,
+        })
+          .populate({ path: "screen", select: "screenNumber theater" })
+          .populate({ path: "showTimes.movie", select: "title" });
+
+        if (date && typeof date === "string") {
+          const selectedDate = new Date(date);
+          filteredSchedules = filteredSchedules.filter((schedule) =>
+            schedule.showTimes.some((showTime) => {
+              const showTimeDate = new Date(showTime.time);
+              return (
+                showTimeDate.getFullYear() === selectedDate.getFullYear() &&
+                showTimeDate.getMonth() === selectedDate.getMonth() &&
+                showTimeDate.getDate() === selectedDate.getDate()
+              );
+            })
+          );
+        }
+  
         res.status(200).json({
           user,
           theaters,
-          screens,
+          screens: screensWithMovie,
+          schedules: filteredSchedules,
         });
       } catch (err: unknown) {
         if (err instanceof Error) {
-          res
-            .status(500)
-            .json({ message: "An error occurred", error: err.message });
+          res.status(500).json({ message: "An error occurred", error: err.message });
         } else {
           res.status(500).json({ message: "An unexpected error occurred" });
         }
       }
     }
   );
-
+  
   getStatsController = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
       try {

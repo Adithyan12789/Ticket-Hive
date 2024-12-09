@@ -1,36 +1,32 @@
-
-import Screens from "../Models/ScreensModel";
+import { Schedule } from "../Models/ScheduleModel";
+import { Screens } from "../Models/ScreensModel";
 
 class ScreenRepository {
-  public async createScreen(screenData: {
-    screenNumber: number;
-    capacity: number;
-    showTimes: { time: string; movie: string; layout: any }[];
-    theater: string;
-  }) {
-    const newScreen = new Screens({
-      ...screenData,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+
+  public async getScreenById(screenId: string) {
+    return await Screens.findById(screenId).populate({
+      path: 'theater',
+      select: 'name city address',
     });
+  }
   
-    return await newScreen.save();
+  // Add a method to fetch schedules by screenId
+  public async getSchedulesByScreenId(screenId: string) {
+    return await Schedule.find({ screen: screenId }).populate({
+      path: 'showTimes.movie',
+      select: 'title',
+    });
   }  
-  
+
+  // Update a screen by ID
+  public async updateScreen(screenId: string, updateData: any) {
+    return await Screens.findByIdAndUpdate(screenId, updateData, {
+      new: true,
+    });
+  }
 
   public async getScreensByTheater(id: string) {
     return await Screens.find({ theater: id });
-  }
-
-  public async  getScreenById(screenId: string) {
-    let screen =  await Screens.findById(screenId).populate("theater", "name ticketPrice");
-    console.log("screen repo: ", screen);
-    
-    return screen
-  }
-
-  public async updateScreen(screenId: string, updateData: any) {
-    return await Screens.findByIdAndUpdate(screenId, updateData, { new: true });
   }
 
   public async deleteScreen(screenId: string) {
@@ -38,9 +34,11 @@ class ScreenRepository {
   }
 
   public async getTheatersByMovieName(movieName: string) {
-    return await Screens.find({ "showTimes.movie": movieName }).populate("theater", "name location");
+    return await Screens.find({ "showTimes.movie": movieName }).populate(
+      "theater",
+      "name location"
+    );
   }
-
 }
 
 export default new ScreenRepository();

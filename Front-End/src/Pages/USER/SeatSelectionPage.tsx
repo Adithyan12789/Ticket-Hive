@@ -2,12 +2,16 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import { FaArrowLeft } from "react-icons/fa";
-import {useGetScreenByIdQuery,useUpdateSeatAvailabilityMutation,} from "../../Slices/UserApiSlice";
+import {
+  useGetScreenByIdQuery,
+  useUpdateSeatAvailabilityMutation,
+} from "../../Slices/UserApiSlice";
 import Loader from "../../Components/UserComponents/Loader";
 import { toast } from "react-toastify";
 import React from "react";
-import { Seat, Screen } from "../../Types/ScreenTypes";
+import { Seat, ScreenDetails } from "../../Types/ScreenTypes";
 import Footer from "../../Components/UserComponents/Footer";
+
 const SelectSeatPage: React.FC = () => {
   const { screenId } = useParams<{ screenId: string }>();
   const navigate = useNavigate();
@@ -15,34 +19,89 @@ const SelectSeatPage: React.FC = () => {
   const [, setLayout] = useState<Seat[][]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [updateSeatAvailability] = useUpdateSeatAvailabilityMutation();
+
   const { data, refetch, isLoading, isError } = useGetScreenByIdQuery(screenId);
-  let screenDetails: Screen | null = null;
-  if (data) {screenDetails = data as Screen;}
+
+  let screenDetails: ScreenDetails | null = null;
+
+  if (data) {
+    screenDetails = data as ScreenDetails;
+  }
+
+  console.log("screenDetails: ", screenDetails);
+
   const location = useLocation();
-  const { date, movieTitle, movieId, theaterId, showTime, showTimeId } = location.state || {};
-  const formattedDate = `${ date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+
+  const { date, movieTitle, movieId, theaterId, showTime, showTimeId } =
+    location.state || {};
+
+  const formattedDate = `${
+    date.getMonth() + 1
+  }/${date.getDate()}/${date.getFullYear()}`;
+
   useEffect(() => {
-    const timer = setTimeout(() => {setLoading(false);}, 2000);
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 2000);
     return () => clearTimeout(timer);
   }, []);
-  useEffect(() => {document.title = screenDetails? `Screen - ${screenDetails.screenNumber} - Select Seats`: "Select Seats";refetch();}, [screenDetails, refetch]);
+
   useEffect(() => {
-    if (screenDetails && showTimeId) {
-      const selectedShowTime = screenDetails.showTimes.find((showTime) => showTime._id === showTimeId);
-      if (selectedShowTime) {setLayout(selectedShowTime.layout);
-      } else {toast.error("Show time not found.");}
-    } else {setLayout(generateSeatNames(5, 8));}
-  }, [screenDetails, showTimeId]);
+    document.title = screenDetails && screenDetails.screen
+      ? `Screen - ${screenDetails.screen.screenNumber} - Select Seats`
+      : "Select Seats";
+    refetch();
+  }, [screenDetails, refetch]);  
+
+
+  useEffect(() => {
+    if (screenDetails && screenDetails.schedule && showTimeId) {
+      // Iterate over the schedule array to find the correct schedule for the showTimeId
+      const selectedSchedule = screenDetails.schedule.find(
+        (schedule) =>
+          schedule.showTimes.some((showTime) => showTime._id === showTimeId)
+      );
+  
+      if (selectedSchedule) {
+        const selectedShowTime = selectedSchedule.showTimes.find(
+          (showTime) => showTime._id === showTimeId
+        );
+        if (selectedShowTime) {
+          setLayout(selectedShowTime.layout);
+        } else {
+          toast.error("Show time not found.");
+        }
+      } else {
+        toast.error("Schedule not found.");
+      }
+    } else {
+      setLayout(generateSeatNames(5, 8));
+    }
+  }, [screenDetails, showTimeId, refetch]);  // Ensure the refetch is part of the dependency array  
+  
+
   const generateSeatNames = (rows: number, cols: number): Seat[][] => {
     const layout: Seat[][] = [];
     for (let i = 0; i < rows; i++) {
       const row: Seat[] = [];
       const rowPrefix = String.fromCharCode(65 + (i % 26));
       for (let j = 1; j <= cols; j++) {
-        row.push({label: `${rowPrefix}${j.toString().padStart(2, "0")}`,holdSeat: false,isAvailable: false});}layout.push(row);}
+        row.push({
+          label: `${rowPrefix}${j.toString().padStart(2, "0")}`,
+          holdSeat: false,
+          isAvailable: false,
+        });
+      }
+      layout.push(row);
+    }
     return layout;
   };
-  const handleSeatSelection = (seatLabel: string,isAvailable: boolean,holdSeat: boolean) => {
+
+  const handleSeatSelection = (
+    seatLabel: string,
+    isAvailable: boolean,
+    holdSeat: boolean
+  ) => {
     if (!isAvailable && holdSeat) return;
     const newSelectedSeats = new Set(selectedSeats);
     if (newSelectedSeats.has(seatLabel)) {
@@ -56,13 +115,19 @@ const SelectSeatPage: React.FC = () => {
     }
     setSelectedSeats(newSelectedSeats);
   };
+
   const renderScreenLayout = () => {
     if (!screenDetails) return <p>No seat layout available for this screen.</p>;
-  
-    const selectedShowTime = screenDetails.showTimes.find(
-      (showTime) => showTime._id === showTimeId
+
+    const selectedSchedule = screenDetails?.schedule?.find((schedule) =>
+      schedule.showTimes.some((showTime) => showTime._id === showTimeId)
     );
-  
+    
+    const selectedShowTime =
+      selectedSchedule?.showTimes.find((showTime) => showTime._id === showTimeId);
+
+      console.log("selectedShowTime: ", selectedShowTime);
+      
     return (
       <div
         style={{
@@ -109,11 +174,18 @@ const SelectSeatPage: React.FC = () => {
                     border: "1px solid #007bff",
                     borderRadius: "4px",
                     fontSize: "0.7rem",
-                    cursor: seat.isAvailable && !seat.holdSeat ? "pointer" : "not-allowed",
+                    cursor:
+                      seat.isAvailable && !seat.holdSeat
+                        ? "pointer"
+                        : "not-allowed",
                     transition: "background-color 0.3s",
                   }}
                   onClick={() =>
-                    handleSeatSelection(seat.label, seat.isAvailable, seat.holdSeat)
+                    handleSeatSelection(
+                      seat.label,
+                      seat.isAvailable,
+                      seat.holdSeat
+                    )
                   }
                   disabled={!seat.isAvailable}
                 >
@@ -145,7 +217,6 @@ const SelectSeatPage: React.FC = () => {
       </div>
     );
   };
-  
 
   const totalSeats = selectedSeats.size;
   const ticketPrice = screenDetails?.theater?.ticketPrice || 0;
@@ -157,17 +228,29 @@ const SelectSeatPage: React.FC = () => {
     return <div>Error fetching seat data.</div>;
   }
 
-  const handleSeatUpdate = async () => {
-    try {
+  const selectedSchedule = screenDetails?.schedule.find((schedule) =>
+    schedule.showTimes.some((showTime) => showTime._id === showTimeId)
+  );
 
+  const scheduleId = selectedSchedule?._id; 
+
+  console.log("scheduleId: ", scheduleId);
+
+  const handleSeatUpdate = async () => {
+    if (!screenDetails || !showTimeId) {
+      toast.error("Error: Unable to find schedule.");
+      return;
+    }
+  
+    try {
       await updateSeatAvailability({
-        screenId,
+        scheduleId: scheduleId, 
         selectedSeats: [...selectedSeats],
         holdSeat: true,
         showTime,
       }).unwrap();
   
-      navigate('/booking', {
+      navigate("/booking", {
         state: {
           selectedSeats: [...selectedSeats],
           theaterName: screenDetails?.theater.name,
@@ -178,66 +261,133 @@ const SelectSeatPage: React.FC = () => {
           theaterId: theaterId,
           screenId: screenId,
           showTime: showTime,
+          scheduleId: scheduleId,
         },
       });
-
+  
       setTimeout(async () => {
         try {
           await updateSeatAvailability({
-            screenId,selectedSeats: [...selectedSeats],holdSeat: false,showTime,}).unwrap();
-          console.log('Seat availability reset to true.');
+            scheduleId,  // Pass the scheduleId instead of screenId
+            selectedSeats: [...selectedSeats],
+            holdSeat: false,
+            showTime,
+          }).unwrap();
+          console.log("Seat availability reset to true.");
         } catch (error) {
-          console.error('Error resetting seat availability:', error);
+          console.error("Error resetting seat availability:", error);
         }
       }, 60000);
     } catch (error) {
-      console.log('error: ', error);
-      toast.error('Unable to update seat availability. Please try again.');
+      console.log("error: ", error);
+      toast.error("Unable to update seat availability. Please try again.");
     }
   };
   
+
   return (
-    <><Container
-      style={{ padding: "30px 15px", position: "relative", minHeight: "100vh" }}
-    >
-      <Row className="mb-3">
-        <Col>
-          <div style={{display: "flex",alignItems: "center",gap: "10px",fontSize: "1.2rem",fontWeight: "bold",}}>
-            <FaArrowLeft onClick={() => navigate(-1)} style={{ cursor: "pointer", fontSize: "1.5rem" }} />
-            <div>
-              <span style={{ fontSize: "1.2rem" }}>{movieTitle || "Movie Title"}</span>
-              <span style={{backgroundColor: "#f8f9fa",padding: "3px 8px",borderRadius: "12px",fontSize: "0.8rem",marginLeft: "10px",color: "#007bff",fontWeight: "600",}}>
-                UA
-              </span>
-            </div>
-          </div>
-        </Col>
-      </Row>
-      <Row className="mb-3">
-        <Col>
-          <div style={{fontSize: "0.9rem",color: "#343a40",fontWeight: "500",textAlign: "center",marginBottom: "20px",}}>
-            Screen {screenDetails?.screenNumber}
-            <br />
-            {screenDetails?.theater.name || "Theater Name"} |{" "}
-            {formattedDate || "Show Date"}
-          </div>
-        </Col>
-      </Row>
-      <Row>{renderScreenLayout()}</Row>
-      {selectedSeats.size > 0 && (
-        <div style={{ position: "fixed",width: "100%",backgroundColor: "rgb(225 225 225)",height: "80px",bottom: "20px",left: "50%",transform: "translateX(-50%)",
-            zIndex: 1000,display: "flex",justifyContent: "center",alignItems: "center",boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",}}>
-          <Button style={{width: "200px",display: "flex",justifyContent: "center",alignItems: "center",}} variant="primary" onClick={handleSeatUpdate} >
-            <div style={{ fontSize: "16px", textAlign: "center" }}>
-              <div>Pay Rs.{totalPrice}</div>
-              <div style={{ fontSize: "10px", color: "whitesmoke" }}>
-                {totalSeats} {totalSeats === 1 ? "ticket" : "tickets"}
+    <>
+      <Container
+        style={{
+          padding: "30px 15px",
+          position: "relative",
+          minHeight: "100vh",
+        }}
+      >
+        <Row className="mb-3">
+          <Col>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                fontSize: "1.2rem",
+                fontWeight: "bold",
+              }}
+            >
+              <FaArrowLeft
+                onClick={() => navigate(-1)}
+                style={{ cursor: "pointer", fontSize: "1.5rem" }}
+              />
+              <div>
+                <span style={{ fontSize: "1.2rem" }}>
+                  {movieTitle || "Movie Title"}
+                </span>
+                <span
+                  style={{
+                    backgroundColor: "#f8f9fa",
+                    padding: "3px 8px",
+                    borderRadius: "12px",
+                    fontSize: "0.8rem",
+                    marginLeft: "10px",
+                    color: "#007bff",
+                    fontWeight: "600",
+                  }}
+                >
+                  UA
+                </span>
               </div>
             </div>
-          </Button>
-        </div>
-      )}
-    </Container><Footer /></>
+          </Col>
+        </Row>
+        <Row className="mb-3">
+          <Col>
+            <div
+              style={{
+                fontSize: "0.9rem",
+                color: "#343a40",
+                fontWeight: "500",
+                textAlign: "center",
+                marginBottom: "20px",
+              }}
+            >
+              Screen {screenDetails?.screen.screenNumber}
+              <br />
+              {screenDetails?.theater.name || "Theater Name"} |{" "}
+              {formattedDate || "Show Date"}
+            </div>
+          </Col>
+        </Row>
+        <Row>{renderScreenLayout()}</Row>
+        {selectedSeats.size > 0 && (
+          <div
+            style={{
+              position: "fixed",
+              width: "100%",
+              backgroundColor: "rgb(225 225 225)",
+              height: "80px",
+              bottom: "20px",
+              left: "50%",
+              transform: "translateX(-50%)",
+              zIndex: 1000,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
+            }}
+          >
+            <Button
+              style={{
+                width: "200px",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+              variant="primary"
+              onClick={handleSeatUpdate}
+            >
+              <div style={{ fontSize: "16px", textAlign: "center" }}>
+                <div>Pay Rs.{totalPrice}</div>
+                <div style={{ fontSize: "10px", color: "whitesmoke" }}>
+                  {totalSeats} {totalSeats === 1 ? "ticket" : "tickets"}
+                </div>
+              </div>
+            </Button>
+          </div>
+        )}
+      </Container>
+      <Footer />
+    </>
   );
 };
 

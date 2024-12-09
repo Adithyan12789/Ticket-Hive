@@ -158,10 +158,10 @@ export const usersApiSlice = apiSlice.injectEndpoints({
     }),
 
     updateSeatAvailability: builder.mutation({
-      query: ({ screenId, selectedSeats, holdSeat, showTime }) => ({
+      query: ({ scheduleId, selectedSeats, holdSeat, showTime }) => ({
         url: `${USERS_URL}/update-availability`,
         method: 'POST',
-        body: { screenId, selectedSeats, holdSeat, showTime },
+        body: { scheduleId, selectedSeats, holdSeat, showTime },
       }),
     }),
 

@@ -22,11 +22,13 @@ import { UserInfo } from "../../Types/UserTypes";
 import { Screen } from "../../Types/ScreenTypes";
 import { TheaterManagement } from "../../Types/TheaterTypes";
 import Footer from "../../Components/UserComponents/Footer";
+
 type TheaterData = {
   theaters: TheaterManagement[];
   screens: Screen[];
   user: UserInfo;
 };
+
 const MovieTheaterScreen: React.FC = () => {
   const { movieTitle } = useParams<{ movieTitle: string }>();
   const [searchParams] = useSearchParams();
@@ -41,18 +43,23 @@ const MovieTheaterScreen: React.FC = () => {
   const location = useLocation();
   const { userInfo } = useSelector((state: RootState) => state.auth);
   const { moviePoster } = location.state || {};
+
   const dates = [...Array(365)].map((_, index) => {
     const date = new Date();
     date.setDate(date.getDate() + index);
     return date;
   });
+
   const [selectedDate, setSelectedDate] = useState<Date | null>(
     dates[0] || null
   );
+
   const formattedDate = selectedDate
     ? selectedDate.toISOString().split("T")[0]
     : null;
+    
   const userId = userInfo?.id;
+
   const {
     data,
     isLoading: loadingTheaters,
@@ -62,17 +69,26 @@ const MovieTheaterScreen: React.FC = () => {
     date: formattedDate,
     userId,
   });
+
   const [loading, setLoading] = useState<boolean>(true);
   const { data: movie } = useGetMovieByMovieIdQuery(movieTitle || "");
   const theaters = (data as TheaterData)?.theaters || [];
   const screens = (data as TheaterData)?.screens || [];
   const user = (data as TheaterData)?.user || [];
   const selectedLanguage = searchParams.get("language") || "English";
+
+  console.log("theaters: ", theaters);
+  console.log("movie: ", movie);
+  console.log("screens: ", screens);
+  console.log("user: ", user);
+  
+
   const userLocation = {
     latitude: user?.latitude,
     longitude: user?.longitude,
     city: user?.city,
   };
+
   const calculateDistance = (
     lat1: number,
     lon1: number,
@@ -92,18 +108,24 @@ const MovieTheaterScreen: React.FC = () => {
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   };
+
   useEffect(() => {
     document.title = movieTitle ? `Movie - Theaters` : "Movie Details";
   }, [movieTitle, formattedDate]);
+  
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
     }, 2000);
     return () => clearTimeout(timer);
   }, []);
+
   const movieName = movie?.title?.trim().toLowerCase();
+
   const genres = movie?.genres || [];
+
   const datesToShow = 4;
+
   const formatDate = (date: Date) => {
     const options: Intl.DateTimeFormatOptions = {
       weekday: "short",
@@ -112,20 +134,24 @@ const MovieTheaterScreen: React.FC = () => {
     };
     return date.toLocaleDateString("en-US", options);
   };
+
   const handleForward = () => {
     if (startIndex + datesToShow < dates.length) {
       setStartIndex(startIndex + datesToShow);
     }
   };
+
   const handleBackward = () => {
     if (startIndex - datesToShow >= 0) {
       setStartIndex(startIndex - datesToShow);
     }
   };
+
   const handleShowModal = (theater: TheaterManagement) => {
     setSelectedTheater(theater);
     setModalVisible(true);
   };
+
   const sortedTheaters = theaters.map((theater) => {
     const distance =
       userLocation.latitude &&
@@ -141,12 +167,14 @@ const MovieTheaterScreen: React.FC = () => {
         : null;
     return { ...theater, distance };
   });
+
   const theatersInSameCity = theaters.filter(
     (theater) =>
       theater.city &&
       user.city &&
       theater.city.toLowerCase() === user.city.toLowerCase()
   );
+
   const theatersOutsideCity = sortedTheaters.filter(
     (theater) =>
       !(
@@ -155,17 +183,21 @@ const MovieTheaterScreen: React.FC = () => {
         theater.city.toLowerCase() === userLocation.city.toLowerCase()
       )
   );
+
   const nearbyTheatersOutsideCity = theatersOutsideCity
     .filter((theater) => theater.distance !== null && theater.distance <= 10)
     .sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity));
+
   const otherTheatersOutsideCity = theatersOutsideCity
     .filter((theater) => theater.distance === null || theater.distance > 10)
     .sort((a, b) => a.name.localeCompare(b.name));
+
   const allTheaters = [
     ...theatersInSameCity,
     ...nearbyTheatersOutsideCity,
     ...otherTheatersOutsideCity,
   ];
+
   const filteredAndSortedTheaters = allTheaters
     .filter((theater) => {
       // Filter by city
@@ -177,26 +209,33 @@ const MovieTheaterScreen: React.FC = () => {
       }
       return true;
     })
+
     .filter((theater) => {
       // Filter by show time
       if (selectedTime) {
         return screens.some(
           (screen) =>
             screen.theater._id === theater._id &&
-            screen.showTimes.some((show) => show.time === selectedTime)
+            screen.schedule.some((schedule) =>
+              schedule.showTimes.some((show) => show.time === selectedTime)
+            )
         );
       }
       return true;
     })
+
     .filter((theater) => {
       // Search by theater name
       return theater.name.toLowerCase().includes(searchInput.toLowerCase());
     })
+
     .sort((a, b) => {
       // Optional: Add a sorting mechanism (e.g., by name or distance)
       return a.name.localeCompare(b.name);
     });
+
   if (loading || loadingTheaters) return <Loader />;
+
   if (errorTheaters) {
     toast.error("Error fetching theaters");
     return <div>Error fetching theaters</div>;
@@ -227,7 +266,10 @@ const MovieTheaterScreen: React.FC = () => {
           </Col>
 
           {/* Right Side: Search Bar with Icon */}
-          <Col md={4} className="d-flex align-items-center justify-content-end ">
+          <Col
+            md={4}
+            className="d-flex align-items-center justify-content-end "
+          >
             <div className="input-group" style={{ maxWidth: "350px" }}>
               <input
                 type="text"
@@ -236,7 +278,9 @@ const MovieTheaterScreen: React.FC = () => {
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
               />
-              <FaSearch style={{position: "relative", top: "18px", right: "30px"}}/>
+              <FaSearch
+                style={{ position: "relative", top: "18px", right: "30px" }}
+              />
             </div>
           </Col>
         </Row>
@@ -340,7 +384,9 @@ const MovieTheaterScreen: React.FC = () => {
                 >
                   <option value="">All Times</option>
                   {screens
-                    .flatMap((screen) => screen.showTimes)
+                    .flatMap((screen) =>
+                      screen.schedule.flatMap((schedule) => schedule.showTimes)
+                    )
                     .map((show) => show.time)
                     .filter((time, idx, self) => self.indexOf(time) === idx) // Remove duplicates
                     .map((time, idx) => (
@@ -414,11 +460,12 @@ const MovieTheaterScreen: React.FC = () => {
                                   }}
                                   key={idx}
                                 >
-                                  {screen.showTimes
+                                  {screen.schedule
+                                    .flatMap((schedule) => schedule.showTimes) // Access all showTimes from the schedule
                                     .filter(
                                       (show) =>
                                         show.movieTitle.trim().toLowerCase() ===
-                                        movieName
+                                        movieName // Filter by movie title
                                     )
                                     .map((filteredShow, timeIdx) => (
                                       <div key={timeIdx} className="mr-2 mb-2">

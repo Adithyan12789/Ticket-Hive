@@ -26,7 +26,7 @@ const BookingPage: React.FC = () => {
 
   console.log("user info: ", userInfo);
 
-  const { movieId, theaterId, screenId, showTime, movieTitle } =
+  const { scheduleId, movieId, theaterId, screenId, showTime, movieTitle } =
     location.state || {};
   const [insufficientFunds, setInsufficientFunds] = useState(false);
   const [loading, setLoading] = useState<boolean>(true);
@@ -170,6 +170,7 @@ const BookingPage: React.FC = () => {
 
       const bookingData = {
         userId: userInfo?.id,
+        scheduleId: scheduleId,
         movieId: movieId,
         theaterId: theaterId,
         seatIds: selectedSeats,
