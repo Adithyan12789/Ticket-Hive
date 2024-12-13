@@ -138,6 +138,69 @@ export const adminApiSlice = apiSlice.injectEndpoints({
         method: 'POST',
       }),
     }),
+
+
+
+    // Chat backend API started
+
+    getAdminMessages: builder.query({
+      query: (chatRoomId) => `${ADMIN_URL}/chatrooms/${chatRoomId}/messages`,
+    }),
+
+    getAdminChatRooms: builder.query({
+      query: (theaterOwnerId) => `${ADMIN_URL}/chatrooms/${theaterOwnerId}`,
+    }),
+
+    sendAdminMessage: builder.mutation({
+      query: (data) => {
+        const formData = new FormData();
+        formData.append('content', data.content);
+        formData.append('senderType', data.senderType);
+        formData.append('theaterOwnerId', data.theaterOwnerId)
+        if (data.file) {
+          formData.append('file', data.file);
+        }
+    
+        return {
+          url: `${ADMIN_URL}/chatrooms/${data.chatRoomId}/messages`,
+          method: 'POST',
+          body: formData,
+        };
+      },
+    }),    
+
+    getTheaterOwners: builder.query({
+      query: () => ({
+        url: `${ADMIN_URL}/get-theaterOwners`,
+        method: "GET",
+      }),
+    }),
+
+    markAdminMessagesAsRead: builder.mutation({
+      query: (chatRoomId) => ({
+        url: `${ADMIN_URL}/mark-messages-read`,
+        method: 'POST',
+        body: { chatRoomId }
+      }),
+    }),
+
+    fetchAdminUnreadMessages: builder.query({
+      query: () => ({
+        url: `${ADMIN_URL}/unreadAdminmessages`,
+        method: 'GET',
+      }),
+    }),
+    
+    fetchUnreadAdminNotifications: builder.query({
+      query: () => `${ADMIN_URL}/notifications/unread`,
+    }),
+
+    markAdminNotificationAsRead: builder.mutation({
+      query: (id) => ({
+        url: `${ADMIN_URL}/notifications/${id}/read`,
+        method: 'PUT',
+      }),
+    }),
   }),
 });
 
@@ -160,4 +223,12 @@ export const {
   useGetBookingDetailsQuery,
   useUpdateBookingStatusMutation,
   useAdminLogoutMutation,
+  useGetTheaterOwnersQuery,
+  useGetAdminChatRoomsQuery,
+  useGetAdminMessagesQuery,
+  useSendAdminMessageMutation,
+  useMarkAdminMessagesAsReadMutation,
+  useFetchAdminUnreadMessagesQuery ,
+  useFetchUnreadAdminNotificationsQuery, 
+  useMarkAdminNotificationAsReadMutation
 } = adminApiSlice;

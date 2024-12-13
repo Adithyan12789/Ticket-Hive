@@ -165,6 +165,11 @@ class TheaterOwnerService {
     return true;
   }
 
+  public async getAllTheaterOwners() {
+    let theaterOwners = await TheaterRepository.getAllTheaterOwners();
+    return theaterOwners;
+  }
+
   public getTheaterOwnerProfile = async (theaterOwnerId: string) => {
     const theaterOwner = await TheaterRepository.findTheaterOwnerById(
       theaterOwnerId

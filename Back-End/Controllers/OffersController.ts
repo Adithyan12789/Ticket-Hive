@@ -8,9 +8,6 @@ class OffersController {
     async (req: CustomRequest, res: Response): Promise<void> => {
       const offerData = req.body;
 
-      console.log("offerData: ", offerData);
-      
-
       try {
         const createdOffer = await OffersService.addOfferService(offerData);
         res.status(201).json({

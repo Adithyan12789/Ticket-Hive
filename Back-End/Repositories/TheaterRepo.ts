@@ -5,6 +5,15 @@ import TheaterOwner, { ITheaterOwner } from "../Models/TheaterOwnerModel";
 
 class TheaterRepository {
 
+    public async getAllTheaterOwners(){
+        try {
+            const theaterOwner = await TheaterOwner.find({});  
+            return theaterOwner;
+        } catch (error) {
+            throw new Error("Error fetching theater owners");
+        }
+    }  
+
     public async findTheaterOwnerById(theaterOwnerId: string): Promise<ITheaterOwner | null> {
         return await TheaterOwner.findById(theaterOwnerId);
     }

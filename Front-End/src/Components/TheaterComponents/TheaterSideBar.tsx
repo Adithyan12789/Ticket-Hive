@@ -6,6 +6,7 @@ import {
   FaTicketAlt,
   FaTag,
   FaCogs,
+  FaComments,
 } from "react-icons/fa";
 import "./TheaterSidebar.css";
 
@@ -76,6 +77,18 @@ const TheaterOwnerSidebar: React.FC = () => {
             }
           >
             <FaTag className="sidebar-icon" /> Offers Management
+          </Link>
+        </li>
+        <li>
+          <Link
+            to="/theater/chat"
+            className={
+              location.pathname === "/theater/chat"
+                ? "active sidebar-link"
+                : "sidebar-link"
+            }
+          >
+            <FaComments className="sidebar-icon" /> Chat
           </Link>
         </li>
         <li>

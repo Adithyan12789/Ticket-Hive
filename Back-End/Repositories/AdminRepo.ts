@@ -4,6 +4,7 @@ import TheaterOwner, { ITheaterOwner } from "../Models/TheaterOwnerModel";
 import Theater from "../Models/TheaterDetailsModel";
 import mongoose from "mongoose";
 import { Booking } from "../Models/bookingModel";
+import Admin from "../Models/AdminModel";
 
 dotenv.config();
 
@@ -128,6 +129,15 @@ class AdminRepository {
       throw new Error("Error saving Theater");
     }
   }
+
+  public static async getAllAdmins(){
+    try {
+        const admins = await Admin.find({});
+        return admins
+    } catch (error) {
+        throw new Error("Error fetching admins");
+    }
+}  
   
 }
 

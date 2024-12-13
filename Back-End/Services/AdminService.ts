@@ -3,6 +3,7 @@ import AdminRepository from "../Repositories/AdminRepo";
 import AdminTokenService from "../Utils/GenerateAdminToken";
 import { Request, Response } from "express";
 import nodemailer from "nodemailer";
+import Admin from "../Models/AdminModel";
 export interface BookingDetails {
   totalPrice: number;
   paymentStatus: string;
@@ -34,13 +35,35 @@ class AdminService {
     password: string,
     res: Response
   ) {
+
     const { adminEmail, adminPassword } = AdminRepository.getAdminCredentials();
 
+    let _id = "";
+
     if (email === adminEmail && password === adminPassword) {
-      const token = AdminTokenService.generateAdminToken(res, "admin");
+      // Check if admin already exists in the database
+      const existingAdmin = await Admin.findOne({ email: adminEmail });
+
+      _id = existingAdmin?._id as string;
+
+      if (!existingAdmin) {
+        // If no existing admin, add to the database
+        const newAdmin = new Admin({
+          name: "Admin",
+          email: adminEmail,
+          password: adminPassword,
+        });
+
+        _id = newAdmin._id as string;
+
+        await newAdmin.save();
+      }
+
+      const token = AdminTokenService.generateAdminToken(res, _id);
+
       return {
-        id: "admin",
-        name: "Admin User",
+        _id: existingAdmin?._id,
+        name: "Admin",
         email: adminEmail,
         token: token,
         isAdmin: true,
@@ -194,8 +217,6 @@ class AdminService {
   public async getAllTicketsService() {
     const bookings = await AdminRepository.findAllBookings();
 
-    console.log("s bookings: ", bookings);
-    
     if (!bookings.length) throw new Error("No tickets found");
 
     return bookings.map((booking: BookingDetails) => ({
@@ -218,6 +239,11 @@ class AdminService {
       paymentMethod: booking.paymentMethod,
       totalPrice: booking.totalPrice,
     }));
+  }
+
+  public async getAllAdmins() {
+    let admins = await AdminRepository.getAllAdmins();
+    return admins;
   }
 
   public adminLogoutService(res: Response) {

@@ -21,6 +21,8 @@ const AdminLoginPage = () => {
 
   const { adminInfo } = useSelector((state: RootState) => state.adminAuth);
 
+  console.log("adminInfo: ", adminInfo);
+  
   useEffect(() => {
     if (adminInfo) {
       navigate('/admin/dashboard');
@@ -62,7 +64,6 @@ const AdminLoginPage = () => {
       if (res && res.isAdmin) {
         dispatch(setCredentials({
           ...res,
-          data: undefined
         }));
         navigate('/admin/dashboard'); 
       } else {

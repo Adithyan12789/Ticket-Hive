@@ -13,6 +13,7 @@ import store from './Store';
 import { AdminRoutes, AdminLoginRoute } from './Routes/AdminRoutes';
 import { UserRoutes } from './Routes/UserRoutes';
 import { TheaterRoutes } from './Routes/TheaterRoutes';
+import ErrorBoundaryWrapper from './Components/UserComponents/ErrorBountary';
 // import AuthProvider from './Components/UserComponents/AuthProvider';
 
 const router = createBrowserRouter(
@@ -34,7 +35,9 @@ const router = createBrowserRouter(
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <Provider store={store}>
     <React.StrictMode>
-      <RouterProvider router={router} />
+      <ErrorBoundaryWrapper>
+        <RouterProvider router={router} />
+      </ErrorBoundaryWrapper>
     </React.StrictMode>
   </Provider>
 );

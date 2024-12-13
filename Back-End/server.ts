@@ -5,13 +5,20 @@ import UserRoutes from "./Routes/UserRoutes";
 import AdminRoutes from "./Routes/AdminRoutes";
 import TheaterRoutes from "./Routes/TheaterRoutes";
 import express from "express";
+import cors from "cors"; 
+import { app, server, io } from "./Config/Socket";
+
+app.set("io", io);
 
 dotenv.config();
 Database.connectDB();
 
 const port = process.env.PORT || 5000;
 
-const app = express();
+app.use(cors({
+    origin: ["http://localhost:5000", "http://localhost:3000"],
+    credentials: true,
+  }));  
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -23,4 +30,4 @@ app.use("/api/users", UserRoutes);
 app.use("/api/admin", AdminRoutes);
 app.use("/api/theater", TheaterRoutes);
 
-app.listen(port, () => console.log(`Server Is Running On Port http://localhost:${port}/`));
+server.listen(port, () => console.log(`Server Is Running On Port http://localhost:${port}/`));

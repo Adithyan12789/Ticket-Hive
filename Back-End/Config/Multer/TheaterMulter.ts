@@ -41,6 +41,10 @@ class TheaterImageUploads {
     return this.createStorage("UploadsCerificates");
   }  
 
+  private static chatStorage(): StorageEngine {
+    return this.createStorage("MessageFiles");
+  }
+
   private static fileFilter(
     req: Express.Request,
     file: Express.Multer.File,
@@ -67,6 +71,11 @@ class TheaterImageUploads {
 
   public static multerUploadCertificatesImages = multer({
     storage: this.uploadCertificateStorage(),
+    fileFilter: this.fileFilter,
+  });
+
+  public static multerUploadChatImages = multer({
+    storage: this.chatStorage(),
     fileFilter: this.fileFilter,
   });
 

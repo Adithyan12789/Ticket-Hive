@@ -207,6 +207,85 @@ export const theaterApiSlice = apiSlice.injectEndpoints({
         method: "GET",
       }),
     }),
+
+
+
+    // Chat started
+
+    fetchUnreadNotifications: builder.query({
+      query: () => `${THEATER_URL}/notifications/unread`,
+    }),
+
+    markNotificationAsRead: builder.mutation({
+      query: (id) => ({
+        url: `${THEATER_URL}/notifications/${id}/read`,
+        method: 'PUT',
+      }),
+    }),
+
+    getChatRooms: builder.query({
+      query: () => ({
+        url: `${THEATER_URL}/chatrooms`,
+        method: 'GET',
+      }),
+    }),
+
+    createChatRoom: builder.mutation({
+      query: (data) => ({
+        url: `${THEATER_URL}/chatrooms`,
+        method: 'POST',
+        body: data,
+      }),
+    }),
+
+    getMessages: builder.query({
+      query: (chatRoomId: string) => ({
+        url: `${THEATER_URL}/chatrooms/${chatRoomId}/messages`,
+        method: "GET",
+      }),
+    }),
+    
+    sendMessage: builder.mutation({
+      query: (data: { chatRoomId: string; content: string; senderType: string; adminId?: string; file?: File }) => {
+        const formData = new FormData();
+        formData.append('content', data.content);
+        formData.append('senderType', data.senderType);
+        if (data.file) {
+          formData.append('file', data.file);
+        }
+        if (data.adminId) {
+          formData.append('adminId', data.adminId);
+        }
+    
+        return {
+          url: `${THEATER_URL}/chatrooms/${data.chatRoomId}/messages`,
+          method: 'POST',
+          body: formData,
+        };
+      },
+    }),      
+
+    fetchUnreadMessages: builder.query({
+      query: () => ({
+        url: `${THEATER_URL}/unread-messages`,
+        method: 'GET'
+      })
+    }),
+    
+    markMessagesAsRead: builder.mutation({
+      query: (chatRoomId) => ({
+        url: `${THEATER_URL}/mark-messages-read`,
+        method: 'POST',
+        body: { chatRoomId }
+      })
+    }),
+
+    getAdmins: builder.query({
+      query: () => ({
+        url: `${THEATER_URL}/get-admins`,
+        method: "GET",
+      }),
+    }),
     
   }),
 });
@@ -239,4 +318,14 @@ export const {
   useUpdateOfferMutation,
   useDeleteOfferMutation,
   useGetTheaterStatsMutation,
+  useFetchUnreadNotificationsQuery,
+  useMarkNotificationAsReadMutation,
+  useGetChatRoomsQuery, 
+  useCreateChatRoomMutation, 
+  useGetMessagesQuery, 
+  useSendMessageMutation,
+  useFetchUnreadMessagesQuery,
+  useMarkMessagesAsReadMutation,
+  useGetAdminsQuery,
+
 } = theaterApiSlice;

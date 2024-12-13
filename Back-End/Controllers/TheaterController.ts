@@ -13,6 +13,7 @@ import User from "../Models/UserModel";
 import { Offer } from "../Models/OffersModel";
 import { Booking } from "../Models/bookingModel";
 import { ISchedule, Schedule } from "../Models/ScheduleModel";
+import { Notification } from "../Models/NotificationModel";
 
 class TheaterController {
   authTheaterOwner = asyncHandler(
@@ -282,6 +283,14 @@ class TheaterController {
     }
   );
 
+  getTheaterOwners = asyncHandler(
+    async (req: Request, res: Response): Promise<void> => {
+      const admins = await TheaterOwnerService.getAllTheaterOwners();
+
+      res.status(200).json(admins);
+    }
+  );
+
   getTheaterProfile = asyncHandler(
     async (req: CustomRequest, res: Response): Promise<void> => {
       if (!req.theaterOwner) {
@@ -530,8 +539,6 @@ class TheaterController {
       const { movieTitle } = req.params;
       const { userId, date } = req.query;
   
-      console.log("date: ", date);
-  
       try {
         const user = await User.findById(userId).select("-password");
         if (!user) {
@@ -567,8 +574,6 @@ class TheaterController {
             },
           });
   
-        console.log("screens: ", screens);
-  
         const screensWithMovie = screens.filter((screen) =>
           (screen.schedule as unknown as ISchedule[]).some((schedule) =>
             schedule.showTimes.some(
@@ -579,8 +584,6 @@ class TheaterController {
             )
           )
         );
-  
-        console.log("screensWithMovie: ", screensWithMovie);
   
         const theaters = screensWithMovie
           .map((screen) => screen.theater)
@@ -636,20 +639,14 @@ class TheaterController {
 
         const theaters = await TheaterDetails.find({ theaterOwnerId: ownerId });
 
-        console.log("theaters: ", theaters);
-
         const bookings = await Booking.find({
           theater: { $in: theaters.map((t) => t._id) },
         }).populate("user", "_id name email");
-
-        console.log("bookings: ", bookings);
 
         const totalEarnings = bookings.reduce(
           (sum, booking) => sum + booking.totalPrice,
           0
         );
-
-        console.log("totalEarnings: ", totalEarnings);
 
         const uniqueUsers = new Set(
           bookings.map((booking) => booking.user._id.toString())
@@ -672,7 +669,6 @@ class TheaterController {
 
   addOfferController = asyncHandler(
     async (req: CustomRequest, res: Response): Promise<void> => {
-      console.log("Request body: ", req.body);
 
       const {
         ownerId,
@@ -797,6 +793,49 @@ class TheaterController {
       }
     }
   );
+
+  getUnreadNotifications = asyncHandler(
+    async (req: CustomRequest, res: Response): Promise<void> => {
+    try {
+      const theaterOwnerId = req.theaterOwner?._id;
+
+      console.log("getUnreadNotifications theaterOwnerId: ", theaterOwnerId);
+
+      const notifications = await Notification.find({ theaterOwnerId: theaterOwnerId, isRead: false }).sort({ createdAt: -1 }); 
+
+      console.log("notifications: ", notifications);
+      
+      res.json(notifications);
+    } catch (error) {
+      res.status(500).json({ message: 'Server error' });
+    }
+  })
+  
+  markNotificationAsRead = asyncHandler(
+    async (req: CustomRequest, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+      
+      const notification = await Notification.findById(id);
+      
+      if (!notification) {
+         res.status(404).json({ message: 'Notification not found' });
+         return
+      }
+  
+      if (notification.theaterOwnerId.toString() !== req.theaterOwner?._id.toString()) {
+        res.status(401).json({ message: 'Not authorized' });
+        return
+      }
+  
+      notification.isRead = true;
+      await notification.save();
+      
+      res.json({ message: 'Notification marked as read' });
+    } catch (error) {
+      res.status(500).json({ message: 'Server error' });
+    }
+  })
 
   logoutTheaterOwner = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {

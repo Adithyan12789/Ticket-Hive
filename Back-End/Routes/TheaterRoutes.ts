@@ -5,6 +5,8 @@ import { TheaterAuthMiddleware } from '../Middlewares/TheaterAuthMiddleware';
 import MulterConfig from '../Config/Multer/TheaterMulter';
 import MovieController from '../Controllers/MovieController';
 import OffersController from '../Controllers/OffersController';
+import ChatController from '../Controllers/ChatController';
+import AdminController from '../Controllers/AdminController';
 
 const router = express.Router();
 
@@ -45,6 +47,15 @@ router.post('/add-offer',TheaterAuthMiddleware.protect, OffersController.addOffe
 router.put('/update-offer/:offerId', TheaterAuthMiddleware.protect, OffersController.updateOfferController);
 router.delete('/delete-offer/:offerId', TheaterAuthMiddleware.protect, OffersController.deleteOfferController);
 router.get('/get-offers',TheaterAuthMiddleware.protect, OffersController.getOffersController);
+
+router.get('/get-admins',TheaterAuthMiddleware.protect, AdminController.getAdmins);
+
+router.get('/notifications/unread',TheaterAuthMiddleware.protect, TheaterController.getUnreadNotifications); 
+router.put('/notifications/:id/read',TheaterAuthMiddleware.protect, TheaterController.markNotificationAsRead); 
+router.route('/chatrooms').get(TheaterAuthMiddleware.protect, ChatController.getChatRooms).post(TheaterAuthMiddleware.protect, ChatController.createChatRoom); 
+router.route('/chatrooms/:chatRoomId/messages').get(TheaterAuthMiddleware.protect, ChatController.getMessages).post(MulterConfig.multerUploadChatImages.single('file'),TheaterAuthMiddleware.protect, ChatController.sendMessage); 
+router.get('/unread-messages', TheaterAuthMiddleware.protect, ChatController.getUnreadMessages); 
+router.route('/mark-messages-read').post(TheaterAuthMiddleware.protect, ChatController.markMessagesAsRead); 
 
 router.post('/theater-logout', TheaterController.logoutTheaterOwner);
 

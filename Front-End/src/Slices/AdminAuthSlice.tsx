@@ -2,22 +2,10 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AdminInfo, AdminAuthState } from "../Types/AdminTypes";
 
 
-const adminInfoString = localStorage.getItem('adminInfo');
-let initialAdminInfo: AdminInfo | null = null;
-
-if (adminInfoString) {
-  try {
-    const adminInfo = JSON.parse(adminInfoString);
-    if (adminInfo.token) {
-      initialAdminInfo = adminInfo;
-    }
-  } catch (error) {
-    console.error('Failed to parse adminInfo from localStorage:', error);
-  }
-}
-
 const initialState: AdminAuthState = {
-  adminInfo: initialAdminInfo,
+  adminInfo: localStorage.getItem('adminInfo') 
+    ? JSON.parse(localStorage.getItem('adminInfo') as string) 
+    : null,
 };
 
 const adminAuthSlice = createSlice({

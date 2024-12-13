@@ -151,9 +151,6 @@ class MovieController {
   
       try {
         const reviews = await MovieService.getAllReviewsService();
-
-        console.log("first reviews: ", reviews);
-        
   
         if (!reviews.length) {
           res.status(404).json({ message: "No reviews found for this movie" });

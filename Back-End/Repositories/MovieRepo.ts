@@ -10,11 +10,9 @@ class MovieRepository {
     movieData: Partial<IMovie>
   ): Promise<IMovie & Document> {
     const movie = new Movie(movieData);
-    console.log("Movie instance before save:", movie);
 
     try {
       const savedMovie = await movie.save();
-      console.log("Movie saved successfully:", savedMovie);
       return savedMovie;
     } catch (error) {
       console.error("Error saving movie:", error);

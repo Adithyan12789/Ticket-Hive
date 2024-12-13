@@ -12,8 +12,6 @@ import { Booking } from "../Models/bookingModel";
 class UserController {
 
   refreshToken = async (req: Request, res: Response) => {
-    // Log to check if cookies are being sent
-    console.log("Request Cookies:", req.cookies);
 
     const refreshToken = req.cookies["refreshToken"]; // Ensure it's the correct name
 
@@ -26,9 +24,6 @@ class UserController {
     // Verify the refresh token using TokenService
     const decoded = TokenService.verifyRefreshToken(refreshToken);
 
-    // Log to check the decoded token (this will give you insights if it's null or malformed)
-    console.log("Decoded Token:", decoded);
-
     if (!decoded || typeof decoded === "string") {
       res.status(401).json({ message: "Invalid or expired refresh token" });
       return;
@@ -37,9 +32,6 @@ class UserController {
     // Find the user using the userId from the decoded token
     try {
       const user = await User.findById(decoded.userId);
-
-      // Log user object to ensure it's being fetched
-      console.log("Found User:", user);
 
       if (!user) {
         res.status(404).json({ message: "User not found" });
@@ -82,17 +74,12 @@ class UserController {
         const accessToken = TokenService.generateAccessToken(
           user._id.toString()
         );
-
-        console.log("controller accessToken: ", accessToken);
         
         const refreshToken = TokenService.generateRefreshToken(
           user._id.toString()
         );
 
         const test = TokenService.setTokenCookies(res, accessToken, refreshToken);
-        console.log("test: ", test);
-        
-
         // Send tokens along with the user data
         res.status(200).json({
           id: user._id,

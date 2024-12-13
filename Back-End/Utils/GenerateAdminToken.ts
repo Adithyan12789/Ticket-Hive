@@ -11,8 +11,8 @@ class AdminTokenService {
         this.jwtSecret = process.env.JWT_SECRET_ADMIN as string;
     }
 
-    public generateAdminToken(res: Response, userId: string): void {
-        const token = jwt.sign({ userId }, this.jwtSecret, {
+    public generateAdminToken(res: Response, adminId: string): void {
+        const token = jwt.sign({ adminId }, this.jwtSecret, {
             expiresIn: '30d',
         });
 

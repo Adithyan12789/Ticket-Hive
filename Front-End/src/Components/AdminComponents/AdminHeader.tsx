@@ -43,7 +43,8 @@ const AdminHeader: React.FC = () => {
               <div className="d-flex justify-content-start w-50">
                 {adminInfo && (
                   <Nav.Link
-                    className="admin-dashboard-title pt-4 text-white"
+                    className="admin-dashboard-title pt-4 pb-4 text-white"
+                    style={{fontSize: "30px"}}
                     onClick={handleDashboardClick}
                   >
                     <FaTachometerAlt /> Admin Dashboard

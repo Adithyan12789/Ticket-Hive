@@ -71,7 +71,6 @@ const TheaterDetailScreen: React.FC = () => {
     fetchMovies();
   }, [getMovies]);
   useEffect(() => {
-    // Set the default showtime to the first available showtime
     if (selectedScreen && selectedScreen.schedule.length > 0) {
       const firstShowtime = selectedScreen.schedule[0].showTimes[0].time;
       setSelectedShowtime(firstShowtime);

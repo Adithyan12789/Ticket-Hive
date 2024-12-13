@@ -1,11 +1,16 @@
 import mongoose, { Document, Schema, Model } from "mongoose";
 
 interface IAdmin extends Document {
+  name: string;
   email: string;
   password: string;
 }
 
 const adminSchema: Schema<IAdmin> = new Schema({
+  name: {
+    type: String,
+    required: true,
+  },
   email: {
     type: String,
     required: true,

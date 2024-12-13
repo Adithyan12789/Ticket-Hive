@@ -160,8 +160,6 @@ class AdminController {
           tickets.map(async (ticket: { movieId: string, offerId: string }) => {
             const movie = await Movie.findById(ticket.movieId).exec();
             const offer = await Offer.findById(ticket.offerId).exec();
-
-            console.log("offer: ", offer);
             
             return {
               ticket,
@@ -199,6 +197,14 @@ class AdminController {
           error: error instanceof Error ? error.message : "Unknown error",
         });
       }
+    }
+  );
+
+  getAdmins = asyncHandler(
+    async (req: Request, res: Response): Promise<void> => {
+      const admins = await adminService.getAllAdmins();
+
+      res.status(200).json(admins);
     }
   );
 

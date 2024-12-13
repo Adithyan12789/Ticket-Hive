@@ -55,8 +55,6 @@ class BookingService {
       "showTimes.time": showTime,
     });
 
-    console.log("before schedule: ", schedule);
-  
     if (!schedule) {
       const existingSchedule = await Schedule.findOne({ screen: screenId });
   
@@ -82,8 +80,6 @@ class BookingService {
       await schedule.save();
     }
 
-    console.log("schedule after: ", schedule);
-
     const targetShowTime = schedule.showTimes.find(
       (show) => show.time === showTime
     );
@@ -91,8 +87,6 @@ class BookingService {
     if (!targetShowTime) {
       throw new Error("Show time not found in the schedule.");
     }
-
-    console.log("targetShowTime: ", targetShowTime);
 
     targetShowTime.layout = targetShowTime.layout.map((row) =>
       row.map((seat) =>

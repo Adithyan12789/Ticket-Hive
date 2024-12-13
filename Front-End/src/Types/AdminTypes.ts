@@ -17,11 +17,11 @@ export interface AdminCredentials {
   
   /** admin Information */
   export interface AdminInfo {
-    data: unknown;
-    id: string;
+    data?: unknown;
+    _id?: string;
     name: string;
     email: string;
-    token: string;
+    token?: string;
   }
   
   /**  admin authentication information State */

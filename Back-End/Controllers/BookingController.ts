@@ -28,8 +28,6 @@ class BookingController {
         offerId,
         movieId
       } = req.body;
-
-      console.log("body: ", req.body);
       
       if (
         !movieId ||
@@ -113,8 +111,6 @@ class BookingController {
     async (req: Request, res: Response): Promise<void> => {
       try {
         const tickets = await BookingService.getAllTicketsService();
-
-        console.log("tickets: ", tickets);
 
         if (!tickets || tickets.length === 0) {
           res.status(404).json({ message: "No tickets found for this user" });

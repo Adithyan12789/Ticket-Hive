@@ -2,7 +2,6 @@ import { Request, Response, NextFunction } from 'express';
 
 class ErrorHandler {
   public notFound(req: Request, res: Response, next: NextFunction): void {
-    console.log(`Not found: ${req.originalUrl}`);
     const error = new Error(`Not found - ${req.originalUrl}`);
     res.status(404);
     next(error);

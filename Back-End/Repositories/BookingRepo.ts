@@ -37,10 +37,7 @@ class BookingRepository {
         { paymentStatus: status },
         { new: true }
       ).exec();
-
-      console.log("repo updatedBooking: ", updatedBooking);
       
-
       return updatedBooking;
     } catch (error: any) {
       console.error("Error updating booking status:", error.message);

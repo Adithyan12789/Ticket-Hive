@@ -9,6 +9,7 @@ import MovieManagement from '../Pages/ADMIN/MoviesManagement';
 import MovieDetailsPage from '../Pages/ADMIN/MovieDetailsPage';
 import BookingsPage from '../Pages/ADMIN/BookingsPage';
 import BookingDetailsPage from '../Pages/ADMIN/BookingDetailsPage';
+import AdminChatScreen from '../Pages/ADMIN/AdminChatScreen';
 
 export const AdminRoutes = (
   <Route path="/admin" element={<AdminPrivateRoute />}>
@@ -21,6 +22,7 @@ export const AdminRoutes = (
     <Route path="movie-details/:id" element={<MovieDetailsPage />} />
     <Route path="bookings" element={<BookingsPage />} />
     <Route path="bookings/:bookingId" element={<BookingDetailsPage />} />
+    <Route path="chat" element={<AdminChatScreen />} />
   </Route>
 );
 
