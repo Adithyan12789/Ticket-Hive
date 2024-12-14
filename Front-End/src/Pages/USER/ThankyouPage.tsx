@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Loader from '../../Components/UserComponents/Loader';
-import { FaCheckCircle } from 'react-icons/fa'; // Import FontAwesome icons
+import { FaCheckCircle } from 'react-icons/fa';
 
 const ThankYou = () => {
   const [loading, setLoading] = useState(true);
@@ -13,18 +13,18 @@ const ThankYou = () => {
   }, []);
 
   useEffect(() => {
-    document.title = `Thankyou Page`
+    document.title = `Thank You - Payment Successful`;
   }, []);
 
   return (
     <div
       style={{
-        fontFamily: '"Roboto", Arial, sans-serif',
-        backgroundColor: '#f4f7fc',
+        fontFamily: '"Poppins", Arial, sans-serif',
+        backgroundColor: '#f0f4f8',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        height: '100vh',
+        minHeight: '100vh',
         margin: 0,
         padding: '20px',
       }}
@@ -36,78 +36,69 @@ const ThankYou = () => {
             style={{
               marginTop: '20px',
               fontSize: '18px',
-              color: '#555',
+              color: '#7d879c',
               fontWeight: '500',
             }}
           >
-            <i className="fa fa-spinner fa-spin" style={{ marginRight: '10px' }}></i>
-            Please wait while we process your payment...
+            Processing your payment, please wait...
           </p>
         </div>
       ) : (
         <div
           style={{
-            background: 'linear-gradient(135deg, #ffffff, #eef2f7)',
-            padding: '40px 50px',
-            boxShadow: '0 8px 20px rgba(0, 0, 0, 0.15)',
+            backgroundColor: '#ffffff',
+            padding: '50px',
+            boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)',
             textAlign: 'center',
-            borderRadius: '15px',
-            maxWidth: '500px',
+            borderRadius: '20px',
+            maxWidth: '600px',
             width: '100%',
+            animation: 'fadeIn 0.5s ease-in-out',
           }}
         >
           <FaCheckCircle
             style={{
-              color: '#27ae60',
-              fontSize: '4rem',
+              color: '#4caf50',
+              fontSize: '4.5rem',
               marginBottom: '20px',
+              animation: 'popIn 0.5s ease-in-out',
             }}
           />
           <h1
             style={{
-              color: '#34495e',
+              color: '#2c3e50',
               marginBottom: '20px',
-              fontWeight: '600',
+              fontWeight: '700',
+              fontSize: '2rem',
             }}
           >
             Payment Successful!
           </h1>
           <p
             style={{
-              color: '#7f8c8d',
+              color: '#576574',
               fontSize: '1.2rem',
               marginBottom: '20px',
-              lineHeight: '1.5',
+              lineHeight: '1.6',
             }}
           >
-            Your transaction has been processed successfully.
-          </p>
-          <p
-            style={{
-              color: '#2c3e50',
-              fontSize: '1rem',
-              marginBottom: '30px',
-              lineHeight: '1.5',
-            }}
-          >
-            Thank you for your purchase. We look forward to serving you again!
+            Thank you for your purchase. Your transaction has been successfully completed.
           </p>
           <Link
             to="/tickets"
             style={{
               display: 'inline-block',
-              padding: '12px 24px',
-              backgroundColor: '#3498db',
+              padding: '15px 30px',
+              backgroundColor: '#007bff',
               color: '#ffffff',
               textDecoration: 'none',
-              borderRadius: '6px',
+              borderRadius: '8px',
               fontSize: '1rem',
-              fontWeight: '500',
-              transition: 'all 0.3s',
-              boxShadow: '0 4px 10px rgba(41, 128, 185, 0.3)',
+              fontWeight: '600',
+              transition: 'transform 0.3s, box-shadow 0.3s',
+              boxShadow: '0 4px 15px rgba(0, 123, 255, 0.2)',
             }}
           >
-            <i className="fa fa-ticket" style={{ marginRight: '10px' }}></i>
             View Tickets
           </Link>
         </div>

@@ -169,7 +169,7 @@ const ChatScreen: React.FC = () => {
       refetchMessages();
       socket.emit("message", messageData);
       socket.emit("messageUnRead", { roomId: selectedChatRoom?._id });
-      socket.emit("stopTypingUser", { roomId: selectedChatRoom?._id });
+      socket.emit("stopTypingTheaterOwner", { roomId: selectedChatRoom?._id });
     }
   };
 

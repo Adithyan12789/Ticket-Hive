@@ -241,7 +241,7 @@ class ChatRoomController {
   markAdminMessagesAsRead = expressAsyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { chatRoomId } = req.body;
 
-    console.log("admin chatRoomId: ", chatRoomId);
+    console.log("Theater Owner marking messages as read for chatRoomId: ", chatRoomId);
 
     await Message.updateMany(
       { chatRoomId, senderType: { $ne: 'Admin' }, read: false },

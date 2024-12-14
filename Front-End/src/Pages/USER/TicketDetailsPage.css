@@ -1,0 +1,85 @@
+/* Ticket Details Screen Styles */
+.poster-wrapper {
+    max-width: 300px;
+    margin: 0 auto;
+  }
+  
+  .modern-card {
+    background-color: #f9f9f9;
+    border-radius: 15px;
+    border: none;
+  }
+  
+  .text-gradient {
+    background: linear-gradient(90deg, #007bff, #6610f2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .qr-code-wrapper {
+    display: flex;
+    align-items: center;
+  }
+  
+  .modern-button {
+    border-radius: 25px;
+    transition: all 0.3s ease-in-out;
+  }
+  
+  .modern-button:hover {
+    transform: scale(1.05);
+  }
+  
+  .modal-header {
+    background-color: #f8f9fa;
+  }
+  
+  .modal-footer {
+    background-color: #f8f9fa;
+  }
+  
+  .btn-danger:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+
+  /* Status bar container */
+.status-bar-container {
+    width: 100%;
+    background-color: #f0f0f0;
+    border-radius: 5px;
+    overflow: hidden;
+    height: 20px;
+    margin-top: 10px;
+    position: relative;
+  }
+  
+  /* Status bar */
+  .status-bar {
+    height: 100%;
+    text-align: center;
+    line-height: 20px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: bold;
+    white-space: nowrap;
+    transition: width 0.5s ease;
+  }
+  
+  /* Status-specific styles */
+  .status-bar-pending {
+    width: 50%;
+    background-color: #ffcc00; /* Yellow for Pending */
+  }
+  
+  .status-bar-cancelled {
+    width: 100%;
+    background-color: #ff4d4f; /* Red for Cancelled */
+  }
+  
+  .status-bar-completed {
+    width: 100%;
+    background-color: #52c41a; /* Green for Completed */
+  }
+  

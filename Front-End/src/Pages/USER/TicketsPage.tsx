@@ -17,6 +17,7 @@ import { RootState } from "../../Store";
 import UserNavBar from "../../Components/UserComponents/UserNavBar";
 import { MovieManagement } from "../../Types/MoviesTypes";
 import { Ticket2 } from "../../Types/BookingTypes";
+import "./TicketPage.css";
 
 interface TicketEntry {
   movieDetails: MovieManagement;
@@ -38,10 +39,10 @@ const TicketsScreen: React.FC = () => {
 
   useEffect(() => {
     document.title = "Ticket Hive - Booking Details";
-  }, []);  
-  
+  }, []);
+
   useEffect(() => {
-    refetch()
+    refetch();
   }, [refetch, data]);
 
   useEffect(() => {
@@ -64,7 +65,8 @@ const TicketsScreen: React.FC = () => {
       return a.movieDetails.title.localeCompare(b.movieDetails.title);
     } else {
       return (
-        new Date(b.ticket.bookingTime).getTime() - new Date(a.ticket.bookingTime).getTime()
+        new Date(b.ticket.bookingTime).getTime() -
+        new Date(a.ticket.bookingTime).getTime()
       );
     }
   });
@@ -87,7 +89,6 @@ const TicketsScreen: React.FC = () => {
 
   console.log("tickets: ", tickets);
   console.log("currentTickets: ", currentTickets);
-  
 
   return (
     <div
@@ -142,7 +143,10 @@ const TicketsScreen: React.FC = () => {
             </div>
 
             {tickets.length === 0 ? (
-              <Alert variant="info" className="text-center">
+              <Alert
+                variant="info"
+                className="text-center p-4 shadow-sm rounded"
+              >
                 You have no bookings yet. Start exploring movies and book your
                 tickets now!
               </Alert>
@@ -152,9 +156,9 @@ const TicketsScreen: React.FC = () => {
                 bordered
                 hover
                 responsive
-                className="text-center my-3 py-3"
+                className="modern-table text-center my-3 py-3 shadow-lg rounded"
               >
-                <thead className="table-dark">
+                <thead className="table-dark text-uppercase">
                   <tr>
                     <th>Movie Title</th>
                     <th>Theater</th>
@@ -175,13 +179,15 @@ const TicketsScreen: React.FC = () => {
                           : ticketEntry.ticket.paymentStatus === "pending"
                           ? "bg-warning text-dark"
                           : ""
-                      }`}
+                      } modern-row`}
                     >
-                      <td className="py-3">{ticketEntry.movieDetails.title}</td>
+                      <td className="py-3 fw-bold">
+                        {ticketEntry.movieDetails.title}
+                      </td>
                       <td className="py-3">{ticketEntry.ticket.theaterName}</td>
                       <td className="py-3">
                         <span
-                          className={`badge ${
+                          className={`badge status-badge ${
                             ticketEntry.ticket.paymentStatus === "Confirmed"
                               ? "bg-success"
                               : ticketEntry.ticket.paymentStatus === "cancelled"
@@ -201,6 +207,7 @@ const TicketsScreen: React.FC = () => {
                             navigate(`/ticket/${ticketEntry.ticket.bookingId}`)
                           }
                           aria-label={`View details for booking ID ${ticketEntry.ticket.bookingId}`}
+                          className="modern-button"
                         >
                           View Details
                         </Button>

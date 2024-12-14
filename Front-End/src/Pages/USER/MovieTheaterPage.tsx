@@ -1,17 +1,10 @@
 import { Key, useEffect, useState } from "react";
-import { Container, Row, Col, Button, Modal } from "react-bootstrap";
-import {
-  useLocation,
-  useNavigate,
-  useParams,
-  useSearchParams,
-} from "react-router-dom";
-import { FaSearch } from "react-icons/fa";
+import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { FaSearch, FaInfoCircle, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import {
   useGetMovieByMovieIdQuery,
   useGetTheatersByMovieTitleQuery,
 } from "../../Slices/UserApiSlice";
-import { FaInfoCircle } from "react-icons/fa";
 import Loader from "../../Components/UserComponents/Loader";
 import { toast } from "react-toastify";
 import "react-datepicker/dist/react-datepicker.css";
@@ -22,6 +15,8 @@ import { UserInfo } from "../../Types/UserTypes";
 import { Screen } from "../../Types/ScreenTypes";
 import { TheaterManagement } from "../../Types/TheaterTypes";
 import Footer from "../../Components/UserComponents/Footer";
+import './MovieTheaterPage.css';
+import React from "react";
 
 type TheaterData = {
   theaters: TheaterManagement[];
@@ -243,303 +238,160 @@ const MovieTheaterScreen: React.FC = () => {
 
   return (
     <>
-      <Container style={{ padding: "40px 20px", marginBottom: "170px" }}>
-        <Row className="mb-4">
-          {/* Left Side: Movie Title and Genres */}
-          <Col md={8}>
-            <h2 className="text-dark font-weight-bold">
-              {movie?.title} ({selectedLanguage})
-            </h2>
-            <div className="d-inline-block mb-2">
-              <div className="badge border border-primary text-primary p-2 rounded-pill me-2">
-                UA
-              </div>
-              {genres.map((genre: string, index: number) => (
-                <span
-                  key={index}
-                  className="badge border border-primary text-dark p-2 rounded-pill me-2"
-                >
-                  {genre}
-                </span>
-              ))}
-            </div>
-          </Col>
+    <div className="userSide-container">
+      <div className="movie-header">
+        <h1 className="movie-title">{movie?.title} ({selectedLanguage})</h1>
+        <div className="genre-tags">
+          <span className="genre-tag">UA</span>
+          {genres.map((genre: string, index: number) => (
+            <span key={index} className="genre-tag">{genre}</span>
+          ))}
+        </div>
+        <div className="userSide-search-container">
+          <input
+            type="text"
+            className="userSide-search-input"
+            placeholder="Search theaters..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+          />
+          <FaSearch className="userSide-search-icon" />
+        </div>
+      </div>
 
-          {/* Right Side: Search Bar with Icon */}
-          <Col
-            md={4}
-            className="d-flex align-items-center justify-content-end "
+      <div className="date-selector">
+        <h2>Select a Date</h2>
+        <div className="date-buttons">
+          <button
+            onClick={handleBackward}
+            disabled={startIndex === 0}
+            className="date-button"
           >
-            <div className="input-group" style={{ maxWidth: "350px" }}>
-              <input
-                type="text"
-                className="form-control rounded-pill border border-primary"
-                placeholder="Search theaters..."
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-              />
-              <FaSearch
-                style={{ position: "relative", top: "18px", right: "30px" }}
-              />
-            </div>
-          </Col>
-        </Row>
-
-        <Row
-          className="mb-4"
-          style={{
-            backgroundColor: "#f8f9fa",
-            padding: "20px",
-            borderRadius: "10px",
-            alignItems: "center",
-            boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
-          }}
-        >
-          {/* Left Side: Date Selection */}
-          <Col md={6}>
-            <h5 className="mb-3 text-primary">Select a Date</h5>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <Button
-                variant="outline-primary"
-                size="sm"
-                onClick={handleBackward}
-                disabled={startIndex === 0}
-                className="rounded-circle border-primary text-primary"
-              >
-                {"<"}
-              </Button>
-              <div
-                style={{
-                  display: "flex",
-                  overflowX: "auto",
-                  gap: "10px",
-                  padding: "5px 0",
-                }}
-              >
-                {dates
-                  .slice(startIndex, startIndex + datesToShow)
-                  .map((date, index) => (
-                    <Button
-                      key={index}
-                      variant={
-                        selectedDate?.toISOString().split("T")[0] ===
-                        date.toISOString().split("T")[0]
-                          ? "primary"
-                          : "outline-secondary"
-                      }
-                      onClick={() => setSelectedDate(date)}
-                      className={`px-3 py-2 rounded border-${
-                        selectedDate?.toISOString().split("T")[0] ===
-                        date.toISOString().split("T")[0]
-                          ? "primary"
-                          : "secondary"
-                      }`}
-                    >
-                      {formatDate(date)}
-                    </Button>
-                  ))}
-              </div>
-              <Button
-                variant="outline-primary"
-                size="sm"
-                onClick={handleForward}
-                disabled={startIndex + datesToShow >= dates.length}
-                className="rounded-circle border-primary text-primary"
-              >
-                {">"}
-              </Button>
-            </div>
-          </Col>
-
-          {/* Right Side: Filter, Sort, and Search */}
-          <Col md={6}>
-            <div
-              style={{ display: "flex", flexDirection: "column", gap: "15px" }}
+            <FaChevronLeft />
+          </button>
+          {dates.slice(startIndex, startIndex + datesToShow).map((date, index) => (
+            <button
+              key={index}
+              onClick={() => setSelectedDate(date)}
+              className={`date-button ${selectedDate?.toISOString().split("T")[0] === date.toISOString().split("T")[0] ? 'active' : ''}`}
             >
-              {/* Filter and Sort */}
-              <div
-                style={{ display: "flex", gap: "15px", alignItems: "center" }}
-              >
-                {/* City Filter */}
-                <select
-                  className="form-select rounded-pill border border-primary"
-                  value={selectedCity || ""}
-                  onChange={(e) => setSelectedCity(e.target.value || null)}
-                >
-                  <option value="">All Cities</option>
-                  {[...new Set(allTheaters.map((theater) => theater.city))]
-                    .filter((city) => city)
-                    .map((city, idx) => (
-                      <option key={idx} value={city}>
-                        {city}
-                      </option>
-                    ))}
-                </select>
+              {formatDate(date)}
+            </button>
+          ))}
+          <button
+            onClick={handleForward}
+            disabled={startIndex + datesToShow >= dates.length}
+            className="date-button"
+          >
+            <FaChevronRight />
+          </button>
+        </div>
+      </div>
 
-                {/* Time Filter */}
-                <select
-                  className="form-select rounded-pill border border-primary"
-                  value={selectedTime || ""}
-                  onChange={(e) => setSelectedTime(e.target.value || null)}
-                >
-                  <option value="">All Times</option>
+      <div className="filters">
+        <select
+          className="filter-select"
+          value={selectedCity || ""}
+          onChange={(e) => setSelectedCity(e.target.value || null)}
+        >
+          <option value="">All Cities</option>
+          {[...new Set(allTheaters.map((theater) => theater.city))]
+            .filter((city) => city)
+            .map((city, idx) => (
+              <option key={idx} value={city}>{city}</option>
+            ))}
+        </select>
+        <select
+          className="filter-select"
+          value={selectedTime || ""}
+          onChange={(e) => setSelectedTime(e.target.value || null)}
+        >
+          <option value="">All Times</option>
+          {screens
+            .flatMap((screen) => screen.schedule.flatMap((schedule) => schedule.showTimes))
+            .map((show) => show.time)
+            .filter((time, idx, self) => self.indexOf(time) === idx)
+            .map((time, idx) => (
+              <option key={idx} value={time}>{time}</option>
+            ))}
+        </select>
+      </div>
+
+      <div className="theaters-container">
+        <h2>Theaters</h2>
+        {filteredAndSortedTheaters.length > 0 ? (
+          filteredAndSortedTheaters.map((theater, index) => (
+            <div key={index} className="theater-card">
+              <div className="theater-header">
+                <div className="theater-info">
+                  <h3>
+                    {theater.name}
+                    <FaInfoCircle
+                      onClick={() => handleShowModal(theater)}
+                      style={{ marginLeft: '0.5rem', cursor: 'pointer', color: '#3b82f6' }}
+                    />
+                  </h3>
+                  <p className="theater-address">{theater.address}</p>
+                </div>
+                <div className="show-times">
                   {screens
-                    .flatMap((screen) =>
-                      screen.schedule.flatMap((schedule) => schedule.showTimes)
-                    )
-                    .map((show) => show.time)
-                    .filter((time, idx, self) => self.indexOf(time) === idx) // Remove duplicates
-                    .map((time, idx) => (
-                      <option key={idx} value={time}>
-                        {time}
-                      </option>
+                    .filter((screen: Screen) => screen.theater._id === theater._id)
+                    .map((screen: Screen, idx: Key | null | undefined) => (
+                      <React.Fragment key={idx}>
+                        {screen.schedule
+                          .flatMap((schedule) => schedule.showTimes)
+                          .filter((show) => show.movieTitle.trim().toLowerCase() === movieName)
+                          .map((filteredShow, timeIdx) => (
+                            <button
+                              key={timeIdx}
+                              className="show-time-button"
+                              onClick={() =>
+                                navigate(`/seat-select/${screen._id}`, {
+                                  state: {
+                                    date: selectedDate,
+                                    movieTitle: movie?.title,
+                                    movieId: movie?._id,
+                                    theaterId: theater?._id,
+                                    showTime: filteredShow.time,
+                                    moviePoster: moviePoster,
+                                    showTimeId: filteredShow._id,
+                                  },
+                                })
+                              }
+                            >
+                              {filteredShow.time}
+                            </button>
+                          ))}
+                      </React.Fragment>
                     ))}
-                </select>
+                </div>
               </div>
             </div>
-          </Col>
-        </Row>
+          ))
+        ) : (
+          <p style={{ color: '#ef4444' }}>No theaters available for the selected movie.</p>
+        )}
+      </div>
 
-        <Row
-          className="mb-4"
-          style={{
-            backgroundColor: "#ffffff",
-            padding: "20px",
-            border: "1px solid #ddd",
-            borderRadius: "10px",
-          }}
-        >
-          <Col>
-            <h5 className="mb-3 text-success">Theaters</h5>
-            {filteredAndSortedTheaters.length > 0 ? (
-              <Row>
-                {filteredAndSortedTheaters.map((theater, index) => (
-                  <Col key={index} md={12} className="mb-4">
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        padding: "20px",
-                        border: "1px solid #ddd",
-                        borderRadius: "15px",
-                        boxShadow: "0px 4px 15px rgba(0,0,0,0.1)",
-                        backgroundColor: "#fff",
-                        transition: "all 0.3s ease-in-out",
-                      }}
-                    >
-                      <div style={{ flex: 2 }}>
-                        <h5 className="font-weight-bold">
-                          {theater.name}{" "}
-                          <FaInfoCircle
-                            className="text-primary"
-                            onClick={() => handleShowModal(theater)}
-                          />
-                        </h5>
-                        <p
-                          className="text-muted"
-                          style={{ fontSize: "0.85rem" }}
-                        >
-                          {theater.address}
-                        </p>
-                      </div>
-                      <div style={{ flex: 2, marginLeft: "50px" }}>
-                        <div style={{ display: "flex", flexWrap: "wrap" }}>
-                          {screens
-                            .filter(
-                              (screen: Screen) =>
-                                screen.theater._id === theater._id
-                            )
-                            .map(
-                              (screen: Screen, idx: Key | null | undefined) => (
-                                <div
-                                  style={{
-                                    display: "flex",
-                                    flexWrap: "wrap",
-                                    gap: "30px",
-                                  }}
-                                  key={idx}
-                                >
-                                  {screen.schedule
-                                    .flatMap((schedule) => schedule.showTimes) // Access all showTimes from the schedule
-                                    .filter(
-                                      (show) =>
-                                        show.movieTitle.trim().toLowerCase() ===
-                                        movieName // Filter by movie title
-                                    )
-                                    .map((filteredShow, timeIdx) => (
-                                      <div key={timeIdx} className="mr-2 mb-2">
-                                        <Button
-                                          variant="outline-primary"
-                                          className="px-3 py-2 rounded border-primary"
-                                          onClick={() =>
-                                            navigate(
-                                              `/seat-select/${screen._id}`,
-                                              {
-                                                state: {
-                                                  date: selectedDate,
-                                                  movieTitle: movie?.title,
-                                                  movieId: movie?._id,
-                                                  theaterId: theater?._id,
-                                                  showTime: filteredShow.time,
-                                                  moviePoster: moviePoster,
-                                                  showTimeId: filteredShow._id,
-                                                },
-                                              }
-                                            )
-                                          }
-                                        >
-                                          {filteredShow.time}
-                                        </Button>
-                                      </div>
-                                    ))}
-                                </div>
-                              )
-                            )}
-                        </div>
-                      </div>
-                    </div>
-                  </Col>
-                ))}
-              </Row>
-            ) : (
-              <p className="text-danger">
-                No theaters available for the selected movie.
-              </p>
-            )}
-          </Col>
-        </Row>
-        <Modal
-          show={modalVisible}
-          onHide={() => setModalVisible(false)}
-          size="lg"
-          centered
-        >
-          <Modal.Header closeButton>
-            <Modal.Title>Theater Details</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            {selectedTheater ? (
-              <div className="p-4">
-                <h5 className="mb-3 fw-bold">{selectedTheater.name}</h5>
-                <p>
-                  <strong>Description:</strong>{" "}
-                  {selectedTheater.description || "No description available."}
-                </p>
-                <h6 className="mt-4">Available Facilities</h6>
-                <ul>
-                  {selectedTheater.amenities.length > 0 ? (
-                    selectedTheater.amenities.map((amenity, idx) => (
-                      <li key={idx}>{amenity}</li>
-                    ))
-                  ) : (
-                    <li>No amenities listed.</li>
-                  )}
-                </ul>
-                <p>
-                  <strong>Address:</strong> {selectedTheater.address}
-                </p>
-                <h6 className="mt-4">Location</h6>
+      {modalVisible && (
+        <div className="userSide-modal-overlay">
+          <div className="userSide-modal-content">
+            <div className="userSide-modal-body">
+              <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '1rem' }}>{selectedTheater?.name}</h2>
+              <p style={{ marginBottom: '1rem' }}><strong>Description:</strong> {selectedTheater?.description || "No description available."}</p>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>Available Facilities</h3>
+              <ul style={{ listStyleType: 'disc', paddingLeft: '1.5rem', marginBottom: '1rem' }}>
+                {selectedTheater?.amenities.length ? (
+                  selectedTheater.amenities.map((amenity, idx) => (
+                    <li key={idx}>{amenity}</li>
+                  ))
+                ) : (
+                  <li>No amenities listed.</li>
+                )}
+              </ul>
+              <p style={{ marginBottom: '1rem' }}><strong>Address:</strong> {selectedTheater?.address}</p>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>Location</h3>
+              {selectedTheater && (
                 <TheaterLocation
                   location={{
                     latitude: selectedTheater.latitude,
@@ -547,16 +399,26 @@ const MovieTheaterScreen: React.FC = () => {
                     theaterName: selectedTheater.name,
                   }}
                 />
-              </div>
-            ) : (
-              <p>Loading...</p>
-            )}
-          </Modal.Body>
-        </Modal>
-      </Container>
-      <Footer />
+              )}
+            </div>
+            <div className="userSide-modal-footer">
+              <button
+                className="close-button"
+                onClick={() => setModalVisible(false)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      
+    </div>
+    <Footer />
     </>
   );
 };
 
 export default MovieTheaterScreen;
+

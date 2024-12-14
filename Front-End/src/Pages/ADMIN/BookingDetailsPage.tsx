@@ -6,7 +6,7 @@ import {
 } from "../../Slices/AdminApiSlice";
 import AdminLayout from "../../Components/AdminComponents/AdminLayout";
 import Loader from "../../Components/UserComponents/Loader";
-import { Ticket } from "../../Types/BookingTypes";
+import { Ticket } from "./BookingsPage";
 import Swal from "sweetalert2";
 
 const AdminBookingDetailPage: React.FC = () => {

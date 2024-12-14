@@ -1,0 +1,239 @@
+.userSide-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+  
+  .movie-header {
+    margin-bottom: 2rem;
+  }
+  
+  .movie-title {
+    font-size: 2.5rem;
+    color: #333;
+    margin-bottom: 0.5rem;
+  }
+  
+  .genre-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    justify-content: center;
+  }
+  
+  .genre-tag {
+    background-color: #e0e0e0;
+    color: #333;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+  }
+  
+  .userSide-search-container {
+    position: relative;
+    max-width: 300px;
+    margin-left: 420px;
+  }
+  
+  .userSide-search-input {
+    width: 100%;
+    padding: 0.5rem 1rem 0.5rem 2.5rem;
+    border: 2px solid #ccc;
+    border-radius: 9999px;
+    font-size: 1rem;
+  }
+  
+  .userSide-search-icon {
+    position: absolute;
+    left: 0.75rem;
+    top: 35%;
+    transform: translateY(-50%);
+    color: #666;
+  }
+  
+  .date-selector {
+    background-color: #fff;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+  }
+  
+  .date-selector h2 {
+    font-size: 1.25rem;
+    color: #333;
+    margin-bottom: 1rem;
+  }
+  
+  .date-buttons {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+  }
+  
+  .date-button {
+    background-color: #f0f0f0;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .date-button.active {
+    background-color: #3b82f6;
+    color: #fff;
+  }
+  
+  .date-button:hover:not(.active) {
+    background-color: #e0e0e0;
+  }
+  
+  .filters {
+    background-color: #fff;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  
+  .filter-select {
+    width: 100%;
+    padding: 0.5rem;
+    border: 2px solid #ccc;
+    border-radius: 0.25rem;
+    font-size: 1rem;
+  }
+  
+  .theaters-container {
+    background-color: #fff;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .theaters-container h2 {
+    font-size: 1.25rem;
+    color: #333;
+    margin-bottom: 1rem;
+  }
+  
+  .theater-card {
+    background-color: #f9f9f9;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    transition: box-shadow 0.3s ease;
+  }
+  
+  .theater-card:hover {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .theater-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+  }
+  
+  .theater-info h3 {
+    font-size: 1.125rem;
+    color: #333;
+    margin-bottom: 0.25rem;
+  }
+  
+  .theater-address {
+    font-size: 0.875rem;
+    color: #666;
+  }
+  
+  .show-times {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  .show-time-button {
+    background-color: #e0f2fe;
+    color: #0369a1;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .show-time-button:hover {
+    background-color: #bae6fd;
+  }
+  
+  .userSide-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .userSide-modal-content {
+    background-color: #fff;
+    border-radius: 0.5rem;
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  
+  .userSide-modal-body {
+    padding: 1.5rem;
+  }
+  
+  .userSide-modal-footer {
+    background-color: #f0f0f0;
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  .close-button {
+    background-color: #3b82f6;
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .close-button:hover {
+    background-color: #2563eb;
+  }
+  
+  @media (max-width: 768px) {
+    .filters {
+      grid-template-columns: 1fr;
+    }
+  
+    .theater-header {
+      flex-direction: column;
+    }
+  
+    .theater-info {
+      margin-bottom: 1rem;
+    }
+  }
+  
+  

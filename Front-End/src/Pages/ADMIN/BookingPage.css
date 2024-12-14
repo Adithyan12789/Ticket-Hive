@@ -1,0 +1,58 @@
+.modern-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    color: #333;
+    background-color: #f9f9f9;
+  }
+  
+  .modern-table thead {
+    background-color: #343a40;
+    color: #fff;
+    text-align: center;
+  }
+  
+  .modern-table th,
+  .modern-table td {
+    padding: 15px;
+    text-align: center;
+    border: 1px solid #ddd;
+  }
+  
+  .modern-table tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+  
+  .modern-table tr:hover {
+    background-color: #e9ecef;
+    cursor: pointer;
+  }
+  
+  .modern-table .badge {
+    font-size: 0.8rem;
+    padding: 5px 10px;
+    border-radius: 12px;
+  }
+  
+  .status-confirmed {
+    background-color: #28a745;
+    color: #fff;
+  }
+  
+  .status-pending {
+    background-color: #ffc107;
+    color: #212529;
+  }
+  
+  .pagination {
+    font-size: 1rem;
+  }
+  
+  button {
+    transition: all 0.3s ease-in-out;
+  }
+  
+  button:hover {
+    transform: scale(1.05);
+  }
+  

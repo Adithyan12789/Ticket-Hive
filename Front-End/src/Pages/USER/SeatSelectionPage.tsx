@@ -102,7 +102,7 @@ const SelectSeatPage: React.FC = () => {
     isAvailable: boolean,
     holdSeat: boolean
   ) => {
-    if (!isAvailable && holdSeat) return;
+    if (!isAvailable || holdSeat) return; // Return early if seat is not available or on hold
     const newSelectedSeats = new Set(selectedSeats);
     if (newSelectedSeats.has(seatLabel)) {
       newSelectedSeats.delete(seatLabel);
@@ -392,3 +392,4 @@ const SelectSeatPage: React.FC = () => {
 };
 
 export default SelectSeatPage;
+

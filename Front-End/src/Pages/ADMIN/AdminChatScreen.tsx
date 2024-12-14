@@ -42,9 +42,9 @@ const ChatScreen: React.FC = () => {
   const [isTyping, setIsTyping] = useState(false);
   const { adminInfo } = useSelector((state: RootState) => state.adminAuth);
   const adminId = adminInfo?._id;
-  const { data: chatRooms = [], refetch: refetchAdminChatRooms } =
+  const { data: chatRooms = [], refetch: refetchAdminChatRooms, error: chatRoomsError, } =
     useGetAdminChatRoomsQuery(adminId);
-  const { data: messages = [], refetch: refetchMessages } =
+  const { data: messages = [], refetch: refetchMessages, error: messagesError, } =
     useGetAdminMessagesQuery(selectedChatRoom?._id ?? "", {
       skip: !selectedChatRoom || !selectedChatRoom._id,
     });
@@ -52,68 +52,94 @@ const ChatScreen: React.FC = () => {
   const [markMessagesAsRead] = useMarkAdminMessagesAsReadMutation();
 
   useEffect(() => {
-    document.title = "Messages";
-    socket.on("message", (message) => {
-      if (message.chatRoomId === selectedChatRoom?._id) {
+      document.title = "Messages - Ticket Hive Admin";
+      if (selectedChatRoom) {
         refetchMessages();
-        markMessagesAsRead(selectedChatRoom?._id);
+        socket.emit("joinRoom", { roomId: selectedChatRoom._id });
+        markMessagesAsRead(selectedChatRoom._id);
+        socket.emit("messageRead", { roomId: selectedChatRoom._id });
       }
-    });
-
-    return () => {
-      socket.off("message");
-    };
-  }, [selectedChatRoom, refetchMessages, markMessagesAsRead]);
-
-  useEffect(() => {
-    socket.on("typingTheaterOwner", () => {
-      setIsTyping(true);
-    });
-    socket.on("stopTypingTheaterOwner", () => {
-      setIsTyping(false);
-    });
-    return () => {
-      socket.off("typingTheaterOwner");
-      socket.off("stopTypingTheaterOwner");
-    };
-  }, []);
-
-  useEffect(() => {
-    if (selectedChatRoom) {
-      refetchMessages();
-      socket.emit("joinRoom", { roomId: selectedChatRoom._id });
-
-      markMessagesAsRead(selectedChatRoom._id);
-
-      socket.emit("messageRead", { roomId: selectedChatRoom._id });
-    }
-  }, [selectedChatRoom, refetchMessages, markMessagesAsRead]);
-
-  useEffect(() => {
-    socket.on("messageRead", (data) => {
-      if (data.roomId === selectedChatRoom?._id) {
+    }, [selectedChatRoom, refetchMessages, markMessagesAsRead]);
+  
+    useEffect(() => {
+      socket.on("message", (message) => {
+        if (message.chatRoomId === selectedChatRoom?._id) {
+          refetchMessages();
+        }
+      });
+      return () => {
+        socket.off("message");
+      };
+    }, [selectedChatRoom, refetchMessages]);
+  
+    useEffect(() => {
+      socket.on("messageRead", (data) => {
+        if (data.roomId === selectedChatRoom?._id) {
+          refetchAdminChatRooms();
+        }
+      });
+      return () => {
+        socket.off("messageRead");
+      };
+    }, [selectedChatRoom, refetchAdminChatRooms]);
+  
+    useEffect(() => {
+      socket.on("messageUnReadTheaterOwner", () => {
         refetchAdminChatRooms();
-      }
-    });
-    return () => {
-      socket.off("messageRead");
-    };
-  }, [selectedChatRoom, refetchAdminChatRooms]);
-
-  useEffect(() => {
-    socket.on("messageUnRead", () => {
+      });
+      return () => {
+        socket.off("messageUnReadTheaterOwner");
+      };
+    }, [refetchAdminChatRooms]);
+  
+    useEffect(() => {
       refetchAdminChatRooms();
     });
-    return () => {
-      socket.off("messageUnRead");
-    };
-  }, [refetchAdminChatRooms]);
-
-  useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [messages]);
+  
+    useEffect(() => {
+      socket.on("typingTheaterOwner", () => {
+        setIsTyping(true);
+      });
+      socket.on("stopTypingTheaterOwner", () => {
+        setIsTyping(false);
+      });
+      return () => {
+        socket.off("typingTheaterOwner");
+        socket.off("stopTypingTheaterOwner");
+      };
+    }, []);
+  
+    useEffect(() => {
+      if (chatRoomsError) {
+        console.error("Failed to fetch chat rooms:", chatRoomsError);
+      }
+      if (messagesError) {
+        console.error("Failed to fetch messages:", messagesError);
+      }
+    }, [chatRoomsError, messagesError]);
+  
+    useEffect(() => {
+      if (messagesEndRef.current) {
+        messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+      }
+    }, [messages]);
+  
+    useEffect(() => {
+      const handleNewMessage = (message: Message) => {
+        if (message.chatRoomId === selectedChatRoom?._id) {
+          refetchMessages();
+          markMessagesAsRead(selectedChatRoom?._id).then(() => {
+            socket.emit("messageRead", { roomId: selectedChatRoom?._id });
+          });
+        }
+      };
+  
+      socket.on("message", handleNewMessage);
+  
+      return () => {
+        socket.off("message", handleNewMessage);
+      };
+    }, [selectedChatRoom, refetchMessages, markMessagesAsRead]);
 
   const handleSendMessage = async () => {
     if (newMessage.trim() || selectedFile) {
@@ -136,8 +162,8 @@ const ChatScreen: React.FC = () => {
       setSelectedFileName(""); 
       refetchMessages();
       socket.emit("message", messageData);
-      socket.emit("messageUnRead", { roomId: selectedChatRoom?._id });
-      socket.emit("stopTypingUser", { roomId: selectedChatRoom?._id });
+      socket.emit("messageUnReadAdmin", { roomId: selectedChatRoom?._id });
+      socket.emit("stopTypingAdmin", { roomId: selectedChatRoom?._id });
     }
   };
 
