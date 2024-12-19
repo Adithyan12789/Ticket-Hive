@@ -1,6 +1,6 @@
 import asyncHandler from "express-async-handler";
 import { NextFunction, Request, Response } from "express";
-import bookingService from "../Services/BookingService";
+import bookingService, { getMovieTitleById } from "../Services/BookingService";
 import { parse, format } from "date-fns";
 import BookingService from "../Services/BookingService";
 import { Movie } from "../Models/MoviesModel";
@@ -8,9 +8,9 @@ import { CustomRequest } from "../Middlewares/AuthMiddleware";
 import WalletService from "../Services/WalletService";
 import WalletRepo from "../Repositories/WalletRepo";
 import { Offer } from "../Models/OffersModel";
+import NotificationService from "../Services/NotificationService";
 
 class BookingController {
-  // Controller to create booking
   public createBooking = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
       const {
@@ -26,9 +26,9 @@ class BookingController {
         paymentMethod,
         convenienceFee,
         offerId,
-        movieId
+        movieId,
       } = req.body;
-      
+
       if (
         !movieId ||
         !scheduleId ||
@@ -48,6 +48,12 @@ class BookingController {
       }
 
       try {
+        const movieTitle = await getMovieTitleById(movieId);
+        if (!movieTitle) {
+          res.status(404).json({ message: "Movie not found" });
+          return;
+        }
+
         if (paymentMethod === "wallet") {
           const walletBalance = await WalletService.getWalletBalance(userId);
           if (walletBalance < totalPrice) {
@@ -55,13 +61,19 @@ class BookingController {
             return;
           }
 
-          const description = "Ticket booking payment";
+          const description = `Payment for booking "${movieTitle}"`;
           await WalletService.deductAmountFromWallet(
             userId,
             totalPrice,
             description
           );
         }
+
+        const nextDay = new Date(bookingDate);
+        nextDay.setDate(nextDay.getDate()+ 1);
+        const formattedNextDay = nextDay.toISOString();
+        
+        console.log(formattedNextDay);
 
         const booking = await BookingService.createBookingService(
           movieId,
@@ -76,7 +88,12 @@ class BookingController {
           paymentStatus,
           paymentMethod,
           convenienceFee,
-          bookingDate
+          formattedNextDay
+        );
+
+        await NotificationService.addNotification(
+          userId,
+          `Your ticket for the movie "${movieTitle}" has been booked successfully.`
         );
 
         if (paymentMethod === "wallet") {
@@ -86,7 +103,14 @@ class BookingController {
           await WalletService.addCashbackToWallet(
             userId,
             cashbackAmount,
-            `Cashback for ticket booking`
+            `Cashback for booking "${movieTitle}"`
+          );
+
+          await NotificationService.addNotification(
+            userId,
+            `You've received a cashback of ₹${cashbackAmount.toFixed(
+              2
+            )} for your booking of "${movieTitle}".`
           );
         }
 
@@ -103,6 +127,84 @@ class BookingController {
         } else {
           res.status(500).json({ message: "An unexpected error occurred" });
         }
+      }
+    }
+  );
+
+  getUnreadNotifications = asyncHandler(
+    async (req: CustomRequest, res: Response): Promise<void> => {
+      try {
+        const userId = req.user?._id;
+
+        if (!userId) {
+          res.status(400).json({ message: "User ID is required" });
+          return;
+        }
+
+        const notifications = await NotificationService.getUnreadNotifications(
+          userId
+        );
+
+        console.log("notifications: ", notifications);
+        
+        res.json(notifications);
+      } catch (error) {
+        res.status(500).json({ message: "Server error" });
+      }
+    }
+  );
+
+  markNotificationAsRead = asyncHandler(
+    async (req: CustomRequest, res: Response): Promise<void> => {
+
+      console.log("enetered mark");
+      
+      const { id: notificationId } = req.params;
+
+      console.log("req.params: ", req.params);
+
+      console.log("notificationId: ", notificationId);
+      
+
+      const userId = req.user?._id;
+
+      try {
+        if (!userId) {
+          res.status(400).json({ message: "User ID is required" });
+          return;
+        }
+
+        const message = await NotificationService.markNotificationAsRead(
+          userId,
+          notificationId
+        );
+
+        res.json({ message });
+      } catch (error: any) {
+        res
+          .status(error.statusCode || 500)
+          .json({ message: error.message || "Server error" });
+      }
+    }
+  );
+
+  clearNotifications = asyncHandler(
+    async (req: CustomRequest, res: Response): Promise<void> => {
+
+      const userId = req.user?._id;
+
+      console.log("userId: ", userId);
+
+      if (!userId) {
+        res.status(400).json({ message: "User ID is required" });
+        return;
+      }
+
+      try {
+        await NotificationService.deleteAllNotifications(userId);
+        res.json({ message: "All notifications cleared" });
+      } catch (error: any) {
+        res.status(500).json({ message: error.message || "Server error" });
       }
     }
   );

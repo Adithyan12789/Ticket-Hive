@@ -18,13 +18,12 @@ import {
   BarChart,
   Bar,
   Legend,
-  LineChart,
-  Line,
 } from "recharts";
 import Loader from "../../Components/UserComponents/Loader";
 import AdminLayout from "../../Components/AdminComponents/AdminLayout";
 import { Box, Typography, Grid, Button } from "@mui/material";
 import styled from "@emotion/styled";
+import { FilteredEarningsChart } from "../../Components/AdminComponents/filtered-earnings-chart";
 
 const DashboardContainer = styled(Box)`
   display: flex;
@@ -120,7 +119,39 @@ const AdminDashboard: React.FC = () => {
     }[]
   >([]);
 
+  const [filteredEarningsData, setFilteredEarningsData] = useState<
+    {
+      date: string;
+      earnings: number;
+    }[]
+  >([]);
+  const [earningsFilter, setEarningsFilter] = useState<'all' | 'monthly' | 'yearly'>('all');
+
   const cardColors = ["#ff9b61", "#86d0a1", "#82aaee", "#ff8398", "#bb72ff"];
+
+  const filterEarningsData = (filter: 'all' | 'monthly' | 'yearly') => {
+    setEarningsFilter(filter);
+    const currentDate = new Date();
+    if (filter === 'all') {
+      setFilteredEarningsData(earningsData);
+    } else if (filter === 'monthly') {
+      const currentMonth = currentDate.getMonth();
+      const currentYear = currentDate.getFullYear();
+      const monthlyData = earningsData.filter(item => {
+        const itemDate = new Date(item.date);
+        return itemDate.getMonth() === currentMonth && itemDate.getFullYear() === currentYear;
+      });
+      setFilteredEarningsData(monthlyData);
+    } else if (filter === 'yearly') {
+      const currentYear = currentDate.getFullYear();
+      const yearlyData = earningsData.filter(item => {
+        const itemDate = new Date(item.date);
+        return itemDate.getFullYear() === currentYear;
+      });
+      setFilteredEarningsData(yearlyData);
+    }
+  };
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -191,6 +222,7 @@ const AdminDashboard: React.FC = () => {
         );
 
         setEarningsData(earningsDataArray);
+        setFilteredEarningsData(earningsDataArray);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -198,6 +230,10 @@ const AdminDashboard: React.FC = () => {
 
     fetchData();
   }, [getUserData, getTheaterOwnersData, getMovies, bookings, refetch]);
+
+  useEffect(() => {
+    //This effect will run whenever earningsFilter changes
+  }, [earningsFilter])
 
   if (isLoading) return <Loader />;
 
@@ -263,47 +299,14 @@ const AdminDashboard: React.FC = () => {
           </Grid>
 
           {/* Total Earnings Section */}
-          <Box
-            sx={{
-              padding: "20px",
-              borderRadius: "8px",
-              boxShadow: "0 2px 6px rgba(0, 0, 0, 0.1)",
-              marginBottom: "30px",
-              backgroundColor: "#ffffff",
+          <FilteredEarningsChart
+            data={filteredEarningsData}
+            filter={earningsFilter}
+            onFilterChange={(filter) => {
+              setEarningsFilter(filter);
+              filterEarningsData(filter);
             }}
-          >
-            <Typography
-              variant="h6"
-              sx={{
-                marginBottom: "15px",
-                fontWeight: 600,
-                color: "#333",
-              }}
-            >
-              Total Earnings
-            </Typography>
-            {earningsData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart
-                  data={earningsData}
-                  margin={{ top: 20, right: 20, left: 20, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis />
-                  <Tooltip />
-                  <Line
-                    type="monotone"
-                    dataKey="earnings"
-                    stroke="#ff6384"
-                    strokeWidth={2}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            ) : (
-              <Typography>No earnings data available</Typography>
-            )}
-          </Box>
+          />
           {/* Booking Trends Section */}
           <Box
             sx={{
@@ -411,3 +414,4 @@ const AdminDashboard: React.FC = () => {
 };
 
 export default AdminDashboard;
+

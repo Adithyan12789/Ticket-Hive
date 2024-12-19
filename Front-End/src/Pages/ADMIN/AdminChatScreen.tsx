@@ -16,6 +16,12 @@ import {
   FaArrowLeft,
   FaCheck,
   FaCheckDouble,
+  FaDownload,
+  FaFile,
+  FaFileAlt,
+  FaFileExcel,
+  FaFilePdf,
+  FaFileWord,
   FaPaperclip,
   FaPaperPlane,
   FaSmile,
@@ -40,106 +46,114 @@ const ChatScreen: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [, setSelectedFileName] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [isImageModalOpen, setImageModalOpen] = React.useState(false);
+  const [modalImage, setModalImage] = React.useState<string | null>(null);
   const { adminInfo } = useSelector((state: RootState) => state.adminAuth);
   const adminId = adminInfo?._id;
-  const { data: chatRooms = [], refetch: refetchAdminChatRooms, error: chatRoomsError, } =
-    useGetAdminChatRoomsQuery(adminId);
-  const { data: messages = [], refetch: refetchMessages, error: messagesError, } =
-    useGetAdminMessagesQuery(selectedChatRoom?._id ?? "", {
-      skip: !selectedChatRoom || !selectedChatRoom._id,
-    });
+  const {
+    data: chatRooms = [],
+    refetch: refetchAdminChatRooms,
+    error: chatRoomsError,
+  } = useGetAdminChatRoomsQuery(adminId);
+  const {
+    data: messages = [],
+    refetch: refetchMessages,
+    error: messagesError,
+  } = useGetAdminMessagesQuery(selectedChatRoom?._id ?? "", {
+    skip: !selectedChatRoom || !selectedChatRoom._id,
+  });
   const [sendMessage] = useSendAdminMessageMutation();
   const [markMessagesAsRead] = useMarkAdminMessagesAsReadMutation();
 
   useEffect(() => {
-      document.title = "Messages - Ticket Hive Admin";
-      if (selectedChatRoom) {
+    document.title = "Messages - Ticket Hive Admin";
+    if (selectedChatRoom) {
+      refetchMessages();
+      socket.emit("joinRoom", { roomId: selectedChatRoom._id });
+      markMessagesAsRead(selectedChatRoom._id);
+      socket.emit("messageRead", { roomId: selectedChatRoom._id });
+    }
+  }, [selectedChatRoom, refetchMessages, markMessagesAsRead]);
+
+  useEffect(() => {
+    socket.on("message", (message) => {
+      if (message.chatRoomId === selectedChatRoom?._id) {
         refetchMessages();
-        socket.emit("joinRoom", { roomId: selectedChatRoom._id });
-        markMessagesAsRead(selectedChatRoom._id);
-        socket.emit("messageRead", { roomId: selectedChatRoom._id });
       }
-    }, [selectedChatRoom, refetchMessages, markMessagesAsRead]);
-  
-    useEffect(() => {
-      socket.on("message", (message) => {
-        if (message.chatRoomId === selectedChatRoom?._id) {
-          refetchMessages();
-        }
-      });
-      return () => {
-        socket.off("message");
-      };
-    }, [selectedChatRoom, refetchMessages]);
-  
-    useEffect(() => {
-      socket.on("messageRead", (data) => {
-        if (data.roomId === selectedChatRoom?._id) {
-          refetchAdminChatRooms();
-        }
-      });
-      return () => {
-        socket.off("messageRead");
-      };
-    }, [selectedChatRoom, refetchAdminChatRooms]);
-  
-    useEffect(() => {
-      socket.on("messageUnReadTheaterOwner", () => {
+    });
+    return () => {
+      socket.off("message");
+    };
+  }, [selectedChatRoom, refetchMessages]);
+
+  useEffect(() => {
+    socket.on("messageRead", (data) => {
+      if (data.roomId === selectedChatRoom?._id) {
         refetchAdminChatRooms();
-      });
-      return () => {
-        socket.off("messageUnReadTheaterOwner");
-      };
-    }, [refetchAdminChatRooms]);
-  
-    useEffect(() => {
+      }
+    });
+    return () => {
+      socket.off("messageRead");
+    };
+  }, [selectedChatRoom, refetchAdminChatRooms]);
+
+  useEffect(() => {
+    socket.on("messageUnReadTheaterOwner", () => {
       refetchAdminChatRooms();
     });
-  
-    useEffect(() => {
-      socket.on("typingTheaterOwner", () => {
-        setIsTyping(true);
-      });
-      socket.on("stopTypingTheaterOwner", () => {
-        setIsTyping(false);
-      });
-      return () => {
-        socket.off("typingTheaterOwner");
-        socket.off("stopTypingTheaterOwner");
-      };
-    }, []);
-  
-    useEffect(() => {
-      if (chatRoomsError) {
-        console.error("Failed to fetch chat rooms:", chatRoomsError);
+    return () => {
+      socket.off("messageUnReadTheaterOwner");
+    };
+  }, [refetchAdminChatRooms]);
+
+  useEffect(() => {
+    refetchAdminChatRooms();
+  });
+
+  useEffect(() => {
+    socket.on("typingTheaterOwner", () => {
+      setIsTyping(true);
+    });
+    socket.on("stopTypingTheaterOwner", () => {
+      setIsTyping(false);
+    });
+    return () => {
+      socket.off("typingTheaterOwner");
+      socket.off("stopTypingTheaterOwner");
+    };
+  }, []);
+
+  useEffect(() => {
+    if (chatRoomsError) {
+      console.error("Failed to fetch chat rooms:", chatRoomsError);
+    }
+    if (messagesError) {
+      console.error("Failed to fetch messages:", messagesError);
+    }
+  }, [chatRoomsError, messagesError]);
+
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
+
+  useEffect(() => {
+    const handleNewMessage = (message: Message) => {
+      if (message.chatRoomId === selectedChatRoom?._id) {
+        refetchMessages();
+        markMessagesAsRead(selectedChatRoom?._id).then(() => {
+          socket.emit("messageRead", { roomId: selectedChatRoom?._id });
+        });
       }
-      if (messagesError) {
-        console.error("Failed to fetch messages:", messagesError);
-      }
-    }, [chatRoomsError, messagesError]);
-  
-    useEffect(() => {
-      if (messagesEndRef.current) {
-        messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-      }
-    }, [messages]);
-  
-    useEffect(() => {
-      const handleNewMessage = (message: Message) => {
-        if (message.chatRoomId === selectedChatRoom?._id) {
-          refetchMessages();
-          markMessagesAsRead(selectedChatRoom?._id).then(() => {
-            socket.emit("messageRead", { roomId: selectedChatRoom?._id });
-          });
-        }
-      };
-  
-      socket.on("message", handleNewMessage);
-  
-      return () => {
-        socket.off("message", handleNewMessage);
-      };
-    }, [selectedChatRoom, refetchMessages, markMessagesAsRead]);
+    };
+
+    socket.on("message", handleNewMessage);
+
+    return () => {
+      socket.off("message", handleNewMessage);
+    };
+  }, [selectedChatRoom, refetchMessages, markMessagesAsRead]);
 
   const handleSendMessage = async () => {
     if (newMessage.trim() || selectedFile) {
@@ -148,18 +162,18 @@ const ChatScreen: React.FC = () => {
         content: newMessage,
         senderType: "Admin",
       };
-  
+
       if (selectedFile) {
         const formData = new FormData();
         formData.append("file", selectedFile);
         messageData.content = selectedFile.name;
         messageData.file = selectedFile;
       }
-  
+
       await sendMessage(messageData);
       setNewMessage("");
       setSelectedFile(null);
-      setSelectedFileName(""); 
+      setSelectedFileName("");
       refetchMessages();
       socket.emit("message", messageData);
       socket.emit("messageUnReadAdmin", { roomId: selectedChatRoom?._id });
@@ -199,41 +213,52 @@ const ChatScreen: React.FC = () => {
     }
   };
 
+  const handleImageClick = (imageUrl: string) => {
+    setModalImage(imageUrl);
+    setImageModalOpen(true);
+  };
+
+  const closeImageModal = () => {
+    setImageModalOpen(false);
+    setModalImage(null);
+  };
+
   const renderFilePreview = () => {
     if (selectedFile) {
       const fileType = selectedFile.type.split("/")[0];
       if (fileType === "image") {
+        const imageUrl = URL.createObjectURL(selectedFile);
         return (
-          <div className="file-preview">
+          <div className="modern-file-preview">
             <img
-              src={URL.createObjectURL(selectedFile)}
+              src={imageUrl}
               alt="Selected Preview"
-              className="preview-image"
-            />
-          </div>
-        );
-      } else if (
-        fileType === "application" &&
-        selectedFile.type === "application/pdf"
-      ) {
-        return (
-          <div className="file-preview">
-            <img
-              src="pdf-icon.png"
-              alt="PDF Preview"
-              className="preview-image"
+              className="modern-preview-image"
             />
           </div>
         );
       } else {
         return (
-          <div className="file-preview">
-            <span className="preview-file-name">{selectedFile.name}</span>
+          <div className="modern-file-preview">
+            <div className="modern-document-preview">
+              {getFileIcon(selectedFile.name)}
+              <span className="modern-file-name">{selectedFile.name}</span>
+            </div>
           </div>
         );
       }
     }
     return null;
+  };
+
+  const getFileIcon = (fileUrl: string) => {
+    if (fileUrl.endsWith(".pdf")) return <FaFilePdf />;
+    if (fileUrl.endsWith(".doc") || fileUrl.endsWith(".docx"))
+      return <FaFileWord />;
+    if (fileUrl.endsWith(".xls") || fileUrl.endsWith(".xlsx"))
+      return <FaFileExcel />;
+    if (fileUrl.endsWith(".txt")) return <FaFileAlt />;
+    return <FaFile />;
   };
 
   return (
@@ -290,43 +315,40 @@ const ChatScreen: React.FC = () => {
                 >
                   <div className="message">
                     {msg?.fileUrl ? (
-                      <div style={{ display: "flex", flexDirection: "column" }}>
-                        {/* Check if the file is a document or text file */}
-                        {msg.fileUrl.endsWith(".pdf") ||
-                        msg.fileUrl.endsWith(".doc") ||
-                        msg.fileUrl.endsWith(".docx") ||
-                        msg.fileUrl.endsWith(".xls") ||
-                        msg.fileUrl.endsWith(".xlsx") ||
-                        msg.fileUrl.endsWith(".txt") ? (
-                          <div
-                            style={{ display: "flex", flexDirection: "column" }}
-                          >
-                            <div>{msg.content}</div>
-                            <a
-                              href={`http://localhost:5000${
-                                msg?.fileUrl?.startsWith("/")
-                                  ? msg?.fileUrl
-                                  : `/${msg?.fileUrl}`
-                              }`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              download
-                              style={{ marginTop: "5px" }}
-                            >
-                              Download
-                            </a>
-                          </div>
-                        ) : (
-                          // If it's an image, display the image
+                      <div className="file-message">
+                        {msg.fileUrl.match(/\.(jpg|jpeg|png|gif)$/i) ? (
+                          // If the file is an image, display the image
                           <img
                             src={`${IMAGES_DIR_PATH}${msg?.fileUrl}`}
                             alt="file preview"
-                            style={{ maxWidth: "200px" }}
+                            className="file-preview"
+                            onClick={() =>
+                              handleImageClick(
+                                `${IMAGES_DIR_PATH}${msg?.fileUrl}`
+                              )
+                            }
                           />
+                        ) : (
+                          // If the file is a document, display its icon, name, and a download button
+                          <div className="document-preview">
+                            {getFileIcon(msg.fileUrl)}
+                            <span className="file-name">
+                              {msg.content || msg.fileUrl.split("/").pop()}
+                            </span>
+                            <a
+                              href={`${IMAGES_DIR_PATH}${msg.fileUrl}`}
+                              download
+                              className="file-download-btn"
+                              title="Download"
+                            >
+                              <FaDownload />
+                            </a>
+                          </div>
                         )}
                       </div>
                     ) : (
-                      msg?.content
+                      // Regular text message
+                      <span className="message-content">{msg?.content}</span>
                     )}
 
                     <small className="message-time">
@@ -360,6 +382,40 @@ const ChatScreen: React.FC = () => {
               />
               <div className="input-controls">
                 {renderFilePreview()}
+
+                {/* Image Modal */}
+                {isImageModalOpen && modalImage && (
+                  <div
+                    className="image-modal-overlay"
+                    onClick={closeImageModal}
+                  >
+                    <div
+                      className="image-modal-content"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <button
+                        className="image-modal-close-btn"
+                        onClick={closeImageModal}
+                        title="Close"
+                      >
+                        &times;
+                      </button>
+                      <img
+                        src={modalImage}
+                        alt="Large Preview"
+                        className="large-image"
+                      />
+                      <a
+                        href={modalImage}
+                        download
+                        className="image-download-btn"
+                        title="Download Image"
+                      >
+                        <FaDownload />
+                      </a>
+                    </div>
+                  </div>
+                )}
 
                 {/* Emoji Picker */}
                 <button onClick={toggleEmojiPicker} className="emoji-button">

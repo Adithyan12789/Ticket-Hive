@@ -14,9 +14,9 @@ import { useNavigate } from "react-router-dom";
 import { RootState, AppDispatch } from "../../Store";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser, faSignOutAlt, faEnvelope } from "@fortawesome/free-solid-svg-icons";
-import { io, Socket } from "socket.io-client";
+import io from "socket.io-client";
 
-const socket: Socket = io("http://localhost:5000");
+const socket = io("http://localhost:5000");
 
 interface Notification {
   _id: string;
@@ -120,7 +120,7 @@ const Header: React.FC = () => {
           <LinkContainer to="/theater">
             <Navbar.Brand className="brand">
               <img
-                src="/stock-vector-icon-logo-illustration-for-digital-business-ticket-services-720686734-removebg-preview.png"
+                src="/logo.png"
                 style={{ marginLeft: "200px", width: "60px" }}
                 alt="Ticket Hive Logo"
               />

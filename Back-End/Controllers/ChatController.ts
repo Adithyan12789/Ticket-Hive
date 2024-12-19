@@ -191,6 +191,7 @@ class ChatRoomController {
     const newMessageData: any = {
       chatRoomId: req.params.chatRoomId,
       createdAt: Date.now(),
+      read: false,
     };
   
     if (req.file) {
@@ -241,7 +242,7 @@ class ChatRoomController {
   markAdminMessagesAsRead = expressAsyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { chatRoomId } = req.body;
 
-    console.log("Theater Owner marking messages as read for chatRoomId: ", chatRoomId);
+    console.log("admin chatRoomId: ", chatRoomId);
 
     await Message.updateMany(
       { chatRoomId, senderType: { $ne: 'Admin' }, read: false },

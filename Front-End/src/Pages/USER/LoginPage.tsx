@@ -82,8 +82,7 @@ const LoginPage = () => {
       
       dispatch(setCredentials({
         ...res,
-        accessToken: res.accessToken, 
-        refreshToken: res.refreshToken,
+        _id: ""
       }));
       navigate("/");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -125,7 +124,7 @@ const LoginPage = () => {
       <div className="user-login-container">
         <div className="header-container">
           <img
-            src="/stock-vector-icon-logo-illustration-for-digital-business-ticket-services-720686734-removebg-preview.png"
+            src="/logo.png"
             alt="Ticket Hive Icon"
             className="header-icon pb-5"
           />

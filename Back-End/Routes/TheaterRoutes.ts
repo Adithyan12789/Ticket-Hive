@@ -24,7 +24,7 @@ router.route('/theater-profile')
 .get( TheaterAuthMiddleware.protect, TheaterController.getTheaterProfile )
 .put( TheaterAuthMiddleware.protect, MulterConfig.multerUploadTheaterProfile.single('profileImage'), TheaterController.updateTheaterProfile);
 
-router.post('/upload-certificate/:theaterId', TheaterAuthMiddleware.protect, MulterConfig.multerUploadCertificatesImages.single('certificate'), TheaterController.uploadVerificationDetailsHandler); 
+router.post('/upload-certificate/:theaterId', TheaterAuthMiddleware.protect, MulterConfig.multerUploadCertificates.single('certificate'), TheaterController.uploadVerificationDetailsHandler); 
 
 router.post("/add-theaters",TheaterAuthMiddleware.protect, MulterConfig.multerUploadTheaterImages.array("images", 3),TheaterController.addTheaterController);
 router.get('/get-theaters',TheaterAuthMiddleware.protect, TheaterController.getTheaters);
@@ -34,11 +34,11 @@ router.route('/theaters/:id')
     .put(TheaterAuthMiddleware.protect, MulterConfig.multerUploadTheaterImages.array("images", 3), TheaterController.updateTheaterHandler)
     .delete(TheaterAuthMiddleware.protect, TheaterController.deleteTheaterHandler);
 
-
 router.post('/add-screen/:theaterId', TheaterAuthMiddleware.protect, ScreenController.addScreen); 
 router.put('/update-screen/:screenId', TheaterAuthMiddleware.protect, ScreenController.updateScreen);
 router.delete('/delete-screen/:screenId', TheaterAuthMiddleware.protect, ScreenController.deleteScreen);
 router.get('/theaters/:id/screens', TheaterAuthMiddleware.protect, ScreenController.getScreensByTheaterId);
+
 router.get('/screen/:screenId', TheaterAuthMiddleware.protect, ScreenController.getScreensById);
 
 router.get('/get-movies',TheaterAuthMiddleware.protect, MovieController.getAllMoviesController);
@@ -50,10 +50,8 @@ router.get('/get-offers',TheaterAuthMiddleware.protect, OffersController.getOffe
 
 router.get('/get-admins',TheaterAuthMiddleware.protect, AdminController.getAdmins);
 
-router.get('/notifications/unread',TheaterAuthMiddleware.protect, TheaterController.getUnreadNotifications); 
-router.put('/notifications/:id/read',TheaterAuthMiddleware.protect, TheaterController.markNotificationAsRead); 
 router.route('/chatrooms').get(TheaterAuthMiddleware.protect, ChatController.getChatRooms).post(TheaterAuthMiddleware.protect, ChatController.createChatRoom); 
-router.route('/chatrooms/:chatRoomId/messages').get(TheaterAuthMiddleware.protect, ChatController.getMessages).post(MulterConfig.multerUploadChatImages.single('file'),TheaterAuthMiddleware.protect, ChatController.sendMessage); 
+router.route('/chatrooms/:chatRoomId/messages').get(TheaterAuthMiddleware.protect, ChatController.getMessages).post(MulterConfig.multerUploadChatFiles.single('file'),TheaterAuthMiddleware.protect, ChatController.sendMessage); 
 router.get('/unread-messages', TheaterAuthMiddleware.protect, ChatController.getUnreadMessages); 
 router.route('/mark-messages-read').post(TheaterAuthMiddleware.protect, ChatController.markMessagesAsRead); 
 

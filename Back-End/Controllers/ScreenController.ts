@@ -78,13 +78,17 @@ class ScreenController {
             }))
           ) || [], // Initialize layout if provided
         }));
-  
+        
+        const formattedDate = new Date().toISOString().split("T")[0]
+
+        console.log("formattedDate6666: ", formattedDate);
+        
         const newSchedule = new Schedule({
           screen: savedScreen._id,
-          date: new Date(), // Today's date, can be adjusted
+          date: formattedDate,
           showTimes: formattedShowTimes,
-        });
-  
+        });    
+        
         await newSchedule.save();
   
         // Optionally add the schedule ID to the screen (if needed)
@@ -185,7 +189,6 @@ class ScreenController {
   // Validation for schedules
   validateScheduleData = [
     body("screen").isMongoId().withMessage("Screen ID must be valid"),
-    body("date").isISO8601().withMessage("Date must be in ISO format"),
     body("showTimes").isArray().withMessage("Show times must be an array"),
     body("showTimes.*.time").notEmpty().withMessage("Show time is required"),
     body("showTimes.*.movie").isMongoId().withMessage("Movie ID must be valid"),
@@ -259,16 +262,17 @@ class ScreenController {
 
   getScreensById = asyncHandler(
     async (req: CustomRequest, res: Response): Promise<void> => {
+      console.log( " entered getScreensById");
+
       const { screenId } = req.params;
-  
+
       console.log("screenId: ", screenId);
   
       try {
-        // Fetch screen with schedules
         const screenWithSchedules = await ScreenService.getScreensByIdService(screenId);
-  
+
         console.log("screenWithSchedules: ", screenWithSchedules);
-  
+        
         res.status(200).json(screenWithSchedules);
       } catch (error: any) {
         res
@@ -277,6 +281,36 @@ class ScreenController {
       }
     }
   );
+
+  // getUserScreensById = asyncHandler(
+  //   async (req: CustomRequest, res: Response): Promise<void> => {
+  //     console.log("entered");
+      
+
+  //     const { screenId } = req.params;
+  //     const { date, movieTitle, showTime } = req.query;
+      
+  //     console.log("req.params: ", req.params);
+  //     console.log("req.query: ", req.query);
+  
+  //     try {
+  //       const screenWithSchedules = await ScreenService.getUserScreensByIdService(
+  //         screenId,
+  //         date as string, 
+  //         movieTitle as string, 
+  //         showTime as string
+  //       );
+
+  //       console.log("screenWithSchedules: ", screenWithSchedules);
+  
+  //       res.status(200).json(screenWithSchedules);
+  //     } catch (error: any) {
+  //       res
+  //         .status(500)
+  //         .json({ message: error?.message || "Internal server error" });
+  //     }
+  //   }
+  // );  
   
 
   getTheatersByMovieName = asyncHandler(
@@ -311,7 +345,6 @@ class ScreenController {
 
   updateSeatAvailability = asyncHandler(
     async (req: CustomRequest, res: Response): Promise<void> => {
-      console.log("req.body: ", req.body);
 
       const { scheduleId, selectedSeats, holdSeat, showTime } = req.body;
 

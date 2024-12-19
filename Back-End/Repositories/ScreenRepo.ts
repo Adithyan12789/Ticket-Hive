@@ -16,8 +16,32 @@ class ScreenRepository {
       path: 'showTimes.movie',
       select: 'title',
     });
-  }  
+  } 
 
+  // public async getSchedulesByUserScreenId(
+  //   screenId: string,
+  //   date?: string,
+  //   movieTitle?: string,
+  //   showTime?: string
+  // ) {
+  //   const query: any = { screen: screenId };
+  
+  //   if (showTime) query['showTimes.time'] = showTime;
+  //   if (movieTitle) query['showTimes.movieTitle'] = movieTitle;
+  
+  //   console.log("Constructed Query:", query);
+  
+  //   const schedules = await Schedule.find(query).populate({
+  //     path: 'showTimes.movie',
+  //     select: 'title',
+  //   });
+  
+  //   console.log("Fetched Schedules:", schedules);
+  
+  //   return schedules;
+  // }
+  
+  
   // Update a screen by ID
   public async updateScreen(screenId: string, updateData: any) {
     return await Screens.findByIdAndUpdate(screenId, updateData, {

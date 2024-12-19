@@ -75,21 +75,27 @@ export const usersApiSlice = apiSlice.injectEndpoints({
 
     refreshToken: builder.mutation<void, void>({
       query: () => {
-        console.log('Sending refresh token request to:', `${USERS_URL}/refresh-token`);
+        console.log(
+          "Sending refresh token request to:",
+          `${USERS_URL}/refresh-token`
+        );
         return {
           url: `${USERS_URL}/refresh-token`,
           method: "POST",
         };
       },
-    }),    
+    }),
 
-    saveUserLocation: builder.mutation<void, { city: string, latitude: number; longitude: number }>({
+    saveUserLocation: builder.mutation<
+      void,
+      { city: string; latitude: number; longitude: number }
+    >({
       query: (location) => ({
         url: `${USERS_URL}/save-location`,
         method: "POST",
         body: location,
       }),
-    }),    
+    }),
 
     getUserProfile: builder.query({
       query: () => ({
@@ -134,14 +140,14 @@ export const usersApiSlice = apiSlice.injectEndpoints({
         method: "GET",
       }),
     }),
-    
+
     getReviews: builder.query({
       query: (movieId) => ({
         url: `${USERS_URL}/reviews/${movieId}`,
         method: "GET",
       }),
-    }), 
-    
+    }),
+
     addReview: builder.mutation({
       query: (data) => ({
         url: `${USERS_URL}/reviews`,
@@ -160,11 +166,10 @@ export const usersApiSlice = apiSlice.injectEndpoints({
     updateSeatAvailability: builder.mutation({
       query: ({ scheduleId, selectedSeats, holdSeat, showTime }) => ({
         url: `${USERS_URL}/update-availability`,
-        method: 'POST',
+        method: "POST",
         body: { scheduleId, selectedSeats, holdSeat, showTime },
       }),
     }),
-
 
     getOffersByTheaterId: builder.query({
       query: (theaterId) => ({
@@ -194,19 +199,37 @@ export const usersApiSlice = apiSlice.injectEndpoints({
         method: "POST",
         body: data,
       }),
-    }),   
+    }),
 
     getTransactionHistory: builder.query({
       query: (userId) => ({
         url: `${USERS_URL}/transaction-history/${userId}`,
         method: "GET",
       }),
-    }),    
+    }),
 
     cancelBooking: builder.mutation({
       query: (bookingId) => ({
         url: `${USERS_URL}/cancel-ticket/${bookingId}`,
         method: "POST",
+      }),
+    }),
+
+    fetchUnreadNotifications: builder.query({
+      query: () => `${USERS_URL}/notifications/unread`,
+    }),
+
+    markNotificationAsRead: builder.mutation({
+      query: (id) => ({
+        url: `${USERS_URL}/notifications/${id}/read`,
+        method: "PUT",
+      }),
+    }),
+
+    clearAllNotifications: builder.mutation({
+      query: () => ({
+        url: `${USERS_URL}/clearNotifications`,
+        method: "DELETE",
       }),
     }),
   }),
@@ -228,8 +251,8 @@ export const {
   useGetMoviesMutation,
   useGetMovieByMovieIdQuery,
   useGetTheatersByMovieTitleQuery,
-  useGetAllReviewsMutation, 
-  useGetReviewsQuery, 
+  useGetAllReviewsMutation,
+  useGetReviewsQuery,
   useAddReviewMutation,
   useGetScreenByIdQuery,
   useUpdateSeatAvailabilityMutation,
@@ -239,4 +262,7 @@ export const {
   useGetTransactionHistoryQuery,
   useCreateWalletTransactionMutation,
   useCancelBookingMutation,
+  useFetchUnreadNotificationsQuery,
+  useMarkNotificationAsReadMutation,
+  useClearAllNotificationsMutation,
 } = usersApiSlice;

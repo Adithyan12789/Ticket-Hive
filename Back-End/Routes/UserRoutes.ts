@@ -46,6 +46,10 @@ router.get('/get-tickets/:userId', AuthMiddleware, BookingController.getAllTicke
 router.get("/tickets/:ticketId", AuthMiddleware, BookingController.getTicketDetails);
 router.post('/cancel-ticket/:bookingId', AuthMiddleware, BookingController.cancelTicket);
 
+router.get('/notifications/unread',AuthMiddleware, BookingController.getUnreadNotifications); 
+router.put('/notifications/:id/read',AuthMiddleware, BookingController.markNotificationAsRead); 
+router.delete('/clearNotifications', AuthMiddleware, BookingController.clearNotifications);
+
 router.post('/create-wallet-transaction', AuthMiddleware, WalletController.addMoneyToWallet);
 router.get('/transaction-history/:userId', AuthMiddleware, WalletController.getTransactionHistory);
 

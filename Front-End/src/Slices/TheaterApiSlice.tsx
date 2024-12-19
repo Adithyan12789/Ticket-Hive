@@ -265,14 +265,14 @@ export const theaterApiSlice = apiSlice.injectEndpoints({
       },
     }),      
 
-    fetchUnreadMessages: builder.query({
+    fetchUnreadMessagesTheaterOwner: builder.query({
       query: () => ({
         url: `${THEATER_URL}/unread-messages`,
         method: 'GET'
       })
     }),
     
-    markMessagesAsRead: builder.mutation({
+    markMessagesAsReadTheaterOwner: builder.mutation({
       query: (chatRoomId) => ({
         url: `${THEATER_URL}/mark-messages-read`,
         method: 'POST',
@@ -324,8 +324,8 @@ export const {
   useCreateChatRoomMutation, 
   useGetMessagesQuery, 
   useSendMessageMutation,
-  useFetchUnreadMessagesQuery,
-  useMarkMessagesAsReadMutation,
+  useFetchUnreadMessagesTheaterOwnerQuery,
+  useMarkMessagesAsReadTheaterOwnerMutation,
   useGetAdminsQuery,
 
 } = theaterApiSlice;

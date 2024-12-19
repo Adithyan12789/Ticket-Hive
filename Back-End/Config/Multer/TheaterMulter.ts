@@ -38,14 +38,15 @@ class TheaterImageUploads {
   }
 
   private static uploadCertificateStorage(): StorageEngine {
-    return this.createStorage("UploadsCerificates");
+    return this.createStorage("UploadsCertificates");
   }  
 
   private static chatStorage(): StorageEngine {
     return this.createStorage("MessageFiles");
   }
 
-  private static fileFilter(
+  // Allow only images
+  private static imageFileFilter(
     req: Express.Request,
     file: Express.Multer.File,
     cb: FileFilterCallback
@@ -59,26 +60,53 @@ class TheaterImageUploads {
     }
   }
 
+  // Allow images and specific document types
+  private static documentAndImageFileFilter(
+    req: Express.Request,
+    file: Express.Multer.File,
+    cb: FileFilterCallback
+  ): void {
+    const allowedMimetypes = [
+      "image/",
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.ms-excel",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "text/plain",
+    ];
+
+    if (allowedMimetypes.some((type) => file.mimetype.startsWith(type) || file.mimetype === type)) {
+      cb(null, true);
+    } else {
+      cb(
+        new Error(
+          "Only images, PDFs, and certain document files are allowed!"
+        ) as any,
+        false
+      );           
+    }
+  }
+
   public static multerUploadTheaterProfile = multer({
     storage: this.theaterOwnerStorage(),
-    fileFilter: this.fileFilter,
+    fileFilter: this.imageFileFilter,
   });
 
   public static multerUploadTheaterImages = multer({
     storage: this.theatersStorage(),
-    fileFilter: this.fileFilter,
+    fileFilter: this.imageFileFilter,
   });
 
-  public static multerUploadCertificatesImages = multer({
+  public static multerUploadCertificates = multer({
     storage: this.uploadCertificateStorage(),
-    fileFilter: this.fileFilter,
+    fileFilter: this.documentAndImageFileFilter,
   });
 
-  public static multerUploadChatImages = multer({
+  public static multerUploadChatFiles = multer({
     storage: this.chatStorage(),
-    fileFilter: this.fileFilter,
+    fileFilter: this.documentAndImageFileFilter,
   });
-
 }
 
 export default TheaterImageUploads;

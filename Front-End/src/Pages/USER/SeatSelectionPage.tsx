@@ -20,6 +20,9 @@ const SelectSeatPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [updateSeatAvailability] = useUpdateSeatAvailabilityMutation();
 
+  console.log("screenId: ", screenId);
+
+
   const { data, refetch, isLoading, isError } = useGetScreenByIdQuery(screenId);
 
   let screenDetails: ScreenDetails | null = null;
@@ -32,7 +35,7 @@ const SelectSeatPage: React.FC = () => {
 
   const location = useLocation();
 
-  const { date, movieTitle, movieId, theaterId, showTime, showTimeId } =
+  const { date, movieTitle, movieId, theaterId, showTime } =
     location.state || {};
 
   const formattedDate = `${
@@ -55,16 +58,25 @@ const SelectSeatPage: React.FC = () => {
 
 
   useEffect(() => {
-    if (screenDetails && screenDetails.schedule && showTimeId) {
-      // Iterate over the schedule array to find the correct schedule for the showTimeId
-      const selectedSchedule = screenDetails.schedule.find(
+    if (screenDetails && screenDetails.schedule) {
+      // First, try to find the schedule by date and showTime
+      let selectedSchedule = screenDetails.schedule.find(
         (schedule) =>
-          schedule.showTimes.some((showTime) => showTime._id === showTimeId)
+          new Date(schedule.date).toDateString() === date.toDateString() &&
+          schedule.showTimes.some((st) => st.time === showTime && st.movieTitle === movieTitle)
       );
-  
+
+      // If not found, try to find by showTime and movieTitle only
+      if (!selectedSchedule) {
+        selectedSchedule = screenDetails.schedule.find(
+          (schedule) =>
+            schedule.showTimes.some((st) => st.time === showTime && st.movieTitle === movieTitle)
+        );
+      }
+
       if (selectedSchedule) {
         const selectedShowTime = selectedSchedule.showTimes.find(
-          (showTime) => showTime._id === showTimeId
+          (st) => st.time === showTime && st.movieTitle === movieTitle
         );
         if (selectedShowTime) {
           setLayout(selectedShowTime.layout);
@@ -77,7 +89,7 @@ const SelectSeatPage: React.FC = () => {
     } else {
       setLayout(generateSeatNames(5, 8));
     }
-  }, [screenDetails, showTimeId, refetch]);  // Ensure the refetch is part of the dependency array  
+  }, [screenDetails, date, movieTitle, showTime]);  // Ensure the refetch is part of the dependency array  
   
 
   const generateSeatNames = (rows: number, cols: number): Seat[][] => {
@@ -119,14 +131,20 @@ const SelectSeatPage: React.FC = () => {
   const renderScreenLayout = () => {
     if (!screenDetails) return <p>No seat layout available for this screen.</p>;
 
-    const selectedSchedule = screenDetails?.schedule?.find((schedule) =>
-      schedule.showTimes.some((showTime) => showTime._id === showTimeId)
+    const selectedSchedule = screenDetails?.schedule?.find(
+      (schedule) =>
+        new Date(schedule.date).toDateString() === date.toDateString() &&
+        schedule.showTimes.some((st) => st.time === showTime && st.movieTitle === movieTitle)
+    ) || screenDetails?.schedule?.find(
+      (schedule) =>
+        schedule.showTimes.some((st) => st.time === showTime && st.movieTitle === movieTitle)
     );
-    
-    const selectedShowTime =
-      selectedSchedule?.showTimes.find((showTime) => showTime._id === showTimeId);
 
-      console.log("selectedShowTime: ", selectedShowTime);
+    const selectedShowTime = selectedSchedule?.showTimes.find(
+      (st) => st.time === showTime && st.movieTitle === movieTitle
+    );
+
+    console.log("selectedShowTime: ", selectedShowTime);
       
     return (
       <div
@@ -228,8 +246,13 @@ const SelectSeatPage: React.FC = () => {
     return <div>Error fetching seat data.</div>;
   }
 
-  const selectedSchedule = screenDetails?.schedule.find((schedule) =>
-    schedule.showTimes.some((showTime) => showTime._id === showTimeId)
+  const selectedSchedule = screenDetails?.schedule.find(
+    (schedule) =>
+      new Date(schedule.date).toDateString() === date.toDateString() &&
+      schedule.showTimes.some((st) => st.time === showTime && st.movieTitle === movieTitle)
+  ) || screenDetails?.schedule?.find(
+    (schedule) =>
+      schedule.showTimes.some((st) => st.time === showTime && st.movieTitle === movieTitle)
   );
 
   const scheduleId = selectedSchedule?._id; 
@@ -237,7 +260,7 @@ const SelectSeatPage: React.FC = () => {
   console.log("scheduleId: ", scheduleId);
 
   const handleSeatUpdate = async () => {
-    if (!screenDetails || !showTimeId) {
+    if (!screenDetails || !showTime) {
       toast.error("Error: Unable to find schedule.");
       return;
     }

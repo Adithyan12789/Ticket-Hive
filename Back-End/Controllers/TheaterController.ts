@@ -603,7 +603,9 @@ class TheaterController {
           .populate({ path: "showTimes.movie", select: "title" });
 
         if (date && typeof date === "string") {
+          
           const selectedDate = new Date(date);
+
           filteredSchedules = filteredSchedules.filter((schedule) =>
             schedule.showTimes.some((showTime) => {
               const showTimeDate = new Date(showTime.time);
@@ -793,49 +795,6 @@ class TheaterController {
       }
     }
   );
-
-  getUnreadNotifications = asyncHandler(
-    async (req: CustomRequest, res: Response): Promise<void> => {
-    try {
-      const theaterOwnerId = req.theaterOwner?._id;
-
-      console.log("getUnreadNotifications theaterOwnerId: ", theaterOwnerId);
-
-      const notifications = await Notification.find({ theaterOwnerId: theaterOwnerId, isRead: false }).sort({ createdAt: -1 }); 
-
-      console.log("notifications: ", notifications);
-      
-      res.json(notifications);
-    } catch (error) {
-      res.status(500).json({ message: 'Server error' });
-    }
-  })
-  
-  markNotificationAsRead = asyncHandler(
-    async (req: CustomRequest, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      
-      const notification = await Notification.findById(id);
-      
-      if (!notification) {
-         res.status(404).json({ message: 'Notification not found' });
-         return
-      }
-  
-      if (notification.theaterOwnerId.toString() !== req.theaterOwner?._id.toString()) {
-        res.status(401).json({ message: 'Not authorized' });
-        return
-      }
-  
-      notification.isRead = true;
-      await notification.save();
-      
-      res.json({ message: 'Notification marked as read' });
-    } catch (error) {
-      res.status(500).json({ message: 'Server error' });
-    }
-  })
 
   logoutTheaterOwner = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {

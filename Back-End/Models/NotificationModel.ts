@@ -1,7 +1,7 @@
 import mongoose, { Schema, model, Document } from "mongoose";
 
 export interface INotification extends Document {
-  theaterOwnerId: mongoose.Types.ObjectId;
+  userId: mongoose.Types.ObjectId;
   isRead: boolean;
   message: string;
   createdAt: Date;
@@ -9,9 +9,9 @@ export interface INotification extends Document {
 
 const NotificationSchema = new Schema<INotification>(
   {
-    theaterOwnerId: {
+    userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "TheaterOwner",
+      ref: "User",
       required: true,
     },
     isRead: {

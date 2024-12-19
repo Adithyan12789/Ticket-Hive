@@ -79,6 +79,9 @@ const TicketDetailsScreen: React.FC = () => {
     );
   }
 
+  console.log("tikcet: ", ticket);
+  
+
   return (
     <>
       <Container className="mt-5">
@@ -190,14 +193,16 @@ const TicketDetailsScreen: React.FC = () => {
                   >
                     Back to Tickets
                   </Button>
-                  <Button
-                    variant="danger"
-                    className="me-3 modern-button"
-                    onClick={() => setShowModal(true)}
-                    disabled={ticket.ticket.paymentStatus === "cancelled"}
-                  >
-                    Cancel Ticket
-                  </Button>
+                  {ticket.ticket.paymentStatus !== "Confirmed" && (
+                    <Button
+                      variant="danger"
+                      className="me-3 modern-button"
+                      onClick={() => setShowModal(true)}
+                      disabled={ticket.ticket.paymentStatus === "cancelled"}
+                    >
+                      Cancel Ticket
+                    </Button>
+                  )}
                 </div>
               </Card.Body>
             </Col>

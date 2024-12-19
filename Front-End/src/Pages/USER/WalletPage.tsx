@@ -90,10 +90,9 @@ const WalletPage: React.FC = () => {
           (transaction) => transaction.status === filterStatus
         );
 
-
   const sortedTransactions = [...filteredTransactions].sort((a, b) => {
     if (sortBy === "amount") {
-      return b.amount - a.amount; 
+      return b.amount - a.amount;
     } else {
       return new Date(b.date).getTime() - new Date(a.date).getTime();
     }
@@ -295,64 +294,91 @@ const WalletPage: React.FC = () => {
             </div>
 
             {transactions.length === 0 ? (
-              <Alert variant="info" className="text-center">
-                No transactions found. Start booking tickets to earn cashback!
-              </Alert>
+              <div className="d-flex flex-column align-items-center justify-content-center my-5">
+                <img
+                  src="/iiii5.webp" // Replace with a relevant image for no transactions
+                  alt="No transactions"
+                  style={{ width: "150px", marginBottom: "20px" }}
+                />
+                <Alert variant="info" className="text-center">
+                  No transactions found. Start booking tickets to earn cashback!
+                </Alert>
+              </div>
             ) : (
-              <Table
-                striped
-                bordered
-                hover
-                responsive
-                className="text-center my-3 py-3"
-              >
-                <thead className="table-dark">
-                  <tr>
-                    <th>Transaction ID</th>
-                    <th>Type</th>
-                    <th>Amount</th>
-                    <th>Status</th>
-                    <th>Date</th>
-                    <th>Description</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {currentTransactions.map((transaction) => (
-                    <tr key={transaction.transactionId}>
-                      <td className="py-3">{transaction.transactionId}</td>
-                      <td className="py-3 text-capitalize">
-                        {transaction.type}
-                      </td>
-                      <td
-                        className={`py-3 ${
-                          transaction.type === "credit"
-                            ? "text-success"
-                            : "text-danger"
-                        }`}
+              <div className="table-container my-4 p-3 rounded shadow-sm">
+                <h3 className="text-center mb-4">Your Transactions</h3>
+                <Table
+                  hover
+                  responsive
+                  className="modern-table text-center"
+                  style={{
+                    borderCollapse: "separate",
+                    borderSpacing: "0 10px",
+                  }}
+                >
+                  <thead className="bg-primary text-white">
+                    <tr>
+                      <th>Transaction ID</th>
+                      <th>Type</th>
+                      <th>Amount</th>
+                      <th>Status</th>
+                      <th>Date</th>
+                      <th>Description</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentTransactions.map((transaction) => (
+                      <tr
+                        key={transaction.transactionId}
+                        className="bg-light shadow-sm align-middle"
                       >
-                        ₹{transaction.amount.toFixed(2)}
-                      </td>
-                      <td className="py-3">
-                        <span
-                          className={`badge ${
-                            transaction.status === "success"
-                              ? "bg-success"
-                              : transaction.status === "failed"
-                              ? "bg-danger"
-                              : "bg-warning text-dark"
+                        <td className="py-3">{transaction.transactionId}</td>
+                        <td className="py-3 text-capitalize">
+                          {transaction.type}
+                        </td>
+                        <td
+                          className={`py-3 fw-bold ${
+                            transaction.type === "credit"
+                              ? "text-success"
+                              : "text-danger"
                           }`}
                         >
-                          {transaction.status}
-                        </span>
-                      </td>
-                      <td className="py-3">
-                        {new Date(transaction.date).toLocaleString()}
-                      </td>
-                      <td className="py-3">{transaction.description}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
+                          ₹{transaction.amount.toFixed(2)}
+                        </td>
+                        <td className="py-3">
+                          <span
+                            className={`badge rounded-pill px-3 py-2 ${
+                              transaction.status === "success"
+                                ? "bg-success"
+                                : transaction.status === "failed"
+                                ? "bg-danger"
+                                : "bg-warning text-dark"
+                            }`}
+                          >
+                            {transaction.status}
+                          </span>
+                        </td>
+                        <td className="py-3">
+                          {new Date(transaction.date).toLocaleString()}
+                        </td>
+                        <td
+                          className={`py-3 ${
+                            transaction.type === "debit"
+                              ? "text-danger"
+                              : "text-success"
+                          }`}
+                          style={{
+                            borderRadius: "4px",
+                            padding: "5px",
+                          }}
+                        >
+                          {transaction.description}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </div>
             )}
 
             <Modal

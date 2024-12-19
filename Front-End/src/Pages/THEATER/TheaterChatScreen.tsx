@@ -6,7 +6,7 @@ import {
   useGetAdminsQuery,
   useGetChatRoomsQuery,
   useCreateChatRoomMutation,
-  useMarkMessagesAsReadMutation,
+  useMarkMessagesAsReadTheaterOwnerMutation,
 } from "../../Slices/TheaterApiSlice";
 import io, { Socket } from "socket.io-client";
 import { format } from "date-fns";
@@ -18,6 +18,12 @@ import {
   FaPaperclip,
   FaPaperPlane,
   FaSmile,
+  FaDownload,
+  FaFile,
+  FaFileAlt,
+  FaFilePdf,
+  FaFileWord,
+  FaFileExcel,
 } from "react-icons/fa";
 import "./TheaterChatScreen.css";
 import { Admin, ChatRoom, Message, MessageData } from "../../Types/ChatTypes";
@@ -34,6 +40,8 @@ const ChatScreen: React.FC = () => {
   const [selectedChatRoom, setSelectedChatRoom] = useState<ChatRoom | null>(
     null
   );
+  const [isImageModalOpen, setImageModalOpen] = React.useState(false);
+  const [modalImage, setModalImage] = React.useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [, setSelectedFileName] = useState("");
   const [newMessage, setNewMessage] = useState<string>("");
@@ -55,7 +63,7 @@ const ChatScreen: React.FC = () => {
     skip: !selectedChatRoom || !selectedChatRoom._id,
   });
   const [sendMessage] = useSendMessageMutation();
-  const [markMessagesAsRead] = useMarkMessagesAsReadMutation();
+  const [markMessagesAsRead] = useMarkMessagesAsReadTheaterOwnerMutation();
 
   useEffect(() => {
     document.title = "Messages - Ticket Hive";
@@ -79,15 +87,17 @@ const ChatScreen: React.FC = () => {
   }, [selectedChatRoom, refetchMessages]);
 
   useEffect(() => {
-    socket.on("messageRead", (data) => {
+    const handleMessageRead = async (data: { roomId: string }) => {
       if (data.roomId === selectedChatRoom?._id) {
-        refetchChatRooms();
+        await refetchMessages();
       }
-    });
+    };
+
+    socket.on("messageRead", handleMessageRead);
     return () => {
       socket.off("messageRead");
     };
-  }, [selectedChatRoom, refetchChatRooms]);
+  }, [selectedChatRoom, refetchMessages]);
 
   useEffect(() => {
     socket.on("messageUnReadAdmin", () => {
@@ -154,18 +164,18 @@ const ChatScreen: React.FC = () => {
         content: newMessage,
         senderType: "TheaterOwner",
       };
-  
+
       if (selectedFile) {
         const formData = new FormData();
         formData.append("file", selectedFile);
         messageData.content = selectedFile.name;
         messageData.file = selectedFile;
       }
-  
+
       await sendMessage(messageData);
       setNewMessage("");
       setSelectedFile(null);
-      setSelectedFileName(""); 
+      setSelectedFileName("");
       refetchMessages();
       socket.emit("message", messageData);
       socket.emit("messageUnRead", { roomId: selectedChatRoom?._id });
@@ -216,43 +226,53 @@ const ChatScreen: React.FC = () => {
     }
   };
 
+  const handleImageClick = (imageUrl: string) => {
+    setModalImage(imageUrl);
+    setImageModalOpen(true);
+  };
+
+  const closeImageModal = () => {
+    setImageModalOpen(false);
+    setModalImage(null);
+  };
+
   const renderFilePreview = () => {
     if (selectedFile) {
       const fileType = selectedFile.type.split("/")[0];
       if (fileType === "image") {
+        const imageUrl = URL.createObjectURL(selectedFile);
         return (
-          <div className="file-preview">
+          <div className="modern-file-preview">
             <img
-              src={URL.createObjectURL(selectedFile)}
+              src={imageUrl}
               alt="Selected Preview"
-              className="preview-image"
-            />
-          </div>
-        );
-      } else if (
-        fileType === "application" &&
-        selectedFile.type === "application/pdf"
-      ) {
-        return (
-          <div className="file-preview">
-            <img
-              src="pdf-icon.png"
-              alt="PDF Preview"
-              className="preview-image"
+              className="modern-preview-image"
             />
           </div>
         );
       } else {
         return (
-          <div className="file-preview">
-            <span className="preview-file-name">{selectedFile.name}</span>
+          <div className="modern-file-preview">
+            <div className="modern-document-preview">
+              {getFileIcon(selectedFile.name)}
+              <span className="modern-file-name">{selectedFile.name}</span>
+            </div>
           </div>
         );
       }
     }
     return null;
   };
-  
+
+  const getFileIcon = (fileUrl: string) => {
+    if (fileUrl.endsWith(".pdf")) return <FaFilePdf />;
+    if (fileUrl.endsWith(".doc") || fileUrl.endsWith(".docx"))
+      return <FaFileWord />;
+    if (fileUrl.endsWith(".xls") || fileUrl.endsWith(".xlsx"))
+      return <FaFileExcel />;
+    if (fileUrl.endsWith(".txt")) return <FaFileAlt />;
+    return <FaFile />;
+  };
 
   return (
     <TheaterOwnerLayout theaterOwnerName={""}>
@@ -310,50 +330,45 @@ const ChatScreen: React.FC = () => {
                 >
                   <div className="message">
                     {msg?.fileUrl ? (
-                      <div style={{ display: "flex", flexDirection: "column" }}>
-                        {/* Check if the file is a document or text file */}
-                        {msg.fileUrl.endsWith(".pdf") ||
-                        msg.fileUrl.endsWith(".doc") ||
-                        msg.fileUrl.endsWith(".docx") ||
-                        msg.fileUrl.endsWith(".xls") ||
-                        msg.fileUrl.endsWith(".xlsx") ||
-                        msg.fileUrl.endsWith(".txt") ? (
-                          <div
-                            style={{ display: "flex", flexDirection: "column" }}
-                          >
-                            <div>{msg.content}</div>
-                            <a
-                              href={`http://localhost:5000${
-                                msg?.fileUrl?.startsWith("/")
-                                  ? msg?.fileUrl
-                                  : `/${msg?.fileUrl}`
-                              }`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              download
-                              style={{ marginTop: "5px" }}
-                            >
-                              Download
-                            </a>
-                          </div>
-                        ) : (
-                          // If it's an image, display the image
+                      <div className="file-message">
+                        {msg.fileUrl.match(/\.(jpg|jpeg|png|gif)$/i) ? (
+                          // If the file is an image, display the image
                           <img
                             src={`${IMAGES_DIR_PATH}${msg?.fileUrl}`}
                             alt="file preview"
-                            style={{ maxWidth: "200px" }}
+                            className="file-preview"
+                            onClick={() =>
+                              handleImageClick(
+                                `${IMAGES_DIR_PATH}${msg?.fileUrl}`
+                              )
+                            }
                           />
+                        ) : (
+                          // If the file is a document, display its icon, name, and a download button
+                          <div className="document-preview">
+                            {getFileIcon(msg.fileUrl)}
+                            <span className="file-name">
+                              {msg.content || msg.fileUrl.split("/").pop()}
+                            </span>
+                            <a
+                              href={`${IMAGES_DIR_PATH}${msg.fileUrl}`}
+                              download
+                              className="file-download-btn"
+                              title="Download"
+                            >
+                              <FaDownload />
+                            </a>
+                          </div>
                         )}
                       </div>
                     ) : (
-                      // If no file, just display the message content
-                      msg?.content
+                      // Regular text message
+                      <span className="message-content">{msg?.content}</span>
                     )}
 
                     <small className="message-time">
                       {format(new Date(msg.createdAt), "hh:mm a")}
                     </small>
-
                     {msg.senderType === "TheaterOwner" && (
                       <div className="message-status">
                         {msg.read ? (
@@ -366,10 +381,8 @@ const ChatScreen: React.FC = () => {
                   </div>
                 </div>
               ))}
-
               <div ref={messagesEndRef} />
             </div>
-
             <div className="chat-input">
               <input
                 type="text"
@@ -384,7 +397,40 @@ const ChatScreen: React.FC = () => {
               <div className="input-controls">
                 {renderFilePreview()}
 
-                {/* Emoji Picker */}
+                {/* Image Modal */}
+                {isImageModalOpen && modalImage && (
+                  <div
+                    className="image-modal-overlay"
+                    onClick={closeImageModal}
+                  >
+                    <div
+                      className="image-modal-content"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <button
+                        className="image-modal-close-btn"
+                        onClick={closeImageModal}
+                        title="Close"
+                      >
+                        &times;
+                      </button>
+                      <img
+                        src={modalImage}
+                        alt="Large Preview"
+                        className="large-image"
+                      />
+                      <a
+                        href={modalImage}
+                        download
+                        className="image-download-btn"
+                        title="Download Image"
+                      >
+                        <FaDownload />
+                      </a>
+                    </div>
+                  </div>
+                )}
+
                 <button onClick={toggleEmojiPicker} className="emoji-button">
                   <FaSmile />
                 </button>
@@ -393,15 +439,13 @@ const ChatScreen: React.FC = () => {
                     <EmojiPicker onEmojiClick={handleEmojiClick} />
                   </div>
                 )}
-
-                {/* Image Upload */}
                 <label htmlFor="image-upload" className="image-upload-label">
                   <FaPaperclip />
                 </label>
                 <input
                   type="file"
                   id="image-upload"
-                  accept="image/*"
+                  accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt"
                   onChange={handleImageUpload}
                   className="image-upload-input"
                 />
@@ -416,4 +460,5 @@ const ChatScreen: React.FC = () => {
     </TheaterOwnerLayout>
   );
 };
+
 export default ChatScreen;

@@ -1,13 +1,12 @@
 import mongoose from "mongoose";
 import { Booking } from "../Models/bookingModel";
-import { Screens } from "../Models/ScreensModel";
 import BookingRepo from "../Repositories/BookingRepo";
 import WalletRepo from "../Repositories/WalletRepo";
 import { ITransaction } from "../Models/WalletModel";
 import { v4 as uuidv4 } from "uuid";
-import TheaterDetails from "../Models/TheaterDetailsModel";
 import { Movie } from "../Models/MoviesModel";
 import { Schedule } from "../Models/ScheduleModel";
+import MovieRepo from "../Repositories/MovieRepo";
 
 export interface BookingDetails {
   totalPrice: number;
@@ -25,7 +24,7 @@ export interface BookingDetails {
   status: "pending" | "completed" | "cancelled" | "failed";
 }
 
-async function getMovieTitleById(movieId: string): Promise<string> {
+export async function getMovieTitleById(movieId: string): Promise<string> {
   const movie = await Movie.findById(movieId);
   if (!movie) {
     throw new Error("Movie not found.");
@@ -47,55 +46,81 @@ class BookingService {
     paymentStatus: string,
     paymentMethod: string,
     convenienceFee: number,
-    bookingDate: Date
+    formattedBookingDate: string
   ) {
+    const formattedDateOnly = formattedBookingDate.split("T")[0];
+    console.log("formattedDateOnly: ", formattedDateOnly);
+
+    const startOfDay = new Date(formattedDateOnly + "T00:00:00.000Z");
+    const endOfDay = new Date(formattedDateOnly + "T23:59:59.999Z");
+
+    // Try to find the existing schedule based on the date and show time
     let schedule = await Schedule.findOne({
       screen: screenId,
-      date: bookingDate,
+      date: { $gte: startOfDay, $lte: endOfDay },
       "showTimes.time": showTime,
     });
 
+    console.log("schedule: ", schedule);
+
     if (!schedule) {
       const existingSchedule = await Schedule.findOne({ screen: screenId });
-  
+      console.log("entered not schedule");
+
       if (!existingSchedule) {
-        throw new Error("No existing schedule found for the screen to use its layout.");
+        throw new Error(
+          "No existing schedule found for the screen to use its layout."
+        );
       }
 
+      // Get the layout from the existing schedule
       const layoutToUse = existingSchedule.showTimes[0].layout;
 
+      // Ensure all seats have `isAvailable` set to `true`
+      const newLayout = layoutToUse.map((row) =>
+        row.map((seat) => ({
+          ...seat,
+          isAvailable: true, // Set all seats as available
+        }))
+      );
+
+      // Create the new schedule with the updated layout
       schedule = new Schedule({
         screen: screenId,
-        date: bookingDate,
+        date: formattedBookingDate,
         showTimes: [
           {
             time: showTime,
             movie: movieId,
             movieTitle: await getMovieTitleById(movieId),
-            layout: layoutToUse,
+            layout: newLayout, // Set the new layout with all seats available
           },
         ],
       });
-  
+
+      // Save the new schedule
       await schedule.save();
     }
 
     const targetShowTime = schedule.showTimes.find(
       (show) => show.time === showTime
     );
-  
+
     if (!targetShowTime) {
       throw new Error("Show time not found in the schedule.");
     }
 
+    // Update the layout to mark selected seats as unavailable
     targetShowTime.layout = targetShowTime.layout.map((row) =>
       row.map((seat) =>
         seatIds.includes(seat.label) ? { ...seat, isAvailable: false } : seat
       )
     );
-  
+
+    // Save the updated schedule
     await schedule.save();
 
+    // Create the new booking record
     const newBooking = await BookingRepo.createBooking({
       movie: new mongoose.Types.ObjectId(movieId),
       theater: new mongoose.Types.ObjectId(theaterId),
@@ -114,7 +139,7 @@ class BookingService {
       user: new mongoose.Types.ObjectId(userId),
       totalPrice,
     });
-  
+
     return newBooking;
   }
 
@@ -148,27 +173,32 @@ class BookingService {
     // Find the booking
     const booking = await BookingRepo.findBookingById(bookingId);
     if (!booking) throw new Error("Booking not found");
-  
+
     // Check if the booking belongs to the user
     if (String(booking.user) !== userId) {
       throw new Error("You are not authorized to cancel this ticket");
     }
-  
-    const { seats, showTime, totalPrice, bookingDate, screen } = booking;
-  
+
+    const { seats, showTime, totalPrice, bookingDate, screen, movie } = booking;
+
+    const movieDetails = await MovieRepo.findMovieById(movie);
+    if (!movieDetails) throw new Error("Movie details not found");
+
     // Find the relevant schedule
     const schedule = await Schedule.findOne({
       screen: screen._id,
       date: bookingDate,
     });
-  
-    if (!schedule) throw new Error("Schedule not found for the specified screen and date.");
-  
+
+    if (!schedule)
+      throw new Error("Schedule not found for the specified screen and date.");
+
     // Find the showtime in the schedule
     const targetShowTime = schedule.showTimes.find((s) => s.time === showTime);
-  
-    if (!targetShowTime) throw new Error("Show time not found in the schedule.");
-  
+
+    if (!targetShowTime)
+      throw new Error("Show time not found in the schedule.");
+
     // Update seat availability in the layout
     let seatFound = false;
     targetShowTime.layout = targetShowTime.layout.map((row) =>
@@ -180,39 +210,45 @@ class BookingService {
         return seat;
       })
     );
-  
+
     if (!seatFound) {
-      throw new Error("Seats not found in the layout for the specified show time.");
+      throw new Error(
+        "Seats not found in the layout for the specified show time."
+      );
     }
-  
+
     // Save the updated schedule
     await schedule.save();
-  
+
     // Update the booking status to "cancelled"
     booking.paymentStatus = "cancelled";
     await booking.save();
-  
+
     // Process the wallet refund
     const wallet = await WalletRepo.findWalletByUserId(userId);
     if (!wallet) throw new Error("Wallet not found");
-  
+
     const transaction: ITransaction = {
       transactionId: uuidv4(),
       amount: totalPrice,
       type: "credit",
       status: "success",
       date: new Date(),
-      description: `Refund for cancelled ticket`,
+      description: `Refund: "${
+        movieDetails.title
+      }" on ${bookingDate.toLocaleDateString()}, ${showTime}, Screen ${
+        screen.screenNumber
+      }, Seats: ${seats.join(", ")}`,
     };
-  
+
     wallet.transactions.push(transaction);
     wallet.balance += totalPrice;
-  
+
     await wallet.save();
-  
+
     return { message: "Booking canceled successfully", booking };
   }
-  
+
   public async getTicketDetails(ticketId: string) {
     const ticket = await BookingRepo.findBookingById(ticketId);
     if (!ticket) throw new Error("Ticket not found");

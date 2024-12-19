@@ -290,12 +290,59 @@
 
 .city-info{
   color: white;
+  margin-left: 20px;
 }
 
 .city-info:hover{
-  color: white;
+  color: rgb(159, 159, 159);
+  text-decoration: none;
 }
 
 .city-info:focus{
   color: white;
+}
+
+.notification-dropdown .dropdown-menu-modern {
+  min-width: 300px;
+  max-height: 400px;
+  overflow-y: auto;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+}
+
+.notification-dropdown .notification-item {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  background-color: #fff;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s;
+}
+
+.notification-dropdown .notification-item:hover {
+  background-color: #f9f9f9;
+}
+
+.notification-dropdown .notification-content {
+  font-size: 14px;
+  color: #333;
+}
+
+.notification-dropdown .notification-date {
+  font-size: 12px;
+  color: #888;
+  margin-top: 4px;
+}
+
+.notification-dropdown .clear-all-button {
+  text-align: center;
+  color: #ff4d4d;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.notification-dropdown .clear-all-button:hover {
+  background-color: #ffefef;
 }

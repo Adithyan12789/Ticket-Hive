@@ -53,7 +53,7 @@ router.patch('/statusChange/:bookingId', AdminAuthMiddleware.protect, BookingCon
 router.get('/get-theaterOwners',AdminAuthMiddleware.protect, TheaterController.getTheaterOwners);
 
 router.get('/chatrooms/:adminId',AdminAuthMiddleware.protect, ChatController.getAdminChatRooms); 
-router.route('/chatrooms/:chatRoomId/messages').get(AdminAuthMiddleware.protect, ChatController.getAdminMessages).post(TheaterMulterConfig.multerUploadChatImages.single('file'),AdminAuthMiddleware.protect, ChatController.sendAdminMessages); 
+router.route('/chatrooms/:chatRoomId/messages').get(AdminAuthMiddleware.protect, ChatController.getAdminMessages).post(TheaterMulterConfig.multerUploadChatFiles.single('file'),AdminAuthMiddleware.protect, ChatController.sendAdminMessages); 
 router.route('/mark-messages-read').post(AdminAuthMiddleware.protect, ChatController.markAdminMessagesAsRead); 
 router.get('/notifications/unread',AdminAuthMiddleware.protect, ChatController.getAdminUnreadMessages); 
 router.put('/notifications/:id/read',AdminAuthMiddleware.protect, ChatController.markAdminMessagesAsRead); 

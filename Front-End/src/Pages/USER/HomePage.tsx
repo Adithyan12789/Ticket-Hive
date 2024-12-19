@@ -11,9 +11,7 @@ import {
 import "./HomePage.css";
 import Footer from "../../Components/UserComponents/Footer";
 import { MovieManagement } from "../../Types/MoviesTypes";
-import {
-  useGetMoviesMutation,
-} from "../../Slices/UserApiSlice";
+import { useGetMoviesMutation } from "../../Slices/UserApiSlice";
 import Loader from "../../Components/UserComponents/Loader";
 import { FaSearch, FaStar } from "react-icons/fa";
 import { Link } from "react-router-dom";
@@ -239,14 +237,45 @@ const HomePage: React.FC = () => {
         )}
 
         <div className="banner-container">
-          <img
-            src="/tickets-stickers-badges-decorative-design-600w-2451487379-transformed.png"
-            alt="Banner"
-            className="banner-image"
-          />
+          <Carousel>
+            <Carousel.Item>
+              <img
+                className="d-block w-100 banner-image"
+                src="/imgu3.webp"
+                alt="First Slide"
+              />
+            </Carousel.Item>
+            <Carousel.Item>
+              <img
+                className="d-block w-100 banner-image"
+                src="/imgh2.webp"
+                alt="Second Slide"
+              />
+            </Carousel.Item>
+            <Carousel.Item>
+              <img
+                className="d-block w-100 banner-image"
+                src="/imgb.webp"
+                alt="Third Slide"
+              />
+            </Carousel.Item>
+            <Carousel.Item>
+              <img
+                className="d-block w-100 banner-image"
+                src="/tickets-stickers-badges-decorative-design-600w-2451487379-transformed.png"
+                alt="Fourth Slide"
+                style={{
+                  objectFit: "cover"
+                }}
+              />
+            </Carousel.Item>
+          </Carousel>
         </div>
 
-        <h1 className="text-center my-5 text-primary" style={{ color: "black" }}>
+        <h1
+          className="text-center my-5 text-primary"
+          style={{ color: "black" }}
+        >
           Recommended Movies
         </h1>
 
