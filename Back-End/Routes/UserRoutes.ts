@@ -26,7 +26,7 @@ router.route('/profile')
 .get( AuthMiddleware, UserController.getUserProfile )
 .put( AuthMiddleware, MulterConfig.multerUploadUserProfile.single('profileImage'), UserController.updateUserProfile);
 
-router.get('/get-movies',AuthMiddleware, MovieController.getAllMoviesController);
+router.get('/get-movies', MovieController.getAllMoviesController);
 router.get('/movie-detail/:id',AuthMiddleware, MovieController.getMovieByIdHandler);
 
 router.get('/reviews/:movieId',AuthMiddleware, MovieController.getReviewsController);

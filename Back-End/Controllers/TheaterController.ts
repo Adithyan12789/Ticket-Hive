@@ -638,36 +638,51 @@ class TheaterController {
     async (req: Request, res: Response): Promise<void> => {
       try {
         const { ownerId } = req.params;
-
+  
+        // Fetch theaters for the given owner
         const theaters = await TheaterDetails.find({ theaterOwnerId: ownerId });
-
+  
+        // Fetch bookings for these theaters, populating user and movie details
         const bookings = await Booking.find({
           theater: { $in: theaters.map((t) => t._id) },
-        }).populate("user", "_id name email");
-
+        })
+          .populate("user", "_id name email")
+          .populate("movie", "title");  // Populate movie title
+  
+        // Calculate total earnings from all bookings
         const totalEarnings = bookings.reduce(
           (sum, booking) => sum + booking.totalPrice,
           0
         );
-
+  
+        // Calculate unique users by creating a Set of user IDs
         const uniqueUsers = new Set(
           bookings.map((booking) => booking.user._id.toString())
         );
-
+  
+        // Calculate unique movies by creating a Set of movie IDs
+        const uniqueMovies = new Set(
+          bookings.map((booking) => booking.movie._id.toString())
+        );
+  
+        // Prepare stats
         const stats = {
           theaters: theaters.length,
           users: uniqueUsers.size, // Count of unique users
+          movies: uniqueMovies.size, // Count of unique movies
           bookings: bookings.length,
           totalEarnings,
         };
-
+  
+        // Return the stats and bookings with populated movie titles
         res.status(200).json({ stats, theaters, bookings });
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
         res.status(500).json({ message: "Error fetching data", error: error });
       }
     }
-  );
+  );  
+  
 
   addOfferController = asyncHandler(
     async (req: CustomRequest, res: Response): Promise<void> => {

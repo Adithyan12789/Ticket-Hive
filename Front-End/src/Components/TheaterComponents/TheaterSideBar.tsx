@@ -2,7 +2,6 @@ import { Link, useLocation } from "react-router-dom";
 import {
   FaHome,
   FaFilm,
-  FaUsers,
   FaTicketAlt,
   FaTag,
   FaCogs,
@@ -41,18 +40,6 @@ const TheaterOwnerSidebar: React.FC = () => {
             }
           >
             <FaFilm className="sidebar-icon" /> Theater Management
-          </Link>
-        </li>
-        <li>
-          <Link
-            to="/user-management"
-            className={
-              location.pathname === "/user/management"
-                ? "active sidebar-link"
-                : "sidebar-link"
-            }
-          >
-            <FaUsers className="sidebar-icon" /> User Management
           </Link>
         </li>
         <li>

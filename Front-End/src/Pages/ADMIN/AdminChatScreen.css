@@ -1,236 +1,359 @@
-/* ChatRoomStyles.css */
-  .chat-room-selection {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    background-color: #ffffff;
-    padding: 20px;
-  }
-  
-  .chat-room-selection h2 {
-    margin-bottom: 20px;
-    color: #333;
-    font-weight: bold;
-  }
-  
-  .chat-room-list {
-    width: 100%;
-  }
-  
-  .chat-room-item {
-    background: black;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-    display: flex;
-    gap: 20px;
-    margin: 15px;
-  }
-  
-  .chat-room-item img {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    margin-bottom: 10px;
-  }
-  
-  .chat-room-item h4 {
-    margin: 10px 0;
-    color: rgb(174, 174, 174);
-    font-size: 20px;
-  }
-  
-  /* Chat window */
-  .chat-window {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    background-color: #e5ddd5;
-    border-radius: 12px;
-    margin: 10px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    color: #333;
-    overflow: hidden;
-    background-image: url('https://media.istockphoto.com/id/1219641933/vector/network-hand-drawn-print.jpg?s=612x612&w=0&k=20&c=2QkrKtMxj-6qIIqktkykB2vgE5KbKEUufd9iFuvC9GA=');
-    background-position: center;
-  }
-  
-  .chat-header {
-    padding: 12px 20px;
-    background-color: rgb(44, 62, 80);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  }
-  
-  .chat-header img {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    margin-right: 15px;
-    border: 2px solid rgba(255, 255, 255, 0.2);
-  }
-  
-  .chat-header h4 {
-    margin: 0;
-    font-weight: 500;
-    font-size: 18px;
-    letter-spacing: 0.5px;
-    color: #fff;
-  }
-  
-  .chat-header button {
-    background-color: white;
-    color: black;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 30px;
-    cursor: pointer;
-    font-size: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    transition: background-color 0.3s ease, transform 0.3s ease;
-  }
+.admin-chat-container {
+  display: flex;
+  height: 100vh;
+  font-family: Arial, sans-serif;
+  padding: 40px;
+}
 
-  .admin-chat-messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: 15px 20px;
-    background-color: rgba(255, 255, 255, 0.85);
-  }
-  
-  .admin-message-container {
-    display: flex;
-    margin-bottom: 12px;
-  }
-  
-  .admin-message-container {
-    display: flex;
-    position: relative;
-    margin-bottom: 10px;
-  }
-  
-  .admin-message-container.admin {
-    justify-content: flex-end;
-  }
-  
-  .admin-message-container.owner {
-    justify-content: flex-start;
-  }
-  
-  .message {
-    max-width: 60%;
-    padding: 10px;
-    border-radius: 10px;
-    position: relative;
-  }
-  
-  .admin-message-container.admin .message {
-    background-color: rgb(198, 222, 248);
-    color: #000;
-    text-align: left;
-  }
-  
-  .admin-message-container.owner .message {
-    background-color: #f1f1f1;
-    color: #000;
-    text-align: left;
-  }
-  
-  .message-time {
-    font-size: 12px;
-    color: gray;
-    display: block;
-    margin-top: 5px;
-  }
-  
-  .admin-message-status {
-    position: absolute;
-    bottom: 13px;
-    right: 10px;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-  }
-  
-  .admin-status-read {
-    color: #009eff;
-  }
-  
-  .admin-status-unread {
-    color: gray;
-  }
-  
-  
-  .chat-input {
-    padding: 10px 20px;
-    background-color: #f5f5f5;
-    display: flex;
-    align-items: center;
-    border-top: 1px solid rgba(0, 0, 0, 0.1);
-  }
-  
-  .input-box {
-    flex: 1;
-    padding: 12px 15px;
-    border-radius: 30px;
-    border: 1px solid #ccc;
-    background-color: #fff;
-    color: #333;
-    font-size: 14px;
-    outline: none;
-    margin-right: 10px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-  }
+.admin-chat-sidebar {
+  width: 300px;
+  background-color: #f0f0f0;
+  overflow-y: auto;
+  border-right: 1px solid #ddd;
+}
 
-  .input-container button {
-    background-color: rgb(44, 62, 80);
-    color: #ffffff;
-    padding: 12px 18px;
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: 18px;
-    transition: background-color 0.3s ease, transform 0.3s ease;
-  }
-  
+.admin-sidebar-title {
+  padding: 20px;
+  font-size: 1.2em;
+  font-weight: bold;
+  border-bottom: 1px solid #ddd;
+}
 
-  .message-file-preview {
-    margin-top: 10px;
-    margin-bottom: 10px;
-    display: flex;
-    justify-content: center;
-  }
-  
-  .file-preview-img {
-    width: 100px;
-    height: 100px;
-    object-fit: cover;
-    border-radius: 8px;
-  }
-  
-  .file-preview-pdf {
-    border: 1px solid #ccc;
-    border-radius: 8px;
-  }
-  
-  .preview-image {
-    width: 40px;
-    height: 40px;
-    object-fit: cover;
-    border-radius: 4px;
-  }
-  
-  .preview-file-name {
-    font-size: 12px;
-    color: #555;
-  }
+.admin-chat-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.admin-chat-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.admin-chat-item:hover {
+  background-color: #e0e0e0;
+}
+
+.admin-chat-item.active {
+  background-color: #d0d0d0;
+}
+
+.admin-chat-item-content {
+  display: flex;
+  align-items: center;
+}
+
+.admin-chat-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 15px;
+}
+
+.admin-chat-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-chat-name {
+  font-weight: bold;
+}
+
+.admin-chat-preview {
+  font-size: 0.8em;
+  color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+}
+
+.admin-unread-indicator {
+  display: flex;
+  align-items: center;
+}
+
+.admin-unread-icon {
+  color: #007bff;
+  font-size: 0.8em;
+  margin-right: 5px;
+}
+
+.admin-unread-count {
+  background-color: #007bff;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: 0.8em;
+}
+
+.admin-chat-main {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  padding-left: 20px;
+}
+
+.admin-select-chat-prompt {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  font-size: 1.2em;
+  color: #666;
+}
+
+.admin-chat-room {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.admin-chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  background-color: #f0f0f0;
+  border-bottom: 1px solid #ddd;
+}
+
+.admin-chat-header-info {
+  display: flex;
+  align-items: center;
+}
+
+.admin-chat-header-image {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 15px;
+}
+
+.admin-chat-header-name {
+  font-size: 1.1em;
+  font-weight: bold;
+}
+
+
+.admin-chat-messages {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.admin-message-container {
+  margin-bottom: 15px;
+}
+
+.admin-message-container.owner {
+  text-align: left;
+}
+
+.admin-message-container.admin {
+  text-align: right;
+}
+
+.admin-message-container.owner .admin-message {
+  background-color: #f0f0f0;
+  text-align: left;
+}
+
+
+.admin-message-container.admin .admin-message {
+  background-color: #007bff;
+  text-align: left;
+  color: white;
+}
+
+.admin-message {
+  display: inline-block;
+  max-width: 70%;
+  padding: 10px 15px;
+  border-radius: 20px;
+  font-size: 0.9em;
+}
+
+.admin-message-content {
+  word-wrap: break-word;
+}
+
+.admin-message-time {
+  display: block;
+  font-size: 0.7em;
+  margin-top: 5px;
+  color: #393939;
+}
+
+.admin-message-status {
+  font-size: 0.7em;
+  margin-top: 2px;
+  text-align: right;
+}
+
+.admin-status-read {
+  color: #34b7f1;
+}
+
+.admin-status-unread {
+  color: #a0a0a0;
+}
+
+.admin-chat-input {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-top: 1px solid #ddd;
+}
+
+.admin-input-box {
+  flex-grow: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  font-size: 0.9em;
+  color: #313131;
+}
+
+.admin-input-box::placeholder {
+  color: #888888; /* Replace with your desired color */
+  opacity: 1; /* Ensure full opacity */
+}
+
+.admin-input-controls {
+  display: flex;
+  align-items: center;
+  margin-left: 10px;
+}
+
+.admin-emoji-button,
+.admin-image-upload-label,
+.admin-send-button {
+  background: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2em;
+  color: #007bff;
+  margin-left: 10px;
+}
+
+.admin-image-upload-input {
+  display: none;
+}
+
+.admin-emoji-picker {
+  position: absolute;
+  bottom: 70px;
+  right: 20px;
+}
+
+.admin-modern-file-preview {
+  max-width: 200px;
+  margin-top: 10px;
+}
+
+.admin-modern-preview-image {
+  max-width: 100%;
+  border-radius: 5px;
+}
+
+.admin-modern-document-preview {
+  display: flex;
+  align-items: center;
+  background-color: #f0f0f0;
+  padding: 5px 10px;
+  border-radius: 5px;
+}
+
+.admin-modern-file-name {
+  margin-left: 10px;
+  font-size: 0.8em;
+}
+
+.admin-image-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.admin-image-modal-content {
+  position: relative;
+  max-width: 90%;
+  max-height: 90%;
+}
+
+.admin-image-modal-close-btn {
+  position: absolute;
+  top: -30px;
+  right: -30px;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.admin-large-image {
+  max-width: 100%;
+  max-height: 90vh;
+  object-fit: contain;
+}
+
+.admin-image-download-btn {
+  position: absolute;
+  bottom: -30px;
+  right: 0;
+  background-color: white;
+  color: #007bff;
+  padding: 5px 10px;
+  border-radius: 5px;
+  text-decoration: none;
+  font-size: 0.9em;
+}
+
+.admin-file-message {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.admin-file-preview {
+  max-width: 200px;
+  max-height: 200px;
+  object-fit: cover;
+  border-radius: 5px;
+  margin-bottom: 5px;
+  cursor: pointer;
+}
+
+.admin-document-preview {
+  display: flex;
+  align-items: center;
+  background-color: #8c8c8c;
+  padding: 5px 10px;
+  border-radius: 5px;
+}
+
+.admin-file-name {
+  margin-left: 10px;
+  font-size: 0.8em;
+}
+
+.admin-file-download-btn {
+  margin-left: 10px;
+  color: #007bff;
+  text-decoration: none;
+}
+

@@ -4,13 +4,19 @@ import { ChatRoom } from '../Models/ChatRoomModel';
 import { Message } from '../Models/MessageModel';
 import TheaterDetails from '../Models/TheaterDetailsModel';
 import { CustomRequest } from '../Middlewares/AdminAuthMiddleware';
+import { io } from '../Config/Socket';
 
 class ChatRoomController {
+
   getChatRooms = expressAsyncHandler(async (req: Request, res: Response): Promise<void> => {
     const theaterOwnerId = (req as any).theaterOwner._id;
+  
+    console.log("getChatRooms theaterOwnerId: ", theaterOwnerId);
     
     const chatRooms = await ChatRoom.find({ theaterOwnerId }).populate('adminId', 'name');
-
+  
+    console.log("getChatRooms chatRooms: ", chatRooms);
+  
     const chatRoomsWithUnreadCount = await Promise.all(
       chatRooms.map(async (room) => {
         const unreadMessagesCount = await Message.countDocuments({
@@ -18,15 +24,28 @@ class ChatRoomController {
           senderType: 'Admin',
           read: false,
         });
+  
+        console.log("getChatRooms unreadMessagesCount: ", unreadMessagesCount);
+  
+        // Emit the unread count update through socket.io
+        io.in((room._id as string).toString()).emit("unreadMessage", { 
+          roomId: room._id as string, 
+          count: unreadMessagesCount 
+        });        
+  
         return {
           ...room.toObject(),
           unreadMessagesCount,
         };
       })
     );
-
+  
+    console.log("getChatRooms chatRoomsWithUnreadCount: ", chatRoomsWithUnreadCount);
+  
     res.json(chatRoomsWithUnreadCount);
   });
+  
+  
 
   createChatRoom = expressAsyncHandler(async (req: Request, res: Response): Promise<void> => {
 
@@ -159,8 +178,12 @@ class ChatRoomController {
 
   getAdminChatRooms = expressAsyncHandler(async (req: Request, res: Response): Promise<void> => {
     const adminId = req.params.adminId;
+
+    console.log("getAdminChatRooms adminId: ", adminId);
     
     const chatRooms = await ChatRoom.find({ adminId }).populate('theaterOwnerId', 'name');
+
+    console.log("getAdminChatRooms chatRooms: ", chatRooms);
 
     const chatRoomsWithUnreadCount = await Promise.all(
       chatRooms.map(async (room) => {
@@ -169,12 +192,22 @@ class ChatRoomController {
           senderType: 'TheaterOwner',
           read: false,
         });
+
+        console.log("unreadMessagesCount: ", unreadMessagesCount);
+
+        io.in((room._id as string).toString()).emit("unreadMessage", { 
+          roomId: room._id as string, 
+          count: unreadMessagesCount 
+        });   
+
         return {
           ...room.toObject(),
           unreadMessagesCount,
         };
       })
     );
+
+    console.log("chatRoomsWithUnreadCount: ", chatRoomsWithUnreadCount);
 
     res.json(chatRoomsWithUnreadCount);
   });

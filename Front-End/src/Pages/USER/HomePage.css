@@ -222,6 +222,10 @@
   color: white; /* Consistent with other text */
 }
 
+#username:after {
+  content: none;
+}
+
 
 /* HomePage.css */
 .banner-container {
@@ -345,4 +349,13 @@
 
 .notification-dropdown .clear-all-button:hover {
   background-color: #ffefef;
+}
+
+.navbar .nav-link, 
+.navbar .nav-item {
+  margin-right: 1rem; /* Adds consistent spacing */
+}
+
+.notification-dropdown {
+  margin-right: 1rem; /* For notification specifically */
 }

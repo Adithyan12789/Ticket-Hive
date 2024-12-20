@@ -11,6 +11,7 @@ import { toast } from "react-toastify";
 import React from "react";
 import { Seat, ScreenDetails } from "../../Types/ScreenTypes";
 import Footer from "../../Components/UserComponents/Footer";
+import Swal from 'sweetalert2';
 
 const SelectSeatPage: React.FC = () => {
   const { screenId } = useParams<{ screenId: string }>();
@@ -264,46 +265,64 @@ const SelectSeatPage: React.FC = () => {
       toast.error("Error: Unable to find schedule.");
       return;
     }
-  
-    try {
-      await updateSeatAvailability({
-        scheduleId: scheduleId, 
-        selectedSeats: [...selectedSeats],
-        holdSeat: true,
-        showTime,
-      }).unwrap();
-  
-      navigate("/booking", {
-        state: {
+
+    // Show confirmation alert
+    const result = await Swal.fire({
+      title: 'Confirm Seat Selection',
+      html: `
+        <p>You have selected ${totalSeats} seat(s).</p>
+        <p>Total Price: Rs.${totalPrice}</p>
+        <p>Do you want to proceed with the payment?</p>
+      `,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, proceed!',
+      cancelButtonText: 'Cancel'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await updateSeatAvailability({
+          scheduleId: scheduleId, 
           selectedSeats: [...selectedSeats],
-          theaterName: screenDetails?.theater.name,
-          date: formattedDate,
-          movieTitle: movieTitle,
-          totalPrice: totalPrice,
-          movieId: movieId,
-          theaterId: theaterId,
-          screenId: screenId,
-          showTime: showTime,
-          scheduleId: scheduleId,
-        },
-      });
-  
-      setTimeout(async () => {
-        try {
-          await updateSeatAvailability({
-            scheduleId,  // Pass the scheduleId instead of screenId
+          holdSeat: true,
+          showTime,
+        }).unwrap();
+
+        navigate("/booking", {
+          state: {
             selectedSeats: [...selectedSeats],
-            holdSeat: false,
-            showTime,
-          }).unwrap();
-          console.log("Seat availability reset to true.");
-        } catch (error) {
-          console.error("Error resetting seat availability:", error);
-        }
-      }, 60000);
-    } catch (error) {
-      console.log("error: ", error);
-      toast.error("Unable to update seat availability. Please try again.");
+            theaterName: screenDetails?.theater.name,
+            date: formattedDate,
+            movieTitle: movieTitle,
+            totalPrice: totalPrice,
+            movieId: movieId,
+            theaterId: theaterId,
+            screenId: screenId,
+            showTime: showTime,
+            scheduleId: scheduleId,
+          },
+        });
+
+        setTimeout(async () => {
+          try {
+            await updateSeatAvailability({
+              scheduleId,
+              selectedSeats: [...selectedSeats],
+              holdSeat: false,
+              showTime,
+            }).unwrap();
+            console.log("Seat availability reset to true.");
+          } catch (error) {
+            console.error("Error resetting seat availability:", error);
+          }
+        }, 60000);
+      } catch (error) {
+        console.log("error: ", error);
+        toast.error("Unable to update seat availability. Please try again.");
+      }
     }
   };
   
@@ -415,4 +434,3 @@ const SelectSeatPage: React.FC = () => {
 };
 
 export default SelectSeatPage;
-

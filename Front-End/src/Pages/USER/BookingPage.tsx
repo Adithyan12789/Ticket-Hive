@@ -526,50 +526,64 @@ const BookingPage: React.FC = () => {
                 <hr />
                 <Row className="mb-4">
                   <Col>
-                    <p
-                      style={{
-                        fontSize: "16px",
-                        color: "#1d3557",
-                        fontWeight: "500",
-                      }}
-                    >
-                      Total Price (excluding convenience fee):{" "}
-                      <strong>Rs. {totalPrice}</strong>
-                    </p>
-                    <p
-                      style={{
-                        fontSize: "16px",
-                        color: "#1d3557",
-                        fontWeight: "500",
-                      }}
-                    >
-                      Convenience Fee (10%):{" "}
-                      <strong>Rs. {convenienceFee.toFixed(2)}</strong>
-                    </p>
-                    <hr />
-                    <p
-                      style={{
-                        fontWeight: "600",
-                        fontSize: "1.25rem",
-                        color: "#1d3557",
-                      }}
-                    >
-                      Amount Payable:{" "}
-                      <span style={{ color: "#e63946" }}>
-                        Rs. {finalPrice.toFixed(2)}
-                      </span>
-                    </p>
-                    <p
-                      style={{
-                        fontSize: "16px",
-                        color: "#28a745",
-                        fontWeight: "500",
-                        marginTop: "10px",
-                      }}
-                    >
-                      <strong>
-                        Use your wallet to pay and get 10% cashback!
-                      </strong>
+                    <h5 style={{ fontWeight: '600', fontSize: '1.2rem', color: '#1d3557', marginBottom: '20px' }}>Price Breakdown</h5>
+                    <div style={{ 
+                      backgroundColor: '#ffffff', 
+                      borderRadius: '12px', 
+                      padding: '20px', 
+                      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' 
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
+                        <span style={{ color: '#4a4a4a', fontSize: '16px' }}>Base Ticket Price</span>
+                        <strong style={{ color: '#1d3557', fontSize: '16px' }}>Rs. {totalPrice.toFixed(2)}</strong>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
+                        <span style={{ color: '#4a4a4a', fontSize: '16px' }}>Convenience Fee (10%)</span>
+                        <strong style={{ color: '#1d3557', fontSize: '16px' }}>Rs. {convenienceFee.toFixed(2)}</strong>
+                      </div>
+                      {selectedOffer && (
+                        <div style={{ 
+                          display: 'flex', 
+                          justifyContent: 'space-between', 
+                          marginBottom: '15px', 
+                          color: '#2a9d8f',
+                          backgroundColor: 'rgba(42, 157, 143, 0.1)',
+                          padding: '10px',
+                          borderRadius: '8px'
+                        }}>
+                          <span style={{ fontSize: '16px' }}>Discount ({selectedOffer.discountValue}%)</span>
+                          <strong style={{ fontSize: '16px' }}>- Rs. {((totalPrice * (selectedOffer.discountValue || 0)) / 100).toFixed(2)}</strong>
+                        </div>
+                      )}
+                      <div style={{ 
+                        borderTop: '2px dashed #e0e0e0', 
+                        marginTop: '15px', 
+                        paddingTop: '15px',
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center'
+                      }}>
+                        <span style={{ color: '#1d3557', fontSize: '18px', fontWeight: '600' }}>Total Amount Payable</span>
+                        <span style={{ 
+                          color: '#e63946', 
+                          fontSize: '22px', 
+                          fontWeight: '700',
+                          backgroundColor: 'rgba(230, 57, 70, 0.1)',
+                          padding: '8px 15px',
+                          borderRadius: '20px'
+                        }}>
+                          Rs. {finalPrice.toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+                    <p style={{ 
+                      fontSize: '14px', 
+                      color: '#28a745', 
+                      fontWeight: '500', 
+                      marginTop: '15px',
+                      textAlign: 'center'
+                    }}>
+                      <strong>💰 Use your wallet to pay and get 10% cashback!</strong>
                     </p>
                   </Col>
                 </Row>
@@ -765,3 +779,4 @@ const BookingPage: React.FC = () => {
 };
 
 export default BookingPage;
+

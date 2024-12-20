@@ -14,6 +14,7 @@ import { useSaveUserLocationMutation } from "../../Slices/UserApiSlice";
 
 import Loader from "./Loader";
 import { CitiesModalProps } from "../../Types/CitiesTypes";
+import { toast } from "react-toastify";
 
 const CitiesModal: React.FC<CitiesModalProps> = ({
   show,
@@ -120,6 +121,7 @@ const CitiesModal: React.FC<CitiesModalProps> = ({
         setFilteredCities(data.data);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Unknown error");
+        toast.error(`Error: ${err instanceof Error ? err.message : "Unknown error"}`);
       } finally {
         setLoading(false);
       }
@@ -153,25 +155,41 @@ const CitiesModal: React.FC<CitiesModalProps> = ({
 
   const fetchCityCoordinates = async (city: string) => {
     try {
+      if (!city || city.trim() === "") {
+        throw new Error("City name is empty or invalid.");
+      }
+
+      console.log("Fetching coordinates for:", city);
+
       const apiKey = "af909a0b110a434ebad61f0aa32717e5";
-      const response = await fetch(
-        `https://api.opencagedata.com/geocode/v1/json?q=${city}&key=${apiKey}`
-      );
+      const url = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(
+        city
+      )}&key=${apiKey}`;
+      console.log("API URL:", url);
+
+      const response = await fetch(url);
+      console.log("Response status:", response.status);
 
       if (!response.ok) {
-        throw new Error("Failed to fetch from geocode service");
+        throw new Error(`API returned error: ${response.statusText}`);
       }
 
       const data = await response.json();
-      const { lat, lng } = data.results[0]?.geometry || {};
+      console.log("API response data:", JSON.stringify(data, null, 2));
 
+      if (!data.results || data.results.length === 0) {
+        throw new Error(`No results found for city: ${city}`);
+      }
+
+      const { lat, lng } = data.results[0]?.geometry || {};
       if (!lat || !lng) {
-        throw new Error("Invalid coordinates received");
+        throw new Error("Invalid coordinates received from API.");
       }
 
       return { latitude: lat, longitude: lng };
-    } catch (err) {
-      console.error("Error fetching city coordinates:", err);
+    } catch (error) {
+      console.error("Error fetching city coordinates:", error);
+      toast.error(`Error: ${error instanceof Error ? error.message : "Unknown error"}`);
       return null;
     }
   };
@@ -189,13 +207,11 @@ const CitiesModal: React.FC<CitiesModalProps> = ({
         handleCitySelect(city); // Call the parent handler to update the city
         handleClose();
       } else {
-        alert(
-          "Failed to fetch coordinates for the selected city. Please try again."
-        );
+        toast.error("Failed to fetch coordinates for the selected city. Please try again.");
       }
     } catch (err) {
       console.error("Error fetching coordinates for city:", err);
-      alert("An error occurred while fetching coordinates. Please try again.");
+      toast.error("An error occurred while fetching coordinates. Please try again.");
     } finally {
       setLoading(false);
     }

@@ -12,11 +12,7 @@ import { logout } from "../../Slices/AuthSlice";
 import { useNavigate } from "react-router-dom";
 import { RootState, AppDispatch } from "../../Store";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faUser,
-  faSignOutAlt,
-  faMapMarkerAlt,
-} from "@fortawesome/free-solid-svg-icons";
+import { faCaretDown, faMapMarkerAlt, faSignOutAlt, faUser } from "@fortawesome/free-solid-svg-icons";
 import CitiesModal from "./CitiesModal";
 import { NotificationDropdown } from "../UserComponents/NotificationDropdown";
 import io from "socket.io-client";
@@ -34,7 +30,7 @@ interface Notification {
 
 interface UpdateNotificationsPayload {
   type: "markAsRead" | "clearAll";
-  notificationId?: number; // Change to number to match Notification._id type
+  notificationId?: number;
 }
 
 const Header: React.FC = () => {
@@ -43,7 +39,9 @@ const Header: React.FC = () => {
   const navigate = useNavigate();
 
   const { data: profileData } = useGetUserProfileQuery(userInfo?.id);
-  const { data: fetchedNotifications = [] } = useFetchUnreadNotificationsQuery({}) as {
+  const { data: fetchedNotifications = [] } = useFetchUnreadNotificationsQuery(
+    {}
+  ) as {
     data: Notification[];
   };
   const [clearAllNotifications] = useClearAllNotificationsMutation();
@@ -51,7 +49,7 @@ const Header: React.FC = () => {
 
   const [showModal, setShowModal] = useState(false);
   const [city, setCity] = useState<string>("");
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>(fetchedNotifications || []);
 
   useEffect(() => {
     setNotifications(fetchedNotifications);
@@ -60,28 +58,38 @@ const Header: React.FC = () => {
   useEffect(() => {
     if (userInfo?.id) {
       socket.emit("joinNotifications", { userId: userInfo.id });
-
-      socket.on("newNotification", (notification: Notification) => {
+  
+      const handleNewNotification = (notification: Notification) => {
         console.log("Real-time: New notification received:", notification);
-        setNotifications(prevNotifications => [notification, ...prevNotifications]);
-      });
-
-      socket.on("updateNotifications", ({ type, notificationId }: UpdateNotificationsPayload) => {
+        setNotifications((prevNotifications) => [
+          notification,
+          ...prevNotifications,
+        ]);
+      };
+  
+      const handleUpdateNotifications = ({
+        type,
+        notificationId,
+      }: UpdateNotificationsPayload) => {
         if (type === "markAsRead" && notificationId !== undefined) {
-          setNotifications(prevNotifications => 
-            prevNotifications.filter(n => n._id !== notificationId)
+          setNotifications((prevNotifications) =>
+            prevNotifications.filter((n) => n._id !== notificationId)
           );
         } else if (type === "clearAll") {
           setNotifications([]);
         }
-      });
+      };
+  
+      socket.on("newNotification", handleNewNotification);
+      socket.on("updateNotifications", handleUpdateNotifications);
+  
+      return () => {
+        socket.off("newNotification", handleNewNotification);
+        socket.off("updateNotifications", handleUpdateNotifications);
+      };
     }
-
-    return () => {
-      socket.off("newNotification");
-      socket.off("updateNotifications");
-    };
   }, [userInfo?.id]);
+  
 
   const profileHandler = () => navigate("/profile");
   const logoutHandler = async () => {
@@ -105,8 +113,8 @@ const Header: React.FC = () => {
       console.log("Entering handleNotificationClick function with id:", id);
       const result = await markAsRead(id.toString()).unwrap();
       console.log("Notification marked as read:", result);
-      setNotifications(prevNotifications => 
-        prevNotifications.filter(n => n._id !== id)
+      setNotifications((prevNotifications) =>
+        prevNotifications.filter((n) => n._id !== id)
       );
     } catch (error) {
       console.error("Error marking notification as read:", error);
@@ -123,20 +131,19 @@ const Header: React.FC = () => {
     }
   };
 
-  console.log("fetchedNotifications: ", fetchedNotifications);
-  
   return (
     <header style={{ backgroundColor: "#3A5E49" }}>
-      <Navbar collapseOnSelect>
+      <Navbar collapseOnSelect expand="lg" className="px-3 py-2">
         <Container>
           <LinkContainer to="/">
-            <Navbar.Brand>
+            <Navbar.Brand className="d-flex align-items-center">
               <img
                 src="/logo.png"
-                style={{ marginRight: "8px", width: "60px" }}
                 alt="Ticket Hive Logo"
+                className="me-2"
+                style={{ width: "50px" }}
               />
-              Ticket Hive
+              <span className="text-light">Ticket Hive</span>
             </Navbar.Brand>
           </LinkContainer>
 
@@ -144,37 +151,40 @@ const Header: React.FC = () => {
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="mx-auto">
               <LinkContainer to="/">
-                <Nav.Link className="nav-home">Home</Nav.Link>
+                <Nav.Link className="text-light">Home</Nav.Link>
               </LinkContainer>
               <LinkContainer to="/allMovies">
-                <Nav.Link className="nav-movies">Movies</Nav.Link>
+                <Nav.Link className="text-light">Movies</Nav.Link>
               </LinkContainer>
             </Nav>
 
             <Nav className="ms-auto d-flex align-items-center">
               {userInfo && (
-                <NotificationDropdown
-                  notifications={notifications}
-                  onNotificationClick={handleNotificationClick}
-                  onClearAll={handleClearNotifications}
-                />
+                <div className="me-3">
+                  <NotificationDropdown
+                    notifications={notifications}
+                    onNotificationClick={handleNotificationClick}
+                    onClearAll={handleClearNotifications}
+                  />
+                </div>
               )}
 
-              <Nav.Link className="city-info" onClick={handleCityClick}>
+              <Nav.Link
+                className="text-light d-flex align-items-center me-3"
+                onClick={handleCityClick}
+              >
                 <FontAwesomeIcon
                   icon={faMapMarkerAlt}
-                  style={{ marginRight: "8px" }}
+                  className="me-2"
+                  size="lg"
                 />
-                {city || profileData?.city || "Location not selected"}
+                {city || profileData?.city || "Select Location"}
               </Nav.Link>
 
               {userInfo ? (
                 <NavDropdown
                   title={
-                    <div
-                      className="d-flex align-items-center"
-                      style={{ marginLeft: "20px" }}
-                    >
+                    <div className="d-flex align-items-center">
                       <img
                         src={
                           profileData?.profileImageName
@@ -182,43 +192,39 @@ const Header: React.FC = () => {
                             : DEFAULT_PROFILE_IMAGE
                         }
                         alt="User Avatar"
+                        className="rounded-circle me-2"
                         style={{
-                          width: "50px",
-                          height: "50px",
-                          borderRadius: "50%",
-                          marginRight: "10px",
+                          width: "40px",
+                          height: "40px",
                           objectFit: "cover",
                         }}
                       />
-                      {userInfo.name}
+                      <span className="text-light me-2">{userInfo.name}</span>
+                      <FontAwesomeIcon
+                        icon={faCaretDown}
+                        className="text-light"
+                      />
                     </div>
                   }
                   id="username"
-                  style={{ zIndex: 1050 }}
-                  className="custom-dropdown"
+                  className="text-light"
                 >
                   <NavDropdown.Item onClick={profileHandler}>
-                    <FontAwesomeIcon
-                      icon={faUser}
-                      style={{ marginRight: "8px" }}
-                    />
+                    <FontAwesomeIcon icon={faUser} className="me-2" />
                     Profile
                   </NavDropdown.Item>
                   <NavDropdown.Item onClick={logoutHandler}>
-                    <FontAwesomeIcon
-                      icon={faSignOutAlt}
-                      style={{ marginRight: "8px" }}
-                    />
+                    <FontAwesomeIcon icon={faSignOutAlt} className="me-2" />
                     Logout
                   </NavDropdown.Item>
                 </NavDropdown>
               ) : (
                 <>
                   <LinkContainer to="/login">
-                    <Nav.Link className="sign-in">Sign In</Nav.Link>
+                    <Nav.Link className="text-light me-3">Sign In</Nav.Link>
                   </LinkContainer>
                   <LinkContainer to="/signup">
-                    <Nav.Link className="sign-up">Sign Up</Nav.Link>
+                    <Nav.Link className="text-light">Sign Up</Nav.Link>
                   </LinkContainer>
                 </>
               )}
@@ -239,4 +245,3 @@ const Header: React.FC = () => {
 };
 
 export default Header;
-

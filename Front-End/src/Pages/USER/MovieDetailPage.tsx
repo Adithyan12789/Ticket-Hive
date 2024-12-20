@@ -227,6 +227,95 @@ const MovieDetailScreen: React.FC = () => {
 
   return (
     <>
+      <style type="text/css">
+        {`
+          .movie-detail-container {
+            padding: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+          }
+          .movie-poster {
+            max-width: 100%;
+            height: auto;
+          }
+          .movie-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: white;
+          }
+          .movie-info {
+            font-size: 1rem;
+          }
+          .rating-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+          }
+          .average-rating-label {
+            font-size: 1rem;
+          }
+          .average-rating-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #f39c12;
+            margin-left: 10px;
+          }
+          .no-reviews {
+            font-size: 1rem;
+          }
+          .rate-now-btn {
+            background-color: #fff;
+            color: #007bff;
+            border: 1px solid #007bff;
+            border-radius: 5px;
+            padding: 5px 15px;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+          }
+          .rate-now-btn:hover {
+            background-color: #007bff;
+            color: #fff;
+          }
+          .book-tickets-btn {
+            width: 100%;
+            padding: 10px 20px;
+            font-size: 18px;
+            margin-top: 20px;
+            background-color: rgb(255, 64, 129);
+          }
+
+          @media (max-width: 768px) {
+            .movie-detail-container {
+              position: relative;
+              top: 0;
+              left: 0;
+              transform: none;
+              padding: 15px;
+              height: 500px;
+              width: 500px;
+            }
+            .movie-title {
+              font-size: 2rem;
+              color: white;
+            }
+            .movie-info {
+              font-size: 0.9rem;
+            }
+            .rating-container {
+              flex-direction: column;
+              align-items: flex-start;
+            }
+            .rate-now-btn {
+              margin-top: 10px;
+            }
+          }
+        `}
+      </style>
       <div
         style={{
           width: "100%",
@@ -240,27 +329,25 @@ const MovieDetailScreen: React.FC = () => {
         }}
       >
         <Container
+          className="movie-detail-container"
           style={{
             position: "absolute",
-            top: "40px",
-            left: "200px",
             zIndex: 2,
             color: "#fff",
             backgroundColor: "rgba(0, 0, 0, 0.5)",
-            padding: "20px",
             borderRadius: "10px",
             boxShadow: "0 4px 20px rgba(0, 0, 0, 0.7)",
-            maxWidth: "800px",
             width: "100%",
+            maxWidth: "800px",
           }}
         >
-          <Row>
-            <Col md={5}>
+          <Row className="g-4">
+            <Col xs={12} md={5} className="text-center text-md-start">
               <img
                 src={`${USER_MOVIE_POSTER}${movie.posters}`}
                 alt={movie.title}
+                className="img-fluid movie-poster"
                 style={{
-                  width: "80%",
                   borderRadius: "10px",
                   boxShadow: "0px 4px 12px rgba(0,0,0,0.5)",
                   transition: "transform 0.3s",
@@ -273,12 +360,10 @@ const MovieDetailScreen: React.FC = () => {
                 }
               />
             </Col>
-            <Col md={7}>
-              <h2 style={{ fontSize: "2.5rem", fontWeight: "bold" }}>
-                {movie.title}
-              </h2>
-              <p>{movie.genres.join(", ")}</p>
-              <p>
+            <Col xs={12} md={7}>
+              <h2 className="movie-title">{movie.title}</h2>
+              <p className="movie-info">{movie.genres.join(", ")}</p>
+              <p className="movie-info">
                 {movie.languages.join(", ")} | {movie.duration} |{" "}
                 {new Date(movie.releaseDate).toLocaleDateString("en-GB", {
                   day: "2-digit",
@@ -287,85 +372,40 @@ const MovieDetailScreen: React.FC = () => {
                 })}
               </p>
               {/* Display Average Rating and Add Review Button */}
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between", // Ensures proper spacing
-                  backgroundColor: "rgba(255, 255, 255, 0.2)", // Light semi-transparent background
-                  padding: "10px 15px",
-                  borderRadius: "8px",
-                  marginBottom: "15px",
-                }}
-              >
+              <div className="rating-container">
                 {averageRating > 0 ? (
                   <>
-                    <div style={{ display: "flex", alignItems: "center" }}>
-                      <span
-                        style={{
-                          fontSize: "1rem",
-                          color: "#fff",
-                        }}
-                      >
+                    <div className="d-flex align-items-center">
+                      <span className="average-rating-label">
                         Average Rating:{" "}
                       </span>
-                      <span
-                        style={{
-                          fontSize: "1.5rem",
-                          fontWeight: "bold",
-                          color: "#f39c12", // Yellow color for stars or ratings
-                          marginLeft: "10px",
-                        }}
-                      >
+                      <span className="average-rating-value">
                         {renderStars(Math.round(averageRating))}
                       </span>
                     </div>
                   </>
                 ) : (
-                  <span style={{ fontSize: "1rem", color: "#fff" }}>
-                    No reviews yet
-                  </span>
+                  <span className="no-reviews">No reviews yet</span>
                 )}
 
                 {!hasReviewed && (
                   <Button
                     variant="secondary"
-                    style={{
-                      backgroundColor: "#fff",
-                      color: "#007bff",
-                      border: "1px solid #007bff",
-                      borderRadius: "5px",
-                      padding: "5px 15px",
-                      fontSize: "1rem",
-                      fontWeight: "600",
-                      transition: "all 0.3s ease",
-                    }}
+                    className="rate-now-btn"
                     onClick={() => setShowReviewModal(true)}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = "#007bff";
-                      e.currentTarget.style.color = "#ddd";
-                    }}
                   >
                     Rate now
                   </Button>
                 )}
               </div>
 
-              <button
-                style={{
-                  backgroundColor: "#ff4081",
-                  color: "#fff",
-                  border: "none",
-                  borderRadius: "5px",
-                  padding: "10px 20px",
-                  cursor: "pointer",
-                  marginTop: "20px",
-                  fontSize: "18px",
-                }}
+              <Button
+                variant="danger"
+                className="book-tickets-btn"
                 onClick={handleBookNow}
               >
                 Book Tickets
-              </button>
+              </Button>
             </Col>
           </Row>
         </Container>
@@ -593,225 +633,92 @@ const MovieDetailScreen: React.FC = () => {
         </Container>
       )}
       <Footer />
+      {/* Review Modal */}
       <Modal
         show={showReviewModal}
         onHide={() => setShowReviewModal(false)}
         centered
-        style={{
-          borderRadius: "1rem",
-          boxShadow: "0 8px 20px rgba(0, 0, 0, 0.15)",
-        }}
       >
-        <Modal.Header
-          closeButton
-          style={{
-            borderBottom: "none",
-            paddingBottom: 0,
-            textAlign: "center",
-          }}
-        >
-          <Modal.Title style={{ fontWeight: "bold", width: "100%" }}>
-            Add Your Review
-          </Modal.Title>
+        <Modal.Header closeButton>
+          <Modal.Title>Add Your Review</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <p
-            style={{
-              fontSize: "0.95rem",
-              color: "#6c757d",
-              textAlign: "center",
-              marginBottom: "1.5rem",
-            }}
-          >
+          <p className="text-muted mb-3">
             Rate your experience on a scale of 1 to 10. Click on the stars to
             select your rating and leave a review.
           </p>
           <Form>
-            <Form.Group controlId="rating" className="mb-4">
-              <Form.Label
-                style={{
-                  fontSize: "1.1rem",
-                  color: "#495057",
-                  fontWeight: "bold",
-                  display: "flex",
-                  justifyContent: "space-between",
-                }}
-              >
+            <Form.Group controlId="rating" className="mb-3">
+              <Form.Label className="d-flex justify-content-between">
                 Rating:{" "}
-                <span
-                  style={{
-                    color: `hsl(${(rating / 10) * 120}, 70%, 50%)`,
-                    fontWeight: "bold",
-                  }}
-                >
+                <span className="text-primary">
                   {rating} / 10
                 </span>
               </Form.Label>
-
-              {/* Star Rating Component */}
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  gap: "5px",
-                  cursor: "pointer",
-                }}
-              >
+              <div className="d-flex justify-content-center">
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((star) => (
                   <div
                     key={star}
                     onClick={() => setRating(star)}
-                    style={{
-                      fontSize: "1.5rem",
-                      color:
-                        star <= rating
-                          ? `hsl(${(rating / 10) * 120}, 70%, 50%)`
-                          : "#ddd",
-                      transition: "color 0.3s ease",
-                    }}
+                    style={{ cursor: "pointer" }}
                   >
-                    {star <= rating ? <FaStar /> : <FaRegStar />}
+                    {star <= rating ? (
+                      <FaStar className="text-warning" size={24} />
+                    ) : (
+                      <FaRegStar size={24} />
+                    )}
                   </div>
                 ))}
               </div>
             </Form.Group>
-
-            <Form.Group controlId="reviewText" className="mb-4">
-              <Form.Label
-                style={{
-                  fontSize: "1.1rem",
-                  color: "#495057",
-                  fontWeight: "bold",
-                }}
-              >
-                Review
-              </Form.Label>
+            <Form.Group controlId="reviewText" className="mb-3">
+              <Form.Label>Review</Form.Label>
               <Form.Control
                 as="textarea"
                 rows={4}
                 value={reviewText}
                 onChange={(e) => setReviewText(e.target.value)}
                 placeholder="Share your experience..."
-                style={{
-                  border: "1px solid #ced4da",
-                  borderRadius: "0.75rem",
-                  boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
-                  transition: "all 0.3s ease",
-                }}
               />
             </Form.Group>
           </Form>
         </Modal.Body>
-
-        <Modal.Footer
-          style={{
-            borderTop: "none",
-            paddingTop: 0,
-            justifyContent: "center",
-          }}
-        >
-          <Button
-            variant="secondary"
-            onClick={() => setShowReviewModal(false)}
-            style={{
-              padding: "0.5rem 1.5rem",
-              borderRadius: "50px",
-              fontWeight: "600",
-              fontSize: "1rem",
-              boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
-              transition: "all 0.3s ease",
-            }}
-          >
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowReviewModal(false)}>
             Close
           </Button>
           <Button
             variant="primary"
             disabled={addingReview}
             onClick={handleAddReview}
-            style={{
-              marginLeft: "0.5rem",
-              padding: "0.5rem 1.5rem",
-              borderRadius: "50px",
-              fontWeight: "600",
-              fontSize: "1rem",
-              backgroundColor: "#007bff",
-              borderColor: "#007bff",
-              boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
-              transition: "all 0.3s ease",
-            }}
           >
             Submit
           </Button>
         </Modal.Footer>
       </Modal>
-      ;{/* Language Selection Modal */}
+      {/* Language Selection Modal */}
       <Modal
         show={showModal}
         onHide={() => setShowModal(false)}
         centered
-        style={{ fontFamily: "Arial, sans-serif" }}
       >
-        <Modal.Header
-          closeButton
-          style={{
-            borderBottom: "none",
-            color: "#fff",
-            borderTopLeftRadius: "10px",
-            borderTopRightRadius: "10px",
-          }}
-        >
-          <Modal.Title
-            style={{
-              fontWeight: "bold",
-              fontSize: "1.8rem",
-              textShadow: "1px 1px 2px rgba(0, 0, 0, 0.3)",
-            }}
-          >
-            Select Language
-          </Modal.Title>
+        <Modal.Header closeButton>
+          <Modal.Title>Select Language</Modal.Title>
         </Modal.Header>
-        <Modal.Body
-          style={{
-            backgroundColor: "#f8f9fa",
-            padding: "30px 25px",
-            borderBottomLeftRadius: "10px",
-            borderBottomRightRadius: "10px",
-            boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
-          }}
-        >
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(100px, 1fr))",
-              gap: "20px",
-            }}
-          >
+        <Modal.Body>
+          <Row>
             {movie.languages.map((language: string) => (
-              <Button
-                key={language}
-                style={{
-                  background: "linear-gradient(135deg, #6f42c1, #e83e8c)",
-                  color: "#fff",
-                  border: "none",
-                  borderRadius: "50px",
-                  padding: "12px 20px",
-                  fontSize: "1rem",
-                  fontWeight: "500",
-                  boxShadow: "0 8px 15px rgba(0, 0, 0, 0.1)",
-                  transition: "all 0.3s ease",
-                }}
-                onClick={() => handleLanguageSelect(language)}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.transform = "scale(1.1)")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.transform = "scale(1)")
-                }
-              >
-                {language}
-              </Button>
+              <Col key={language} xs={6} sm={4} className="mb-3">
+                <Button
+                  variant="outline-primary"
+                  className="w-100"
+                  onClick={() => handleLanguageSelect(language)}
+                >
+                  {language}
+                </Button>
+              </Col>
             ))}
-          </div>
+          </Row>
         </Modal.Body>
       </Modal>
     </>
@@ -819,3 +726,4 @@ const MovieDetailScreen: React.FC = () => {
 };
 
 export default MovieDetailScreen;
+

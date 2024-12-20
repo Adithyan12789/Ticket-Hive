@@ -8,11 +8,10 @@ import {
   useCreateChatRoomMutation,
   useMarkMessagesAsReadTheaterOwnerMutation,
 } from "../../Slices/TheaterApiSlice";
-import io, { Socket } from "socket.io-client";
+import io from "socket.io-client";
 import { format } from "date-fns";
 import TheaterOwnerLayout from "../../Components/TheaterComponents/TheaterLayout";
 import {
-  FaArrowLeft,
   FaCheck,
   FaCheckDouble,
   FaPaperclip,
@@ -26,14 +25,24 @@ import {
   FaFileExcel,
 } from "react-icons/fa";
 import "./TheaterChatScreen.css";
-import { Admin, ChatRoom, Message, MessageData } from "../../Types/ChatTypes";
+import { Admin, Message, MessageData } from "../../Types/ChatTypes";
 
-const socket: Socket = io("http://localhost:5000");
+const socket = io("http://localhost:5000");
 
 const defaultProfileImage =
   "https://media.istockphoto.com/id/1495088043/vector/user-profile-icon-avatar-or-person-icon-profile-picture-portrait-symbol-default-portrait.jpg?s=612x612&w=0&k=20&c=dhV2p1JwmloBTOaGAtaA3AW1KSnjsdMt7-U_3EZElZ0=";
 
 const IMAGES_DIR_PATH = "http://localhost:5000/";
+
+interface ChatRoom {
+  _id: string;
+  adminId: {
+    _id: string;
+    name: string;
+    profileImage?: string;
+  };
+  unreadMessagesCount: number;
+}
 
 const ChatScreen: React.FC = () => {
   const [selectedAdmin, setSelectedAdmin] = useState<Admin | null>(null);
@@ -76,15 +85,36 @@ const ChatScreen: React.FC = () => {
   }, [selectedChatRoom, refetchMessages, markMessagesAsRead]);
 
   useEffect(() => {
-    socket.on("message", (message) => {
+    const handleNewMessage = (message: Message) => {
       if (message.chatRoomId === selectedChatRoom?._id) {
         refetchMessages();
+        markMessagesAsRead(selectedChatRoom._id).then(() => {
+          socket.emit("messageRead", { roomId: selectedChatRoom._id });
+        });
+      } else {
+        // Update unread count for other chat rooms
+        refetchChatRooms();
       }
-    });
-    return () => {
-      socket.off("message");
     };
-  }, [selectedChatRoom, refetchMessages]);
+
+    const handleUnreadMessage = (data: { roomId: string, count: number }) => {
+      setSelectedChatRoom((prevRoom) => {
+        if (prevRoom && prevRoom._id === data.roomId) {
+          return { ...prevRoom, unreadMessagesCount: data.count };
+        }
+        return prevRoom;
+      });
+      refetchChatRooms();
+    };
+
+    socket.on("message", handleNewMessage);
+    socket.on("unreadMessage", handleUnreadMessage);
+
+    return () => {
+      socket.off("message", handleNewMessage);
+      socket.off("unreadMessage", handleUnreadMessage);
+    };
+  }, [selectedChatRoom, refetchMessages, markMessagesAsRead, refetchChatRooms]);
 
   useEffect(() => {
     const handleMessageRead = async (data: { roomId: string }) => {
@@ -110,7 +140,7 @@ const ChatScreen: React.FC = () => {
 
   useEffect(() => {
     refetchChatRooms();
-  });
+  }, [refetchChatRooms]);
 
   useEffect(() => {
     socket.on("typingAdmin", () => {
@@ -140,27 +170,32 @@ const ChatScreen: React.FC = () => {
     }
   }, [messages]);
 
-  useEffect(() => {
-    const handleNewMessage = (message: Message) => {
-      if (message.chatRoomId === selectedChatRoom?._id) {
-        refetchMessages();
-        markMessagesAsRead(selectedChatRoom?._id).then(() => {
-          socket.emit("messageRead", { roomId: selectedChatRoom?._id });
-        });
-      }
-    };
-
-    socket.on("message", handleNewMessage);
-
-    return () => {
-      socket.off("message", handleNewMessage);
-    };
-  }, [selectedChatRoom, refetchMessages, markMessagesAsRead]);
-
   const handleSendMessage = async () => {
     if (newMessage.trim() || selectedFile) {
+      let chatRoomId = selectedChatRoom?._id;
+
+      // If no chat room is selected, create a new one
+      if (!chatRoomId) {
+        if (!selectedAdmin) {
+          console.error("No admin selected");
+          return;
+        }
+        const newChatRoom = await createChatRoom({
+          adminId: selectedAdmin._id,
+        }).unwrap();
+        chatRoomId = newChatRoom._id;
+        setSelectedChatRoom(newChatRoom);
+        refetchChatRooms();
+      }
+
+      // Ensure chatRoomId is not undefined
+      if (!chatRoomId) {
+        console.error("Failed to create or retrieve chat room");
+        return;
+      }
+
       const messageData: MessageData = {
-        chatRoomId: selectedChatRoom?._id || "",
+        chatRoomId: chatRoomId,
         content: newMessage,
         senderType: "TheaterOwner",
       };
@@ -178,20 +213,25 @@ const ChatScreen: React.FC = () => {
       setSelectedFileName("");
       refetchMessages();
       socket.emit("message", messageData);
-      socket.emit("messageUnRead", { roomId: selectedChatRoom?._id });
-      socket.emit("stopTypingTheaterOwner", { roomId: selectedChatRoom?._id });
+      socket.emit("messageUnRead", { roomId: chatRoomId });
+      socket.emit("stopTypingTheaterOwner", { roomId: chatRoomId });
     }
   };
 
-  const handleChatRoomSelect = async (adminId: string) => {
-    let chatRoom = chatRooms.find(
-      (room: { adminId: { _id: string } }) => room.adminId._id === adminId
+  const handleAdminSelect = async (admin: Admin) => {
+    setSelectedAdmin(admin);
+    const chatRoom = chatRooms.find(
+      (room: ChatRoom) => room.adminId._id === admin._id
     );
-    if (!chatRoom) {
-      chatRoom = await createChatRoom({ adminId }).unwrap();
-      refetchChatRooms();
+    if (chatRoom) {
+      setSelectedChatRoom(chatRoom);
+      if (chatRoom.unreadMessagesCount > 0) {
+        markMessagesAsRead(chatRoom._id);
+        socket.emit("messageRead", { roomId: chatRoom._id });
+      }
+    } else {
+      setSelectedChatRoom(null);
     }
-    setSelectedChatRoom(chatRoom);
   };
 
   let typingTimeout: NodeJS.Timeout | undefined;
@@ -276,189 +316,207 @@ const ChatScreen: React.FC = () => {
 
   return (
     <TheaterOwnerLayout theaterOwnerName={""}>
-      <div className="container">
-        {!selectedAdmin && (
-          <div className="admin-selection">
-            <h2 className="admin-selection-title">Select an Admin</h2>
-            <div className="admin-list">
-              {admins.map((admin: Admin) => (
-                <div
-                  key={admin._id}
-                  onClick={() => {
-                    setSelectedAdmin(admin);
-                    handleChatRoomSelect(admin._id);
-                  }}
-                  className="admin-card"
-                >
-                  <img
-                    src={admin.profileImage || defaultProfileImage}
-                    alt={admin.name}
-                    className="admin-image"
-                  />
-                  <h4 className="admin-name">{admin.name}</h4>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-        {selectedAdmin && (
-          <div className="chat-room">
-            <div className="chat-header">
-              <div className="chat-header-info">
-                <img
-                  src={selectedAdmin.profileImage || defaultProfileImage}
-                  alt={selectedAdmin.name}
-                  className="chat-header-image"
-                />
-                <h4 className="chat-header-name">{selectedAdmin.name}</h4>
-              </div>
-              <button
-                onClick={() => setSelectedAdmin(null)}
-                className="back-button"
+      <div className="chat-container">
+        <div className="chat-sidebar">
+          <h2 className="user-sidebar-title">Admins</h2>
+          {admins.map((admin: Admin) => {
+            const chatRoom = chatRooms.find(
+              (room: ChatRoom) => room.adminId._id === admin._id
+            );
+            return (
+              <div
+                key={admin._id}
+                onClick={() => handleAdminSelect(admin)}
+                className={`admin-item ${
+                  selectedAdmin?._id === admin._id ? "active" : ""
+                }`}
               >
-                <FaArrowLeft className="back-icon" />
-                Back
-              </button>
-            </div>
-            <div className="chat-messages">
-              {messages.map((msg: Message) => (
-                <div
-                  key={msg._id}
-                  className={`message-container ${
-                    msg.senderType === "Admin" ? "admin" : "owner"
-                  }`}
-                >
-                  <div className="message">
-                    {msg?.fileUrl ? (
-                      <div className="file-message">
-                        {msg.fileUrl.match(/\.(jpg|jpeg|png|gif)$/i) ? (
-                          // If the file is an image, display the image
-                          <img
-                            src={`${IMAGES_DIR_PATH}${msg?.fileUrl}`}
-                            alt="file preview"
-                            className="file-preview"
-                            onClick={() =>
-                              handleImageClick(
-                                `${IMAGES_DIR_PATH}${msg?.fileUrl}`
-                              )
-                            }
-                          />
-                        ) : (
-                          // If the file is a document, display its icon, name, and a download button
-                          <div className="document-preview">
-                            {getFileIcon(msg.fileUrl)}
-                            <span className="file-name">
-                              {msg.content || msg.fileUrl.split("/").pop()}
-                            </span>
-                            <a
-                              href={`${IMAGES_DIR_PATH}${msg.fileUrl}`}
-                              download
-                              className="file-download-btn"
-                              title="Download"
-                            >
-                              <FaDownload />
-                            </a>
+                <img
+                  src={admin.profileImage || defaultProfileImage}
+                  alt={admin.name}
+                  className="admin-image"
+                />
+                <div className="admin-info">
+                  <span className="chat-name">{admin.name}</span>
+                  <span className="chat-preview">
+                    {chatRoom
+                      ? chatRoom.unreadMessagesCount > 0
+                        ? `${chatRoom.unreadMessagesCount} unread messages`
+                        : "No new messages"
+                      : "Start a new conversation"}
+                  </span>
+                </div>
+                {chatRoom?.unreadMessagesCount > 0 && (
+                  <div className="admin-unread-indicator">
+                    <span className="admin-unread-count">
+                      {chatRoom.unreadMessagesCount}
+                    </span>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+        <div className="chat-main">
+          {selectedAdmin ? (
+            <div className="chat-room">
+              <div className="chat-header">
+                <div className="chat-header-info">
+                  <img
+                    src={selectedAdmin.profileImage || defaultProfileImage}
+                    alt={selectedAdmin.name}
+                    className="chat-header-image"
+                  />
+                  <h4 className="chat-header-name">{selectedAdmin.name}</h4>
+                </div>
+              </div>
+              <div className="chat-messages">
+                {messages.map((msg: Message) => (
+                  <div
+                    key={msg._id}
+                    className={`message-container ${
+                      msg.senderType === "Admin" ? "admin" : "owner"
+                    }`}
+                  >
+                    <div className="message">
+                      {msg?.fileUrl ? (
+                        <div className="file-message">
+                          {msg.fileUrl.match(/\.(jpg|jpeg|png|gif)$/i) ? (
+                            <img
+                              src={`${IMAGES_DIR_PATH}${msg?.fileUrl}`}
+                              alt="file preview"
+                              className="file-preview"
+                              onClick={() =>
+                                handleImageClick(
+                                  `${IMAGES_DIR_PATH}${msg?.fileUrl}`
+                                )
+                              }
+                            />
+                          ) : (
+                            <div className="document-preview">
+                              {getFileIcon(msg.fileUrl)}
+                              <span className="file-name">
+                                {msg.content || msg.fileUrl.split("/").pop()}
+                              </span>
+                              <a
+                                href={`${IMAGES_DIR_PATH}${msg.fileUrl}`}
+                                download
+                                className="file-download-btn"
+                                title="Download"
+                              >
+                                <FaDownload />
+                              </a>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="message-content">{msg?.content}</span>
+                      )}
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          gap: "10px",
+                          marginTop: "10px",
+                        }}
+                      >
+                        <small className="message-time">
+                          {format(new Date(msg.createdAt), "hh:mm a")}
+                        </small>
+                        {msg.senderType === "TheaterOwner" && (
+                          <div className="message-status">
+                            {msg.read ? (
+                              <FaCheckDouble className="status-read" />
+                            ) : (
+                              <FaCheck className="status-read" />
+                            )}
                           </div>
                         )}
                       </div>
-                    ) : (
-                      // Regular text message
-                      <span className="message-content">{msg?.content}</span>
-                    )}
-
-                    <small className="message-time">
-                      {format(new Date(msg.createdAt), "hh:mm a")}
-                    </small>
-                    {msg.senderType === "TheaterOwner" && (
-                      <div className="message-status">
-                        {msg.read ? (
-                          <FaCheckDouble className="status-read" />
-                        ) : (
-                          <FaCheck className="status-unread" />
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-              <div ref={messagesEndRef} />
-            </div>
-            <div className="chat-input">
-              <input
-                type="text"
-                value={newMessage}
-                onChange={handleTyping}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleSendMessage();
-                }}
-                placeholder="Type a message..."
-                className="input-box"
-              />
-              <div className="input-controls">
-                {renderFilePreview()}
-
-                {/* Image Modal */}
-                {isImageModalOpen && modalImage && (
-                  <div
-                    className="image-modal-overlay"
-                    onClick={closeImageModal}
-                  >
-                    <div
-                      className="image-modal-content"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <button
-                        className="image-modal-close-btn"
-                        onClick={closeImageModal}
-                        title="Close"
-                      >
-                        &times;
-                      </button>
-                      <img
-                        src={modalImage}
-                        alt="Large Preview"
-                        className="large-image"
-                      />
-                      <a
-                        href={modalImage}
-                        download
-                        className="image-download-btn"
-                        title="Download Image"
-                      >
-                        <FaDownload />
-                      </a>
                     </div>
                   </div>
-                )}
-
-                <button onClick={toggleEmojiPicker} className="emoji-button">
-                  <FaSmile />
-                </button>
-                {showEmojiPicker && (
-                  <div className="emoji-picker">
-                    <EmojiPicker onEmojiClick={handleEmojiClick} />
-                  </div>
-                )}
-                <label htmlFor="image-upload" className="image-upload-label">
-                  <FaPaperclip />
-                </label>
-                <input
-                  type="file"
-                  id="image-upload"
-                  accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt"
-                  onChange={handleImageUpload}
-                  className="image-upload-input"
-                />
+                ))}
+                <div ref={messagesEndRef} />
               </div>
-              <button onClick={handleSendMessage} className="send-button">
-                <FaPaperPlane className="send-icon" />
-              </button>
+              <div className="chat-input">
+                <input
+                  type="text"
+                  value={newMessage}
+                  onChange={handleTyping}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleSendMessage();
+                  }}
+                  placeholder="Type a message..."
+                  className="input-box"
+                />
+                <div className="input-controls">
+                  {renderFilePreview()}
+                  {isImageModalOpen && modalImage && (
+                    <div
+                      className="image-modal-overlay"
+                      onClick={closeImageModal}
+                    >
+                      <div
+                        className="image-modal-content"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <button
+                          className="image-modal-close-btn"
+                          onClick={closeImageModal}
+                          title="Close"
+                        >
+                          &times;
+                        </button>
+                        <img
+                          src={modalImage}
+                          alt="Large Preview"
+                          className="large-image"
+                        />
+                        <a
+                          href={modalImage}
+                          download
+                          className="image-download-btn"
+                          title="Download Image"
+                        >
+                          <FaDownload />
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                  <button onClick={toggleEmojiPicker} className="emoji-button">
+                    <FaSmile />
+                  </button>
+                  {showEmojiPicker && (
+                    <div className="emoji-picker">
+                      <EmojiPicker onEmojiClick={handleEmojiClick} />
+                    </div>
+                  )}
+                  <label htmlFor="image-upload" className="image-upload-label">
+                    <FaPaperclip />
+                  </label>
+                  <input
+                    type="file"
+                    id="image-upload"
+                    accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt"
+                    onChange={handleImageUpload}
+                    className="image-upload-input"
+                  />
+                </div>
+                <button onClick={handleSendMessage} className="send-button">
+                  <FaPaperPlane className="send-icon" />
+                </button>
+              </div>
             </div>
-          </div>
-        )}
+          ) : (
+            <div className="no-chat-selected">
+              <p>Select an admin from the sidebar to start chatting.</p>
+            </div>
+          )}
+        </div>
       </div>
     </TheaterOwnerLayout>
   );
 };
 
 export default ChatScreen;
+

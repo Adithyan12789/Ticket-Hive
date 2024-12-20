@@ -148,7 +148,7 @@ export const adminApiSlice = apiSlice.injectEndpoints({
     }),
 
     getAdminChatRooms: builder.query({
-      query: (theaterOwnerId) => `${ADMIN_URL}/chatrooms/${theaterOwnerId}`,
+      query: (adminId) => `${ADMIN_URL}/chatrooms/${adminId}`,
     }),
 
     sendAdminMessage: builder.mutation({

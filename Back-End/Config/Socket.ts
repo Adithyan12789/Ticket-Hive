@@ -1,11 +1,10 @@
+// Previous imports remain the same
 import { Server, Socket } from "socket.io";
 import express from "express";
 import http from "http";
 
 const app = express();
-
 const server = http.createServer(app);
-
 const io = new Server(server, {
   cors: {
     origin: ["http://localhost:3000"],
@@ -16,6 +15,7 @@ const io = new Server(server, {
 io.on("connection", (socket: Socket) => {
   console.log("Client Connected", socket.id);
 
+  // All previous event handlers remain unchanged
   socket.on("joinRoom", ({ roomId }) => {
     socket.join(roomId);
     console.log(`user joined room ${roomId}`);
@@ -27,7 +27,6 @@ io.on("connection", (socket: Socket) => {
   });
 
   socket.on("messageRead", ({ roomId }) => {
-    // Broadcast to all clients in the room, including sender
     io.in(roomId).emit("messageRead", { roomId });
     console.log("messageRead emitted to room:", roomId);
   });
@@ -42,6 +41,18 @@ io.on("connection", (socket: Socket) => {
     console.log("messageUnReadAdmin");
   });
 
+  // Add new event handlers for unread message counts
+  socket.on("updateUnreadCount", ({ roomId, count }) => {
+    io.to(roomId).emit("unreadMessage", { roomId, count });
+    console.log(`Unread count updated for room ${roomId}: ${count}`);
+  });
+
+  socket.on("resetUnreadCount", ({ roomId }) => {
+    io.to(roomId).emit("unreadMessage", { roomId, count: 0 });
+    console.log(`Unread count reset for room ${roomId}`);
+  });
+
+  // Previous typing event handlers remain unchanged
   socket.on("typingTheaterOwner", ({ roomId }) => {
     socket.to(roomId).emit("typingTheaterOwner");
     console.log("typingTheaterOwner");
@@ -62,20 +73,15 @@ io.on("connection", (socket: Socket) => {
     console.log("stopTypingAdmin");
   });
 
-  socket.on("disconnect", () => {
-    console.log("Client Disconnected");
-  });
-  // --- Notification Sockets ---
+  // Previous notification handlers remain unchanged
   socket.on("joinNotifications", ({ userId }) => {
-    socket.join(userId); // Join a user-specific room for notifications
+    socket.join(userId);
     console.log(`User ${userId} joined their notification room`);
   });
 
   socket.on("sendNotification", ({ userId, notification }) => {
     io.to(userId).emit("newNotification", { notification });
-    console.log(
-      `Real-time: Notification sent to user ${userId}: ${notification}`
-    );
+    console.log(`Real-time: Notification sent to user ${userId}: ${notification}`);
   });
 
   socket.on("disconnect", () => {
@@ -84,3 +90,4 @@ io.on("connection", (socket: Socket) => {
 });
 
 export { app, io, server };
+

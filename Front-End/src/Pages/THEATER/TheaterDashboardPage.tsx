@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import Sidebar from "../../Components/TheaterComponents/TheaterSideBar";
 import ReportModal from "../../Components/TheaterComponents/TheaterReportModal";
 import { useGetTheaterStatsMutation } from "../../Slices/TheaterApiSlice";
+import { FilteredEarningsChart } from "../../Components/AdminComponents/filtered-earnings-chart";
 import {
   AreaChart,
   Area,
@@ -65,13 +66,16 @@ const StatValue = styled(Typography)`
 
 interface Booking {
   bookingDate: string;
-  movieTitle: string;
+  movie: {
+    _id: string;
+    title: string;
+  };
   totalPrice: number;
 }
 
 interface Stats {
-  users: number;  // Changed from theaterOwners to theaters
-  theaters: number;  // Changed from theaterOwners to theaters
+  users: number; // Changed from theaterOwners to theaters
+  theaters: number; // Changed from theaterOwners to theaters
   totalEarnings: number;
   bookings: number;
   movies: number;
@@ -102,7 +106,19 @@ const TheaterDashboard: React.FC = () => {
   const [earningsData, setEarningsData] = useState<
     { date: string; earnings: number }[]
   >([]);
-  const [isModalOpen, setIsModalOpen] = useState(false); // Modal open state
+
+  const [filteredEarningsData, setFilteredEarningsData] = useState<
+    {
+      date: string;
+      earnings: number;
+    }[]
+  >([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [earningsFilter, setEarningsFilter] = useState<
+    "all" | "monthly" | "yearly"
+  >("all");
+
+  console.log("mostBookedMoviesData: ", mostBookedMoviesData);
 
   useEffect(() => {
     if (ownerId) {
@@ -110,29 +126,30 @@ const TheaterDashboard: React.FC = () => {
         .unwrap()
         .then((response: TheaterStatsResponse) => {
           const { stats, bookings } = response;
+
           setStats(stats);
-  
+
           console.log("bookings: ", bookings);
-  
+
           // Extract booking dates and calculate trends
           const bookingDates = bookings.map((b) => b.bookingDate.split("T")[0]);
-  
+
           const uniqueDates = Array.from(new Set(bookingDates));
           const trendsData = uniqueDates.map((date) => ({
             date,
             count: bookingDates.filter((d) => d === date).length,
           }));
           setBookingTrendsData(trendsData);
-  
+
           // Calculate most booked movies
-          const movieTitles = bookings.map((b) => b.movieTitle);
+          const movieTitles = bookings.map((b) => b.movie.title);
           const uniqueMovies = Array.from(new Set(movieTitles));
           const moviesData = uniqueMovies.map((movie) => ({
             movie,
             count: movieTitles.filter((title) => title === movie).length,
           }));
           setMostBookedMoviesData(moviesData);
-  
+
           // Calculate earnings by date
           const earningsByDate = bookings.reduce((acc, booking) => {
             const date = booking.bookingDate.split("T")[0];
@@ -140,7 +157,7 @@ const TheaterDashboard: React.FC = () => {
             acc[date] = (acc[date] || 0) + earnings;
             return acc;
           }, {} as Record<string, number>);
-  
+
           const earningsDataArray = Object.entries(earningsByDate).map(
             ([date, earnings]) => ({
               date,
@@ -152,7 +169,32 @@ const TheaterDashboard: React.FC = () => {
         .catch((error) => console.error("Error fetching data:", error));
     }
   }, [ownerId, getTheaterStats]);
-  
+
+  const filterEarningsData = (filter: "all" | "monthly" | "yearly") => {
+    setEarningsFilter(filter);
+    const currentDate = new Date();
+    if (filter === "all") {
+      setFilteredEarningsData(earningsData);
+    } else if (filter === "monthly") {
+      const currentMonth = currentDate.getMonth();
+      const currentYear = currentDate.getFullYear();
+      const monthlyData = earningsData.filter((item) => {
+        const itemDate = new Date(item.date);
+        return (
+          itemDate.getMonth() === currentMonth &&
+          itemDate.getFullYear() === currentYear
+        );
+      });
+      setFilteredEarningsData(monthlyData);
+    } else if (filter === "yearly") {
+      const currentYear = currentDate.getFullYear();
+      const yearlyData = earningsData.filter((item) => {
+        const itemDate = new Date(item.date);
+        return itemDate.getFullYear() === currentYear;
+      });
+      setFilteredEarningsData(yearlyData);
+    }
+  };
 
   return (
     <TheaterLayout theaterOwnerName={""}>
@@ -194,6 +236,7 @@ const TheaterDashboard: React.FC = () => {
                 }),
               },
               { title: "Bookings", value: stats.bookings },
+              { title: "Movies", value: stats.movies },
             ].map((stat, index) => (
               <Grid
                 item
@@ -212,6 +255,15 @@ const TheaterDashboard: React.FC = () => {
               </Grid>
             ))}
           </Grid>
+
+          <FilteredEarningsChart
+            data={filteredEarningsData}
+            filter={earningsFilter}
+            onFilterChange={(filter) => {
+              setEarningsFilter(filter);
+              filterEarningsData(filter);
+            }}
+          />
 
           {/* Total Earnings Section */}
           <Box
@@ -327,7 +379,7 @@ const TheaterDashboard: React.FC = () => {
           <Button
             variant="contained"
             color="primary"
-            style={{marginLeft: "530px"}}
+            style={{ marginLeft: "530px" }}
             onClick={() => setIsModalOpen(true)}
           >
             Generate Report
