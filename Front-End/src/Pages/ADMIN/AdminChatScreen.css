@@ -165,7 +165,7 @@
 
 
 .admin-message-container.admin .admin-message {
-  background-color: #007bff;
+  background-color: #5c81a9;
   text-align: left;
   color: white;
 }
@@ -200,7 +200,7 @@
 }
 
 .admin-status-unread {
-  color: #a0a0a0;
+  color: #d1d1d1;
 }
 
 .admin-chat-input {

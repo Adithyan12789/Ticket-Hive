@@ -180,7 +180,7 @@
 }
 
 .message-container.owner .message {
-  background-color: #007bff;
+  background-color: #5c81a9;
   color: white;
   text-align: left;
 }
@@ -207,7 +207,7 @@
 }
 
 .status-unread {
-  color: #a0a0a0;
+  color: #d1d1d1;
 }
 
 .chat-input {

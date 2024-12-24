@@ -325,7 +325,7 @@ const ChatScreen: React.FC = () => {
         <div className="admin-chat-main">
           {!selectedChatRoom ? (
             <div className="select-chat-prompt">
-              <h2>Select a theater owner to start messaging</h2>
+              <p style={{fontSize: "17px", textAlign: "left"}}>Select a theater owner to start messaging</p>
             </div>
           ) : (
             <div className="admin-chat-room">
