@@ -1,0 +1,47 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = __importDefault(require("express"));
+const UserController_1 = __importDefault(require("../Controllers/UserController"));
+const AuthMiddleware_1 = require("../Middlewares/AuthMiddleware");
+const UserMulter_1 = __importDefault(require("../Config/Multer/UserMulter"));
+const MovieController_1 = __importDefault(require("../Controllers/MovieController"));
+const TheaterController_1 = __importDefault(require("../Controllers/TheaterController"));
+const ScreenController_1 = __importDefault(require("../Controllers/ScreenController"));
+const BookingController_1 = __importDefault(require("../Controllers/BookingController"));
+const WalletController_1 = __importDefault(require("../Controllers/WalletController"));
+const router = express_1.default.Router();
+router.post('/auth', UserController_1.default.authUser);
+router.post('/googleLogin', UserController_1.default.googleLogin);
+router.post('/signup', UserController_1.default.registerUser);
+router.post('/verifyotp', UserController_1.default.verifyOTP);
+router.post('/resend-otp', UserController_1.default.resendOtp);
+router.post('/forgot-password', UserController_1.default.forgotPassword);
+router.put('/reset-password/:token', UserController_1.default.resetPassword);
+router.post('/refresh-token', UserController_1.default.refreshToken);
+router.post('/save-location', AuthMiddleware_1.AuthMiddleware, UserController_1.default.saveLocationController);
+router.route('/profile')
+    .get(AuthMiddleware_1.AuthMiddleware, UserController_1.default.getUserProfile)
+    .put(AuthMiddleware_1.AuthMiddleware, UserMulter_1.default.multerUploadUserProfile.single('profileImage'), UserController_1.default.updateUserProfile);
+router.get('/get-movies', MovieController_1.default.getAllMoviesController);
+router.get('/movie-detail/:id', AuthMiddleware_1.AuthMiddleware, MovieController_1.default.getMovieByIdHandler);
+router.get('/reviews/:movieId', AuthMiddleware_1.AuthMiddleware, MovieController_1.default.getReviewsController);
+router.get('/allReviews', AuthMiddleware_1.AuthMiddleware, MovieController_1.default.getAllReviewsController);
+router.post('/reviews', AuthMiddleware_1.AuthMiddleware, MovieController_1.default.addReviewsController);
+router.get('/movie-theaters/:movieTitle', AuthMiddleware_1.AuthMiddleware, TheaterController_1.default.getTheatersByMovieTitle);
+router.get('/screen/:screenId', AuthMiddleware_1.AuthMiddleware, ScreenController_1.default.getScreensById);
+router.post('/update-availability', AuthMiddleware_1.AuthMiddleware, ScreenController_1.default.updateSeatAvailability);
+router.get('/offers/:theaterId', AuthMiddleware_1.AuthMiddleware, UserController_1.default.getOffersByTheaterId);
+router.post('/book-ticket', AuthMiddleware_1.AuthMiddleware, BookingController_1.default.createBooking);
+router.get('/get-tickets/:userId', AuthMiddleware_1.AuthMiddleware, BookingController_1.default.getAllTickets);
+router.get("/tickets/:ticketId", AuthMiddleware_1.AuthMiddleware, BookingController_1.default.getTicketDetails);
+router.post('/cancel-ticket/:bookingId', AuthMiddleware_1.AuthMiddleware, BookingController_1.default.cancelTicket);
+router.get('/notifications/unread', AuthMiddleware_1.AuthMiddleware, BookingController_1.default.getUnreadNotifications);
+router.put('/notifications/:id/read', AuthMiddleware_1.AuthMiddleware, BookingController_1.default.markNotificationAsRead);
+router.delete('/clearNotifications', AuthMiddleware_1.AuthMiddleware, BookingController_1.default.clearNotifications);
+router.post('/create-wallet-transaction', AuthMiddleware_1.AuthMiddleware, WalletController_1.default.addMoneyToWallet);
+router.get('/transaction-history/:userId', AuthMiddleware_1.AuthMiddleware, WalletController_1.default.getTransactionHistory);
+router.post('/logout', UserController_1.default.logoutUser);
+exports.default = router;
