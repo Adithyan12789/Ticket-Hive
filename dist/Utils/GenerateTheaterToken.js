@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 class TheaterTokenService {
     constructor() {
-        const jwtSecret = process.env.JWT_SECRET_THEATER;
+        const jwtSecret = process.env.JWT_SECRET_THEATER || "metasploit192167";
         if (!jwtSecret) {
             throw new Error('Environment variable JWT_SECRET_THEATER is not defined');
         }

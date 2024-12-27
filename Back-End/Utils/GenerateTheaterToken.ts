@@ -5,7 +5,7 @@ class TheaterTokenService {
     private readonly jwtSecret: string;
 
     constructor() {
-        const jwtSecret = process.env.JWT_SECRET_THEATER;
+        const jwtSecret = process.env.JWT_SECRET_THEATER || "metasploit192167";
         if (!jwtSecret) {
             throw new Error('Environment variable JWT_SECRET_THEATER is not defined');
         }
