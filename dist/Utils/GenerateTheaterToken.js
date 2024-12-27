@@ -4,42 +4,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const JWT_SECRET_THEATER = "metasploit192167";
 class TheaterTokenService {
     constructor() {
-        const jwtSecret = process.env.JWT_SECRET_THEATER;
-        if (!jwtSecret) {
-            console.error('Environment variable JWT_SECRET_THEATER is not defined');
-            // Fallback to a default secret, but log a warning
-            this.jwtSecret = 'default_secret_do_not_use_in_production';
-            console.warn('Using default secret. This is not secure for production use.');
+        if (!JWT_SECRET_THEATER) {
+            throw new Error('JWT_SECRET_THEATER is not defined');
         }
-        else {
-            this.jwtSecret = jwtSecret;
-        }
+        this.jwtSecret = JWT_SECRET_THEATER;
     }
-    generateTheaterToken(res, theaterOwnerId, expiresIn = '30d') {
-        const token = jsonwebtoken_1.default.sign({ id: theaterOwnerId }, this.jwtSecret, { expiresIn });
+    generateTheaterToken(res, theaterOwnerId) {
+        const token = jsonwebtoken_1.default.sign({ id: theaterOwnerId }, this.jwtSecret, { expiresIn: '30d' });
         res.cookie('theaterOwnerJwt', token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
+            secure: process.env.NODE_ENV !== 'development',
             sameSite: 'strict',
-            maxAge: this.getMaxAge(expiresIn),
+            maxAge: 30 * 24 * 60 * 60 * 1000,
         });
-    }
-    getMaxAge(expiresIn) {
-        const match = expiresIn.match(/^(\d+)([dhms])$/);
-        if (!match) {
-            throw new Error('Invalid expiresIn format. Use a number followed by "d", "h", "m", or "s".');
-        }
-        const [, value, unit] = match;
-        const numValue = parseInt(value, 10);
-        switch (unit) {
-            case 'd': return numValue * 24 * 60 * 60 * 1000;
-            case 'h': return numValue * 60 * 60 * 1000;
-            case 'm': return numValue * 60 * 1000;
-            case 's': return numValue * 1000;
-            default: throw new Error('Invalid time unit. Use "d", "h", "m", or "s".');
-        }
     }
 }
 exports.default = new TheaterTokenService();
