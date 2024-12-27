@@ -6,11 +6,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 class TheaterTokenService {
     constructor() {
-        const jwtSecret = process.env.JWT_SECRET_THEATER || "metasploit192167";
+        const jwtSecret = process.env.JWT_SECRET_THEATER;
         if (!jwtSecret) {
-            throw new Error('Environment variable JWT_SECRET_THEATER is not defined');
+            console.error('Environment variable JWT_SECRET_THEATER is not defined');
+            // Fallback to a default secret, but log a warning
+            this.jwtSecret = 'default_secret_do_not_use_in_production';
+            console.warn('Using default secret. This is not secure for production use.');
         }
-        this.jwtSecret = jwtSecret;
+        else {
+            this.jwtSecret = jwtSecret;
+        }
     }
     generateTheaterToken(res, theaterOwnerId, expiresIn = '30d') {
         const token = jsonwebtoken_1.default.sign({ id: theaterOwnerId }, this.jwtSecret, { expiresIn });

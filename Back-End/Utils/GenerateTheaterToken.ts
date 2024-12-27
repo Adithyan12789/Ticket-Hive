@@ -5,11 +5,15 @@ class TheaterTokenService {
     private readonly jwtSecret: string;
 
     constructor() {
-        const jwtSecret = process.env.JWT_SECRET_THEATER || "metasploit192167";
+        const jwtSecret = process.env.JWT_SECRET_THEATER;
         if (!jwtSecret) {
-            throw new Error('Environment variable JWT_SECRET_THEATER is not defined');
+            console.error('Environment variable JWT_SECRET_THEATER is not defined');
+            // Fallback to a default secret, but log a warning
+            this.jwtSecret = 'default_secret_do_not_use_in_production';
+            console.warn('Using default secret. This is not secure for production use.');
+        } else {
+            this.jwtSecret = jwtSecret;
         }
-        this.jwtSecret = jwtSecret;
     }
 
     public generateTheaterToken(res: Response, theaterOwnerId: string, expiresIn: string = '30d'): void {
