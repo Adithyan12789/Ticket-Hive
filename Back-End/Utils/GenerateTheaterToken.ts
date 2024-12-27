@@ -1,17 +1,15 @@
 import { Response } from 'express';
 import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 class TheaterTokenService {
     private jwtSecret: string;
+    private jwts = process.env.JWT_SECRET_THEATER || 'metasploit192167';
 
     constructor() {
-        if (!process.env.JWT_SECRET_THEATER) {
+        if (!this.jwts) {
             throw new Error('JWT_SECRET_THEATER is not defined');
         }
-        this.jwtSecret = process.env.JWT_SECRET_THEATER || 'metasploit192167';
+        this.jwtSecret = this.jwts;
     }
 
     public generateTheaterToken(res: Response, theaterOwnerId: string): void {
