@@ -7,8 +7,12 @@ class TheaterTokenService {
     private jwtSecret: string;
 
     constructor() {
+        console.log("JWT_SECRET_THEATER: ", JWT_SECRET_THEATER);
+        
+
         if (JWT_SECRET_THEATER) {
             this.jwtSecret = JWT_SECRET_THEATER;
+            console.log("this.jwtSecret: ", this.jwtSecret);
         }else{
             throw new Error('JWT_SECRET_THEATER is not defined');
         }
