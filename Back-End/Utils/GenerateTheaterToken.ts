@@ -1,14 +1,17 @@
 import { Response } from 'express';
 import jwt from 'jsonwebtoken';
 
+const JWT_SECRET_THEATER="metasploit192167";
+
 class TheaterTokenService {
     private jwtSecret: string;
 
     constructor() {
-        if (!process.env.JWT_SECRET_THEATER) {
+        if (JWT_SECRET_THEATER) {
+            this.jwtSecret = JWT_SECRET_THEATER;
+        }else{
             throw new Error('JWT_SECRET_THEATER is not defined');
         }
-        this.jwtSecret = process.env.JWT_SECRET_THEATER;
     }
 
     public generateTheaterToken(res: Response, theaterOwnerId: string): void {
