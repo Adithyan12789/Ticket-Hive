@@ -9,5 +9,5 @@
     "skipLibCheck": true                       // Skip type checking of declaration files
   },
   "include": ["Back-End/**/*.ts", "Back-End/server.ts", "Back-End/Middlewares/AdminAuthMiddleware.jsx"],              // Include all .ts files in Back-End folder
-  "exclude": ["node_modules"]                  // Exclude node_modules from compilation
+  "exclude": ["Back-End/node_modules"]                  // Exclude node_modules from compilation
 }
