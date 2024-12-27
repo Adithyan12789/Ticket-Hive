@@ -15,7 +15,6 @@ const io = new Server(server, {
 io.on("connection", (socket: Socket) => {
   console.log("Client Connected", socket.id);
 
-  // All previous event handlers remain unchanged
   socket.on("joinRoom", ({ roomId }) => {
     socket.join(roomId);
     console.log(`user joined room ${roomId}`);
@@ -41,7 +40,6 @@ io.on("connection", (socket: Socket) => {
     console.log("messageUnReadAdmin");
   });
 
-  // Add new event handlers for unread message counts
   socket.on("updateUnreadCount", ({ roomId, count }) => {
     io.to(roomId).emit("unreadMessage", { roomId, count });
     console.log(`Unread count updated for room ${roomId}: ${count}`);
@@ -52,7 +50,6 @@ io.on("connection", (socket: Socket) => {
     console.log(`Unread count reset for room ${roomId}`);
   });
 
-  // Previous typing event handlers remain unchanged
   socket.on("typingTheaterOwner", ({ roomId }) => {
     socket.to(roomId).emit("typingTheaterOwner");
     console.log("typingTheaterOwner");
@@ -73,7 +70,6 @@ io.on("connection", (socket: Socket) => {
     console.log("stopTypingAdmin");
   });
 
-  // Previous notification handlers remain unchanged
   socket.on("joinNotifications", ({ userId }) => {
     socket.join(userId);
     console.log(`User ${userId} joined their notification room`);

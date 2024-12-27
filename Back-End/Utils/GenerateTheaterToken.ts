@@ -1,5 +1,8 @@
 import { Response } from 'express';
 import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 class TheaterTokenService {
     private jwtSecret: string;
