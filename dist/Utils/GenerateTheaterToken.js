@@ -4,17 +4,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const JWT_SECRET_THEATER = "metasploit192167";
 class TheaterTokenService {
     constructor() {
-        console.log("JWT_SECRET_THEATER: ", JWT_SECRET_THEATER);
-        if (JWT_SECRET_THEATER) {
-            this.jwtSecret = JWT_SECRET_THEATER;
-            console.log("this.jwtSecret: ", this.jwtSecret);
-        }
-        else {
+        console.log("process.env.JWT_SECRET_THEATER: ", process.env.JWT_SECRET_THEATER);
+        if (!process.env.JWT_SECRET_THEATER) {
+            console.log("There is no jwt secret theater");
             throw new Error('JWT_SECRET_THEATER is not defined');
         }
+        this.jwtSecret = process.env.JWT_SECRET_THEATER;
+        console.log("this.jwtSecret: ", this.jwtSecret);
     }
     generateTheaterToken(res, theaterOwnerId) {
         const token = jsonwebtoken_1.default.sign({ id: theaterOwnerId }, this.jwtSecret, { expiresIn: '30d' });
