@@ -9,7 +9,8 @@
     "client": "npm run dev --prefix Front-End",
     "dev": " concurrently \"npm run server\" \"npm run client\" ",
     "prepare": "husky",
-    "release": "standard-version"
+    "release": "standard-version",
+    "type": "module"
   },
   "author": "",
   "license": "ISC",
