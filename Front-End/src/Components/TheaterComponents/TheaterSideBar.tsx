@@ -7,7 +7,7 @@ import {
   FaCogs,
   FaComments,
 } from "react-icons/fa";
-import "./TheaterSidebar.css";
+import "./TheaterSideBar.css"
 
 const TheaterOwnerSidebar: React.FC = () => {
   const location = useLocation();
