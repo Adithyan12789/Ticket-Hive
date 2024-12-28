@@ -1,7 +1,5 @@
 import React from "react";
 import { Dialog, DialogActions, DialogContent, DialogTitle, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from "@mui/material";
-// import { jsPDF } from "jspdf";
-import 'jspdf-autotable'
 import jsPDF from 'jspdf'
 import "jspdf-autotable";  // Ensure this is imported
 import * as XLSX from "xlsx";
