@@ -18,7 +18,12 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ['slick-carousel', 'react-datepicker'],
+    include: ['slick-carousel', 'react-datepicker', 'jspdf', 'jspdf-autotable'],
+  },
+  resolve: {
+    alias: {
+      'jspdf-autotable': 'jspdf-autotable/dist/jspdf.plugin.autotable'
+    }
   },
   css: {
     preprocessorOptions: {

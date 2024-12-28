@@ -5,6 +5,7 @@
     useGetMovieByMovieIdQuery,
     useGetTheatersByMovieTitleQuery,
   } from "../../Slices/UserApiSlice";
+  import 'react-datepicker/dist/react-datepicker.css'
   import Loader from "../../Components/UserComponents/Loader";
   import 'react-datepicker/dist/react-datepicker.css'
   import { toast } from "react-toastify";
