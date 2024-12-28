@@ -18,12 +18,15 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ['slick-carousel'],
+    include: ['slick-carousel', 'react-datepicker'],
   },
   css: {
     preprocessorOptions: {
       scss: {
-        additionalData: `@import "slick-carousel/slick/slick.css";`,
+        additionalData: `
+          @import "slick-carousel/slick/slick.css";
+          @import "react-datepicker/dist/react-datepicker.css";
+        `,
       },
     },
   },
