@@ -17,7 +17,7 @@ dotenv_1.default.config();
 DB_1.default.connectDB();
 const port = process.env.PORT || 5000;
 Socket_1.app.use((0, cors_1.default)({
-    origin: ["http://localhost:5000", "http://localhost:3000"],
+    origin: ["http://localhost:3000", "https://ticket-hive-rho.vercel.app/", "https://ticket-hive-a0yhxvn6i-adithyan-narayanans-projects.vercel.app/"],
     credentials: true,
 }));
 Socket_1.app.use(express_1.default.json());
