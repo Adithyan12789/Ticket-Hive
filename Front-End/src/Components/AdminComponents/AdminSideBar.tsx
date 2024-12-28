@@ -8,7 +8,7 @@ import {
   FaCheck,
   FaComments,
 } from "react-icons/fa";
-import "./AdminSidebar.css";
+import "./AdminSideBar.css"
 import { AdminSidebarProps } from "../../Types/AdminTypes";
 import { MdMovie } from "react-icons/md";
 
