@@ -11,5 +11,21 @@ export default defineConfig({
         changeOrigin: true,
       },
     },
-  },  
+  },
+  build: {
+    rollupOptions: {
+      external: [],
+    },
+  },
+  optimizeDeps: {
+    include: ['slick-carousel'],
+  },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        additionalData: `@import "slick-carousel/slick/slick.css";`,
+      },
+    },
+  },
 })
+
