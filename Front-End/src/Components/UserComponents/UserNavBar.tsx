@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Navbar, Nav, Container } from "react-bootstrap";
 import { FaUser, FaCalendarAlt, FaWallet, FaSignOutAlt } from "react-icons/fa";
-import "./UserNavbar.css";
+import "./UserNavBar.css"
 import { AppDispatch, RootState } from "../../Store";
 import { useDispatch, useSelector } from "react-redux";
 import {
