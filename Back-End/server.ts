@@ -15,16 +15,21 @@ Database.connectDB();
 
 const port = process.env.PORT || 5000;
 
-app.use(cors({
-    origin: ["http://localhost:3000", "https://ticket-hive-eight.vercel.app/", "https://ticket-hive-git-main-adithyan-narayanans-projects.vercel.app/"],
-    credentials: true,
-  }));  
+const corsOptions = {
+  origin: [
+    "http://localhost:3000",
+    "https://ticket-hive-eight.vercel.app",
+    "https://ticket-hive-git-main-adithyan-narayanans-projects.vercel.app"
+  ],
+  credentials: true // If you're using cookies or authentication headers
+};
 
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-app.use(express.static('Back-End/public'));
+app.use(express.static('Back-End/public')); 
 
 app.use("/api/users", UserRoutes);
 app.use("/api/admin", AdminRoutes);
