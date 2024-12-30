@@ -7,7 +7,7 @@ import AdminLayout from "../../Components/AdminComponents/AdminLayout";
 import { toast } from "react-toastify";
 import Loader from "../../Components/UserComponents/Loader";
 
-const THEATER_IMAGES_DIR_PATH = "http://localhost:5000/movieImages/";
+const THEATER_IMAGES_DIR_PATH = "https://tickethive.fun/movieImages/";
 
 const MovieDetailScreen: React.FC = () => {
   const { id } = useParams();

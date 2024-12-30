@@ -20,7 +20,7 @@ import UserProfileNavbar from "../../Components/UserComponents/UserNavBar";
 import "./UserProfilePage.css";
 import { useNavigate } from "react-router-dom";
 
-const PROFILE_IMAGE_DIR_PATH = "http://localhost:5000/UserProfileImages/";
+const PROFILE_IMAGE_DIR_PATH = "https://tickethive.fun/UserProfileImages/";
 const DEFAULT_PROFILE_IMAGE = "/profileImage_1729749713837.jpg";
 
 const ProfileScreen: React.FC = () => {

@@ -34,7 +34,7 @@ import { Screen } from "../../Types/ScreenTypes";
 import { MovieManagement } from "../../Types/MoviesTypes";
 import Swal from "sweetalert2";
 import React from "react";
-const THEATER_IMAGES_DIR_PATH = "http://localhost:5000/TheatersImages/";
+const THEATER_IMAGES_DIR_PATH = "https://tickethive.fun/TheatersImages/";
 const DEFAULT_THEATER_IMAGE = "/profileImage_1729749713837.jpg";
 const TheaterDetailScreen: React.FC = () => {
   const { id } = useParams();

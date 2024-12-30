@@ -31,9 +31,9 @@ import {
 } from "react-icons/fa";
 import Footer from "../../Components/UserComponents/Footer";
 
-const USER_MOVIE_POSTER = "http://localhost:5000/MoviePosters/";
-const USER_MOVIE_IMAGES = "http://localhost:5000/movieImages/";
-const USER_MOVIE_CAST_IMAGES = "http://localhost:5000/CastsImages/";
+const USER_MOVIE_POSTER = "https://tickethive.fun/MoviePosters/";
+const USER_MOVIE_IMAGES = "https://tickethive.fun/movieImages/";
+const USER_MOVIE_CAST_IMAGES = "https://tickethive.fun/CastsImages/";
 
 interface Review {
   _id: string;

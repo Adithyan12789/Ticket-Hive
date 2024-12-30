@@ -17,10 +17,10 @@ import CitiesModal from "./CitiesModal";
 import { NotificationDropdown } from "../UserComponents/NotificationDropdown";
 import io from "socket.io-client";
 
-const PROFILE_IMAGE_DIR_PATH = "http://localhost:5000/UserProfileImages/";
+const PROFILE_IMAGE_DIR_PATH = "https://tickethive.fun/UserProfileImages/";
 const DEFAULT_PROFILE_IMAGE = "/profileImage_1729749713837.jpg";
 
-const socket = io("http://localhost:5000");
+const socket = io("https://tickethive.fun");
 
 interface Notification {
   _id: number;

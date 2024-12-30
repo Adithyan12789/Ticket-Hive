@@ -68,8 +68,8 @@ const AdminBookingDetailPage: React.FC = () => {
     }
   };
 
-  const BACKDROP_BASE_URL = "http://localhost:5000/TheatersImages/";
-  const MOVIE_IMAGES_DIR_PATH = "http://localhost:5000/MoviePosters/";
+  const BACKDROP_BASE_URL = "https://tickethive.fun/TheatersImages/";
+  const MOVIE_IMAGES_DIR_PATH = "https://tickethive.fun/MoviePosters/";
 
   return (
     <AdminLayout adminName="Admin">

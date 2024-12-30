@@ -5,7 +5,7 @@ import { useGetMoviesMutation } from "../../Slices/UserApiSlice";
 import Loader from "../../Components/UserComponents/Loader";
 import { MovieManagement } from "../../Types/MoviesTypes";
 
-const MOVIE_IMAGES_DIR_PATH = "http://localhost:5000/MoviePosters/";
+const MOVIE_IMAGES_DIR_PATH = "https://tickethive.fun/MoviePosters/";
 
 const AllMoviesPage: React.FC = () => {
   const [selectedLanguage, setSelectedLanguage] = useState<string>("");

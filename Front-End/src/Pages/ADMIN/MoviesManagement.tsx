@@ -35,7 +35,7 @@ import Swal from "sweetalert2";
 import axios from "axios";
 import Select from "react-select";
 
-const MOVIE_IMAGES_DIR_PATH = "http://localhost:5000/MoviePosters/";
+const MOVIE_IMAGES_DIR_PATH = "https://tickethive.fun/MoviePosters/";
 
 const MovieManagementScreen: React.FC = () => {
   const [showModal, setShowModal] = useState<boolean>(false);

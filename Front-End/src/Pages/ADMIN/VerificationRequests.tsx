@@ -177,7 +177,7 @@ const AdminVerificationScreen = () => {
           <Modal.Body>
             {selectedCertificate && (
               <img
-                src={`http://localhost:5000/${selectedCertificate}`}
+                src={`https://tickethive.fun/${selectedCertificate}`}
                 alt="Certificate Preview"
                 style={{
                   width: "100%",

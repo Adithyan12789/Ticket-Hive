@@ -21,7 +21,7 @@ import {
 import "./TicketDetailsPage.css";
 import Footer from "../../Components/UserComponents/Footer";
 
-const USER_MOVIE_POSTER = "http://localhost:5000/MoviePosters/";
+const USER_MOVIE_POSTER = "https://tickethive.fun/MoviePosters/";
 
 const TicketDetailsScreen: React.FC = () => {
   const { bookingId } = useParams<{ bookingId: string }>();

@@ -43,8 +43,8 @@ const HomePage: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  const BACKDROP_BASE_URL = "http://localhost:5000/movieImages/";
-  const MOVIE_IMAGES_DIR_PATH = "http://localhost:5000/MoviePosters/";
+  const BACKDROP_BASE_URL = "https://tickethive.fun/movieImages/";
+  const MOVIE_IMAGES_DIR_PATH = "https://tickethive.fun/MoviePosters/";
 
   const filteredTrendingMovies = trendingMovies
     .filter((movie) =>

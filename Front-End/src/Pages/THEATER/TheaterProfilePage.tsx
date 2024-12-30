@@ -21,7 +21,7 @@ import { TheaterInfo } from "../../Types/TheaterTypes";
 import TheaterProfileSidebar from "../../Components/TheaterComponents/TheaterProfileSidebar";
 import "./TheaterProfilePage.css";
 
-const PROFILE_IMAGE_DIR_PATH = "http://localhost:5000/TheaterProfileImages/";
+const PROFILE_IMAGE_DIR_PATH = "https://tickethive.fun/TheaterProfileImages/";
 const DEFAULT_PROFILE_IMAGE = "/profileImage_1729749713837.jpg";
 
 const TheaterProfileScreen: React.FC = () => {

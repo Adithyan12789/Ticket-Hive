@@ -25,7 +25,7 @@ import Loader from "../../Components/UserComponents/Loader";
 import { TheaterManagement } from "../../Types/TheaterTypes";
 import "./TheaterManagement.css";
 
-const THEATER_IMAGES_DIR_PATH = "http://localhost:5000/TheatersImages/";
+const THEATER_IMAGES_DIR_PATH = "https://tickethive.fun/TheatersImages/";
 const DEFAULT_THEATER_IMAGE = "/profileImage_1729749713837.jpg";
 
 const AddTheaterScreen: React.FC = () => {
