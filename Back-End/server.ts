@@ -16,9 +16,9 @@ Database.connectDB();
 const port = process.env.PORT || 5000;
 
 app.use(cors({
-    origin: ["http://localhost:3000", "https://ticket-hive-eight.vercel.app/", "https://ticket-hive-git-main-adithyan-narayanans-projects.vercel.app/"],
-    credentials: true,
-  }));  
+  origin: '*',
+}));
+ 
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
