@@ -19,7 +19,8 @@ const corsOptions = {
   origin: [
     "http://localhost:3000",
     "https://ticket-hive-eight.vercel.app",
-    "https://ticket-hive-git-main-adithyan-narayanans-projects.vercel.app"
+    "https://ticket-hive-git-main-adithyan-narayanans-projects.vercel.app",
+    "https://ticket-hive-zeta.vercel.app" 
   ],
   credentials: true // If you're using cookies or authentication headers
 };
