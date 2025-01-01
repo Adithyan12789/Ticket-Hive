@@ -226,7 +226,7 @@ class TheaterController {
       try {
         const resetToken =
           await TheaterOwnerService.forgotTheaterOwnerPasswordService(email);
-        const resetUrl = `http://localhost:3000/theater-reset-password/${resetToken}`;
+        const resetUrl = `https://ticket-hive-zeta.vercel.app/theater-reset-password/${resetToken}`;
         const message = `Password reset link: ${resetUrl}`;
 
         await EmailUtil.sendOtpEmail(email, message);

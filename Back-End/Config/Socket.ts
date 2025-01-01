@@ -7,7 +7,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: 'https://ticket-hive-zeta.vercel.app',
+    origin: ["http://localhost:3000",'https://ticket-hive-zeta.vercel.app'],
     methods: ['GET', 'POST'],
     credentials: true,
   },

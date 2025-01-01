@@ -79,14 +79,12 @@ class UserController {
           user._id.toString()
         );
 
-        const test = TokenService.setTokenCookies(res, accessToken, refreshToken);
-        // Send tokens along with the user data
+        TokenService.setTokenCookies(res, accessToken, refreshToken);
+
         res.status(200).json({
           id: user._id,
           name: user.name,
           email: user.email,
-          accessToken, // Add accessToken here
-          refreshToken, // Add refreshToken here
         });
       } catch (err: unknown) {
         if (err instanceof Error) {
@@ -292,7 +290,7 @@ class UserController {
 
       try {
         const resetToken = await UserService.forgotPasswordService(email);
-        const resetUrl = `http://localhost:3000/reset-password/${resetToken}`;
+        const resetUrl = `https://ticket-hive-zeta.vercel.app/reset-password/${resetToken}`;
         const message = `Password reset link: ${resetUrl}`;
 
         await EmailUtil.sendOtpEmail(email, message);
