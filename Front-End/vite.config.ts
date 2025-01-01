@@ -11,8 +11,13 @@ export default defineConfig({
         target: "https://tickethive.fun",
         changeOrigin: true,
       },
+      '/socket.io': {
+        target: "https://tickethive.fun",
+        ws: true, // Enable WebSocket proxying
+        changeOrigin: true,
+      },
     },
-  },
+  },  
   build: {
     rollupOptions: {
       external: [],
