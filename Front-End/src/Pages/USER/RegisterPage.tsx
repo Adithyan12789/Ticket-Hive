@@ -211,7 +211,7 @@ const SignUpPage = () => {
       <div className="user-signup-container">
       <div className="signup-header-container">
           <img
-            src="/stock-vector-icon-logo-illustration-for-digital-business-ticket-services-720686734-removebg-preview.png"
+            src="/logo.png"
             alt="Ticket Hive Icon"
             className="signup-header-icon pb-5"
           />
