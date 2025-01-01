@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import { Navbar, Nav, Container, NavDropdown } from "react-bootstrap";
 import { useSelector, useDispatch } from "react-redux";
 import { LinkContainer } from "react-router-bootstrap";
@@ -52,9 +52,7 @@ const Header: React.FC = () => {
   const [notifications, setNotifications] = useState<Notification[]>(fetchedNotifications || []);
 
   useEffect(() => {
-    if (fetchedNotifications) {
-      setNotifications(fetchedNotifications);
-    }
+    setNotifications(fetchedNotifications);
   }, [fetchedNotifications]);
 
   useEffect(() => {
@@ -90,7 +88,7 @@ const Header: React.FC = () => {
         socket.off("updateNotifications", handleUpdateNotifications);
       };
     }
-  }, [userInfo?.id, setNotifications]);
+  }, [userInfo?.id]);
   
 
   const profileHandler = () => navigate("/profile");
@@ -110,7 +108,7 @@ const Header: React.FC = () => {
     setShowModal(false);
   };
 
-  const handleNotificationClick = useCallback(async (id: number) => {
+  const handleNotificationClick = async (id: number) => {
     try {
       console.log("Entering handleNotificationClick function with id:", id);
       const result = await markAsRead(id.toString()).unwrap();
@@ -121,9 +119,9 @@ const Header: React.FC = () => {
     } catch (error) {
       console.error("Error marking notification as read:", error);
     }
-  }, [markAsRead]);
+  };
 
-  const handleClearNotifications = useCallback(async () => {
+  const handleClearNotifications = async () => {
     try {
       await clearAllNotifications({}).unwrap();
       setNotifications([]);
@@ -131,7 +129,7 @@ const Header: React.FC = () => {
     } catch (err) {
       console.error(err);
     }
-  }, [clearAllNotifications]);
+  };
 
   return (
     <header style={{ backgroundColor: "#3A5E49" }}>
@@ -247,4 +245,3 @@ const Header: React.FC = () => {
 };
 
 export default Header;
-
