@@ -18,8 +18,7 @@ const port = process.env.PORT || 5000;
 const corsOptions = {
   origin: [
     "http://localhost:3000",
-    "https://www.ticket.fun/",
-    "https://ticket-hive-delta.vercel.app/",
+    "https://ticket-hive-l599.vercel.app"
   ],
   credentials: true 
 };
