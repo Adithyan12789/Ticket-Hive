@@ -61,7 +61,7 @@ class UserController {
 
   authUser = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
-      console.log("entered auth controller function ");
+      console.log("entered auth controller function");
       
 
       const { email, password } = req.body;
