@@ -20,7 +20,7 @@ router.put('/reset-password/:token', UserController.resetPassword);
 
 router.post('/refresh-token', UserController.refreshToken);
 
-router.post('/save-location', UserController.saveLocationController);
+router.post('/save-location', AuthMiddleware, UserController.saveLocationController);
 
 router.route('/profile')
 .get( AuthMiddleware, UserController.getUserProfile )
