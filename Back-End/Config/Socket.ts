@@ -9,8 +9,7 @@ const io = new Server(server, {
   cors: {
     origin: [
       "http://localhost:3000",
-      "https://www.tickethive.fun",
-      "https://ticket-hive-l599.vercel.app"
+      "https://ticket-hive-zeta.vercel.app"
     ],
     methods: ["GET", "POST"],
     credentials: true // If you're using cookies or authentication headers
