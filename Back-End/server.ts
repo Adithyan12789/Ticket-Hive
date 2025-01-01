@@ -18,7 +18,7 @@ const port = process.env.PORT || 5000;
 const corsOptions = {
   origin: [
     "http://localhost:3000",
-    "https://ticket-hive-zeta.vercel.app"
+    "https://ticket-hive-zeta.vercel.app/"
   ],
   credentials: true 
 };
