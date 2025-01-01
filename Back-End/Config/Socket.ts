@@ -5,7 +5,7 @@ import http from "http";
 
 const app = express();
 const server = http.createServer(app);
-const io = require('socket.io')(server, {
+const io = new Server(server, {
   cors: {
     origin: 'https://ticket-hive-zeta.vercel.app',
     methods: ['GET', 'POST'],
