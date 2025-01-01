@@ -16,12 +16,13 @@ Database.connectDB();
 const port = process.env.PORT || 5000;
 
 const corsOptions = {
-  origin: 'https://ticket-hive-zeta.vercel.app', // Allow requests from this origin
-  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allow specific HTTP methods
-  credentials: true, // Allow cookies or authentication headers
+  origin: 'https://ticket-hive-zeta.vercel.app',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true,
 };
 
 app.use(cors(corsOptions));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
