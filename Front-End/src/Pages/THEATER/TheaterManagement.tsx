@@ -24,8 +24,9 @@ import TheaterOwnerLayout from "../../Components/TheaterComponents/TheaterLayout
 import Loader from "../../Components/UserComponents/Loader";
 import { TheaterManagement } from "../../Types/TheaterTypes";
 import "./TheaterManagement.css";
+import { backendUrl } from "../../url";
 
-const THEATER_IMAGES_DIR_PATH = "https://tickethive.fun/TheatersImages/";
+const THEATER_IMAGES_DIR_PATH = `${backendUrl}/TheatersImages/`;
 const DEFAULT_THEATER_IMAGE = "/profileImage_1729749713837.jpg";
 
 const AddTheaterScreen: React.FC = () => {

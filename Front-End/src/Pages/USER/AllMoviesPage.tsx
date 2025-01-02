@@ -4,8 +4,9 @@ import { Link } from "react-router-dom";
 import { useGetMoviesMutation } from "../../Slices/UserApiSlice";
 import Loader from "../../Components/UserComponents/Loader";
 import { MovieManagement } from "../../Types/MoviesTypes";
+import { backendUrl } from "../../url";
 
-const MOVIE_IMAGES_DIR_PATH = "https://tickethive.fun/MoviePosters/";
+const MOVIE_IMAGES_DIR_PATH = `${backendUrl}/MoviePosters/`;
 
 const AllMoviesPage: React.FC = () => {
   const [selectedLanguage, setSelectedLanguage] = useState<string>("");

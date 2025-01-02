@@ -20,8 +20,9 @@ import {
 } from "react-icons/fa";
 import "./TicketDetailsPage.css";
 import Footer from "../../Components/UserComponents/Footer";
+import { backendUrl } from "../../url";
 
-const USER_MOVIE_POSTER = "https://tickethive.fun/MoviePosters/";
+const USER_MOVIE_POSTER = `${backendUrl}/MoviePosters/`;
 
 const TicketDetailsScreen: React.FC = () => {
   const { bookingId } = useParams<{ bookingId: string }>();

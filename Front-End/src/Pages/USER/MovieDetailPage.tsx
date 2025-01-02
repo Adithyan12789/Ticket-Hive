@@ -30,10 +30,11 @@ import {
   FaUserAlt,
 } from "react-icons/fa";
 import Footer from "../../Components/UserComponents/Footer";
+import { backendUrl } from "../../url"
 
-const USER_MOVIE_POSTER = "https://tickethive.fun/MoviePosters/";
-const USER_MOVIE_IMAGES = "https://tickethive.fun/movieImages/";
-const USER_MOVIE_CAST_IMAGES = "https://tickethive.fun/CastsImages/";
+const USER_MOVIE_POSTER = `${backendUrl}/MoviePosters/`;
+const USER_MOVIE_IMAGES = `${backendUrl}/movieImages/`;
+const USER_MOVIE_CAST_IMAGES = `${backendUrl}/CastsImages/`;
 
 interface Review {
   _id: string;
@@ -338,7 +339,7 @@ const MovieDetailScreen: React.FC = () => {
             borderRadius: "10px",
             boxShadow: "0 4px 20px rgba(0, 0, 0, 0.7)",
             width: "100%",
-            maxWidth: "800px",
+            maxWidth: "700px",
           }}
         >
           <Row className="g-4">
@@ -469,8 +470,8 @@ const MovieDetailScreen: React.FC = () => {
                   <FaChevronRight size={30} style={{ color: "#007bff" }} />
                 }
               >
-                {reviewsState.map((review: Review) => (
-                  <Carousel.Item key={review._id}>
+                {reviewsState?.map((review: Review) => (
+                  <Carousel.Item key={review?._id}>
                     <Row className="justify-content-center">
                       <Col md={8} sm={12}>
                         <Card
@@ -485,7 +486,7 @@ const MovieDetailScreen: React.FC = () => {
                               <div className="d-flex align-items-center">
                                 <FaUserAlt size={30} color="#007bff" />
                                 <strong style={{ paddingLeft: "20px" }}>
-                                  {review.user.name}
+                                  {review.user?.name}
                                 </strong>
                                 <Badge
                                   pill

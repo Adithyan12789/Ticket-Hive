@@ -15,6 +15,7 @@ import { useGetMoviesMutation } from "../../Slices/UserApiSlice";
 import Loader from "../../Components/UserComponents/Loader";
 import { FaSearch, FaStar } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import { backendUrl } from "../../url";
 
 const HomePage: React.FC = () => {
   const [getMovies, { isLoading: loadingTrending }] = useGetMoviesMutation();
@@ -43,8 +44,8 @@ const HomePage: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  const BACKDROP_BASE_URL = "https://tickethive.fun/movieImages/";
-  const MOVIE_IMAGES_DIR_PATH = "https://tickethive.fun/MoviePosters/";
+  const BACKDROP_BASE_URL = `${backendUrl}/movieImages/`;
+  const MOVIE_IMAGES_DIR_PATH = `${backendUrl}/MoviePosters/`;
 
   const filteredTrendingMovies = trendingMovies
     .filter((movie) =>

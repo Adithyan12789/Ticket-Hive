@@ -11,6 +11,7 @@ import Loader from "../../Components/UserComponents/Loader";
 import { TheaterVerification } from "../../Types/TheaterTypes";
 import { FaCheck, FaTimes, FaFileAlt } from "react-icons/fa";
 import { FetchBaseQueryError, SerializedError } from "../../Types/AdminTypes";
+import { backendUrl } from "../../url";
 
 
 const AdminVerificationScreen = () => {
@@ -177,7 +178,7 @@ const AdminVerificationScreen = () => {
           <Modal.Body>
             {selectedCertificate && (
               <img
-                src={`https://tickethive.fun/${selectedCertificate}`}
+                src={`${backendUrl}/${selectedCertificate}`}
                 alt="Certificate Preview"
                 style={{
                   width: "100%",

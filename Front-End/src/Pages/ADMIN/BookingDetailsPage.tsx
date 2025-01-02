@@ -8,6 +8,7 @@ import AdminLayout from "../../Components/AdminComponents/AdminLayout";
 import Loader from "../../Components/UserComponents/Loader";
 import { Ticket } from "./BookingsPage";
 import Swal from "sweetalert2";
+import { backendUrl } from "../../url";
 
 const AdminBookingDetailPage: React.FC = () => {
   const { bookingId } = useParams<{ bookingId: string }>();
@@ -68,8 +69,8 @@ const AdminBookingDetailPage: React.FC = () => {
     }
   };
 
-  const BACKDROP_BASE_URL = "https://tickethive.fun/TheatersImages/";
-  const MOVIE_IMAGES_DIR_PATH = "https://tickethive.fun/MoviePosters/";
+  const BACKDROP_BASE_URL = `${backendUrl}/TheatersImages/`;
+  const MOVIE_IMAGES_DIR_PATH = `${backendUrl}/MoviePosters/`;
 
   return (
     <AdminLayout adminName="Admin">

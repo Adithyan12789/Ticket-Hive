@@ -6,8 +6,9 @@ import { useGetMovieByMovieIdQuery } from "../../Slices/AdminApiSlice";
 import AdminLayout from "../../Components/AdminComponents/AdminLayout";
 import { toast } from "react-toastify";
 import Loader from "../../Components/UserComponents/Loader";
+import { backendUrl } from "../../url";
 
-const THEATER_IMAGES_DIR_PATH = "https://tickethive.fun/movieImages/";
+const THEATER_IMAGES_DIR_PATH = `${backendUrl}/movieImages/`;
 
 const MovieDetailScreen: React.FC = () => {
   const { id } = useParams();

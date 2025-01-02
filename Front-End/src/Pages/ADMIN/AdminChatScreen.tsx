@@ -26,13 +26,14 @@ import {
 } from "react-icons/fa";
 import { Message, MessageData } from "../../Types/ChatTypes";
 import "./AdminChatScreen.css";
+import { backendUrl } from "../../url";
 
-const socket = io("https://tickethive.fun");
+const socket = io("https://api.tickethive.fun");
 
 const defaultProfileImage =
   "https://media.istockphoto.com/id/1495088043/vector/user-profile-icon-avatar-or-person-icon-profile-picture-portrait-symbol-default-portrait.jpg?s=612x612&w=0&k=20&c=dhV2p1JwmloBTOaGAtaA3AW1KSnjsdMt7-U_3EZElZ0=";
 
-const IMAGES_DIR_PATH = "https://tickethive.fun/";
+const IMAGES_DIR_PATH = backendUrl;
 
 export interface ChatRoom {
   _id: string;

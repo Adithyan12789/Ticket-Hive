@@ -16,7 +16,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser, faSignOutAlt, faEnvelope } from "@fortawesome/free-solid-svg-icons";
 import io from "socket.io-client";
 
-const socket = io("https://tickethive.fun");
+const socket = io("https://api.tickethive.fun");
 
 interface Notification {
   _id: string;
