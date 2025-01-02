@@ -8,11 +8,11 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target: "https://tickethive.fun",
+        target: "https://tickethive.fun/",
         changeOrigin: true,
       },
       '/socket.io': {
-        target: "https://tickethive.fun",
+        target: "https://tickethive.fun/",
         ws: true, // Enable WebSocket proxying
         changeOrigin: true,
       },
