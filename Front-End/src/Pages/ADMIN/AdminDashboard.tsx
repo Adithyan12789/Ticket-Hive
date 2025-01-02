@@ -1,12 +1,4 @@
 import React, { useEffect, useState } from "react";
-import Sidebar from "../../Components/AdminComponents/AdminSideBar";
-import ReportModal from "../../Components/AdminComponents/ReportModal";
-import {
-  useGetUserDataMutation,
-  useGetBookingDetailsQuery,
-  useGetTheaterOwnerDataMutation,
-  useGetMoviesMutation,
-} from "../../Slices/AdminApiSlice";
 import {
   AreaChart,
   Area,
@@ -17,49 +9,23 @@ import {
   ResponsiveContainer,
   BarChart,
   Bar,
-  Legend,
 } from "recharts";
-import Loader from "../../Components/UserComponents/Loader";
+import { motion } from "framer-motion";
+import { Users, Building2, DollarSign, Ticket, Film, TrendingUp, BarChart2, PieChart } from 'lucide-react';
+
 import AdminLayout from "../../Components/AdminComponents/AdminLayout";
-import { Box, Typography, Grid, Button } from "@mui/material";
-import styled from "@emotion/styled";
+import Sidebar from "../../Components/AdminComponents/AdminSideBar";
+import ReportModal from "../../Components/AdminComponents/ReportModal";
 import { FilteredEarningsChart } from "../../Components/AdminComponents/filtered-earnings-chart";
+import Loader from "../../Components/UserComponents/Loader";
+import {
+  useGetUserDataMutation,
+  useGetBookingDetailsQuery,
+  useGetTheaterOwnerDataMutation,
+  useGetMoviesMutation,
+} from "../../Slices/AdminApiSlice";
 
-const DashboardContainer = styled(Box)`
-  display: flex;
-  height: 100vh;
-  background-color: #f4f7fb;
-`;
-
-const StatsCard = styled(Box)<{ bgColor: string }>`
-  background-color: ${(props) => props.bgColor};
-  padding: 20px;
-  text-align: center;
-  border-radius: 50%;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-  height: 150px;
-  width: 150px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  &:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  }
-`;
-
-const StatTitle = styled(Typography)`
-  font-size: 1rem;
-  color: #ffffff;
-  font-weight: 600;
-`;
-
-const StatValue = styled(Typography)`
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #ffffff;
-`;
+import "./AdminDashboard.css";
 
 interface Stats {
   users: number;
@@ -67,6 +33,21 @@ interface Stats {
   totalEarnings: number;
   bookings: number;
   movies: number;
+}
+
+interface BookingTrend {
+  date: string;
+  count: number;
+}
+
+interface MovieBooking {
+  movie: string;
+  count: number;
+}
+
+interface EarningsData {
+  date: string;
+  earnings: number;
 }
 
 interface Ticket {
@@ -79,17 +60,14 @@ interface Booking {
   ticket: Ticket;
 }
 
-interface BookingsData {
-  tickets: Booking[];
-}
+type EarningsFilter = 'all' | 'monthly' | 'yearly';
 
 const AdminDashboard: React.FC = () => {
   const [getUserData] = useGetUserDataMutation();
   const [getTheaterOwnersData] = useGetTheaterOwnerDataMutation();
   const [getMovies] = useGetMoviesMutation();
   const { data: bookings, isLoading, refetch } = useGetBookingDetailsQuery({});
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [stats, setStats] = useState<Stats>({
     users: 0,
     theaterOwners: 0,
@@ -97,39 +75,83 @@ const AdminDashboard: React.FC = () => {
     bookings: 0,
     movies: 0,
   });
+  const [bookingTrendsData, setBookingTrendsData] = useState<BookingTrend[]>([]);
+  const [mostBookedMoviesData, setMostBookedMoviesData] = useState<MovieBooking[]>([]);
+  const [earningsData, setEarningsData] = useState<EarningsData[]>([]);
+  const [filteredEarningsData, setFilteredEarningsData] = useState<EarningsData[]>([]);
+  const [earningsFilter, setEarningsFilter] = useState<EarningsFilter>('all');
 
-  const [bookingTrendsData, setBookingTrendsData] = useState<
-    {
-      date: string;
-      count: number;
-    }[]
-  >([]);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const userResponse = await getUserData({}).unwrap();
+        const theaterOwnerResponse = await getTheaterOwnersData({}).unwrap();
+        const moviesResponse = await getMovies({}).unwrap();
+        refetch();
 
-  const [mostBookedMoviesData, setMostBookedMoviesData] = useState<
-    {
-      movie: string;
-      count: number;
-    }[]
-  >([]);
+        const bookingsData = bookings as { tickets: Booking[] } | undefined;
 
-  const [earningsData, setEarningsData] = useState<
-    {
-      date: string;
-      earnings: number;
-    }[]
-  >([]);
+        const totalEarnings = bookingsData?.tickets?.reduce(
+          (sum, booking) => sum + (booking.ticket.totalPrice || 0),
+          0
+        ) || 0;
 
-  const [filteredEarningsData, setFilteredEarningsData] = useState<
-    {
-      date: string;
-      earnings: number;
-    }[]
-  >([]);
-  const [earningsFilter, setEarningsFilter] = useState<'all' | 'monthly' | 'yearly'>('all');
+        setStats({
+          users: userResponse?.length || 0,
+          theaterOwners: theaterOwnerResponse?.length || 0,
+          bookings: bookingsData?.tickets?.length || 0,
+          movies: moviesResponse?.movies?.length || 0,
+          totalEarnings: totalEarnings,
+        });
 
-  const cardColors = ["#ff9b61", "#86d0a1", "#82aaee", "#ff8398", "#bb72ff"];
+        const bookingDates = bookingsData?.tickets
+          ?.map((booking) => booking.ticket.bookingDate?.split("T")[0])
+          .filter((date): date is string => date !== undefined) || [];
 
-  const filterEarningsData = (filter: 'all' | 'monthly' | 'yearly') => {
+        const uniqueDates = Array.from(new Set(bookingDates));
+        const trendsData = uniqueDates.map((date) => ({
+          date,
+          count: bookingDates.filter((d) => d === date).length,
+        }));
+
+        setBookingTrendsData(trendsData);
+
+        const movieTitles = bookingsData?.tickets?.map((booking) => booking.ticket.movieTitle) || [];
+        const uniqueMovies = Array.from(new Set(movieTitles));
+        const moviesData = uniqueMovies.map((movie) => ({
+          movie,
+          count: movieTitles.filter((title) => title === movie).length,
+        }));
+
+        setMostBookedMoviesData(moviesData);
+
+        const earningsByDate = bookingsData?.tickets?.reduce(
+          (acc: Record<string, number>, booking) => {
+            const date = booking.ticket.bookingDate?.split("T")[0];
+            const earnings = booking.ticket.totalPrice || 0;
+            if (date) {
+              acc[date] = (acc[date] || 0) + earnings;
+            }
+            return acc;
+          },
+          {}
+        ) || {};
+
+        const earningsDataArray = Object.entries(earningsByDate).map(
+          ([date, earnings]) => ({ date, earnings })
+        );
+
+        setEarningsData(earningsDataArray);
+        setFilteredEarningsData(earningsDataArray);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, [getUserData, getTheaterOwnersData, getMovies, bookings, refetch]);
+
+  const filterEarningsData = (filter: EarningsFilter) => {
     setEarningsFilter(filter);
     const currentDate = new Date();
     if (filter === 'all') {
@@ -152,263 +174,113 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const userResponse = await getUserData({}).unwrap();
-        const theaterOwnerResponse = await getTheaterOwnersData({}).unwrap();
-        const moviesResponse = await getMovies({}).unwrap();
-
-        refetch();
-
-        const bookingsData: BookingsData = bookings;
-
-        // Compute total earnings
-        const totalEarnings = bookingsData?.tickets?.reduce(
-          (sum, booking) => sum + (booking.ticket.totalPrice || 0),
-          0
-        );
-
-        setStats({
-          users: userResponse?.length || 0,
-          theaterOwners: theaterOwnerResponse?.length || 0,
-          bookings: bookingsData?.tickets?.length || 0,
-          movies: moviesResponse?.movies?.length || 0,
-          totalEarnings: totalEarnings || 0, // Add total earnings to stats
-        });
-
-        // Process Booking Trends Data
-        const bookingDates =
-          bookingsData?.tickets
-            ?.map((ticket) => ticket.ticket.bookingDate?.split("T")[0])
-            .filter((date) => date !== undefined) || [];
-
-        const uniqueDates = Array.from(new Set(bookingDates));
-        const trendsData = uniqueDates.map((date) => ({
-          date,
-          count: bookingDates.filter((d) => d === date).length,
-        }));
-
-        setBookingTrendsData(trendsData);
-
-        // Process Most Booked Movies Data
-        const movieTitles =
-          bookingsData?.tickets?.map((ticket) => ticket.ticket.movieTitle) ||
-          [];
-        const uniqueMovies = Array.from(new Set(movieTitles));
-        const moviesData = uniqueMovies.map((movie) => ({
-          movie,
-          count: movieTitles.filter((title) => title === movie).length,
-        }));
-
-        setMostBookedMoviesData(moviesData);
-
-        // Process Earnings Data for Chart
-        const earningsByDate = bookingsData?.tickets?.reduce(
-          (acc: Record<string, number>, booking) => {
-            const date = booking?.ticket?.bookingDate?.split("T")[0];
-            const earnings = booking?.ticket?.totalPrice || 0;
-            if (date) {
-              acc[date] = (acc[date] || 0) + earnings;
-            }
-            return acc;
-          },
-          {}
-        );
-
-        const earningsDataArray = Object.entries(earningsByDate || {}).map(
-          ([date, earnings]) => ({ date, earnings })
-        );
-
-        setEarningsData(earningsDataArray);
-        setFilteredEarningsData(earningsDataArray);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-
-    fetchData();
-  }, [getUserData, getTheaterOwnersData, getMovies, bookings, refetch]);
-
-  useEffect(() => {
-    //This effect will run whenever earningsFilter changes
-  }, [earningsFilter])
-
   if (isLoading) return <Loader />;
 
+  const statItems = [
+    { title: "Users", value: stats.users, icon: Users, color: "#4CAF50" },
+    { title: "Theater Owners", value: stats.theaterOwners, icon: Building2, color: "#2196F3" },
+    { title: "Total Earnings", value: stats.totalEarnings.toLocaleString("en-US", {
+      style: "currency",
+      currency: "INR",
+    }), icon: DollarSign, color: "#FFC107" },
+    { title: "Bookings", value: stats.bookings, icon: Ticket, color: "#9C27B0" },
+    { title: "Movies", value: stats.movies, icon: Film, color: "#FF5722" },
+  ];
+
   return (
-    <AdminLayout adminName={""}>
-      <DashboardContainer>
-        <Sidebar adminName={"Adithyan"} />
-        <Box
-          sx={{
-            flex: 1,
-            padding: "20px",
-            backgroundColor: "#f4f7fb",
-            overflowY: "auto",
-          }}
-        >
-          <Typography
-            variant="h4"
-            sx={{
-              textAlign: "center",
-              color: "#333",
-              marginBottom: "80px",
-              marginTop: "50px",
-              fontWeight: 700,
-            }}
-          >
-            Admin Dashboard
-          </Typography>
+    <AdminLayout adminName="">
+      <div className="admin-dashboard">
+        <Sidebar adminName="Adithyan" />
+        <main className="dashboard-content">
+          <h1 className="dashboard-title">Admin Dashboard</h1>
 
-          <Grid
-            container
-            spacing={3}
-            sx={{ marginLeft: "50px", marginBottom: "30px" }}
-          >
-            {[
-              { title: "Users", value: stats.users },
-              { title: "Theater Owners", value: stats.theaterOwners },
-              {
-                title: "Total Earnings",
-                value: stats.totalEarnings.toLocaleString("en-US", {
-                  style: "currency",
-                  currency: "INR",
-                }),
-              },
-              { title: "Bookings", value: stats.bookings },
-              { title: "Movies", value: stats.movies },
-            ].map((stat, index) => (
-              <Grid
-                item
-                xs={12}
-                sm={6}
-                md={4} // Ensures cards align in rows
-                lg={2} // Adjusts alignment for larger screens
-                display="flex"
-                justifyContent="center"
+          <div className="stats-grid">
+            {statItems.map((item, index) => (
+              <motion.div
                 key={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className="stat-card"
+                style={{ backgroundColor: item.color, color: "#ffffff" }}
               >
-                <StatsCard bgColor={cardColors[index % cardColors.length]}>
-                  <StatTitle>{stat.title}</StatTitle>
-                  <StatValue>{stat.value}</StatValue>
-                </StatsCard>
-              </Grid>
+                <div className="stat-icon">
+                  <item.icon size={40} />
+                </div>
+                <h2 className="stat-title">{item.title}</h2>
+                <p className="stat-value">{item.value}</p>
+              </motion.div>
             ))}
-          </Grid>
+          </div>
 
-          {/* Total Earnings Section */}
-          <FilteredEarningsChart
-            data={filteredEarningsData}
-            filter={earningsFilter}
-            onFilterChange={(filter) => {
-              setEarningsFilter(filter);
-              filterEarningsData(filter);
-            }}
-          />
-          {/* Booking Trends Section */}
-          <Box
-            sx={{
-              padding: "20px",
-              borderRadius: "8px",
-              boxShadow: "0 2px 6px rgba(0, 0, 0, 0.1)",
-              marginBottom: "30px",
-              backgroundColor: "#ffffff",
-            }}
-          >
-            <Typography
-              variant="h6"
-              sx={{
-                marginBottom: "15px",
-                fontWeight: 600,
-                color: "#333",
-              }}
-            >
-              Booking Trends
-            </Typography>
-            {bookingTrendsData.length > 0 ? (
+          <div className="chart-grid">
+            <div className="chart-card">
+              <h3 className="chart-title">
+                <TrendingUp size={24} className="chart-icon" />
+                Booking Trends
+              </h3>
               <ResponsiveContainer width="100%" height={300}>
                 <AreaChart
                   data={bookingTrendsData}
-                  margin={{ top: 20, right: 20, left: 20, bottom: 5 }}
+                  margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="date" />
                   <YAxis />
                   <Tooltip />
-                  <Area
-                    type="monotone"
-                    dataKey="count"
-                    stroke="#36a2eb"
-                    fill="#36a2eb"
-                    strokeWidth={2}
-                  />
+                  <Area type="monotone" dataKey="count" stroke="#8884d8" fill="#8884d8" />
                 </AreaChart>
               </ResponsiveContainer>
-            ) : (
-              <Typography>No booking trend data available</Typography>
-            )}
-          </Box>
-          {/* Most Booked Movies Section */}
-          <Box
-            sx={{
-              padding: "20px",
-              borderRadius: "8px",
-              boxShadow: "0 2px 6px rgba(0, 0, 0, 0.1)",
-              marginBottom: "30px",
-              backgroundColor: "#ffffff",
-            }}
-          >
-            <Typography
-              variant="h6"
-              sx={{
-                marginBottom: "15px",
-                fontWeight: 600,
-                color: "#333",
-              }}
-            >
-              Most Booked Movies
-            </Typography>
-            {mostBookedMoviesData.length > 0 ? (
+            </div>
+            <div className="chart-card">
+              <h3 className="chart-title">
+                <BarChart2 size={24} className="chart-icon" />
+                Most Booked Movies
+              </h3>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart
                   data={mostBookedMoviesData}
-                  margin={{ top: 20, right: 20, left: 20, bottom: 5 }}
+                  margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="movie" />
                   <YAxis />
                   <Tooltip />
-                  <Legend />
-                  <Bar dataKey="count" fill="#4bc0c0" />
+                  <Bar dataKey="count" fill="#82ca9d" />
                 </BarChart>
               </ResponsiveContainer>
-            ) : (
-              <Typography>No data for most booked movies</Typography>
-            )}
-          </Box>
-          {/* Generate Report Button */}
-          <Box sx={{ textAlign: "center", marginTop: "50px" }}>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => setIsModalOpen(true)}
-            >
-              Generate Report
-            </Button>
+            </div>
+          </div>
 
-            <ReportModal
-              open={isModalOpen}
-              onClose={() => setIsModalOpen(false)}
-              stats={stats}
-              earningsData={earningsData}
-              bookingTrendsData={bookingTrendsData}
-              mostBookedMoviesData={mostBookedMoviesData}
+          <div className="earnings-chart">
+            <h3 className="chart-title">
+              <PieChart size={24} className="chart-icon" />
+              Earnings Overview
+            </h3>
+            <FilteredEarningsChart
+              data={filteredEarningsData}
+              filter={earningsFilter}
+              onFilterChange={(filter: EarningsFilter) => {
+                setEarningsFilter(filter);
+                filterEarningsData(filter);
+              }}
             />
-          </Box>
-        </Box>
-      </DashboardContainer>
+          </div>
+
+          <button className="generate-report-button" onClick={() => setIsModalOpen(true)}>
+            Generate Report
+          </button>
+
+          <ReportModal
+            open={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            stats={stats}
+            earningsData={earningsData}
+            bookingTrendsData={bookingTrendsData}
+            mostBookedMoviesData={mostBookedMoviesData}
+          />
+        </main>
+      </div>
     </AdminLayout>
   );
 };
