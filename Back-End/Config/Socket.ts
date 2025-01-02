@@ -13,7 +13,6 @@ const io = new Server(server, {
   },
 });
 
-
 io.on("connection", (socket: Socket) => {
   console.log("Client Connected", socket.id);
 

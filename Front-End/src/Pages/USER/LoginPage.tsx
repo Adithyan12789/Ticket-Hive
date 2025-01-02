@@ -25,7 +25,10 @@ const LoginPage = () => {
   const [login, { isLoading }] = useLoginMutation();
   const [googleLogin] = useGoogleLoginMutation();
 
-  const { userInfo } = useSelector((state: RootState) => state.auth);
+  const { userInfo } = useSelector((state: RootState) => state.auth) || {};
+
+  console.log("userInfo: ", userInfo);
+  
 
   useEffect(() => {
     if (userInfo) {

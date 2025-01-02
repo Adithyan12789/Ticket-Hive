@@ -16,9 +16,9 @@ Database.connectDB();
 const port = process.env.PORT || 5000;
 
 app.use(cors({
-  origin: 'https://ticket-hive-zeta.vercel.app', // Allow only your frontend origin
-  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Specify allowed HTTP methods
-  credentials: true, // Allow cookies and authentication
+  origin: ["http://localhost:3000",'https://ticket-hive-zeta.vercel.app'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true,
 }));
 
 app.use(express.json());

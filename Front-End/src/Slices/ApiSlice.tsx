@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery, BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
 
 const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = fetchBaseQuery({ 
-  baseUrl: 'http://localhost:5000/',
+  baseUrl: 'https://tickethive.fun/',
   credentials: 'include',
 });
 
@@ -9,4 +9,4 @@ export const apiSlice = createApi({
   baseQuery,
   tagTypes: ['User'],
   endpoints: () => ({}),
-});
+}); 
