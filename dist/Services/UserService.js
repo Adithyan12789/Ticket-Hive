@@ -60,6 +60,7 @@ class UserService {
     }
     async authenticateUser(email, password) {
         const user = await UserRepo_1.default.findUserByEmail(email);
+        console.log("user: ", user);
         if (user) {
             if (user.isBlocked) {
                 throw new Error("Your account is blocked");

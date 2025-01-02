@@ -197,7 +197,7 @@ class TheaterController {
             }
             try {
                 const resetToken = await TheaterService_1.default.forgotTheaterOwnerPasswordService(email);
-                const resetUrl = `http://localhost:3000/theater-reset-password/${resetToken}`;
+                const resetUrl = `https://tickethive.fun/theater-reset-password/${resetToken}`;
                 const message = `Password reset link: ${resetUrl}`;
                 await EmailUtil_1.default.sendOtpEmail(email, message);
                 res.status(200).json({ message: "Password reset email sent" });

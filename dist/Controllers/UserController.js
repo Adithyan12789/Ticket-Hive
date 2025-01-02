@@ -49,23 +49,25 @@ class UserController {
             }
         };
         this.authUser = (0, express_async_handler_1.default)(async (req, res) => {
+            console.log("entered auth controller function");
             const { email, password } = req.body;
+            console.log("req.body: ", req.body);
             if (!email || !password) {
                 res.status(400).json({ message: "Email and password are required" });
                 return;
             }
             try {
                 const user = await UserService_1.default.authenticateUser(email, password);
+                console.log("controller user: ", user);
                 const accessToken = GenerateToken_1.default.generateAccessToken(user._id.toString());
+                console.log("controller accessToken: ", accessToken);
                 const refreshToken = GenerateToken_1.default.generateRefreshToken(user._id.toString());
-                const test = GenerateToken_1.default.setTokenCookies(res, accessToken, refreshToken);
-                // Send tokens along with the user data
+                console.log("controller refreshToken: ", refreshToken);
+                GenerateToken_1.default.setTokenCookies(res, accessToken, refreshToken);
                 res.status(200).json({
                     id: user._id,
                     name: user.name,
                     email: user.email,
-                    accessToken, // Add accessToken here
-                    refreshToken, // Add refreshToken here
                 });
             }
             catch (err) {
@@ -240,7 +242,7 @@ class UserController {
             }
             try {
                 const resetToken = await UserService_1.default.forgotPasswordService(email);
-                const resetUrl = `http://localhost:3000/reset-password/${resetToken}`;
+                const resetUrl = `https://tickethive.fun/reset-password/${resetToken}`;
                 const message = `Password reset link: ${resetUrl}`;
                 await EmailUtil_1.default.sendOtpEmail(email, message);
                 res.status(200).json({ message: "Password reset email sent" });

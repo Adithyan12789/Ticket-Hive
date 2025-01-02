@@ -14,11 +14,20 @@ const server = http_1.default.createServer(app);
 exports.server = server;
 const io = new socket_io_1.Server(server, {
     cors: {
-        origin: ["http://localhost:3000", "https://ticket-hive-rho.vercel.app/", "https://ticket-hive-a0yhxvn6i-adithyan-narayanans-projects.vercel.app/"],
+        origin: [
+            "http://localhost:3000",
+            "https://www.tickethive.fun",
+            "https://ticket-hive-dusky.vercel.app/"
+        ],
         methods: ["GET", "POST"],
+        credentials: true,
     },
 });
 exports.io = io;
+app.use((req, res, next) => {
+    console.log(`Request Origin: ${req.headers.origin}`);
+    next();
+});
 io.on("connection", (socket) => {
     console.log("Client Connected", socket.id);
     socket.on("joinRoom", ({ roomId }) => {
