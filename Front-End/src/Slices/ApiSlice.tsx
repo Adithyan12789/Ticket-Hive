@@ -1,7 +1,7 @@
-import { createApi, fetchBaseQuery, BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
-const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = fetchBaseQuery({ 
-  baseUrl: 'https://api.tickethive.fun/',
+const baseQuery = fetchBaseQuery({ 
+  baseUrl: process.env.NEXT_PUBLIC_API_URL || 'https://api.tickethive.fun/',
   credentials: 'include',
 });
 

@@ -21,13 +21,22 @@ app.use(cors({
     "https://www.tickethive.fun", 
     "https://ticket-hive-plum.vercel.app"
   ],
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Added OPTIONS
   credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'], // Added explicit headers
+  exposedHeaders: ['set-cookie'] // Important for cookies
 }));
+
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+// Configure cookie settings for cross-origin
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Credentials', 'true');
+  next();
+});
 
 app.use(express.static('Back-End/public')); 
 
