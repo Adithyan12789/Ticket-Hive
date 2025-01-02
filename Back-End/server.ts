@@ -15,18 +15,23 @@ Database.connectDB();
 
 const port = process.env.PORT || 5000;
 
-app.use(cors({
-  origin: [
-    "http://localhost:3000", 
-    "https://www.tickethive.fun", 
-    "https://ticket-hive-plum.vercel.app"
-  ],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Added OPTIONS
-  credentials: true,
-  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'], // Added explicit headers
-  exposedHeaders: ['set-cookie'] // Important for cookies
-}));
+const allowedOrigins = [
+  'https://www.tickethive.fun',
+  'https://ticket-hive-plum.vercel.app',
+  'http://localhost:3000'
+];
 
+app.use(cors({
+  origin: function(origin, callback) {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+}));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
