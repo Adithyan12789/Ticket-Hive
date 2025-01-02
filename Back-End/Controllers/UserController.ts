@@ -301,7 +301,7 @@ class UserController {
 
       try {
         const resetToken = await UserService.forgotPasswordService(email);
-        const resetUrl = `https://ticket-hive-zeta.vercel.app/reset-password/${resetToken}`;
+        const resetUrl = `https://tickethive.fun/reset-password/${resetToken}`;
         const message = `Password reset link: ${resetUrl}`;
 
         await EmailUtil.sendOtpEmail(email, message);

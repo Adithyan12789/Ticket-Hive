@@ -5,12 +5,22 @@ import http from "http";
 
 const app = express();
 const server = http.createServer(app);
+
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:3000/", 'https://www.tickethive.fun/', 'https://ticket-hive-plum.vercel.app/'],
-    methods: ['GET', 'POST'],
+    origin: [
+      "http://localhost:3000", 
+      "https://www.tickethive.fun", 
+      "https://ticket-hive-plum.vercel.app"
+    ],
+    methods: ["GET", "POST"],
     credentials: true,
   },
+});
+
+app.use((req, res, next) => {
+  console.log(`Request Origin: ${req.headers.origin}`);
+  next();
 });
 
 io.on("connection", (socket: Socket) => {
