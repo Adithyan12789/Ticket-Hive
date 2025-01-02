@@ -17,7 +17,7 @@ const port = process.env.PORT || 5000;
 
 const allowedOrigins = [
   'https://www.tickethive.fun',
-  'https://ticket-hive-plum.vercel.app',
+  'https://ticket-hive-dusky.vercel.app/',
   'http://localhost:3000'
 ];
 

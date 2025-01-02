@@ -11,7 +11,7 @@ const io = new Server(server, {
     origin: [
       "http://localhost:3000", 
       "https://www.tickethive.fun", 
-      "https://ticket-hive-plum.vercel.app"
+      "https://ticket-hive-dusky.vercel.app/"
     ],
     methods: ["GET", "POST"],
     credentials: true,
