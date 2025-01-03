@@ -44,7 +44,7 @@ const TheaterOwnerSidebar: React.FC = () => {
         </li>
         <li>
           <Link
-            to="/admin/bookings"
+            to="/theater/bookings"
             className={
               location.pathname === "/theater/bookings"
                 ? "active sidebar-link"
