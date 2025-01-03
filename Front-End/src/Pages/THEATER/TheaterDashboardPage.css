@@ -1,16 +1,18 @@
+/* theater_dashboard.css */
+
 /* General Layout for Admin Dashboard */
 .theater-dashboard {
   display: flex;
   min-height: 100vh;
   background-color: #f0f2f5;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Roboto', sans-serif;
 }
 
 /* Sidebar styles */
 .sidebar {
-  width: 280px;
+  width: 250px;
   background-color: #ffffff;
-  color: #333;
+  color: #333333;
   padding: 20px;
   position: fixed;
   top: 0;
@@ -18,16 +20,16 @@
   height: 100vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
 }
 
 .sidebar-title {
   font-size: 24px;
-  color: #1a237e;
+  color: #1a73e8;
   margin-bottom: 30px;
   text-align: center;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .sidebar-links {
@@ -40,7 +42,7 @@
 }
 
 .sidebar-links a {
-  color: #333;
+  color: #5f6368;
   text-decoration: none;
   font-size: 16px;
   display: block;
@@ -50,29 +52,24 @@
 }
 
 .sidebar-links a:hover {
-  background-color: #e8eaf6;
-  color: #1a237e;
+  background-color: #e8f0fe;
+  color: #1a73e8;
 }
 
 .sidebar-links a.active {
-  background-color: #1a237e;
-  color: #ffffff;
+  background-color: #e8f0fe;
+  color: #1a73e8;
+  font-weight: 500;
 }
 
 .sidebar-links a:active {
   transform: scale(0.98);
 }
 
-.dashboard-content {
-  flex: 1;
-  padding: 30px;
-  margin-left: 280px;
-}
-
 .dashboard-title {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #1a237e;
+  font-size: 28px;
+  font-weight: 500;
+  color: #202124;
   margin-bottom: 2rem;
   text-align: center;
 }
@@ -87,34 +84,35 @@
 .stat-card {
   background-color: #ffffff;
   border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
   padding: 1.5rem;
   text-align: center;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: all 0.3s cubic-bezier(.25,.8,.25,1);
 }
 
 .stat-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
 }
 
 .stat-icon {
   font-size: 2.5rem;
   margin-bottom: 1rem;
-  color: #1a237e;
+  color: #1a73e8;
 }
 
 .stat-title {
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 500;
   margin-bottom: 0.5rem;
-  color: #333;
+  color: #5f6368;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .stat-value {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #1a237e;
+  font-size: 24px;
+  font-weight: 500;
+  color: #202124;
 }
 
 .chart-grid {
@@ -127,20 +125,19 @@
 .chart-card {
   background-color: #ffffff;
   border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
   padding: 1.5rem;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: all 0.3s cubic-bezier(.25,.8,.25,1);
 }
 
 .chart-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
 }
 
 .chart-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #1a237e;
+  font-size: 18px;
+  font-weight: 500;
+  color: #202124;
   margin-bottom: 1rem;
   display: flex;
   align-items: center;
@@ -148,21 +145,20 @@
 
 .chart-icon {
   margin-right: 0.5rem;
-  color: #1a237e;
+  color: #1a73e8;
 }
 
 .earnings-chart {
   background-color: #ffffff;
   border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
   padding: 1.5rem;
   margin-bottom: 2rem;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: all 0.3s cubic-bezier(.25,.8,.25,1);
 }
 
 .earnings-chart:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
 }
 
 .earnings-header {
@@ -176,31 +172,32 @@
   display: block;
   margin: 2rem auto;
   padding: 12px 24px;
-  background-color: #1a237e;
+  background-color: #1a73e8;
   color: #ffffff;
   border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
+  border-radius: 24px;
+  font-size: 16px;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .generate-report-button:hover {
-  background-color: #3949ab;
-  transform: translateY(-2px);
+  background-color: #185abc;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 @media (max-width: 768px) {
+  .theater-dashboard {
+    flex-direction: column;
+  }
+
   .sidebar {
     width: 100%;
     height: auto;
     position: relative;
-  }
-
-  .dashboard-content {
-    margin-left: 0;
   }
 
   .stats-grid {
