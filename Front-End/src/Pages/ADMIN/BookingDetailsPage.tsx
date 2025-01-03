@@ -6,9 +6,26 @@ import {
 } from "../../Slices/AdminApiSlice";
 import AdminLayout from "../../Components/AdminComponents/AdminLayout";
 import Loader from "../../Components/UserComponents/Loader";
-import { Ticket } from "./AdminBookingsPage";
 import Swal from "sweetalert2";
 import { backendUrl } from "../../url";
+
+interface Ticket {
+    bookingId: string;
+    movieId: string;
+    theaterName: string;
+    screenName: string;
+    seats: string[];
+    bookingTime: string;
+    paymentStatus: string;
+    userName: string;
+    userEmail: string;
+    images: string[];
+    showTime: string;
+    paymentMethod: string;
+    movieDetails: {
+       poster: string;
+    };
+}
 
 const AdminBookingDetailPage: React.FC = () => {
   const { bookingId } = useParams<{ bookingId: string }>();
@@ -19,7 +36,7 @@ const AdminBookingDetailPage: React.FC = () => {
   console.log("Booking: ", booking);
 
   const selectedBooking = booking?.tickets?.find(
-    (ticket: Ticket) => ticket.ticket.bookingId === bookingId
+    (ticket: Ticket) => ticket.bookingId === bookingId
   );
 
   console.log("selectedBooking: ", selectedBooking);
