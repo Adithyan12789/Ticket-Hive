@@ -151,6 +151,8 @@ class AdminController {
       try {
         const tickets = await adminService.getAllTicketsService();
 
+        console.log("admin getAllTickets: ", tickets);
+        
         if (!tickets || tickets.length === 0) {
           res.status(404).json({ message: "No tickets found for this user" });
           return;

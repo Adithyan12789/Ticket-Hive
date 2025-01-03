@@ -217,6 +217,8 @@ class AdminService {
   public async getAllTicketsService() {
     const bookings = await AdminRepository.findAllBookings();
 
+    console.log("getAllTicketsService bookings: ", bookings);
+
     if (!bookings.length) throw new Error("No tickets found");
 
     return bookings.map((booking: BookingDetails) => ({

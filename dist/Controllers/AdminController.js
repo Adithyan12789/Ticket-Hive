@@ -129,6 +129,7 @@ class AdminController {
         this.getAllTickets = (0, express_async_handler_1.default)(async (req, res) => {
             try {
                 const tickets = await AdminService_1.default.getAllTicketsService();
+                console.log("admin getAllTickets: ", tickets);
                 if (!tickets || tickets.length === 0) {
                     res.status(404).json({ message: "No tickets found for this user" });
                     return;
