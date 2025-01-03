@@ -60,7 +60,7 @@ const TicketsScreen: React.FC = () => {
           (ticket) => ticket.ticket.paymentStatus === filterStatus
         );
 
-  const sortedTickets = [...filteredTickets].sort((a, b) => {
+  const sortedTickets = [...filteredTickets].sort((b, a) => {
     if (sortBy === "movieTitle") {
       return a.movieDetails.title.localeCompare(b.movieDetails.title);
     } else {
