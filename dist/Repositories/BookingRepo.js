@@ -7,7 +7,7 @@ const bookingModel_1 = require("../Models/bookingModel");
 const UserModel_1 = __importDefault(require("../Models/UserModel"));
 class BookingRepository {
     async findAllBookings(userId) {
-        return await bookingModel_1.Booking.find({ "user._id": userId })
+        return await bookingModel_1.Booking.find({ "user": userId })
             .populate("user", "name email")
             .populate("movie theater screen")
             .lean();

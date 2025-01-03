@@ -4,7 +4,7 @@ import User, { IUser } from "../Models/UserModel";
 class BookingRepository {
 
   public async findAllBookings(userId: string): Promise<any[]> {
-    return await Booking.find({ "user._id": userId })
+    return await Booking.find({ "user": userId })
       .populate("user", "name email")
       .populate("movie theater screen")
       .lean();
