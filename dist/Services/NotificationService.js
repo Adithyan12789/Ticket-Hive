@@ -17,7 +17,7 @@ class NotificationService {
     static async getUnreadNotifications(userId) {
         try {
             const unreadNotifications = await NotificationModel_1.Notification.find({
-                userId,
+                userId: userId,
                 isRead: false
             }).sort({ createdAt: -1 });
             console.log("unreadNotifications: ", unreadNotifications);

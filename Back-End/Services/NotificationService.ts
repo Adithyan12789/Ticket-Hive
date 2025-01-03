@@ -20,7 +20,7 @@ class NotificationService {
   public static async getUnreadNotifications(userId: string): Promise<any> {
     try {
       const unreadNotifications = await Notification.find({ 
-        userId, 
+        userId: userId, 
         isRead: false 
       }).sort({ createdAt: -1 });
 

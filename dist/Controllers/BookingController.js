@@ -108,6 +108,7 @@ class BookingController {
         this.getUnreadNotifications = (0, express_async_handler_1.default)(async (req, res) => {
             try {
                 const userId = req.user?._id;
+                console.log("getUnreadNotifications userId: ", userId);
                 if (!userId) {
                     res.status(400).json({ message: "User ID is required" });
                     return;
