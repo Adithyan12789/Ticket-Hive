@@ -36,6 +36,9 @@
 
     const { data: bookings, isLoading, refetch } = useGetBookingDetailsQuery({});
 
+    console.log("BookingDetailsScreen bookings: ", bookings);
+    
+
     useEffect(() => {
       document.title = "Admin Booking Details";
       refetch();
