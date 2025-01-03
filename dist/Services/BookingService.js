@@ -96,8 +96,8 @@ class BookingService {
         });
         return newBooking;
     }
-    async getAllTicketsService() {
-        const bookings = await BookingRepo_1.default.findAllBookings();
+    async getAllTicketsService(userId) {
+        const bookings = await BookingRepo_1.default.findAllBookings(userId);
         if (!bookings.length)
             throw new Error("No tickets found");
         return bookings.map((booking) => ({

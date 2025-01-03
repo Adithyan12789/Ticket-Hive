@@ -6,8 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const bookingModel_1 = require("../Models/bookingModel");
 const UserModel_1 = __importDefault(require("../Models/UserModel"));
 class BookingRepository {
-    async findAllBookings() {
-        return await bookingModel_1.Booking.find({})
+    async findAllBookings(userId) {
+        return await bookingModel_1.Booking.find({ "user._id": userId })
             .populate("user", "name email")
             .populate("movie theater screen")
             .lean();

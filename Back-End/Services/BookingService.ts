@@ -143,8 +143,8 @@ class BookingService {
     return newBooking;
   }
 
-  public async getAllTicketsService() {
-    const bookings = await BookingRepo.findAllBookings();
+  public async getAllTicketsService(userId: string) {
+    const bookings = await BookingRepo.findAllBookings(userId);
 
     if (!bookings.length) throw new Error("No tickets found");
 

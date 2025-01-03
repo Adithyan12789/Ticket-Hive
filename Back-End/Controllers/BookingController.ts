@@ -210,9 +210,15 @@ class BookingController {
   );
 
   getAllTickets = asyncHandler(
-    async (req: Request, res: Response): Promise<void> => {
+    async (req: CustomRequest, res: Response): Promise<void> => {
       try {
-        const tickets = await BookingService.getAllTicketsService();
+        const userId = req.user?._id;
+        if (!userId) {
+          res.status(401).json({ message: "Unauthorized access" });
+          return;
+        }
+  
+        const tickets = await BookingService.getAllTicketsService(userId);
 
         if (!tickets || tickets.length === 0) {
           res.status(404).json({ message: "No tickets found for this user" });

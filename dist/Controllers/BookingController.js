@@ -157,7 +157,12 @@ class BookingController {
         });
         this.getAllTickets = (0, express_async_handler_1.default)(async (req, res) => {
             try {
-                const tickets = await BookingService_2.default.getAllTicketsService();
+                const userId = req.user?._id;
+                if (!userId) {
+                    res.status(401).json({ message: "Unauthorized access" });
+                    return;
+                }
+                const tickets = await BookingService_2.default.getAllTicketsService(userId);
                 if (!tickets || tickets.length === 0) {
                     res.status(404).json({ message: "No tickets found for this user" });
                     return;
