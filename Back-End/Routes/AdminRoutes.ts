@@ -11,7 +11,7 @@ import TheaterController from '../Controllers/TheaterController';
 const router = express.Router();
 
 router.post('/admin-login', AdminController.adminLogin);
-router.post('/get-user', AdminAuthMiddleware.protect, AdminController.getAllUsers);
+router.get('/get-user', AdminAuthMiddleware.protect, AdminController.getAllUsers);
 router.post('/get-theaterOwners', AdminAuthMiddleware.protect, AdminController.getAllTheaterOwners);
 router.patch('/block-user', AdminAuthMiddleware.protect, AdminController.blockUserController);
 router.patch('/unblock-user', AdminAuthMiddleware.protect, AdminController.unblockUserController);

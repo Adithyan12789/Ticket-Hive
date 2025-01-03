@@ -14,7 +14,7 @@ const ChatController_1 = __importDefault(require("../Controllers/ChatController"
 const TheaterController_1 = __importDefault(require("../Controllers/TheaterController"));
 const router = express_1.default.Router();
 router.post('/admin-login', AdminController_1.default.adminLogin);
-router.post('/get-user', AdminAuthMiddleware_1.AdminAuthMiddleware.protect, AdminController_1.default.getAllUsers);
+router.get('/get-user', AdminAuthMiddleware_1.AdminAuthMiddleware.protect, AdminController_1.default.getAllUsers);
 router.post('/get-theaterOwners', AdminAuthMiddleware_1.AdminAuthMiddleware.protect, AdminController_1.default.getAllTheaterOwners);
 router.patch('/block-user', AdminAuthMiddleware_1.AdminAuthMiddleware.protect, AdminController_1.default.blockUserController);
 router.patch('/unblock-user', AdminAuthMiddleware_1.AdminAuthMiddleware.protect, AdminController_1.default.unblockUserController);
