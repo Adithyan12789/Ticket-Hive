@@ -223,8 +223,10 @@ class BookingController {
             }
         });
         this.getTicketDetails = (0, express_async_handler_1.default)(async (req, res) => {
+            console.log("enter getTicketDetails admin");
             try {
                 const { ticketId } = req.params;
+                console.log("admin ticketId: ", ticketId);
                 const ticket = await BookingService_1.default.getTicketDetails(ticketId);
                 if (ticket) {
                     res.status(200).json(ticket);

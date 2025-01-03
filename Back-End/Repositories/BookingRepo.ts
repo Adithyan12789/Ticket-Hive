@@ -19,7 +19,7 @@ class BookingRepository {
   }
 
   public async findBookingById(bookingId: string): Promise<any | null> {
-    return await Booking.findById(bookingId).populate("movie theater screen");
+    return await Booking.findById({ _id: bookingId }).populate("movie theater screen");
   }
 
   public async deleteBookingById(bookingId: string): Promise<any | null> {
