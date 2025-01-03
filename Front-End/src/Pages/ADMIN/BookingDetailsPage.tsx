@@ -8,6 +8,7 @@ import AdminLayout from "../../Components/AdminComponents/AdminLayout";
 import Loader from "../../Components/UserComponents/Loader";
 import Swal from "sweetalert2";
 import { backendUrl } from "../../url";
+import { Ticket } from "./AdminBookingsPage";
 
 const AdminBookingDetailPage: React.FC = () => {
   const { bookingId } = useParams<{ bookingId: string }>();
@@ -19,20 +20,22 @@ const AdminBookingDetailPage: React.FC = () => {
     document.title = "Booking Details - Admin";
   }, []);
 
-  console.log("Full Booking Object: ", booking);
+// Log the full booking object for debugging
+console.log("Full Booking Object:", booking);
 
-  const tickets = booking.tickets || [];
-  console.log("Tickets Array: ", tickets);
-  
-  const selectedBooking = tickets.find(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (ticket: any) => {
-      console.log("Current Ticket Booking ID:", ticket?.ticket?.bookingId);
-      return ticket?.ticket?.bookingId === bookingId;
-    }
-  );
-  
-  console.log("Selected Booking: ", selectedBooking);
+// Access the tickets array safely
+const tickets = booking?.tickets || [];
+console.log("Tickets Array (Processed):", tickets);
+
+// Find the specific booking using the bookingId
+const selectedBooking = tickets.find(
+  (ticket: Ticket) => {
+    console.log("Current Ticket Booking ID:", ticket?.ticket?.bookingId);
+    return ticket?.ticket?.bookingId === bookingId;
+  }
+);
+
+console.log("Selected Booking:", selectedBooking);
 
   if (isLoading) return <Loader />;
 
