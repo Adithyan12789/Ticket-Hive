@@ -125,10 +125,10 @@ export const adminApiSlice = apiSlice.injectEndpoints({
     }),    
     
     getBookingDetailById: builder.query({
-      query: ({ bookingId }) => ({
+      query: (bookingId) => ({
         url: `${ADMIN_URL}/get-ticketDetail/${bookingId}`,
         method: "GET",
-      }),
+      }),      
     }),
 
     updateBookingStatus: builder.mutation({
