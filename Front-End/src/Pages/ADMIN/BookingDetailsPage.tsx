@@ -17,6 +17,7 @@ const AdminBookingDetailPage: React.FC = () => {
   const [status, setStatus] = useState<string>("");
 
   console.log("Booking ID from Params:", bookingId);
+  console.log("Booking: ", booking);
   console.log("Tickets Array:", booking?.tickets);
   
   const selectedBooking = booking?.tickets?.find(
