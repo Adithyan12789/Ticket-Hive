@@ -310,6 +310,8 @@ class BookingController {
 
         const booking = await bookingService.getBookingDetails(bookingId);
 
+        console.log("getBookingDetails coontroller booking: ", booking);
+
         if (booking) {
           res.status(200).json(booking);
         } else {

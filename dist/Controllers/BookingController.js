@@ -228,6 +228,7 @@ class BookingController {
                 const { bookingId } = req.params;
                 console.log("admin bookingId: ", bookingId);
                 const booking = await BookingService_1.default.getBookingDetails(bookingId);
+                console.log("getBookingDetails coontroller booking: ", booking);
                 if (booking) {
                     res.status(200).json(booking);
                 }
