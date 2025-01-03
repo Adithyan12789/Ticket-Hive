@@ -22,7 +22,7 @@ class BookingRepository {
         return await bookingModel_1.Booking.findById(ticketId).populate("movie theater screen");
     }
     async findBookingById(bookingId) {
-        return await bookingModel_1.Booking.findById({ _id: bookingId }).populate("movie theater screen");
+        return await bookingModel_1.Booking.findById(bookingId).populate("movie theater screen");
     }
     async deleteBookingById(bookingId) {
         return await bookingModel_1.Booking.findByIdAndDelete(bookingId);
