@@ -252,6 +252,7 @@
   align-items: center; /* Center the icon and text vertically */
   padding: 10px 15px; /* Add padding to each item */
   text-decoration: none !important; 
+  z-index: 9999;
 }
 
 .dropdown-item:hover {
