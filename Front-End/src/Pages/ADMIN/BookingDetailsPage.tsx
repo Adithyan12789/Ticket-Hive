@@ -6,26 +6,9 @@ import {
 } from "../../Slices/AdminApiSlice";
 import AdminLayout from "../../Components/AdminComponents/AdminLayout";
 import Loader from "../../Components/UserComponents/Loader";
+import { Ticket } from "./AdminBookingsPage";
 import Swal from "sweetalert2";
 import { backendUrl } from "../../url";
-
-interface Ticket {
-    bookingId: string;
-    movieId: string;
-    theaterName: string;
-    screenName: string;
-    seats: string[];
-    bookingTime: string;
-    paymentStatus: string;
-    userName: string;
-    userEmail: string;
-    images: string[];
-    showTime: string;
-    paymentMethod: string;
-    movieDetails: {
-       poster: string;
-    };
-}
 
 const AdminBookingDetailPage: React.FC = () => {
   const { bookingId } = useParams<{ bookingId: string }>();
@@ -33,12 +16,15 @@ const AdminBookingDetailPage: React.FC = () => {
   const [updateBookingStatus] = useUpdateBookingStatusMutation();
   const [status, setStatus] = useState<string>("");
 
-  console.log("Booking: ", booking);
-
+  console.log("Booking ID from Params:", bookingId);
+  console.log("Tickets Array:", booking?.tickets);
+  
   const selectedBooking = booking?.tickets?.find(
-    (ticket: Ticket) => ticket.bookingId === bookingId
+    (ticket: Ticket) => {
+      console.log("Current Ticket Booking ID:", ticket.ticket.bookingId);
+      return ticket.ticket.bookingId === bookingId;
+    }
   );
-
   console.log("selectedBooking: ", selectedBooking);
 
   useEffect(() => {
