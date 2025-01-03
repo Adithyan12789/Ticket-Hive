@@ -252,7 +252,6 @@
   align-items: center; /* Center the icon and text vertically */
   padding: 10px 15px; /* Add padding to each item */
   text-decoration: none !important; 
-  z-index: 9999;
 }
 
 .dropdown-item:hover {
@@ -266,6 +265,10 @@
 
 .custom-dropdown .dropdown-toggle::after {
   display: none !important;  /* Hides the default caret */
+}
+
+.navbar-expand-lg .navbar-nav .dropdown-menu{
+  z-index: 9999;
 }
 
 .hover-link {
