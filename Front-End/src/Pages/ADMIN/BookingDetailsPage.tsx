@@ -12,8 +12,7 @@ import { backendUrl } from "../../url";
 
 const AdminBookingDetailPage: React.FC = () => {
   const { bookingId } = useParams<{ bookingId: string }>();
-  const ticketId = bookingId;
-  const { data: booking, isLoading } = useGetBookingDetailByIdQuery(ticketId);
+  const { data: booking, isLoading } = useGetBookingDetailByIdQuery(bookingId || '');  
   const [updateBookingStatus] = useUpdateBookingStatusMutation();
   const [status, setStatus] = useState<string>("");
 
