@@ -6,7 +6,6 @@ import {
 } from "../../Slices/AdminApiSlice";
 import AdminLayout from "../../Components/AdminComponents/AdminLayout";
 import Loader from "../../Components/UserComponents/Loader";
-import { Ticket } from "./AdminBookingsPage";
 import Swal from "sweetalert2";
 import { backendUrl } from "../../url";
 
@@ -16,21 +15,24 @@ const AdminBookingDetailPage: React.FC = () => {
   const [updateBookingStatus] = useUpdateBookingStatusMutation();
   const [status, setStatus] = useState<string>("");
 
-  console.log("Booking ID from Params:", bookingId);
-  console.log("Booking: ", booking);
-  console.log("Tickets Array:", booking?.tickets);
-  
-  const selectedBooking = booking?.tickets?.find(
-    (ticket: Ticket) => {
-      console.log("Current Ticket Booking ID:", ticket.ticket.bookingId);
-      return ticket.ticket.bookingId === bookingId;
-    }
-  );
-  console.log("selectedBooking: ", selectedBooking);
-
   useEffect(() => {
     document.title = "Booking Details - Admin";
   }, []);
+
+  console.log("Full Booking Object: ", booking);
+
+  const tickets = booking.tickets || [];
+  console.log("Tickets Array: ", tickets);
+  
+  const selectedBooking = tickets.find(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (ticket: any) => {
+      console.log("Current Ticket Booking ID:", ticket?.ticket?.bookingId);
+      return ticket?.ticket?.bookingId === bookingId;
+    }
+  );
+  
+  console.log("Selected Booking: ", selectedBooking);
 
   if (isLoading) return <Loader />;
 
