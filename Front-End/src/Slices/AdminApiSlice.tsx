@@ -17,14 +17,14 @@ export const adminApiSlice = apiSlice.injectEndpoints({
     getUserData:builder.mutation({
       query:()=>({
          url:`${ADMIN_URL}/get-user` ,
-         method:'POST',
+         method:'GET',
       })
     }),
 
     getTheaterOwnerData:builder.mutation({
       query:()=>({
          url:`${ADMIN_URL}/get-theaterOwners` ,
-         method:'POST',
+         method:'GET',
       })
     }),
 
