@@ -22,6 +22,7 @@ import { Box, Typography, Grid, Button } from "@mui/material";
 import styled from "@emotion/styled";
 import { RootState } from "../../Store";
 import { useSelector } from "react-redux";
+import "./TheaterDashboardPage.css";
 
 // Styled components
 const DashboardContainer = styled(Box)`
