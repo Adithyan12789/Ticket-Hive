@@ -211,8 +211,12 @@ class BookingController {
 
   getAllTickets = asyncHandler(
     async (req: CustomRequest, res: Response): Promise<void> => {
+
       try {
-        const userId = req.user?._id;
+        const { userId } = req.params;
+
+        console.log("hmghnjhgn userId: ", userId);
+        
         if (!userId) {
           res.status(401).json({ message: "Unauthorized access" });
           return;
