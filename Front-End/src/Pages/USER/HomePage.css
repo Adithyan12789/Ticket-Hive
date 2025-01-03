@@ -267,10 +267,6 @@
   display: none !important;  /* Hides the default caret */
 }
 
-.navbar-expand-lg .navbar-nav .dropdown-menu{
-  z-index: 9999;
-}
-
 .hover-link {
   text-decoration: none;
   font-weight: bold;
