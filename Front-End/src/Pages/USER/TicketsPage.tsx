@@ -28,7 +28,11 @@ const TicketsScreen: React.FC = () => {
   const navigate = useNavigate();
   const { userInfo } = useSelector((state: RootState) => state.auth);
 
-  const { data, isLoading, refetch } = useGetBookingDetailsQuery(userInfo?.id);
+  const userId = userInfo?.id
+
+  console.log("userId: ", userId);
+  
+  const { data, isLoading, refetch } = useGetBookingDetailsQuery(userId);
   const tickets: TicketEntry[] = data?.tickets || [];
 
   const [currentPage, setCurrentPage] = useState(1);
