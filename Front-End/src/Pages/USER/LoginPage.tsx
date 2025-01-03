@@ -117,10 +117,10 @@ const LoginPage = () => {
         error instanceof Error ? error.message : "An error occurred during Google login"
       );
     }
-
-    if (loading) return <Loader />;
     
   };
+
+  if (loading) return <Loader />;
 
   return (
     <div className="user-login-page">
