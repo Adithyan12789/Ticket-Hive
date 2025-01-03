@@ -300,8 +300,14 @@ class BookingController {
 
   getTicketDetails = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
+
+      console.log("enter getTicketDetails admin");
+      
       try {
         const { ticketId } = req.params;
+
+        console.log("admin ticketId: ", ticketId);
+
         const ticket = await bookingService.getTicketDetails(ticketId);
 
         if (ticket) {
