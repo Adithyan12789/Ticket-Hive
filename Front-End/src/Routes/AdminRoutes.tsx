@@ -7,7 +7,7 @@ import TheaterOwners from '../Pages/ADMIN/TheaterOwnerManagement';
 import VerificationRequests from '../Pages/ADMIN/VerificationRequests';
 import MovieManagement from '../Pages/ADMIN/MoviesManagement';
 import MovieDetailsPage from '../Pages/ADMIN/MovieDetailsPage';
-import BookingsPage from '../Pages/ADMIN/BookingsPage';
+import AdminBookingsPage from '../Pages/ADMIN/AdminBookingsPage';
 import BookingDetailsPage from '../Pages/ADMIN/BookingDetailsPage';
 import AdminChatScreen from '../Pages/ADMIN/AdminChatScreen';
 
@@ -20,7 +20,7 @@ export const AdminRoutes = (
     <Route path="add-movies" element={<MovieManagement />} />
     <Route path="get-movies" element={<MovieManagement />} />
     <Route path="movie-details/:id" element={<MovieDetailsPage />} />
-    <Route path="bookings" element={<BookingsPage />} />
+    <Route path="bookings" element={<AdminBookingsPage />} />
     <Route path="bookings/:bookingId" element={<BookingDetailsPage />} />
     <Route path="chat" element={<AdminChatScreen />} />
   </Route>

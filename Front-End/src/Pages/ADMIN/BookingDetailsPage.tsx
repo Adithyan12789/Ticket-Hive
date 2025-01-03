@@ -1,22 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
-  useGetBookingDetailsQuery,
+  useGetBookingDetailByIdQuery,
   useUpdateBookingStatusMutation,
 } from "../../Slices/AdminApiSlice";
 import AdminLayout from "../../Components/AdminComponents/AdminLayout";
 import Loader from "../../Components/UserComponents/Loader";
-import { Ticket } from "./BookingsPage";
+import { Ticket } from "./AdminBookingsPage";
 import Swal from "sweetalert2";
 import { backendUrl } from "../../url";
 
 const AdminBookingDetailPage: React.FC = () => {
   const { bookingId } = useParams<{ bookingId: string }>();
-  const { data: bookings, isLoading } = useGetBookingDetailsQuery({});
+  const { data: booking, isLoading } = useGetBookingDetailByIdQuery(bookingId);
   const [updateBookingStatus] = useUpdateBookingStatusMutation();
   const [status, setStatus] = useState<string>("");
 
-  const selectedBooking = bookings?.tickets?.find(
+  const selectedBooking = booking?.tickets?.find(
     (ticket: Ticket) => ticket.ticket.bookingId === bookingId
   );
 

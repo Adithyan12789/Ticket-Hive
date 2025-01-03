@@ -1,12 +1,12 @@
   import React, { useState, useEffect } from "react";
   import { Button, Pagination, Table } from "react-bootstrap";
-  import { useGetBookingDetailsQuery } from "../../Slices/AdminApiSlice";
+  import { useGetAllBookingDetailsQuery } from "../../Slices/AdminApiSlice";
   import AdminLayout from "../../Components/AdminComponents/AdminLayout";
   import Loader from "../../Components/UserComponents/Loader";
   import { FaInfoCircle } from "react-icons/fa";
   import { BookingDetails } from "../../Types/BookingTypes";
   import { useNavigate } from "react-router-dom";
-  import "./BookingPage.css"; // Add a custom CSS file for additional styling
+  import "./AdminBookingPage.css"; // Add a custom CSS file for additional styling
 
   export interface Ticket {
     ticket: {
@@ -34,9 +34,9 @@
     const [currentPage, setCurrentPage] = useState(1);
     const [bookingsPerPage] = useState(6);
 
-    const { data: bookings, isLoading, refetch } = useGetBookingDetailsQuery({});
+    const { data: allBookings, isLoading, refetch } = useGetAllBookingDetailsQuery({});
 
-    console.log("BookingDetailsScreen bookings: ", bookings);
+    console.log("BookingDetailsScreen bookings: ", allBookings);
     
 
     useEffect(() => {
@@ -45,7 +45,7 @@
     }, [refetch]);
 
     const transformedBookings =
-      bookings?.tickets?.map((ticket: Ticket) => ({
+    allBookings?.tickets?.map((ticket: Ticket) => ({
         bookingId: ticket.ticket.bookingId,
         user: {
           name: ticket.ticket.userName,

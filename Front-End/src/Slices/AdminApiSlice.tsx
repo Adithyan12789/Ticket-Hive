@@ -117,9 +117,16 @@ export const adminApiSlice = apiSlice.injectEndpoints({
       }),
     }),
 
-    getBookingDetails: builder.query({
+    getAllBookingDetails: builder.query({
       query: () => ({
         url: `${ADMIN_URL}/getAlltickets`,
+        method: "GET",
+      }),
+    }),    
+    
+    getBookingDetailById: builder.query({
+      query: ({ bookingId }) => ({
+        url: `${ADMIN_URL}/getAlltickets/${bookingId}`,
         method: "GET",
       }),
     }),
@@ -220,7 +227,8 @@ export const {
   useGetMovieByMovieIdQuery,
   useUpdateMovieMutation,
   useDeleteMovieMutation,
-  useGetBookingDetailsQuery,
+  useGetAllBookingDetailsQuery,
+  useGetBookingDetailByIdQuery,
   useUpdateBookingStatusMutation,
   useAdminLogoutMutation,
   useGetTheaterOwnersQuery,
