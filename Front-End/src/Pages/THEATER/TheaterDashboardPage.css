@@ -66,6 +66,7 @@
 .dashboard-content {
   flex-grow: 1;
   padding: 2rem;
+  margin-left: 250px; /* Match sidebar width */
 }
 
 .dashboard-title {
@@ -182,6 +183,17 @@
 
   .chart-grid {
     grid-template-columns: 1fr;
+  }
+
+  .dashboard-content {
+    margin-left: 0;
+    padding: 1rem;
+  }
+
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: static;
   }
 }
 
