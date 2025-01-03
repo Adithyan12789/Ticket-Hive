@@ -260,6 +260,9 @@ class BookingService {
   
   public async getBookingDetails(bookingId: string) {
     const booking = await BookingRepo.findBookingById(bookingId);
+
+    console.log("getBookingDetails service booking: ", booking);
+    
     if (!booking) throw new Error("Booking not found");
     return booking;
   }
