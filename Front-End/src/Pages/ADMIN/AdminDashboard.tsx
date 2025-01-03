@@ -20,7 +20,7 @@ import { FilteredEarningsChart } from "../../Components/AdminComponents/filtered
 import Loader from "../../Components/UserComponents/Loader";
 import {
   useGetUserDataMutation,
-  useGetBookingDetailsQuery,
+  useGetAllBookingDetailsQuery,
   useGetTheaterOwnerDataMutation,
   useGetMoviesMutation,
 } from "../../Slices/AdminApiSlice";
@@ -66,7 +66,7 @@ const AdminDashboard: React.FC = () => {
   const [getUserData] = useGetUserDataMutation();
   const [getTheaterOwnersData] = useGetTheaterOwnerDataMutation();
   const [getMovies] = useGetMoviesMutation();
-  const { data: bookings, isLoading, refetch } = useGetBookingDetailsQuery({});
+  const { data: bookings, isLoading, refetch } = useGetAllBookingDetailsQuery({});
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [stats, setStats] = useState<Stats>({
     users: 0,
