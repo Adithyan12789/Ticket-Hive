@@ -212,6 +212,8 @@ class BookingController {
   getAllTickets = asyncHandler(
     async (req: CustomRequest, res: Response): Promise<void> => {
 
+      console.log("entered getAllTickets function");
+      
       try {
         const { userId } = req.params;
 

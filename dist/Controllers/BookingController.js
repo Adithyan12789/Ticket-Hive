@@ -156,8 +156,10 @@ class BookingController {
             }
         });
         this.getAllTickets = (0, express_async_handler_1.default)(async (req, res) => {
+            console.log("entered getAllTickets function");
             try {
-                const userId = req.user?._id;
+                const { userId } = req.params;
+                console.log("hmghnjhgn userId: ", userId);
                 if (!userId) {
                     res.status(401).json({ message: "Unauthorized access" });
                     return;
