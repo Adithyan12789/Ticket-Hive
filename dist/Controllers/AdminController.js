@@ -127,6 +127,7 @@ class AdminController {
             }
         });
         this.getAllTickets = (0, express_async_handler_1.default)(async (req, res) => {
+            console.log("entered Admin getAllTickets function");
             try {
                 const tickets = await AdminService_1.default.getAllTicketsService();
                 console.log("admin getAllTickets: ", tickets);

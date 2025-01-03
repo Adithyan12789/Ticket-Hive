@@ -148,6 +148,9 @@ class AdminController {
 
   getAllTickets = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
+
+      console.log("entered Admin getAllTickets function");
+
       try {
         const tickets = await adminService.getAllTicketsService();
 
