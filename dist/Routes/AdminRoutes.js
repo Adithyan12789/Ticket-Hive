@@ -33,7 +33,7 @@ router.put('/movie-edit/:id', MovieMulter_1.default.multerUploadMultipleFields, 
 }, MovieController_1.default.updateMovieHandler);
 router.delete('/movie-delete/:id', AdminAuthMiddleware_1.AdminAuthMiddleware.protect, MovieController_1.default.deleteMovieHandler);
 router.get('/getAlltickets', AdminAuthMiddleware_1.AdminAuthMiddleware.protect, AdminController_1.default.getAllTickets);
-router.get("/tickets/:ticketId", AdminAuthMiddleware_1.AdminAuthMiddleware.protect, BookingController_1.default.getTicketDetails);
+router.get("/get-ticketDetail/:bookingId", AdminAuthMiddleware_1.AdminAuthMiddleware.protect, BookingController_1.default.getBookingDetails);
 router.put("/tickets/:ticketId", AdminAuthMiddleware_1.AdminAuthMiddleware.protect, BookingController_1.default.updateTicket);
 router.get("/theater/:theaterId/bookings", AdminAuthMiddleware_1.AdminAuthMiddleware.protect, BookingController_1.default.getTheaterBookings);
 router.patch('/statusChange/:bookingId', AdminAuthMiddleware_1.AdminAuthMiddleware.protect, BookingController_1.default.updateBookingStatus);

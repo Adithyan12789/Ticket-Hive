@@ -298,6 +298,30 @@ class BookingController {
     }
   );
 
+  getBookingDetails = asyncHandler(
+    async (req: Request, res: Response): Promise<void> => {
+
+      console.log("enter getBookingDetails admin");
+      
+      try {
+        const { bookingId } = req.params;
+
+        console.log("admin bookingId: ", bookingId);
+
+        const booking = await bookingService.getBookingDetails(bookingId);
+
+        if (booking) {
+          res.status(200).json(booking);
+        } else {
+          res.status(404).json({ message: "Booking not found" });
+        }
+      } catch (error: any) {
+        console.error("Error fetching Booking details:", error.message);
+        res.status(500).json({ message: "Failed to fetch Booking details" });
+      }
+    }
+  );
+  
   getTicketDetails = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
 

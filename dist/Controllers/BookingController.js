@@ -222,6 +222,24 @@ class BookingController {
                 });
             }
         });
+        this.getBookingDetails = (0, express_async_handler_1.default)(async (req, res) => {
+            console.log("enter getBookingDetails admin");
+            try {
+                const { bookingId } = req.params;
+                console.log("admin bookingId: ", bookingId);
+                const booking = await BookingService_1.default.getBookingDetails(bookingId);
+                if (booking) {
+                    res.status(200).json(booking);
+                }
+                else {
+                    res.status(404).json({ message: "Booking not found" });
+                }
+            }
+            catch (error) {
+                console.error("Error fetching Booking details:", error.message);
+                res.status(500).json({ message: "Failed to fetch Booking details" });
+            }
+        });
         this.getTicketDetails = (0, express_async_handler_1.default)(async (req, res) => {
             console.log("enter getTicketDetails admin");
             try {

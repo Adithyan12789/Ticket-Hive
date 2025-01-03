@@ -253,9 +253,15 @@ class BookingService {
   }
 
   public async getTicketDetails(ticketId: string) {
-    const ticket = await BookingRepo.findBookingById(ticketId);
+    const ticket = await BookingRepo.findTicketById(ticketId);
     if (!ticket) throw new Error("Ticket not found");
     return ticket;
+  }  
+  
+  public async getBookingDetails(bookingId: string) {
+    const booking = await BookingRepo.findBookingById(bookingId);
+    if (!booking) throw new Error("Booking not found");
+    return booking;
   }
 
   public updateBookingStatusService = async (

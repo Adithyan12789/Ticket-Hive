@@ -180,10 +180,16 @@ class BookingService {
         return { message: "Booking canceled successfully", booking };
     }
     async getTicketDetails(ticketId) {
-        const ticket = await BookingRepo_1.default.findBookingById(ticketId);
+        const ticket = await BookingRepo_1.default.findTicketById(ticketId);
         if (!ticket)
             throw new Error("Ticket not found");
         return ticket;
+    }
+    async getBookingDetails(bookingId) {
+        const booking = await BookingRepo_1.default.findBookingById(bookingId);
+        if (!booking)
+            throw new Error("Booking not found");
+        return booking;
     }
     async updateTicket(ticketId, updatedData) {
         const updatedTicket = await BookingRepo_1.default.updateBooking(ticketId, updatedData);

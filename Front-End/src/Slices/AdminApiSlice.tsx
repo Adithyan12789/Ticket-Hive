@@ -125,8 +125,8 @@ export const adminApiSlice = apiSlice.injectEndpoints({
     }),    
     
     getBookingDetailById: builder.query({
-      query: ({ ticketId }) => ({
-        url: `${ADMIN_URL}/tickets/${ticketId}`,
+      query: ({ bookingId }) => ({
+        url: `${ADMIN_URL}/get-ticketDetail/${bookingId}`,
         method: "GET",
       }),
     }),

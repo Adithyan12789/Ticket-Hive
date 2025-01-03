@@ -18,6 +18,9 @@ class BookingRepository {
     async findBookingsByUserId(userId) {
         return await bookingModel_1.Booking.find({ user: userId }).populate("movie theater screen").lean();
     }
+    async findTicketById(ticketId) {
+        return await bookingModel_1.Booking.findById(ticketId).populate("movie theater screen");
+    }
     async findBookingById(bookingId) {
         return await bookingModel_1.Booking.findById({ _id: bookingId }).populate("movie theater screen");
     }
