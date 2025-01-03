@@ -16,6 +16,8 @@ const AdminBookingDetailPage: React.FC = () => {
   const [updateBookingStatus] = useUpdateBookingStatusMutation();
   const [status, setStatus] = useState<string>("");
 
+  console.log("Booking: ", booking);
+
   const selectedBooking = booking?.tickets?.find(
     (ticket: Ticket) => ticket.ticket.bookingId === bookingId
   );
