@@ -187,6 +187,7 @@ class BookingService {
     }
     async getBookingDetails(bookingId) {
         const booking = await BookingRepo_1.default.findBookingById(bookingId);
+        console.log("getBookingDetails service booking: ", booking);
         if (!booking)
             throw new Error("Booking not found");
         return booking;
