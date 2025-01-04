@@ -1,29 +1,36 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
-  useGetBookingDetailByIdQuery,
+  useGetAllBookingDetailsQuery,
   useUpdateBookingStatusMutation,
 } from "../../Slices/AdminApiSlice";
 import AdminLayout from "../../Components/AdminComponents/AdminLayout";
 import Loader from "../../Components/UserComponents/Loader";
+import { Ticket } from "./AdminBookingsPage";
 import Swal from "sweetalert2";
 import { backendUrl } from "../../url";
 
-const BookingDetailPage: React.FC = () => {
+const AdminBookingDetailPage: React.FC = () => {
   const { bookingId } = useParams<{ bookingId: string }>();
-  const { data: booking, isLoading } = useGetBookingDetailByIdQuery(bookingId);  
+  const { data: booking, isLoading } = useGetAllBookingDetailsQuery({});  
   const [updateBookingStatus] = useUpdateBookingStatusMutation();
   const [status, setStatus] = useState<string>("");
 
-    useEffect(() => {
+  console.log("Booking: ", booking);
+
+  const selectedBooking = booking?.tickets?.find(
+    (ticket: Ticket) => ticket.ticket.bookingId === bookingId
+  );
+
+  console.log("selectedBooking: ", selectedBooking);
+
+  useEffect(() => {
     document.title = "Booking Details - Admin";
   }, []);
 
-  console.log("Booking: ", booking);
-
   if (isLoading) return <Loader />;
 
-  if (!booking) {
+  if (!selectedBooking) {
     return (
       <AdminLayout adminName="Admin">
         <div className="container mt-5 text-center">
@@ -36,9 +43,9 @@ const BookingDetailPage: React.FC = () => {
     );
   }
 
-  const ticket = booking.ticket;
-  const movieDetails = booking.movieDetails;
-  const offerDetails = booking.offerDetails;
+  const ticket = selectedBooking.ticket;
+  const movieDetails = selectedBooking.movieDetails;
+  const offerDetails = selectedBooking.offerDetails;
 
   const handleStatusChange = async (newStatus: string) => {
     const result = await Swal.fire({
@@ -247,4 +254,4 @@ const BookingDetailPage: React.FC = () => {
   );
 };
 
-export default BookingDetailPage;
+export default AdminBookingDetailPage;
