@@ -28,7 +28,7 @@
     };
   }
 
-  const BookingDetailsScreen: React.FC = () => {
+  const AdminBookingScreen: React.FC = () => {
     const navigate = useNavigate();
 
     const [currentPage, setCurrentPage] = useState(1);
@@ -151,4 +151,4 @@
     );
   };
 
-  export default BookingDetailsScreen;
+  export default AdminBookingScreen;

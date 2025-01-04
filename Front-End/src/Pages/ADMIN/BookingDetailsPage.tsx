@@ -11,7 +11,7 @@ import Swal from "sweetalert2";
 import { backendUrl } from "../../url";
 
 
-const AdminBookingDetailPage: React.FC = () => {
+const BookingDetailPage: React.FC = () => {
   const { bookingId } = useParams<{ bookingId: string }>();
   const { data: booking, isLoading } = useGetBookingDetailByIdQuery(bookingId);  
   const [updateBookingStatus] = useUpdateBookingStatusMutation();
@@ -260,4 +260,4 @@ const AdminBookingDetailPage: React.FC = () => {
   );
 };
 
-export default AdminBookingDetailPage;
+export default BookingDetailPage;
