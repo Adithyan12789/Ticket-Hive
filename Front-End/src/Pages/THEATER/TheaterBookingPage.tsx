@@ -37,7 +37,7 @@ const TheaterBookingScreen: React.FC = () => {
   const { data: allBookings, isLoading, refetch } = useGetAllBookingDetailsQuery({});
   
   useEffect(() => {
-    document.title = "Admin Booking Details";
+    document.title = "Theater Owner Booking Details";
     refetch();
   }, [refetch]);
 
