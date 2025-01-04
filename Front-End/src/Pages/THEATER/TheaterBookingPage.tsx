@@ -34,15 +34,21 @@ const TheaterBookingScreen: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [bookingsPerPage] = useState(6);
 
-  const { data: allBookings, isLoading, refetch } = useGetAllBookingDetailsQuery({});
-  
+  const {
+    data: allBookings,
+    isLoading,
+    refetch,
+  } = useGetAllBookingDetailsQuery({});
+
   useEffect(() => {
     document.title = "Theater Owner Booking Details";
     refetch();
   }, [refetch]);
 
+  console.log("allBookings: ", allBookings);
+  
   const transformedBookings =
-  allBookings?.tickets?.map((ticket: Ticket) => ({
+    allBookings?.tickets?.map((ticket: Ticket) => ({
       bookingId: ticket.ticket.bookingId,
       user: {
         name: ticket.ticket.userName,
@@ -71,14 +77,17 @@ const TheaterBookingScreen: React.FC = () => {
 
   if (isLoading) return <Loader />;
 
-  const theaterOwnerName = transformedBookings?.user?.name || "Adithyan Narayanan";
+  const theaterOwnerName =
+    transformedBookings?.user?.name || "Adithyan Narayanan";
 
   return (
     <TheaterOwnerLayout theaterOwnerName={theaterOwnerName}>
       <div className="container mt-4">
         <h1 className="mb-4 text-center">Booking Details</h1>
         {transformedBookings.length === 0 ? (
-          <p className="text-muted text-center">No bookings available at the moment.</p>
+          <p className="text-muted text-center">
+            No bookings available at the moment.
+          </p>
         ) : (
           <div className="table-responsive">
             <Table className="modern-table">
@@ -95,7 +104,10 @@ const TheaterBookingScreen: React.FC = () => {
               <tbody>
                 {paginatedBookings.map((booking: BookingDetails) => (
                   <tr key={booking.bookingId}>
-                    <td>{`${booking.bookingId.slice(0, 6)}...${booking.bookingId.slice(-4)}`}</td>
+                    <td>{`${booking.bookingId.slice(
+                      0,
+                      6
+                    )}...${booking.bookingId.slice(-4)}`}</td>
                     <td>{booking.user.name}</td>
                     <td>{booking.theater.name}</td>
                     <td>{booking.paymentMethod}</td>
