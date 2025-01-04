@@ -9,26 +9,6 @@ import Loader from "../../Components/UserComponents/Loader";
 import Swal from "sweetalert2";
 import { backendUrl } from "../../url";
 
-
-interface Ticket {
-      _id: string;
-      movieId: string;
-      theaterName: string;
-      screenName: string;
-      seats: string[];
-      bookingTime: string;
-      paymentStatus: string;
-      userName: string;
-      userEmail: string;
-      images: string[];
-      showTime: string;
-      paymentMethod: string;
-      movieDetails: {
-        poster: string;
-      }
-  }
-
-
 const BookingDetailPage: React.FC = () => {
   const { bookingId } = useParams<{ bookingId: string }>();
   const { data: booking, isLoading } = useGetBookingDetailByIdQuery(bookingId);  
@@ -40,16 +20,9 @@ const BookingDetailPage: React.FC = () => {
   }, []);
 
   console.log("Booking: ", booking);
+  
+  const selectedBooking = booking._id === bookingId ? booking : null;
 
-  if (!booking || !booking.tickets || booking.tickets.length === 0) {
-    console.error("Booking details or tickets not found.");
-    return <div>No booking details available.</div>;
-  }
-  
-  const selectedBooking = booking.tickets.find(
-    (ticket: Ticket) => ticket._id === bookingId
-  );
-  
   console.log("selectedBooking: ", selectedBooking);
 
   if (isLoading) return <Loader />;
