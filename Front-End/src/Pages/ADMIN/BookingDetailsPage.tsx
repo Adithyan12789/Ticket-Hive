@@ -20,19 +20,23 @@ const AdminBookingDetailPage: React.FC = () => {
     useEffect(() => {
     document.title = "Booking Details - Admin";
   }, []);
-
-  if (!booking || !booking.tickets || booking.tickets.length === 0) {
-    console.error("Booking details or tickets not found.");
+  if (!booking) {
+    console.error("Booking object is undefined.");
     return <div>No booking details available.</div>;
   }
   
-  console.log("Booking: ", booking);
+  console.log("Booking object: ", JSON.stringify(booking, null, 2));
+  
+  if (!booking.tickets || booking.tickets.length === 0) {
+    console.error("Tickets array is empty or undefined.");
+    return <div>No tickets found in booking details.</div>;
+  }
   
   const selectedBooking = booking.tickets.find(
-    (ticket: Ticket) => ticket.ticket.bookingId === bookingId
+    (ticket: Ticket) => ticket.ticket?.bookingId === bookingId
   );
   
-  console.log("selectedBooking: ", selectedBooking);
+  console.log("Selected booking: ", selectedBooking);
 
   if (isLoading) return <Loader />;
 
