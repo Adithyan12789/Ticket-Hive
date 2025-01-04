@@ -6,9 +6,9 @@ import {
 } from "../../Slices/AdminApiSlice";
 import AdminLayout from "../../Components/AdminComponents/AdminLayout";
 import Loader from "../../Components/UserComponents/Loader";
+import { Ticket } from "./AdminBookingsPage";
 import Swal from "sweetalert2";
 import { backendUrl } from "../../url";
-import { Ticket } from "./AdminBookingsPage";
 
 const AdminBookingDetailPage: React.FC = () => {
   const { bookingId } = useParams<{ bookingId: string }>();
@@ -16,26 +16,17 @@ const AdminBookingDetailPage: React.FC = () => {
   const [updateBookingStatus] = useUpdateBookingStatusMutation();
   const [status, setStatus] = useState<string>("");
 
+  console.log("Booking: ", booking);
+
+  const selectedBooking = booking?.tickets?.find(
+    (ticket: Ticket) => ticket.ticket.bookingId === bookingId
+  );
+
+  console.log("selectedBooking: ", selectedBooking);
+
   useEffect(() => {
     document.title = "Booking Details - Admin";
   }, []);
-
-// Log the full booking object for debugging
-console.log("Full Booking Object:", booking);
-
-// Access the tickets array safely
-const tickets = booking?.tickets || [];
-console.log("Tickets Array (Processed):", tickets);
-
-// Find the specific booking using the bookingId
-const selectedBooking = tickets.find(
-  (ticket: Ticket) => {
-    console.log("Current Ticket Booking ID:", ticket?.ticket?.bookingId);
-    return ticket?.ticket?.bookingId === bookingId;
-  }
-);
-
-console.log("Selected Booking:", selectedBooking);
 
   if (isLoading) return <Loader />;
 
