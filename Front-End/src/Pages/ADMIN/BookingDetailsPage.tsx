@@ -6,28 +6,9 @@ import {
 } from "../../Slices/AdminApiSlice";
 import AdminLayout from "../../Components/AdminComponents/AdminLayout";
 import Loader from "../../Components/UserComponents/Loader";
+import { Ticket } from "./AdminBookingsPage";
 import Swal from "sweetalert2";
 import { backendUrl } from "../../url";
-
-
-
-interface Ticket {
-    bookingId: string;
-    movieId: string;
-    theaterName: string;
-    screenName: string;
-    seats: string[];
-    bookingTime: string;
-    paymentStatus: string;
-    userName: string;
-    userEmail: string;
-    images: string[];
-    showTime: string;
-    paymentMethod: string;
-  movieDetails: {
-    poster: string;
-  };
-}
 
 
 const AdminBookingDetailPage: React.FC = () => {
@@ -36,11 +17,11 @@ const AdminBookingDetailPage: React.FC = () => {
   const [updateBookingStatus] = useUpdateBookingStatusMutation();
   const [status, setStatus] = useState<string>("");
 
-  useEffect(() => {
+    useEffect(() => {
     document.title = "Booking Details - Admin";
   }, []);
 
-  if (!booking || !booking.tickets) {
+  if (!booking || !booking.tickets || booking.tickets.length === 0) {
     console.error("Booking details or tickets not found.");
     return <div>No booking details available.</div>;
   }
@@ -48,7 +29,7 @@ const AdminBookingDetailPage: React.FC = () => {
   console.log("Booking: ", booking);
   
   const selectedBooking = booking.tickets.find(
-    (ticket: Ticket) => ticket.bookingId === bookingId
+    (ticket: Ticket) => ticket.ticket.bookingId === bookingId
   );
   
   console.log("selectedBooking: ", selectedBooking);
