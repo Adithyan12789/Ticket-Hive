@@ -21,12 +21,12 @@ const BookingDetailPage: React.FC = () => {
     document.title = "Booking Details - Admin";
   }, []);
 
+  console.log("Booking: ", booking);
+
   if (!booking || !booking.tickets || booking.tickets.length === 0) {
     console.error("Booking details or tickets not found.");
     return <div>No booking details available.</div>;
   }
-  
-  console.log("Booking: ", booking);
   
   const selectedBooking = booking.tickets.find(
     (ticket: Ticket) => ticket.ticket.bookingId === bookingId

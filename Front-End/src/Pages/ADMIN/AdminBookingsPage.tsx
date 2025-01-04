@@ -35,8 +35,6 @@
     const [bookingsPerPage] = useState(6);
 
     const { data: allBookings, isLoading, refetch } = useGetAllBookingDetailsQuery({});
-
-    console.log("BookingDetailsScreen bookings: ", allBookings);
     
     useEffect(() => {
       document.title = "Admin Booking Details";
