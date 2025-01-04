@@ -71,7 +71,7 @@ const TheaterBookingScreen: React.FC = () => {
 
   if (isLoading) return <Loader />;
 
-  const theaterOwnerName = transformedBookings.user.name;
+  const theaterOwnerName = transformedBookings?.user?.name || "Adithyan Narayanan";
 
   return (
     <TheaterOwnerLayout theaterOwnerName={theaterOwnerName}>
