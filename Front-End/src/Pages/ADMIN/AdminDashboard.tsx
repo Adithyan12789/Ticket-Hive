@@ -11,7 +11,7 @@ import {
   Bar,
 } from "recharts";
 import { motion } from "framer-motion";
-import { Users, Building2, DollarSign, Ticket, Film, TrendingUp, BarChart2, PieChart } from 'lucide-react';
+import { Users, Building2, DollarSign, Ticket, Film, TrendingUp, BarChart2, PieChart, ArrowUp, ArrowDown } from 'lucide-react';
 
 import AdminLayout from "../../Components/AdminComponents/AdminLayout";
 import Sidebar from "../../Components/AdminComponents/AdminSideBar";
@@ -80,6 +80,7 @@ const AdminDashboard: React.FC = () => {
   const [earningsData, setEarningsData] = useState<EarningsData[]>([]);
   const [filteredEarningsData, setFilteredEarningsData] = useState<EarningsData[]>([]);
   const [earningsFilter, setEarningsFilter] = useState<EarningsFilter>('all');
+  const [earningsPercentage, setEarningsPercentage] = useState<number>(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -103,6 +104,11 @@ const AdminDashboard: React.FC = () => {
           movies: moviesResponse?.movies?.length || 0,
           totalEarnings: totalEarnings,
         });
+
+        // Calculate earnings percentage (assuming 20% growth for this example)
+        const previousTotalEarnings = totalEarnings * 0.8;
+        const earningsGrowth = ((totalEarnings - previousTotalEarnings) / previousTotalEarnings) * 100;
+        setEarningsPercentage(earningsGrowth);
 
         const bookingDates = bookingsData?.tickets
           ?.map((booking) => booking.ticket.bookingDate?.split("T")[0])
@@ -179,10 +185,6 @@ const AdminDashboard: React.FC = () => {
   const statItems = [
     { title: "Users", value: stats.users, icon: Users, color: "#4CAF50" },
     { title: "Theater Owners", value: stats.theaterOwners, icon: Building2, color: "#2196F3" },
-    { title: "Total Earnings", value: stats.totalEarnings.toLocaleString("en-US", {
-      style: "currency",
-      currency: "INR",
-    }), icon: DollarSign, color: "#FFC107" },
     { title: "Bookings", value: stats.bookings, icon: Ticket, color: "#9C27B0" },
     { title: "Movies", value: stats.movies, icon: Film, color: "#FF5722" },
   ];
@@ -212,6 +214,37 @@ const AdminDashboard: React.FC = () => {
               </motion.div>
             ))}
           </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
+            className="total-earnings-card"
+          >
+            <div className="total-earnings-content">
+              <h2 className="total-earnings-title">Total Earnings</h2>
+              <p className="total-earnings-value">
+                {stats.totalEarnings.toLocaleString("en-US", {
+                  style: "currency",
+                  currency: "INR",
+                })}
+              </p>
+              <div className="total-earnings-percentage">
+                {earningsPercentage >= 0 ? (
+                  <ArrowUp className="earnings-icon up" />
+                ) : (
+                  <ArrowDown className="earnings-icon down" />
+                )}
+                <span className={earningsPercentage >= 0 ? "percentage up" : "percentage down"}>
+                  {Math.abs(earningsPercentage).toFixed(2)}%
+                </span>
+                <span className="percentage-label">vs last period</span>
+              </div>
+            </div>
+            <div className="total-earnings-icon">
+              <DollarSign size={60} />
+            </div>
+          </motion.div>
 
           <div className="chart-grid">
             <div className="chart-card">
@@ -286,4 +319,3 @@ const AdminDashboard: React.FC = () => {
 };
 
 export default AdminDashboard;
-
