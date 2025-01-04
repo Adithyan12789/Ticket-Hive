@@ -47,6 +47,7 @@ router.post('/add-offer',TheaterAuthMiddleware.protect, OffersController.addOffe
 router.put('/update-offer/:offerId', TheaterAuthMiddleware.protect, OffersController.updateOfferController);
 router.delete('/delete-offer/:offerId', TheaterAuthMiddleware.protect, OffersController.deleteOfferController);
 router.get('/get-offers',TheaterAuthMiddleware.protect, OffersController.getOffersController);
+router.get('/getAlltickets', TheaterAuthMiddleware.protect, AdminController.getAllTickets);
 
 router.get('/get-admins',TheaterAuthMiddleware.protect, AdminController.getAdmins);
 

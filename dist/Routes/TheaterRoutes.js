@@ -41,6 +41,7 @@ router.post('/add-offer', TheaterAuthMiddleware_1.TheaterAuthMiddleware.protect,
 router.put('/update-offer/:offerId', TheaterAuthMiddleware_1.TheaterAuthMiddleware.protect, OffersController_1.default.updateOfferController);
 router.delete('/delete-offer/:offerId', TheaterAuthMiddleware_1.TheaterAuthMiddleware.protect, OffersController_1.default.deleteOfferController);
 router.get('/get-offers', TheaterAuthMiddleware_1.TheaterAuthMiddleware.protect, OffersController_1.default.getOffersController);
+router.get('/getAlltickets', TheaterAuthMiddleware_1.TheaterAuthMiddleware.protect, AdminController_1.default.getAllTickets);
 router.get('/get-admins', TheaterAuthMiddleware_1.TheaterAuthMiddleware.protect, AdminController_1.default.getAdmins);
 router.route('/chatrooms').get(TheaterAuthMiddleware_1.TheaterAuthMiddleware.protect, ChatController_1.default.getChatRooms).post(TheaterAuthMiddleware_1.TheaterAuthMiddleware.protect, ChatController_1.default.createChatRoom);
 router.route('/chatrooms/:chatRoomId/messages').get(TheaterAuthMiddleware_1.TheaterAuthMiddleware.protect, ChatController_1.default.getMessages).post(TheaterMulter_1.default.multerUploadChatFiles.single('file'), TheaterAuthMiddleware_1.TheaterAuthMiddleware.protect, ChatController_1.default.sendMessage);
