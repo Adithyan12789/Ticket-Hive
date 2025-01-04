@@ -38,7 +38,6 @@
 
     console.log("BookingDetailsScreen bookings: ", allBookings);
     
-
     useEffect(() => {
       document.title = "Admin Booking Details";
       refetch();
