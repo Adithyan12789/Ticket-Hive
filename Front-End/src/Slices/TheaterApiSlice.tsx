@@ -209,6 +209,13 @@ export const theaterApiSlice = apiSlice.injectEndpoints({
     }),
 
 
+    getAllBookingDetails: builder.query({
+      query: () => ({
+        url: `${THEATER_URL}/getAlltickets`,
+        method: "GET",
+      }),
+    }),  
+
 
     // Chat started
 
@@ -318,6 +325,7 @@ export const {
   useUpdateOfferMutation,
   useDeleteOfferMutation,
   useGetTheaterStatsMutation,
+  useGetAllBookingDetailsQuery,
   useFetchUnreadNotificationsQuery,
   useMarkNotificationAsReadMutation,
   useGetChatRoomsQuery, 

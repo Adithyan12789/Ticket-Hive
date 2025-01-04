@@ -12,6 +12,7 @@ import AddScreenPage from '../Pages/THEATER/AddScreenPage';
 import EditScreenPage from '../Pages/THEATER/EditScreenPage';
 import OffersManagementPage from '../Pages/THEATER/OffersManagementPage';
 import TheaterChatScreen from '../Pages/THEATER/TheaterChatScreen';
+import TheaterBookingScreen from '../Pages/THEATER/TheaterBookingPage';
 
 export const TheaterRoutes = (
   <>
@@ -29,6 +30,7 @@ export const TheaterRoutes = (
       <Route path="/theater/edit/:id" element={<TheaterManagement />} />
       <Route path="/theater/add-screen/:theaterId" element={<AddScreenPage />} />
       <Route path="/theater/edit-screen/:screenId" element={<EditScreenPage />} />
+      <Route path="/theater/bookings" element={<TheaterBookingScreen />} />
       <Route path="/theater/offer-management" element={<OffersManagementPage />} />
       <Route path="/theater/chat" element={<TheaterChatScreen />} />
     </Route>
