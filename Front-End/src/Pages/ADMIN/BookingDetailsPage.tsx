@@ -20,14 +20,10 @@ const BookingDetailPage: React.FC = () => {
   }, []);
 
   console.log("Booking: ", booking);
-  
-  const selectedBooking = booking._id === bookingId ? booking : null;
-
-  console.log("selectedBooking: ", selectedBooking);
 
   if (isLoading) return <Loader />;
 
-  if (!selectedBooking) {
+  if (!booking) {
     return (
       <AdminLayout adminName="Admin">
         <div className="container mt-5 text-center">
@@ -40,9 +36,9 @@ const BookingDetailPage: React.FC = () => {
     );
   }
 
-  const ticket = selectedBooking.ticket;
-  const movieDetails = selectedBooking.movieDetails;
-  const offerDetails = selectedBooking.offerDetails;
+  const ticket = booking.ticket;
+  const movieDetails = booking.movieDetails;
+  const offerDetails = booking.offerDetails;
 
   const handleStatusChange = async (newStatus: string) => {
     const result = await Swal.fire({
