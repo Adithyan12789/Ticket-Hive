@@ -213,7 +213,7 @@ const SignUpPage = () => {
         style={{backgroundImage: "url('/pngtree-old-movie-posters-on-the-wall-image_2881318.jpg')"}}
       ></div>
       <div className="absolute inset-0 bg-black opacity-40"></div>
-      <div className="relative z-10 w-full max-w-md p-8 space-y-8 bg-black shadow-2xl rounded-xl">
+      <div className="relative z-10 w-full p-8 space-y-8 bg-black shadow-2xl rounded-xl" style={{ maxWidth: '33rem' }}>
         <div className="flex items-center justify-center space-x-4">
           <img src="/logo.png" alt="Ticket Hive Icon" className="w-16 h-16" />
           <h1 className="pt-4 text-4xl font-bold text-white">Ticket Hive</h1>
