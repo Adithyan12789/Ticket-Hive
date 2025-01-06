@@ -243,103 +243,102 @@
     
 
     return (
-      <>
-      <div className="userSide-container">
-        <div className="movie-header">
-          <h1 className="movie-title">{movie?.title} ({selectedLanguage})</h1>
-          <div className="genre-tags">
-            <span className="genre-tag">UA</span>
-            {genres.map((genre: string, index: number) => (
-              <span key={index} className="genre-tag">{genre}</span>
-            ))}
+      <div className="movieTheater-movie-theater-screen">
+        <div className="movieTheater-container">
+          <div className="movieTheater-movie-info">
+            <h1 className="movieTheater-movie-title">{movie?.title} ({selectedLanguage})</h1>
+            <div className="movieTheater-genre-tags">
+              <span className="movieTheater-genre-tag ua">UA</span>
+              {genres.map((genre: string, index: number) => (
+                <span key={index} className="movieTheater-genre-tag">{genre}</span>
+              ))}
+            </div>
+            <div className="movieTheater-search-container">
+              <input
+                type="text"
+                className="movieTheater-search-input"
+                placeholder="Search theaters..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+              />
+              <FaSearch className="movieTheater-search-icon" />
+            </div>
           </div>
-          <div className="userSide-search-container">
-            <input
-              type="text"
-              className="userSide-search-input"
-              placeholder="Search theaters..."
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-            />
-            <FaSearch className="userSide-search-icon" />
-          </div>
-        </div>
-
-        <div className="date-selector">
-          <h2>Select a Date</h2>
-          <div className="date-buttons">
-            <button
-              onClick={handleBackward}
-              disabled={startIndex === 0}
-              className="date-button"
-            >
-              <FaChevronLeft />
-            </button>
-            {dates.slice(startIndex, startIndex + datesToShow).map((date, index) => (
+  
+          <div className="movieTheater-date-selector">
+            <h2>Select a Date</h2>
+            <div className="movieTheater-date-buttons">
               <button
-                key={index}
-                onClick={() => setSelectedDate(date)}
-                className={`date-button ${selectedDate?.toISOString().split("T")[0] === date.toISOString().split("T")[0] ? 'active' : ''}`}
+                onClick={handleBackward}
+                disabled={startIndex === 0}
+                className="movieTheater-nav-button"
               >
-                {formatDate(date)}
+                <FaChevronLeft />
               </button>
-            ))}
-            <button
-              onClick={handleForward}
-              disabled={startIndex + datesToShow >= dates.length}
-              className="date-button"
-            >
-              <FaChevronRight />
-            </button>
+              {dates.slice(startIndex, startIndex + datesToShow).map((date, index) => (
+                <button
+                  key={index}
+                  onClick={() => setSelectedDate(date)}
+                  className={`movieTheater-date-button ${selectedDate?.toISOString().split("T")[0] === date.toISOString().split("T")[0] ? 'active' : ''}`}
+                >
+                  {formatDate(date)}
+                </button>
+              ))}
+              <button
+                onClick={handleForward}
+                disabled={startIndex + datesToShow >= dates.length}
+                className="movieTheater-nav-button"
+              >
+                <FaChevronRight />
+              </button>
+            </div>
           </div>
-        </div>
-
-        <div className="filters">
-          <select
-            className="filter-select"
-            value={selectedCity || ""}
-            onChange={(e) => setSelectedCity(e.target.value || null)}
-          >
-            <option value="">All Cities</option>
-            {[...new Set(allTheaters.map((theater) => theater.city))]
-              .filter((city) => city)
-              .map((city, idx) => (
-                <option key={idx} value={city}>{city}</option>
-              ))}
-          </select>
-          <select
-            className="filter-select"
-            value={selectedTime || ""}
-            onChange={(e) => setSelectedTime(e.target.value || null)}
-          >
-            <option value="">All Times</option>
-            {screens
-              .flatMap((screen) => screen.schedule.flatMap((schedule) => schedule.showTimes))
-              .map((show) => show.time)
-              .filter((time, idx, self) => self.indexOf(time) === idx)
-              .map((time, idx) => (
-                <option key={idx} value={time}>{time}</option>
-              ))}
-          </select>
-        </div>
-
-        <div className="theaters-container">
-          <h2>Theaters</h2>
-          {filteredAndSortedTheaters.length > 0 ? (
-            filteredAndSortedTheaters.map((theater, index) => (
-              <div key={index} className="theater-card">
-                <div className="theater-header">
-                  <div className="theater-info">
+  
+          <div className="movieTheater-filters">
+            <select
+              className="movieTheater-filter-select"
+              value={selectedCity || ""}
+              onChange={(e) => setSelectedCity(e.target.value || null)}
+            >
+              <option value="">All Cities</option>
+              {[...new Set(allTheaters.map((theater) => theater.city))]
+                .filter((city) => city)
+                .map((city, idx) => (
+                  <option key={idx} value={city}>{city}</option>
+                ))}
+            </select>
+            <select
+              className="movieTheater-filter-select"
+              value={selectedTime || ""}
+              onChange={(e) => setSelectedTime(e.target.value || null)}
+            >
+              <option value="">All Times</option>
+              {screens
+                .flatMap((screen) => screen.schedule.flatMap((schedule) => schedule.showTimes))
+                .map((show) => show.time)
+                .filter((time, idx, self) => self.indexOf(time) === idx)
+                .map((time, idx) => (
+                  <option key={idx} value={time}>{time}</option>
+                ))}
+            </select>
+          </div>
+  
+          <div className="movieTheater-theaters-container">
+            <h2>Theaters</h2>
+            {filteredAndSortedTheaters.length > 0 ? (
+              filteredAndSortedTheaters.map((theater, index) => (
+                <div key={index} className="movieTheater-theater-card">
+                  <div className="movieTheater-theater-info">
                     <h3>
                       {theater.name}
                       <FaInfoCircle
                         onClick={() => handleShowModal(theater)}
-                        style={{ marginLeft: '0.5rem', cursor: 'pointer', color: '#3b82f6' }}
+                        className="movieTheater-info-icon"
                       />
                     </h3>
-                    <p className="theater-address">{theater.address}</p>
+                    <p className="movieTheater-theater-address">{theater.address}</p>
                   </div>
-                  <div className="show-times">
+                  <div className="movieTheater-show-times">
                     {screens
                       .filter((screen: Screen) => screen.theater._id === theater._id)
                       .map((screen: Screen, idx: Key | null | undefined) => (
@@ -350,7 +349,7 @@
                             .map((filteredShow, timeIdx) => (
                               <button
                                 key={timeIdx}
-                                className="show-time-button"
+                                className="movieTheater-show-time-button"
                                 onClick={() =>
                                   navigate(`/seat-select/${screen._id}`, {
                                     state: {
@@ -372,21 +371,21 @@
                       ))}
                   </div>
                 </div>
-              </div>
-            ))
-          ) : (
-            <p style={{ color: '#ef4444' }}>No theaters available for the selected movie.</p>
-          )}
+              ))
+            ) : (
+              <p className="no-theaters">No theaters available for the selected movie.</p>
+            )}
+          </div>
         </div>
-
+  
         {modalVisible && (
-          <div className="userSide-modal-overlay">
-            <div className="userSide-modal-content">
-              <div className="userSide-modal-body">
-                <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '1rem' }}>{selectedTheater?.name}</h2>
-                <p style={{ marginBottom: '1rem' }}><strong>Description:</strong> {selectedTheater?.description || "No description available."}</p>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>Available Facilities</h3>
-                <ul style={{ listStyleType: 'disc', paddingLeft: '1.5rem', marginBottom: '1rem' }}>
+          <div className="movieTheater-modal-overlay">
+            <div className="movieTheater-modal-content">
+              <div className="movieTheater-modal-body">
+                <h2>{selectedTheater?.name}</h2>
+                <p><strong>Description:</strong> {selectedTheater?.description || "No description available."}</p>
+                <h3>Available Facilities</h3>
+                <ul>
                   {selectedTheater?.amenities.length ? (
                     selectedTheater.amenities.map((amenity, idx) => (
                       <li key={idx}>{amenity}</li>
@@ -395,21 +394,23 @@
                     <li>No amenities listed.</li>
                   )}
                 </ul>
-                <p style={{ marginBottom: '1rem' }}><strong>Address:</strong> {selectedTheater?.address}</p>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>Location</h3>
+                <p><strong>Address:</strong> {selectedTheater?.address}</p>
+                <h3>Location</h3>
                 {selectedTheater && (
-                  <TheaterLocation
-                    location={{
-                      latitude: selectedTheater.latitude,
-                      longitude: selectedTheater.longitude,
-                      theaterName: selectedTheater.name,
-                    }}
-                  />
+                  <div className="movieTheater-theater-location">
+                    <TheaterLocation
+                      location={{
+                        latitude: selectedTheater.latitude,
+                        longitude: selectedTheater.longitude,
+                        theaterName: selectedTheater.name,
+                      }}
+                    />
+                  </div>
                 )}
               </div>
-              <div className="userSide-modal-footer">
+              <div className="movieTheater-modal-footer">
                 <button
-                  className="close-button"
+                  className="movieTheater-close-button"
                   onClick={() => setModalVisible(false)}
                 >
                   Close
@@ -418,13 +419,10 @@
             </div>
           </div>
         )}
-
-        
+  
+        <Footer />
       </div>
-      <Footer />
-      </>
     );
   };
-
+  
   export default MovieTheaterScreen;
-
