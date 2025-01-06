@@ -194,7 +194,7 @@ const LoginPage = () => {
             </div>
           </div>
 
-          <div className="mt-6">
+          <div className="flex justify-center mt-6">
             <GoogleOAuthProvider clientId="677515594917-egtbr0hasoe3pf9j7npt2sk1s3v0e5e2.apps.googleusercontent.com">
               <GoogleLogin
                 onSuccess={handleGoogleSuccess}
