@@ -2,22 +2,22 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { setCredentials } from "../../Slices/AuthSlice";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import { jwtDecode } from 'jwt-decode';
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEnvelope, faLock } from "@fortawesome/free-solid-svg-icons";
+import "./LoginPage.css";
 import { RootState, AppDispatch } from "../../Store";
 import { useGoogleLoginMutation, useLoginMutation } from "../../Slices/UserApiSlice";
 import { CredentialResponse } from '@react-oauth/google';
 import { GoogleJwtPayload } from "../../Types/UserTypes";
-import "react-toastify/dist/ReactToastify.css";
 import Loader from "../../Components/UserComponents/Loader";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(true); 
 
   const navigate = useNavigate();
   const dispatch: AppDispatch = useDispatch();
@@ -123,24 +123,26 @@ const LoginPage = () => {
   if (loading) return <Loader />;
 
   return (
-    <div className="relative flex items-center justify-center min-h-screen overflow-hidden">
-      <div 
-        className="absolute inset-0 bg-center bg-no-repeat bg-cover blur-sm"
-        style={{backgroundImage: "url('/pngtree-old-movie-posters-on-the-wall-image_2881318.jpg')"}}
-      ></div>
-      <div className="absolute inset-0 bg-black opacity-40"></div>
-      <div className="relative z-10 w-full max-w-md p-8 space-y-8 bg-black shadow-2xl rounded-xl">
-        <div className="flex items-center justify-center space-x-4">
-          <img src="/logo.png" alt="Ticket Hive Icon" className="w-16 h-16" />
-          <h1 className="pt-4 text-4xl font-bold text-white">Ticket Hive</h1>
+    <div className="user-login-page">
+      <div className="user-login-container">
+        <div className="header-container">
+          <img
+            src="/logo.png"
+            alt="Ticket Hive Icon"
+            className="pb-5 header-icon"
+          />
+          <h1 className="pb-4" style={{ fontSize: "40px" }}>
+            Ticket Hive
+          </h1>
         </div>
-        
-        <form onSubmit={submitHandler} className="space-y-6">
-          <div>
-            <div className="relative">
-              <FontAwesomeIcon icon={faEnvelope} className="absolute pt-5 text-gray-400 transform -translate-y-1/2 left-3" />
+        <form onSubmit={submitHandler}>
+          <div className="user-input">
+            <div className="user-input-wrapper">
+              <span className="user-input-icon">
+                <FontAwesomeIcon icon={faEnvelope} />
+              </span>
               <input
-                className="w-full py-2 pl-10 pr-3 text-gray-700 placeholder-gray-500 border-2 border-gray-300 rounded-lg outline-none focus:border-purple-500"
+                className="user-login-input"
                 type="email"
                 placeholder="Email Address"
                 value={email}
@@ -148,11 +150,13 @@ const LoginPage = () => {
               />
             </div>
           </div>
-          <div>
-            <div className="relative">
-              <FontAwesomeIcon icon={faLock} className="absolute pt-5 text-gray-400 transform -translate-y-1/2 left-3" />
+          <div className="pb-3 user-input">
+            <div className="user-input-wrapper">
+              <span className="user-input-icon">
+                <FontAwesomeIcon icon={faLock} />
+              </span>
               <input
-                className="w-full py-2 pl-10 pr-3 text-gray-700 placeholder-gray-500 border-2 border-gray-300 rounded-lg outline-none focus:border-purple-500"
+                className="user-login-input"
                 type="password"
                 placeholder="Password"
                 value={password}
@@ -161,57 +165,35 @@ const LoginPage = () => {
             </div>
           </div>
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <input id="remember-me" name="remember-me" type="checkbox" className="w-4 h-4 mt-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500" />
-              <label htmlFor="remember-me" className="block ml-2 text-sm text-white">
-                Remember me
-              </label>
-            </div>
-            <div className="text-sm">
-              <a href="/forgot-password" className="font-medium text-purple-600 hover:text-purple-500">
-                Forgot your password?
-              </a>
-            </div>
+          <div className="user-forgot-password">
+            <a href="/forgot-password" className="user-forgot-password-link">
+              Forgot Password?
+            </a>
           </div>
 
-          <button
-            className="flex justify-center w-full px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-black rounded-md shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
-            type="submit"
-            disabled={isLoading}
-          >
+          <button className="user-login-btn" type="submit">
             {isLoading ? "Signing In..." : "Sign In"}
           </button>
+
+          <div className="pt-5 user-login-now">
+            <p>
+              Already a User? <a href="/signup">Sign Up</a>
+            </p>
+          </div>
         </form>
 
-        <div className="mt-6">
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-            <span className="px-2 text-white bg-black">Or continue with</span>
-            </div>
-          </div>
-
-          <div className="flex justify-center mt-6">
-            <GoogleOAuthProvider clientId="677515594917-egtbr0hasoe3pf9j7npt2sk1s3v0e5e2.apps.googleusercontent.com">
-              <GoogleLogin
-                onSuccess={handleGoogleSuccess}
-                onError={() => toast.error("Google login failed.")}
-              />
-            </GoogleOAuthProvider>
-          </div>
+        <div
+          className="my-4 text-center"
+          style={{ display: "flex", justifyContent: "center" }}
+        >
+          <GoogleOAuthProvider clientId="677515594917-egtbr0hasoe3pf9j7npt2sk1s3v0e5e2.apps.googleusercontent.com">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => toast.error("Google login failed.")}
+            />
+          </GoogleOAuthProvider>
         </div>
-
-        <p className="mt-8 text-sm text-center text-gray-600">
-          Not a member?{' '}
-          <a href="/signup" className="font-medium text-purple-600 hover:text-purple-500">
-            Sign up now
-          </a>
-        </p>
       </div>
-      <ToastContainer />
     </div>
   );
 };
