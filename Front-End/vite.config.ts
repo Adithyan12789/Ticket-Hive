@@ -8,7 +8,7 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target: "https://api.tickethive.fun",
+        target: "http://api.tickethive.fun",
         changeOrigin: true,
       },
       '/socket.io': {

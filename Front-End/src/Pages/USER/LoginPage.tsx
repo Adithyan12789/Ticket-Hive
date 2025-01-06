@@ -123,11 +123,11 @@ const LoginPage = () => {
   if (loading) return <Loader />;
 
   return (
-    <div className="flex items-center justify-center min-h-screen p-4 bg-gradient-to-r from-purple-500 to-pink-500">
-      <div className="w-full max-w-md p-8 space-y-8 bg-white shadow-2xl rounded-xl">
+    <div className="flex items-center justify-center min-h-screen bg-center bg-no-repeat bg-cover" style={{backgroundImage: "url('/pngtree-old-movie-posters-on-the-wall-image_2881318.jpg')"}}>
+      <div className="w-full max-w-md p-8 space-y-8 bg-black shadow-2xl bg-opacity-70 rounded-xl">
         <div className="flex items-center justify-center space-x-4">
           <img src="/logo.png" alt="Ticket Hive Icon" className="w-16 h-16" />
-          <h1 className="text-4xl font-bold text-gray-800">Ticket Hive</h1>
+          <h1 className="pt-4 text-4xl font-bold text-gray-800">Ticket Hive</h1>
         </div>
         
         <form onSubmit={submitHandler} className="space-y-6">
@@ -145,7 +145,7 @@ const LoginPage = () => {
           </div>
           <div>
             <div className="relative">
-              <FontAwesomeIcon icon={faLock} className="absolute text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
+              <FontAwesomeIcon icon={faLock} className="absolute pt-5 text-gray-400 transform -translate-y-1/2 left-3" />
               <input
                 className="w-full py-2 pl-10 pr-3 border-2 border-gray-200 rounded-lg outline-none focus:border-purple-500"
                 type="password"
@@ -158,7 +158,7 @@ const LoginPage = () => {
 
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <input id="remember-me" name="remember-me" type="checkbox" className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500" />
+              <input id="remember-me" name="remember-me" type="checkbox" className="w-4 h-4 mt-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500" />
               <label htmlFor="remember-me" className="block ml-2 text-sm text-gray-900">
                 Remember me
               </label>
