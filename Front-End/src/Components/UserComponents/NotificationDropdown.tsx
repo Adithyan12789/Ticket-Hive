@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import styles from './NotificationDropdown.module.css';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBell } from "@fortawesome/free-solid-svg-icons";
+import Swal from 'sweetalert2';
 
 interface Notification {
   _id: number;
@@ -81,9 +82,23 @@ export function NotificationDropdown({ notifications, onNotificationClick, onCle
             <button
               className={styles.clearAllButton}
               onClick={() => {
-                onClearAll();
-                setIsOpen(false);
-              }}
+                Swal.fire({
+                  title: 'Are you sure?',
+                  text: "You won't be able to undo this!",
+                  icon: 'warning',
+                  showCancelButton: true,
+                  confirmButtonColor: '#3085d6',
+                  cancelButtonColor: '#d33',
+                  confirmButtonText: 'Yes, clear all!',
+                  cancelButtonText: 'Cancel',
+                }).then((result) => {
+                  if (result.isConfirmed) {
+                    onClearAll(); // Call the parent function to clear notifications
+                    Swal.fire('Cleared!', 'Your notifications have been cleared.', 'success');
+                    setIsOpen(false); // Close the dropdown
+                  }
+                });
+              }}              
             >
               Clear All
             </button>
