@@ -5,7 +5,7 @@ import {
   useVerifyOtpMutation,
   useResendOtpMutation,
 } from "../../Slices/UserApiSlice";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faEnvelope,
@@ -13,7 +13,6 @@ import {
   faUser,
   faPhone,
 } from "@fortawesome/free-solid-svg-icons";
-import "./RegisterPage.css";
 import Loader from "../../Components/UserComponents/Loader";
 import { jwtDecode } from 'jwt-decode';
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
@@ -22,6 +21,7 @@ import { setCredentials } from "../../Slices/AuthSlice";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../../Store";
 import { GoogleJwtPayload } from "../../Types/UserTypes";
+import "react-toastify/dist/ReactToastify.css";
 
 
 const SignUpPage = () => {
@@ -207,172 +207,155 @@ const SignUpPage = () => {
 
 
   return (
-    <div className="user-signup-page">
-      <div className="user-signup-container">
-      <div className="signup-header-container">
-          <img
-            src="/logo.png"
-            alt="Ticket Hive Icon"
-            className="signup-header-icon pb-5"
-          />
-          <h1 className="pb-4" style={{ fontSize: "40px" }}>
-            Ticket Hive
-          </h1>
+    <div className="relative flex items-center justify-center min-h-screen overflow-hidden">
+      <div 
+        className="absolute inset-0 bg-center bg-no-repeat bg-cover blur-sm"
+        style={{backgroundImage: "url('/pngtree-old-movie-posters-on-the-wall-image_2881318.jpg')"}}
+      ></div>
+      <div className="absolute inset-0 bg-black opacity-40"></div>
+      <div className="relative z-10 w-full max-w-md p-8 space-y-8 bg-white shadow-2xl rounded-xl">
+        <div className="flex items-center justify-center space-x-4">
+          <img src="/logo.png" alt="Ticket Hive Icon" className="w-16 h-16" />
+          <h1 className="text-4xl font-bold text-gray-800">Ticket Hive</h1>
         </div>
-        <form onSubmit={submitHandler}>
-          <div className="user-input">
-            <div className="user-input-wrapper">
-              <span className="user-input-icon">
-                <FontAwesomeIcon icon={faUser} />
-              </span>
-              <input
-                className="user-signup-input"
-                type="text"
-                placeholder="Full Name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-            </div>
+        
+        <form onSubmit={submitHandler} className="space-y-6">
+          <div className="relative">
+            <FontAwesomeIcon icon={faUser} className="absolute text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
+            <input
+              className="w-full py-2 pl-10 pr-3 text-gray-700 placeholder-gray-500 border-2 border-gray-300 rounded-lg outline-none focus:border-purple-500"
+              type="text"
+              placeholder="Full Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
           </div>
 
-          <div className="user-input">
-            <div className="user-input-wrapper">
-              <span className="user-input-icon">
-                <FontAwesomeIcon icon={faEnvelope} />
-              </span>
-              <input
-                className="user-signup-input"
-                type="email"
-                placeholder="Email Address"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
+          <div className="relative">
+            <FontAwesomeIcon icon={faEnvelope} className="absolute text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
+            <input
+              className="w-full py-2 pl-10 pr-3 text-gray-700 placeholder-gray-500 border-2 border-gray-300 rounded-lg outline-none focus:border-purple-500"
+              type="email"
+              placeholder="Email Address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
           </div>
 
-          <div className="user-input">
-            <div className="user-input-wrapper">
-              <span className="user-input-icon">
-                <FontAwesomeIcon icon={faPhone} />
-              </span>
-              <input
-                className="user-signup-input"
-                type="tel"
-                placeholder="Phone Number"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-              />
-            </div>
+          <div className="relative">
+            <FontAwesomeIcon icon={faPhone} className="absolute text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
+            <input
+              className="w-full py-2 pl-10 pr-3 text-gray-700 placeholder-gray-500 border-2 border-gray-300 rounded-lg outline-none focus:border-purple-500"
+              type="tel"
+              placeholder="Phone Number"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+            />
           </div>
 
-          <div className="user-input">
-            <div className="user-input-wrapper">
-              <span className="user-input-icon">
-                <FontAwesomeIcon icon={faLock} />
-              </span>
-              <input
-                className="user-signup-input"
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
+          <div className="relative">
+            <FontAwesomeIcon icon={faLock} className="absolute text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
+            <input
+              className="w-full py-2 pl-10 pr-3 text-gray-700 placeholder-gray-500 border-2 border-gray-300 rounded-lg outline-none focus:border-purple-500"
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
           </div>
 
-          <div className="user-input">
-            <div className="user-input-wrapper">
-              <span className="user-input-icon">
-                <FontAwesomeIcon icon={faLock} />
-              </span>
-              <input
-                className="user-signup-input"
-                type="password"
-                placeholder="Confirm Password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-              />
-            </div>
+          <div className="relative">
+            <FontAwesomeIcon icon={faLock} className="absolute text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
+            <input
+              className="w-full py-2 pl-10 pr-3 text-gray-700 placeholder-gray-500 border-2 border-gray-300 rounded-lg outline-none focus:border-purple-500"
+              type="password"
+              placeholder="Confirm Password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+            />
           </div>
 
           <button
-            className="user-signup-btn"
+            className="flex justify-center w-full px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
             type="submit"
             disabled={isLoading}
           >
             Sign Up
           </button>
-
-          <div className="user-login-now pt-5">
-            <p>
-              Already have an account? <a href="/login">Login Now</a>
-            </p>
-          </div>
         </form>
 
-        <div
-          className="text-center"
-          style={{ display: "flex", justifyContent: "center" }}
-        >
-          <GoogleOAuthProvider clientId="677515594917-egtbr0hasoe3pf9j7npt2sk1s3v0e5e2.apps.googleusercontent.com">
-            <GoogleLogin
-              onSuccess={handleGoogleSuccess}
-              onError={() => toast.error("Google login failed.")}
-            />
-          </GoogleOAuthProvider>
+        <div className="mt-6">
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 text-gray-500 bg-white">Or continue with</span>
+            </div>
+          </div>
+
+          <div className="flex justify-center mt-6">
+            <GoogleOAuthProvider clientId="677515594917-egtbr0hasoe3pf9j7npt2sk1s3v0e5e2.apps.googleusercontent.com">
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => toast.error("Google login failed.")}
+              />
+            </GoogleOAuthProvider>
+          </div>
         </div>
+
+        <p className="mt-8 text-sm text-center text-gray-600">
+          Already have an account?{' '}
+          <a href="/login" className="font-medium text-purple-600 hover:text-purple-500">
+            Login Now
+          </a>
+        </p>
       </div>
 
       {showOtpModal && (
-        <div className="otp-modal">
-          <div className="otp-modal-content">
-            <h3 className="otp-modal-title">OTP Verification</h3>
-            <p className="otp-modal-description">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="w-full max-w-md p-8 bg-white rounded-lg">
+            <h3 className="mb-4 text-2xl font-bold">OTP Verification</h3>
+            <p className="mb-4">
               We have sent an OTP to your email. Please enter the OTP below to
               proceed with the verification.
             </p>
-            <div className="otp-input-wrapper">
-              <input
-                type="text"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value)}
-                placeholder="Enter OTP"
-                maxLength={6}
-                className="otp-input"
-              />
-            </div>
-
-            <div className="otp-modal-footer">
+            <input
+              type="text"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              placeholder="Enter OTP"
+              maxLength={6}
+              className="w-full px-3 py-2 mb-4 border border-gray-300 rounded-md"
+            />
+            <div className="flex items-center justify-between mb-4">
               <button
                 onClick={handleOtpSubmit}
                 disabled={isVerifying || timeLeft < 0}
-                className="otp-btn primary-btn"
+                className="px-4 py-2 text-white transition duration-300 bg-purple-600 rounded-md hover:bg-purple-700"
               >
-                {" "}
                 Verify OTP
               </button>
-
               {timeLeft <= 0 && (
                 <button
                   onClick={handleOtpResend}
                   disabled={isResending}
-                  className="otp-btn secondary-btn"
+                  className="px-4 py-2 text-gray-800 transition duration-300 bg-gray-200 rounded-md hover:bg-gray-300"
                 >
-                  {" "}
                   Resend OTP
                 </button>
               )}
-
-              <p className="otp-time-left">
-                Time Left: <span>{formatTimeLeft()}</span>
-              </p>
             </div>
-            <p className="otp-modal-note">
-              Didn’t receive the OTP? wait until the time expires to resend.
+            <p className="text-sm text-gray-600">
+              Time Left: <span className="font-bold">{formatTimeLeft()}</span>
+            </p>
+            <p className="mt-4 text-sm text-gray-500">
+              Didn't receive the OTP? Wait until the time expires to resend.
             </p>
           </div>
         </div>
       )}
+      <ToastContainer />
     </div>
   );
 };
