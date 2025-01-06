@@ -1,0 +1,215 @@
+.container {
+    padding: 30px 15px;
+    position: relative;
+    min-height: 100vh;
+  }
+  
+  .header {
+    margin-bottom: 1rem;
+  }
+  
+  .headerContent {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.2rem;
+    font-weight: bold;
+  }
+  
+  .backArrow {
+    cursor: pointer;
+    font-size: 1.5rem;
+  }
+  
+  .movieTitle {
+    font-size: 1.2rem;
+  }
+  
+  .movieRating {
+    background-color: #f8f9fa;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    margin-left: 10px;
+    color: #007bff;
+    font-weight: 600;
+  }
+  
+  .theaterInfo {
+    font-size: 0.9rem;
+    color: #343a40;
+    font-weight: 500;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .screenLayout {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+  }
+  
+  .row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px;
+    gap: 8px;
+  }
+  
+  .secondRow {
+    margin-bottom: 30px;
+  }
+  
+  .middleRow {
+    margin-bottom: 50px;
+  }
+  
+  .seatGap {
+    width: 20px;
+  }
+  
+  .seat {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #007bff;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    transition: background-color 0.3s;
+  }
+  
+  .available {
+    background-color: #f8f9fa;
+    color: #000;
+    cursor: pointer;
+  }
+  
+  .selected {
+    background-color: rgb(0 185 255);
+    color: #fff;
+  }
+  
+  .unavailable {
+    background-color: gray;
+    color: #000;
+    cursor: not-allowed;
+  }
+  
+  .screen {
+    width: 50%;
+    max-width: 250px;
+    height: 12px;
+    background: linear-gradient(to bottom, rgb(96 176 255), #f8f9fa);
+    margin-top: 50px;
+    border-radius: 5px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+  }
+  
+  .screenText {
+    font-size: 10px;
+    margin-top: 10px;
+  }
+  
+  .paymentBar {
+    position: fixed;
+    width: 100%;
+    background-color: rgb(225 225 225);
+    height: 80px;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .paymentButton {
+    width: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .ticketCount {
+    font-size: 10px;
+    color: whitesmoke;
+  }
+  
+  @media (max-width: 768px) {
+    .container {
+      padding: 15px 10px;
+    }
+  
+    .headerContent {
+      font-size: 1rem;
+    }
+  
+    .movieTitle {
+      font-size: 1rem;
+    }
+  
+    .movieRating {
+      font-size: 0.7rem;
+      padding: 2px 6px;
+    }
+  
+    .theaterInfo {
+      font-size: 0.8rem;
+    }
+  
+    .seat {
+      width: 25px;
+      height: 25px;
+      font-size: 0.6rem;
+    }
+  
+    .screen {
+      width: 70%;
+    }
+  
+    .paymentBar {
+      height: 60px;
+    }
+  
+    .paymentButton {
+      width: 150px;
+      font-size: 0.9rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .seat {
+      width: 20px;
+      height: 20px;
+      font-size: 0.5rem;
+    }
+  
+    .seatGap {
+      width: 10px;
+    }
+  
+    .row {
+      gap: 4px;
+    }
+  
+    .screen {
+      width: 90%;
+    }
+  
+    .paymentBar {
+      height: 50px;
+    }
+  
+    .paymentButton {
+      width: 120px;
+      font-size: 0.8rem;
+    }
+  }
+  
+  

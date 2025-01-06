@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import { FaArrowLeft } from "react-icons/fa";
@@ -8,10 +8,10 @@ import {
 } from "../../Slices/UserApiSlice";
 import Loader from "../../Components/UserComponents/Loader";
 import { toast } from "react-toastify";
-import React from "react";
 import { Seat, ScreenDetails } from "../../Types/ScreenTypes";
 import Footer from "../../Components/UserComponents/Footer";
 import Swal from 'sweetalert2';
+import styles from './select-seat-page.module.css';
 
 const SelectSeatPage: React.FC = () => {
   const { screenId } = useParams<{ screenId: string }>();
@@ -21,9 +21,6 @@ const SelectSeatPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [updateSeatAvailability] = useUpdateSeatAvailabilityMutation();
 
-  console.log("screenId: ", screenId);
-
-
   const { data, refetch, isLoading, isError } = useGetScreenByIdQuery(screenId);
 
   let screenDetails: ScreenDetails | null = null;
@@ -31,8 +28,6 @@ const SelectSeatPage: React.FC = () => {
   if (data) {
     screenDetails = data as ScreenDetails;
   }
-
-  console.log("screenDetails: ", screenDetails);
 
   const location = useLocation();
 
@@ -57,17 +52,14 @@ const SelectSeatPage: React.FC = () => {
     refetch();
   }, [screenDetails, refetch]);  
 
-
   useEffect(() => {
     if (screenDetails && screenDetails.schedule) {
-      // First, try to find the schedule by date and showTime
       let selectedSchedule = screenDetails.schedule.find(
         (schedule) =>
           new Date(schedule.date).toDateString() === date.toDateString() &&
           schedule.showTimes.some((st) => st.time === showTime && st.movieTitle === movieTitle)
       );
 
-      // If not found, try to find by showTime and movieTitle only
       if (!selectedSchedule) {
         selectedSchedule = screenDetails.schedule.find(
           (schedule) =>
@@ -90,8 +82,7 @@ const SelectSeatPage: React.FC = () => {
     } else {
       setLayout(generateSeatNames(5, 8));
     }
-  }, [screenDetails, date, movieTitle, showTime]);  // Ensure the refetch is part of the dependency array  
-  
+  }, [screenDetails, date, movieTitle, showTime]);
 
   const generateSeatNames = (rows: number, cols: number): Seat[][] => {
     const layout: Seat[][] = [];
@@ -115,7 +106,7 @@ const SelectSeatPage: React.FC = () => {
     isAvailable: boolean,
     holdSeat: boolean
   ) => {
-    if (!isAvailable || holdSeat) return; // Return early if seat is not available or on hold
+    if (!isAvailable || holdSeat) return;
     const newSelectedSeats = new Set(selectedSeats);
     if (newSelectedSeats.has(seatLabel)) {
       newSelectedSeats.delete(seatLabel);
@@ -145,60 +136,32 @@ const SelectSeatPage: React.FC = () => {
       (st) => st.time === showTime && st.movieTitle === movieTitle
     );
 
-    console.log("selectedShowTime: ", selectedShowTime);
-      
     return (
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: "5px",
-        }}
-      >
+      <div className={styles.screenLayout}>
         {selectedShowTime?.layout.map((row, rowIndex) => (
           <div
             key={`row-${rowIndex}`}
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              marginBottom:
-                rowIndex === 1
-                  ? "30px" // Add 30px margin for the second row
-                  : rowIndex === Math.floor(selectedShowTime.layout.length / 2)
-                  ? "50px" // Add 50px margin for the middle row
-                  : "10px", // Default 10px margin for other rows
-              gap: "8px",
-            }}
+            className={`${styles.row} ${
+              rowIndex === 1
+                ? styles.secondRow
+                : rowIndex === Math.floor(selectedShowTime.layout.length / 2)
+                ? styles.middleRow
+                : ''
+            }`}
           >
             {row.map((seat, seatIndex) => (
               <React.Fragment key={`seat-${seatIndex}`}>
                 {seatIndex === Math.floor(row.length / 2) && (
-                  <div style={{ width: "20px" }}></div>
+                  <div className={styles.seatGap}></div>
                 )}
                 <button
-                  style={{
-                    width: "30px",
-                    height: "30px",
-                    backgroundColor: selectedSeats.has(seat.label)
-                      ? "rgb(0 185 255)"
+                  className={`${styles.seat} ${
+                    selectedSeats.has(seat.label)
+                      ? styles.selected
                       : seat.isAvailable && !seat.holdSeat
-                      ? "#f8f9fa"
-                      : "gray",
-                    color: selectedSeats.has(seat.label) ? "#fff" : "#000",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    border: "1px solid #007bff",
-                    borderRadius: "4px",
-                    fontSize: "0.7rem",
-                    cursor:
-                      seat.isAvailable && !seat.holdSeat
-                        ? "pointer"
-                        : "not-allowed",
-                    transition: "background-color 0.3s",
-                  }}
+                      ? styles.available
+                      : styles.unavailable
+                  }`}
                   onClick={() =>
                     handleSeatSelection(
                       seat.label,
@@ -214,23 +177,8 @@ const SelectSeatPage: React.FC = () => {
             ))}
           </div>
         ))}
-        <div
-          style={{
-            width: "50%",
-            maxWidth: "250px",
-            height: "12px",
-            background: "linear-gradient(to bottom, rgb(96 176 255), #f8f9fa)",
-            color: "#fff",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            marginTop: "50px",
-            borderRadius: "5px",
-            fontWeight: "bold",
-            boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.3)",
-          }}
-        ></div>
-        <div style={{ fontSize: "10px", marginTop: "10px" }}>
+        <div className={styles.screen}></div>
+        <div className={styles.screenText}>
           <p>All eyes this way please!</p>
         </div>
       </div>
@@ -256,9 +204,7 @@ const SelectSeatPage: React.FC = () => {
       schedule.showTimes.some((st) => st.time === showTime && st.movieTitle === movieTitle)
   );
 
-  const scheduleId = selectedSchedule?._id; 
-
-  console.log("scheduleId: ", scheduleId);
+  const scheduleId = selectedSchedule?._id;
 
   const handleSeatUpdate = async () => {
     if (!screenDetails || !showTime) {
@@ -266,7 +212,6 @@ const SelectSeatPage: React.FC = () => {
       return;
     }
 
-    // Show confirmation alert
     const result = await Swal.fire({
       title: 'Confirm Seat Selection',
       html: `
@@ -325,64 +270,31 @@ const SelectSeatPage: React.FC = () => {
       }
     }
   };
-  
 
   return (
     <>
-      <Container
-        style={{
-          padding: "30px 15px",
-          position: "relative",
-          minHeight: "100vh",
-        }}
-      >
-        <Row className="mb-3">
+      <Container className={styles.container}>
+        <Row className={styles.header}>
           <Col>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-                fontSize: "1.2rem",
-                fontWeight: "bold",
-              }}
-            >
+            <div className={styles.headerContent}>
               <FaArrowLeft
                 onClick={() => navigate(-1)}
-                style={{ cursor: "pointer", fontSize: "1.5rem" }}
+                className={styles.backArrow}
               />
               <div>
-                <span style={{ fontSize: "1.2rem" }}>
+                <span className={styles.movieTitle}>
                   {movieTitle || "Movie Title"}
                 </span>
-                <span
-                  style={{
-                    backgroundColor: "#f8f9fa",
-                    padding: "3px 8px",
-                    borderRadius: "12px",
-                    fontSize: "0.8rem",
-                    marginLeft: "10px",
-                    color: "#007bff",
-                    fontWeight: "600",
-                  }}
-                >
+                <span className={styles.movieRating}>
                   UA
                 </span>
               </div>
             </div>
           </Col>
         </Row>
-        <Row className="mb-3">
+        <Row className={styles.theaterInfo}>
           <Col>
-            <div
-              style={{
-                fontSize: "0.9rem",
-                color: "#343a40",
-                fontWeight: "500",
-                textAlign: "center",
-                marginBottom: "20px",
-              }}
-            >
+            <div>
               Screen {screenDetails?.screen.screenNumber}
               <br />
               {screenDetails?.theater.name || "Theater Name"} |{" "}
@@ -392,35 +304,15 @@ const SelectSeatPage: React.FC = () => {
         </Row>
         <Row>{renderScreenLayout()}</Row>
         {selectedSeats.size > 0 && (
-          <div
-            style={{
-              position: "fixed",
-              width: "100%",
-              backgroundColor: "rgb(225 225 225)",
-              height: "80px",
-              bottom: "20px",
-              left: "50%",
-              transform: "translateX(-50%)",
-              zIndex: 1000,
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
-            }}
-          >
+          <div className={styles.paymentBar}>
             <Button
-              style={{
-                width: "200px",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
+              className={styles.paymentButton}
               variant="primary"
               onClick={handleSeatUpdate}
             >
-              <div style={{ fontSize: "16px", textAlign: "center" }}>
+              <div>
                 <div>Pay Rs.{totalPrice}</div>
-                <div style={{ fontSize: "10px", color: "whitesmoke" }}>
+                <div className={styles.ticketCount}>
                   {totalSeats} {totalSeats === 1 ? "ticket" : "tickets"}
                 </div>
               </div>
