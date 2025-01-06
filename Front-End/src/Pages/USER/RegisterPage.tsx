@@ -213,15 +213,15 @@ const SignUpPage = () => {
         style={{backgroundImage: "url('/pngtree-old-movie-posters-on-the-wall-image_2881318.jpg')"}}
       ></div>
       <div className="absolute inset-0 bg-black opacity-40"></div>
-      <div className="relative z-10 w-full max-w-md p-8 space-y-8 bg-white shadow-2xl rounded-xl">
+      <div className="relative z-10 w-full max-w-md p-8 space-y-8 bg-black shadow-2xl rounded-xl">
         <div className="flex items-center justify-center space-x-4">
           <img src="/logo.png" alt="Ticket Hive Icon" className="w-16 h-16" />
-          <h1 className="text-4xl font-bold text-gray-800">Ticket Hive</h1>
+          <h1 className="pt-4 text-4xl font-bold text-white">Ticket Hive</h1>
         </div>
         
         <form onSubmit={submitHandler} className="space-y-6">
           <div className="relative">
-            <FontAwesomeIcon icon={faUser} className="absolute text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
+            <FontAwesomeIcon icon={faUser} className="absolute mt-4 text-gray-400 transform -translate-y-1/2 left-3" />
             <input
               className="w-full py-2 pl-10 pr-3 text-gray-700 placeholder-gray-500 border-2 border-gray-300 rounded-lg outline-none focus:border-purple-500"
               type="text"
@@ -232,7 +232,7 @@ const SignUpPage = () => {
           </div>
 
           <div className="relative">
-            <FontAwesomeIcon icon={faEnvelope} className="absolute text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
+            <FontAwesomeIcon icon={faEnvelope} className="absolute mt-4 text-gray-400 transform -translate-y-1/2 left-3" />
             <input
               className="w-full py-2 pl-10 pr-3 text-gray-700 placeholder-gray-500 border-2 border-gray-300 rounded-lg outline-none focus:border-purple-500"
               type="email"
@@ -243,7 +243,7 @@ const SignUpPage = () => {
           </div>
 
           <div className="relative">
-            <FontAwesomeIcon icon={faPhone} className="absolute text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
+            <FontAwesomeIcon icon={faPhone} className="absolute mt-4 text-gray-400 transform -translate-y-1/2 left-3" />
             <input
               className="w-full py-2 pl-10 pr-3 text-gray-700 placeholder-gray-500 border-2 border-gray-300 rounded-lg outline-none focus:border-purple-500"
               type="tel"
@@ -254,7 +254,7 @@ const SignUpPage = () => {
           </div>
 
           <div className="relative">
-            <FontAwesomeIcon icon={faLock} className="absolute text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
+            <FontAwesomeIcon icon={faLock} className="absolute mt-4 text-gray-400 transform -translate-y-1/2 left-3" />
             <input
               className="w-full py-2 pl-10 pr-3 text-gray-700 placeholder-gray-500 border-2 border-gray-300 rounded-lg outline-none focus:border-purple-500"
               type="password"
@@ -265,7 +265,7 @@ const SignUpPage = () => {
           </div>
 
           <div className="relative">
-            <FontAwesomeIcon icon={faLock} className="absolute text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
+            <FontAwesomeIcon icon={faLock} className="absolute mt-4 text-gray-400 transform -translate-y-1/2 left-3" />
             <input
               className="w-full py-2 pl-10 pr-3 text-gray-700 placeholder-gray-500 border-2 border-gray-300 rounded-lg outline-none focus:border-purple-500"
               type="password"
@@ -290,7 +290,7 @@ const SignUpPage = () => {
               <div className="w-full border-t border-gray-300"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 text-gray-500 bg-white">Or continue with</span>
+              <span className="px-2 text-white bg-black">Or continue with</span>
             </div>
           </div>
 
