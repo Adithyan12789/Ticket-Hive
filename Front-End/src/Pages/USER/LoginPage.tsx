@@ -129,10 +129,10 @@ const LoginPage = () => {
         style={{backgroundImage: "url('/pngtree-old-movie-posters-on-the-wall-image_2881318.jpg')"}}
       ></div>
       <div className="absolute inset-0 bg-black opacity-40"></div>
-      <div className="relative z-10 w-full max-w-md p-8 space-y-8 bg-white shadow-2xl rounded-xl">
+      <div className="relative z-10 w-full max-w-md p-8 space-y-8 bg-black shadow-2xl rounded-xl">
         <div className="flex items-center justify-center space-x-4">
           <img src="/logo.png" alt="Ticket Hive Icon" className="w-16 h-16" />
-          <h1 className="pt-4 text-4xl font-bold text-gray-800">Ticket Hive</h1>
+          <h1 className="pt-4 text-4xl font-bold text-white">Ticket Hive</h1>
         </div>
         
         <form onSubmit={submitHandler} className="space-y-6">
@@ -163,8 +163,8 @@ const LoginPage = () => {
 
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <input id="remember-me" name="remember-me" type="checkbox" className="w-4 h-4 pt-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500" />
-              <label htmlFor="remember-me" className="block ml-2 text-sm text-gray-700">
+              <input id="remember-me" name="remember-me" type="checkbox" className="w-4 h-4 mt-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500" />
+              <label htmlFor="remember-me" className="block ml-2 text-sm text-white">
                 Remember me
               </label>
             </div>
@@ -176,7 +176,7 @@ const LoginPage = () => {
           </div>
 
           <button
-            className="flex justify-center w-full px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+            className="flex justify-center w-full px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-black rounded-md shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
             type="submit"
             disabled={isLoading}
           >
@@ -190,7 +190,7 @@ const LoginPage = () => {
               <div className="w-full border-t border-gray-300"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 text-gray-500 bg-white">Or continue with</span>
+              <span className="px-2 text-gray-300 bg-white">Or continue with</span>
             </div>
           </div>
 
