@@ -126,12 +126,13 @@ const Header: React.FC = () => {
     try {
       await clearAllNotifications({}).unwrap();
       setNotifications([]);
-      alert("All notifications cleared");
     } catch (err) {
       console.error(err);
     }
   };
 
+  console.log("userInfo: ", userInfo);
+  
   return (
     <header style={{ backgroundColor: "#3A5E49" }}>
       <Navbar collapseOnSelect expand="lg" className="px-3 py-2">
@@ -200,7 +201,7 @@ const Header: React.FC = () => {
                           objectFit: "cover",
                         }}
                       />
-                      <span className="text-light me-2">{userInfo.name}</span>
+                      <span className="text-light me-2">{userInfo.name || userInfo.data.name}</span>
                       <FontAwesomeIcon
                         icon={faCaretDown}
                         className="text-light"
