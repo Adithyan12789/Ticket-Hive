@@ -171,7 +171,7 @@ const SelectSeatPage: React.FC = () => {
                   }
                   disabled={!seat.isAvailable}
                 >
-                  {seat.label}
+                  {window.innerWidth <= 480 ? seat.label.slice(-2) : seat.label}
                 </button>
               </React.Fragment>
             ))}
@@ -326,3 +326,4 @@ const SelectSeatPage: React.FC = () => {
 };
 
 export default SelectSeatPage;
+
