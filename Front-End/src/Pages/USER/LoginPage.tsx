@@ -190,12 +190,12 @@ const LoginPage = () => {
               <div className="w-full border-t border-gray-300"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 text-gray-300 bg-white">Or continue with</span>
+            <span className="px-2 text-white bg-black">Or continue with</span>
             </div>
           </div>
 
           <div className="mt-6">
-            <GoogleOAuthProvider clientId="YOUR_GOOGLE_CLIENT_ID">
+            <GoogleOAuthProvider clientId="677515594917-egtbr0hasoe3pf9j7npt2sk1s3v0e5e2.apps.googleusercontent.com">
               <GoogleLogin
                 onSuccess={handleGoogleSuccess}
                 onError={() => toast.error("Google login failed.")}
