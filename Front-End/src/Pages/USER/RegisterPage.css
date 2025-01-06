@@ -79,9 +79,9 @@ input::placeholder,
 
 input:focus,
 .user-signup-input:focus{
-  border-bottom-color: #3A5E49;
-  border-color: #007bff;
-  box-shadow: 0 0 10px rgba(0, 123, 255, 0.2);
+  border-bottom-color: #9333EA;
+  border-color: #9333EA;
+  box-shadow: 0 0 10px #8400ff;
 }
 
 .user-signup-input {
@@ -103,13 +103,13 @@ input:focus,
 }
 
 .user-signup-btn {
-  background-color: #b31200;
+  background-color: #9333EA;
   height: 50px;
   color: white;
 }
 
 .user-signup-btn:hover{
-  background-color: #2e4c3b;
+  background-color: #9333EA;
 }
 
 .social-login-buttons {
@@ -207,13 +207,13 @@ a {
 }
 
 .primary-btn:hover {
-  background-color: #45a049;
+  background-color: #9333EA;
 }
 
 .secondary-btn {
   background-color: #f1f1f1;
-  color: #4CAF50;
-  border: 1px solid #4CAF50;
+  color: #9333EA;
+  border: 1px solid #9333EA;
 }
 
 .secondary-btn:hover {
@@ -228,7 +228,7 @@ a {
 .otp-time-left {
   font-size: 14px;
   margin-top: 10px;
-  color: #ff0000;
+  color: #9333EA;
   text-align: center;
 }
 
