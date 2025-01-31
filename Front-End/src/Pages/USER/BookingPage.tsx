@@ -115,7 +115,7 @@ const BookingPage: React.FC = () => {
       return;
     }
 
-    const razorpayApiKey = "rzp_test_Oks5Gpac00wL72";
+    const razorpayApiKey = "rzp_test_RIuFkzXFQwkp22";
 
     if (!razorpayApiKey) {
       Swal.fire(
@@ -274,7 +274,7 @@ const BookingPage: React.FC = () => {
           {offers && offers.length > 0 && (
             <Col md={4} className="mb-4">
               <Card
-                className="rounded-lg border-0"
+                className="border-0 rounded-lg"
                 style={{
                   boxShadow: "0px 6px 18px rgba(0, 0, 0, 0.1)",
                   borderRadius: "12px",
@@ -283,7 +283,7 @@ const BookingPage: React.FC = () => {
                 }}
               >
                 <h4
-                  className="text-center mb-4"
+                  className="mb-4 text-center"
                   style={{
                     fontSize: "22px",
                     fontWeight: "600",
@@ -436,7 +436,7 @@ const BookingPage: React.FC = () => {
 
           <Col md={8}>
             <Card
-              className="rounded-lg border-0"
+              className="border-0 rounded-lg"
               style={{
                 boxShadow: "0px 6px 18px rgba(0, 0, 0, 0.1)",
                 borderRadius: "12px",
@@ -445,7 +445,7 @@ const BookingPage: React.FC = () => {
             >
               <Card.Body>
                 <Row>
-                  <Col className="text-center mb-4">
+                  <Col className="mb-4 text-center">
                     <div
                       style={{
                         display: "flex",
@@ -625,7 +625,7 @@ const BookingPage: React.FC = () => {
                         {selectedPaymentMethods === "Razorpay" && (
                           <Button
                             variant="outline-primary"
-                            className="w-100 mb-3"
+                            className="mb-3 w-100"
                             onClick={handleRazorpayPayment}
                             style={{ fontSize: "16px", padding: "12px" }}
                           >
@@ -635,7 +635,7 @@ const BookingPage: React.FC = () => {
                         {selectedPaymentMethods === "Paypal" && (
                           <Button
                             variant="outline-success"
-                            className="w-100 mb-3"
+                            className="mb-3 w-100"
                             onClick={() => handleProceed("paypal")}
                             style={{ fontSize: "16px", padding: "12px" }}
                           >
@@ -659,7 +659,7 @@ const BookingPage: React.FC = () => {
                       <>
                         <Button
                           variant="outline-primary"
-                          className="w-100 mb-3"
+                          className="mb-3 w-100"
                           onClick={handleRazorpayPayment}
                           style={{ fontSize: "16px", padding: "12px" }}
                         >
@@ -667,7 +667,7 @@ const BookingPage: React.FC = () => {
                         </Button>
                         <Button
                           variant="outline-success"
-                          className="w-100 mb-3"
+                          className="mb-3 w-100"
                           onClick={() => handleProceed("paypal")}
                           style={{ fontSize: "16px", padding: "12px" }}
                         >
