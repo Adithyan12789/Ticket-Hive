@@ -1,7 +1,19 @@
 import { Booking, IBooking } from "../Models/bookingModel";
 import User, { IUser } from "../Models/UserModel";
+import { injectable } from "inversify";
+import { BaseRepository } from "./Base/BaseRepository";
+import { IBookingRepository } from "../Interface/IBooking/IRepository";
 
-class BookingRepository {
+@injectable()
+export class BookingRepository
+  extends BaseRepository<IBooking>
+  implements IBookingRepository
+{
+  private readonly bookModel = Booking;
+
+  constructor() {
+    super(Booking);
+  }
 
   public async findAllBookings(userId: string): Promise<any[]> {
     return await Booking.find({ "user": userId })
@@ -34,7 +46,7 @@ class BookingRepository {
     return await Booking.create(data);
   }
 
-  public async updateBookingStatus(bookingId: string, status: string) {
+  public async updateBookingStatus(bookingId: string, status: string): Promise<IBooking | null> {
     try {
       const updatedBooking = await Booking.findOneAndUpdate(
         { _id: bookingId },
@@ -49,15 +61,15 @@ class BookingRepository {
     }
   }
 
-  public async updateBooking(bookingId: string, updatedData: Partial<typeof Booking>) {
+  public async updateBooking(bookingId: string, updatedData: Partial<typeof Booking>): Promise<IBooking | null> {
     return await Booking.findByIdAndUpdate(bookingId, updatedData, { new: true });
   }
 
-  public async getUserBookings(userId: string): Promise<any[]> {
+  public async getUserBookings(userId: string): Promise<IBooking[]> {
     return await this.findBookingsByUserId(userId);
   }
 
-  public async getTheaterBookings(theaterId: string) {
+  public async getTheaterBookings(theaterId: string): Promise<IBooking[]> {
     return await Booking.find({ theater: theaterId })
       .populate("user", "name email")
       .populate("movie", "title")

@@ -1,38 +1,27 @@
-import mongoose from "mongoose";
-import { IOffer, Offer } from "../Models/OffersModel";
-import OffersRepo from "../Repositories/OffersRepo";
+import { inject, injectable } from "inversify";
+import { IOfferService } from "../Interface/IOffer/IService";
+import { IOffer } from "../Models/OffersModel";
+import { IOfferRepository } from "../Interface/IOffer/IRepository";
+import { OfferData } from "../types/offerTypes";
 
-export interface OfferData {
-  offerName: string;
-  ownerId: string;
-  paymentMethod: string;
-  offerDescription: string;
-  discountValue: number;
-  minPurchaseAmount: number;
-  validityStart: string | Date;
-  validityEnd: string | Date;
-  applicableTheaters: string[];
-}
+@injectable()
+export class OfferService implements IOfferService {
+  constructor(
+    @inject("IOfferRepository") private readonly offerRepository: IOfferRepository
+  ) {}
 
-class OffersService {
   public async addOfferService(offerData: OfferData): Promise<IOffer> {
-    const {
-      ownerId,
-      offerName,
-      paymentMethod,
-      offerDescription,
-      discountValue,
-      minPurchaseAmount,
-      validityStart,
-      validityEnd,
-      applicableTheaters,
-    } = offerData;
+
+    console.log("Offer data before validation:", offerData);
+
+    const { offerName, createdBy, paymentMethod, description, discountValue, minPurchaseAmount, validityStart, validityEnd, applicableTheaters } =
+      offerData;
 
     if (
       !offerName ||
-      !ownerId ||
+      !createdBy ||
       !paymentMethod ||
-      !offerDescription ||
+      !description ||
       !discountValue ||
       minPurchaseAmount === undefined ||
       !validityStart ||
@@ -53,97 +42,26 @@ class OffersService {
       throw { statusCode: 400, message: "Invalid date format" };
     }
 
-    const theaterObjectIds = applicableTheaters.map(
-      (id) => new mongoose.Types.ObjectId(id)
-    );
-
-    const newOffer = new Offer({
-      offerName,
-      createdBy: ownerId,
-      paymentMethod,
-      description: offerDescription,
-      discountValue,
-      minPurchaseAmount,
+    const createdOffer = await this.offerRepository.createOffer({
+      ...offerData,
       validityStart: parsedValidityStart,
       validityEnd: parsedValidityEnd,
-      applicableTheaters: theaterObjectIds,
-    });
+    }); 
 
-    const createdOffer = await newOffer.save();
     return createdOffer;
   }
 
-  public async updateOfferService(offerId: string, offerData: OfferData): Promise<IOffer> {
-    const {
-      offerName,
-      paymentMethod,
-      offerDescription,
-      discountValue,
-      minPurchaseAmount,
-      validityStart,
-      validityEnd,
-      applicableTheaters,
-    } = offerData;
-
-    // Validate required fields
-    if (
-      !offerName ||
-      !paymentMethod ||
-      !offerDescription ||
-      !discountValue ||
-      minPurchaseAmount === undefined ||
-      !validityStart ||
-      !validityEnd ||
-      !Array.isArray(applicableTheaters) ||
-      applicableTheaters.length === 0
-    ) {
-      throw { statusCode: 400, message: "All fields are required" };
-    }
-
-    const parsedValidityStart = new Date(validityStart);
-    const parsedValidityEnd = new Date(validityEnd);
-
-    if (
-      isNaN(parsedValidityStart.getTime()) ||
-      isNaN(parsedValidityEnd.getTime())
-    ) {
-      throw { statusCode: 400, message: "Invalid date format" };
-    }
-
-    const theaterObjectIds = applicableTheaters.map(
-      (id) => new mongoose.Types.ObjectId(id)
-    );
-
-    const updatedOffer = await OffersRepo.updateOffer(offerId, {
-      offerName,
-      paymentMethod,
-      description: offerDescription,
-      discountValue,
-      minPurchaseAmount,
-      validityStart: parsedValidityStart,
-      validityEnd: parsedValidityEnd,
-      applicableTheaters: theaterObjectIds,
-    });
-
-    if (!updatedOffer) {
-      throw { statusCode: 404, message: "Offer not found" };
-    }
-
-    return updatedOffer;
+  public async updateOfferService(offerId: string, offerData: OfferData): Promise<IOffer | null> {
+    return this.offerRepository.updateOffer(offerId, offerData);
   }
 
-  public async deleteOfferHandler(offerId: string): Promise<IOffer | null> {
-    const deletedOffer = await Offer.findByIdAndDelete(offerId);
-    return deletedOffer;
+  public async deleteOfferService(offerId: string): Promise<IOffer | null> {
+    return this.offerRepository.deleteOffer(offerId);
   }
 
   public async getOffersService(): Promise<IOffer[]> {
     const currentDate = new Date();
-    
-    await Offer.deleteMany({ validUntil: { $lt: currentDate } });
-    return Offer.find();
+    await this.offerRepository.deleteExpiredOffers(currentDate);
+    return this.offerRepository.getAllOffers();
   }
-  
 }
-
-export default new OffersService();

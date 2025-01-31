@@ -1,14 +1,22 @@
-import dotenv from "dotenv";
 import { Movie, IMovie } from "../Models/MoviesModel";
-import { Document } from "mongoose";
+import { HydratedDocument } from "mongoose";
+import { injectable } from "inversify";
+import { BaseRepository } from "./Base/BaseRepository";
+import { IMovieRepository } from "../Interface/IMovie/IRepository";
 
-dotenv.config();
+@injectable()
+export class MovieRepository
+  extends BaseRepository<IMovie>
+  implements IMovieRepository
+{
+  constructor() {
+    super(Movie);
+  }
 
-class MovieRepository {
-
-  public static async addMovieRepo(
+  public async addMovieRepo(
     movieData: Partial<IMovie>
-  ): Promise<IMovie & Document> {
+  ): Promise<HydratedDocument<IMovie>> {
+    // Use HydratedDocument for type compatibility
     const movie = new Movie(movieData);
 
     try {
@@ -20,14 +28,17 @@ class MovieRepository {
     }
   }
 
-  public static async getAllMovies(): Promise<IMovie[]> {
-    return await Movie.find();
+  public async getAllMovies(): Promise<IMovie[]> {
+    return Movie.find(); // Removed unnecessary await
   }
 
-  public static async findMovieById(id: string): Promise<IMovie | null> {
+  public async findMovieById(id: string): Promise<IMovie | null> {
     return await Movie.findById(id);
   }
 
+  public async findByIdAndDelete(id: string): Promise<IMovie | null> {
+    return await Movie.findByIdAndDelete(id);
+  }
 }
 
 export default MovieRepository;

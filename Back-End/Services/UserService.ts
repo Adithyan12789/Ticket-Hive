@@ -6,10 +6,40 @@ import User, { IUser } from "../Models/UserModel";
 import { Booking } from "../Models/bookingModel";
 import { Movie } from "../Models/MoviesModel";
 import TheaterDetails from "../Models/TheaterDetailsModel";
+import { inject, injectable } from "inversify";
+import { IUserRepository } from "../Interface/IUser/IRepository";
+import TokenService from "../Utils/GenerateToken";
 
-class UserService {
+@injectable()
+export class UserService {
+  constructor(
+    @inject("IUserRepository") private userRepository: IUserRepository
+  ) {}
+
+
+  public async refreshToken(refreshToken: string): Promise<{ accessToken: string }> {
+    // Verify the refresh token
+    const decoded = TokenService.verifyRefreshToken(refreshToken);
+
+    if (!decoded || typeof decoded === "string") {
+      throw new Error("Invalid or expired refresh token");
+    }
+
+    // Retrieve the user
+    const user = await this.userRepository.findUserById(decoded.userId);
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    // Generate a new access token
+    const newAccessToken = TokenService.generateAccessToken(user._id.toString());
+
+    return { accessToken: newAccessToken };
+  }
+
   public async authenticateUser(email: string, password: string) {
-    const user = await UserRepository.findUserByEmail(email);
+    const user = await this.userRepository.findUserByEmail(email);
 
     console.log("user: ", user);
 
@@ -25,34 +55,55 @@ class UserService {
     throw new Error("Invalid Email or Password");
   }
 
+  public async handleGoogleLogin(name: string, email: string): Promise<IUser & { isNew?: boolean }> {
+    let user = await this.userRepository.findUserByEmail(email);
+
+    if (user) {
+      return user;
+    }
+
+    user = await this.userRepository.createUser({
+      name,
+      email,
+      otp: "",
+      phone: "",
+      password: "",
+    });
+
+    if (!user) {
+      throw new Error("Invalid user data");
+    }
+
+    user.isNew = true;
+    return user;
+  }
+  
+
   public async registerUserService(
     name: string,
     email: string,
     password: string,
     phone: string
-  ) {
-    const existingUser = await User.findOne({ email });
-
+  ): Promise<IUser> {
+    const existingUser = await this.userRepository.findUserByEmail(email);
+  
     if (existingUser) {
       if (!existingUser.otpVerified) {
         const otp = crypto.randomInt(100000, 999999).toString();
-        existingUser.otp = otp;
-        existingUser.otpVerified = false;
-        existingUser.otpGeneratedAt = new Date();
-        await existingUser.save();
-
-        await EmailUtil.sendOtpEmail(existingUser.email, otp);
-        return existingUser;
+        const updatedUser = await this.userRepository.updateUserOtp(email, otp);
+  
+        await EmailUtil.sendOtpEmail(email, otp);
+        return updatedUser;
       }
-
+  
       throw new Error("Email already exists.");
     }
-
+  
     const otp = crypto.randomInt(100000, 999999).toString();
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-
-    const newUser = new User({
+  
+    const newUser = await this.userRepository.createUser({
       name,
       email,
       phone,
@@ -60,14 +111,14 @@ class UserService {
       otp,
       otpVerified: false,
     });
-
-    await newUser.save();
-    await EmailUtil.sendOtpEmail(newUser.email, otp);
+  
+    await EmailUtil.sendOtpEmail(email, otp);
     return newUser;
   }
+  
 
   public async verifyOtpService(email: string, otp: string) {
-    const user = await UserRepository.findUserByEmail(email);
+    const user = await this.userRepository.findUserByEmail(email);
     if (!user) {
       throw new Error("User not found");
     }
@@ -92,7 +143,7 @@ class UserService {
   }
 
   public async resendOtpService(email: string) {
-    const user = await UserRepository.findUserByEmail(email);
+    const user = await this.userRepository.findUserByEmail(email);
 
     if (!user) {
       throw new Error("User not found");
@@ -103,7 +154,7 @@ class UserService {
     user.otpExpires = new Date(Date.now() + 1 * 60 * 1000 + 59 * 1000);
 
     try {
-      await UserRepository.saveUser(user);
+      await this.userRepository.saveUser(user);
     } catch (err) {
       throw new Error("Failed to save user with new OTP");
     }
@@ -118,7 +169,7 @@ class UserService {
   }
 
   public async forgotPasswordService(email: string) {
-    const user = await UserRepository.findUserByEmail(email);
+    const user = await this.userRepository.findUserByEmail(email);
     if (!user) {
       throw new Error("User not found");
     }
@@ -132,7 +183,7 @@ class UserService {
   }
 
   public async resetPasswordService(resetToken: string, password: string) {
-    const user = await UserRepository.findUserByResetToken(resetToken);
+    const user = await this.userRepository.findUserByResetToken(resetToken);
     if (!user) {
       throw new Error("Invalid or expired token");
     }
@@ -155,14 +206,14 @@ class UserService {
   ): Promise<IUser | null> {
     try {
       // Call the repository method to update the location
-      return await UserRepository.updateLocation(userId, city, latitude, longitude);
+      return await this.userRepository.updateLocation(userId, city, latitude, longitude);
     } catch (error) {
       throw new Error("Service: Error updating location");
     }
   }
 
   public getUserProfile = async (userId: any) => {
-    const user = await UserRepository.findUserById(userId);
+    const user = await this.userRepository.findUserById(userId);
 
     if (!user) {
       throw new Error("User not found");
@@ -181,14 +232,14 @@ class UserService {
   public updateUserProfileService = async (
     userId: string,
     updateData: {
-      currentPassword?: string;  // Optional field
+      currentPassword?: string; 
       name: string;
       phone: string;
-      password?: string;  // Optional field
+      password?: string; 
     },
     profileImage: { filename: string | undefined }
   ) => {
-    const user = await UserRepository.findUserById(userId);
+    const user = await this.userRepository.findUserById(userId);
     if (!user) {
       throw new Error("User not found");
     }
@@ -215,21 +266,19 @@ class UserService {
       user.profileImageName = profileImage.filename || user.profileImageName;
     }
   
-    return await UserRepository.saveUser(user);
+    return await this.userRepository.saveUser(user);
   };
   
 
   public getOffersByTheaterIdService = async (theaterId: string) => {
     try {
-      return await UserRepository.getOffersByTheaterId(theaterId);
+      return await this.userRepository.getOffersByTheaterId(theaterId);
     } catch (error) {
       throw new Error("Error fetching Offers");
     }
   };
 
-  public logoutUserService() {
+  public async logoutUserService(): Promise<any> {
     return true;
   }
 }
-
-export default new UserService();

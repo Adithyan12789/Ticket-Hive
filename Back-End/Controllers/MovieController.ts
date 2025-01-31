@@ -1,18 +1,24 @@
 import asyncHandler from "express-async-handler";
-import { NextFunction, Request, Response } from "express";
-import MovieService from "../Services/MovieService";
+import { Request, Response } from "express";
+import { inject, injectable } from "inversify"
 import { IMovie, Movie } from "../Models/MoviesModel";
 import mongoose from "mongoose";
+import { IMovieService } from "../Interface/IMovie/IService";
 
 const languageMapping: { [key: string]: string } = {
-  en: "Eng",
-  ta: "Tam",
-  ml: "Mal",
+  en: "English",
+  ta: "Tamil",
+  ml: "Malalayalam",
   hi: "Hindi",
   te: "Telugu",
 };
 
-class MovieController {
+@injectable()
+export class MovieController {
+  constructor(
+    @inject("IMovieService") private readonly movieService: IMovieService,
+  ) {}
+
   async addMovieController(req: Request, res: Response): Promise<void> {
     try {
       const posterFile = (req.files as any)["poster"]?.[0];
@@ -44,7 +50,7 @@ class MovieController {
         castsImages: castImageFiles.map((file: any) => file.filename),
       };
 
-      const newMovie = await MovieService.addMovie(movieData);
+      const newMovie = await this.movieService.addMovie(movieData);
 
       res
         .status(201)
@@ -57,12 +63,18 @@ class MovieController {
 
   async getAllMoviesController(req: Request, res: Response): Promise<void> {
     try {
-      const movies = await MovieService.getAllMovies();
+      if (!this.movieService) {
+        throw new Error("MovieService is undefined");
+      }
+  
+      const movies = await this.movieService.getAllMoviesService();
       res.status(200).json({ movies });
     } catch (error) {
-      res.status(500).json({ message: "Failed to get movies", error });
+      console.error("Error fetching movies:", error instanceof Error ? error.message : error);
+      res.status(500).json({ message: "Failed to get movies" });
     }
   }
+  
 
   getMovieByIdHandler = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
@@ -74,7 +86,7 @@ class MovieController {
       }
 
       try {
-        const movie = await Movie.findById(movieId);
+        const movie = await this.movieService.findMovieById(movieId);
 
         if (!movie) {
           res.status(404).json({ message: "Movie not found" });
@@ -99,7 +111,7 @@ class MovieController {
       const castImageFiles = (req.files as any)["castImages"] || [];
 
       try {
-        const updatedMovie = await MovieService.updateMovieData(
+        const updatedMovie = await this.movieService.updateMovieData(
           id,
           updateData,
           posterFile,
@@ -127,7 +139,7 @@ class MovieController {
       const { id } = req.params;
 
       try {
-        const deletedMovie = await MovieService.deleteMovieService(id);
+        const deletedMovie = await this.movieService.deleteMovieService(id);
 
         if (!deletedMovie) {
           res.status(404).json({ message: "Movie not found for deletion" });
@@ -145,82 +157,4 @@ class MovieController {
       }
     }
   );
-
-  getAllReviewsController = asyncHandler(
-    async (req: Request, res: Response): Promise<void> => {
-  
-      try {
-        const reviews = await MovieService.getAllReviewsService();
-  
-        if (!reviews.length) {
-          res.status(404).json({ message: "No reviews found for this movie" });
-          return;
-        }
-  
-        res.status(200).json(reviews);
-      } catch (error) {
-        console.error("Error fetching reviews:", error);
-        res.status(500).json({ message: "Error fetching reviews", error });
-      }
-    }
-  );  
-  
-  getReviewsController = asyncHandler(
-    async (req: Request, res: Response): Promise<void> => {
-      const { movieId } = req.params;
-  
-      if (!mongoose.Types.ObjectId.isValid(movieId)) {
-        res.status(400).json({ message: "Invalid Movie ID" });
-        return;
-      }
-  
-      try {
-        const reviews = await MovieService.getReviewsByMovieId(movieId);
-  
-        if (!reviews.length) {
-          res.status(404).json({ message: "No reviews found for this movie" });
-          return;
-        }
-  
-        res.status(200).json(reviews);
-      } catch (error) {
-        console.error("Error fetching reviews:", error);
-        res.status(500).json({ message: "Error fetching reviews", error });
-      }
-    }
-  );  
-
-  addReviewsController = asyncHandler(
-    async (req: Request, res: Response): Promise<void> => {
-      const { movieId, userId, rating, review } = req.body;
-  
-      if (!mongoose.Types.ObjectId.isValid(movieId) || !mongoose.Types.ObjectId.isValid(userId)) {
-        res.status(400).json({ message: "Invalid Movie or User ID" });
-        return;
-      }
-  
-      if (!rating || !review) {
-        res.status(400).json({ message: "Rating and comment are required" });
-        return;
-      }
-  
-      try {
-        const newReview = await MovieService.addReview({ movieId, userId, rating, review });
-  
-        // Recalculate and update average rating
-        await MovieService.updateAverageRating(movieId);
-  
-        res.status(201).json({
-          message: "Review added successfully",
-          review: newReview,
-        });
-      } catch (error) {
-        console.error("Error adding review:", error);
-        res.status(500).json({ message: "Error adding review", error });
-      }
-    }
-  );
-  
 }
-
-export default new MovieController();

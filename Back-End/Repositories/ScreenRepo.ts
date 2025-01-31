@@ -1,68 +1,90 @@
-import { Schedule } from "../Models/ScheduleModel";
-import { Screens } from "../Models/ScreensModel";
+import { injectable } from "inversify";
+import { IScreenRepository } from "../Interface/IScreen/IRepository";
+import { ISchedule, Schedule } from "../Models/ScheduleModel";
+import { Screens, IScreen } from "../Models/ScreensModel";
 
-class ScreenRepository {
-
-  public async getScreenById(screenId: string) {
+@injectable()
+class ScreenRepository implements IScreenRepository {
+  public async getScreenById(screenId: string): Promise<any | null> {
     return await Screens.findById(screenId).populate({
       path: 'theater',
       select: 'name city address',
     });
   }
   
-  // Add a method to fetch schedules by screenId
-  public async getSchedulesByScreenId(screenId: string) {
+  public async getSchedulesByScreenId(screenId: string): Promise<ISchedule[]> {
     return await Schedule.find({ screen: screenId }).populate({
       path: 'showTimes.movie',
       select: 'title',
     });
-  } 
-
-  // public async getSchedulesByUserScreenId(
-  //   screenId: string,
-  //   date?: string,
-  //   movieTitle?: string,
-  //   showTime?: string
-  // ) {
-  //   const query: any = { screen: screenId };
+  }
   
-  //   if (showTime) query['showTimes.time'] = showTime;
-  //   if (movieTitle) query['showTimes.movieTitle'] = movieTitle;
-  
-  //   console.log("Constructed Query:", query);
-  
-  //   const schedules = await Schedule.find(query).populate({
-  //     path: 'showTimes.movie',
-  //     select: 'title',
-  //   });
-  
-  //   console.log("Fetched Schedules:", schedules);
-  
-  //   return schedules;
-  // }
-  
-  
-  // Update a screen by ID
-  public async updateScreen(screenId: string, updateData: any) {
+  public async updateScreen(screenId: string, updateData: Partial<IScreen>): Promise<IScreen | null> {
     return await Screens.findByIdAndUpdate(screenId, updateData, {
       new: true,
     });
   }
 
-  public async getScreensByTheater(id: string) {
-    return await Screens.find({ theater: id });
-  }
+  public async getScreensByTheater(theaterId: string): Promise<IScreen[]> {
+    const screens = await Screens.find({ theater: theaterId })
+      .populate("schedule", "date showTimes")
+      .lean();
+  
+    return screens as unknown as IScreen[];
+  }  
+  
 
-  public async deleteScreen(screenId: string) {
+  public async deleteScreen(screenId: string): Promise<IScreen | null> {
     return await Screens.findByIdAndDelete(screenId);
   }
 
-  public async getTheatersByMovieName(movieName: string) {
+  public async getTheatersByMovieName(movieName: string): Promise<any[]> {
     return await Screens.find({ "showTimes.movie": movieName }).populate(
       "theater",
       "name location"
     );
   }
+
+  public async createScreen(screenData: Partial<IScreen>): Promise<any | null> {
+    const newScreen = new Screens(screenData);
+    return await newScreen.save();
+  }
+
+  public async createSchedule(scheduleData: Partial<ISchedule>): Promise<ISchedule> {
+    const newSchedule = new Schedule(scheduleData);
+    return await newSchedule.save();
+  }
+
+  public async getScheduleById(scheduleId: string): Promise<ISchedule | null> {
+    return await Schedule.findById(scheduleId);
+  }
+
+  public async updateSchedule(scheduleId: string, updateData: Partial<ISchedule>): Promise<ISchedule | null> {
+    return await Schedule.findByIdAndUpdate(scheduleId, updateData, { new: true });
+  }
+
+  public async updateSeatAvailability(
+    scheduleId: string,
+    showTime: string,
+    selectedSeats: string[],
+    holdSeat: boolean
+  ): Promise<ISchedule | null> {
+    const schedule = await Schedule.findById(scheduleId);
+    if (!schedule) return null;
+
+    const targetShowTime = schedule.showTimes.find(st => String(st.time) === showTime);
+    if (!targetShowTime) return null;
+
+    targetShowTime.layout.forEach(row => {
+      row.forEach(seat => {
+        if (selectedSeats.includes(seat.label)) {
+          seat.holdSeat = holdSeat;
+        }
+      });
+    });
+
+    return await schedule.save();
+  }
 }
 
-export default new ScreenRepository();
+export default ScreenRepository;

@@ -1,11 +1,17 @@
-import ScreenRepository from "../Repositories/ScreenRepo";
-import { IScreen, Screens } from "../Models/ScreensModel";
-import ScheduleRepo from "../Repositories/ScheduleRepo";
+import { inject, injectable } from "inversify";
 import { format } from "date-fns";
+import { IScreenRepository } from "../Interface/IScreen/IRepository";
+import { IScreenService } from "../Interface/IScreen/IService";
+import { ISchedule } from "../Models/ScheduleModel";
+import { IScreen } from "../Models/ScreensModel";
 import TheaterDetails from "../Models/TheaterDetailsModel";
-import { Schedule } from "../Models/ScheduleModel";
 
-class ScreenService {
+@injectable()
+export class ScreenService implements IScreenService {
+  constructor(
+    @inject("IScreenRepository") private readonly screenRepository: IScreenRepository
+  ) {}
+
   public async addScreenHandler(
     theaterOwnerId: string,
     screenData: {
@@ -14,9 +20,7 @@ class ScreenService {
       layout: { label: string; isAvailable: boolean }[][];
       theater: string;
     }
-  ) {
-
-    // Validate the layout structure
+  ): Promise<IScreen> {
     if (
       !Array.isArray(screenData.layout) ||
       !screenData.layout.every((row) => Array.isArray(row))
@@ -25,238 +29,146 @@ class ScreenService {
     }
 
     try {
-      // Transform the layout for saving
       const transformedLayout = screenData.layout.map((row) =>
         row.map((seat) => ({
           label: seat.label,
-          isAvailable: seat.isAvailable, // Ensure isAvailable is also retained
+          isAvailable: seat.isAvailable,
         }))
       );
 
-      // Create a new screen instance directly
-      const newScreen = new Screens({
+      const newScreenData = {
         theater: screenData.theater,
         screenNumber: screenData.screenNumber,
         capacity: screenData.capacity,
         layout: transformedLayout,
-      });
+      };
 
-      // Save the screen instance to the database
-      const savedScreen = await newScreen.save();
-
-      return savedScreen;
+      return await this.screenRepository.createScreen(newScreenData);
     } catch (error) {
       console.error("Service Error: ", error);
       throw new Error("Failed to save screen.");
     }
   }
 
-  // Edit an existing screen (static data)
   public async editScreenHandler(
     theaterOwnerId: string,
     screenId: string,
     updateData: {
       screenNumber?: number;
       capacity?: number;
-      layout?: any[]; // Updated layout for the screen
+      layout?: any[];
     }
-  ) {
-    const screen = await ScreenRepository.getScreenById(screenId);
+  ): Promise<IScreen | null> {
+    const screen = await this.screenRepository.getScreenById(screenId);
 
     if (!screen) {
       throw new Error("Screen not found");
     }
 
-    // Update static screen data
-    return await ScreenRepository.updateScreen(screenId, updateData);
+    return await this.screenRepository.updateScreen(screenId, updateData);
   }
 
-  // Add schedule for a screen (dynamic data)
   public async addScheduleHandler(
     screenId: string,
     scheduleData: {
-      date: string; // ISO date format
+      date: string;
       showTimes: {
         time: string;
-        movie: string; // Movie ID
+        movie: string;
         movieTitle: string;
-        layout: any[]; // Seat availability layout
+        layout: any[];
       }[];
     }
-  ) {
-    const screen = await ScreenRepository.getScreenById(screenId);
+  ): Promise<ISchedule> {
+    const screen = await this.screenRepository.getScreenById(screenId);
 
     if (!screen) {
       throw new Error("Screen not found for scheduling");
     }
 
     const formattedDate = format(new Date(scheduleData.date), "yyyy-MM-dd");
-
-    console.log("formattedDate 99999: ", formattedDate);
     
-    return await ScheduleRepo.createSchedule({
+    return await this.screenRepository.createSchedule({
       screen: screenId,
       date: formattedDate,
       showTimes: scheduleData.showTimes,
     });
   }
 
-  // Update schedule for a screen (dynamic data)
   public async editScheduleHandler(
     scheduleId: string,
     updateData: {
       date?: string;
       showTimes?: {
         time?: string;
-        movie?: string; // Movie ID
+        movie?: string;
         movieTitle?: string;
         layout?: any[];
       }[];
     }
-  ) {
-    const schedule = await ScheduleRepo.getScheduleById(scheduleId);
+  ): Promise<ISchedule | null> {
+    const schedule = await this.screenRepository.getScheduleById(scheduleId);
 
     if (!schedule) {
       throw new Error("Schedule not found");
     }
 
-    // Update the existing schedule
-    return await ScheduleRepo.updateSchedule(scheduleId, updateData);
+    return await this.screenRepository.updateSchedule(scheduleId, updateData);
   }
 
   public async deleteScreenHandler(screenId: string): Promise<IScreen | null> {
-    return await Screens.findByIdAndDelete(screenId);
+    return await this.screenRepository.deleteScreen(screenId);
   }
 
-  public getScreenByIdHandler = async (screenId: string) => {
+  public async getScreenByIdHandler(screenId: string): Promise<IScreen | null> {
     try {
-      const screen = await ScreenRepository.getScreenById(screenId);
-      return screen;
+      return await this.screenRepository.getScreenById(screenId);
     } catch (error: any) {
       throw new Error(error?.message || "Failed to retrieve screen");
     }
-  };
+  }
 
-  // public getScreensByTheaterIdsService = async (id: string) => {
-  //   try {
-  //     return await ScreenRepository.getScreensByTheater(id);
-  //   } catch (error) {
-  //     throw new Error("Error fetching Screens");
-  //   }
-  // };
-
-  public getScreensWithSchedulesByTheaterIdsService = async (id: string) => {
+  public async getScreensWithSchedulesByTheaterIdsService(id: string): Promise<IScreen[]> {
     try {
-
-      const screens = await Screens.find({ theater: id }).populate(
-        "schedule",
-        "date showTimes"
-      );
-
+      const screens = await this.screenRepository.getScreensByTheater(id);
       return screens;
     } catch (error) {
       throw new Error("Error fetching screens and schedules");
     }
-  };
+  }
 
-  public getScreensByIdService = async (screenId: string) => {
+  public async getScreensByIdService(screenId: string): Promise<{ screen: IScreen | null, schedule: ISchedule[], theater: any }> {
     try {
-      console.log( " entered service");
-      // Fetch the screen details from the repository]
-      let screen = await ScreenRepository.getScreenById(screenId);
+      const screen = await this.screenRepository.getScreenById(screenId);
 
       if (!screen) {
         throw new Error("Screen not found");
       }
 
       const theaterId = screen.theater;
-
       const theater = await TheaterDetails.findById(theaterId);
-
-      // Fetch schedules for the specific screenId
-      const schedule = await ScreenRepository.getSchedulesByScreenId(screenId);
-
-      console.log("schedule: ", schedule);
+      const schedule = await this.screenRepository.getSchedulesByScreenId(screenId);
       
       return { screen, schedule, theater };
     } catch (error) {
       throw new Error("Error fetching screen or schedules");
     }
-  };
+  }
 
-  // public getUserScreensByIdService = async (
-  //   screenId: string,
-  //   date?: string,
-  //   movieTitle?: string,
-  //   showTime?: string
-  // ) => {
-  //   try {
-
-  //     console.log("entered ser");
-      
-  //     // Fetch the screen details from the repository
-  //     const screen = await ScreenRepository.getScreenById(screenId);
-
-  //     if (!screen) {
-  //       throw new Error("Screen not found");
-  //     }
-
-  //     const theaterId = screen.theater;
-  //     const theater = await TheaterDetails.findById(theaterId);
-
-  //     // Fetch schedules with optional filtering
-  //     const schedule = await ScreenRepository.getSchedulesByScreenId(
-  //       screenId,
-  //     );
-
-  //     console.log("schedule ccccc: ", schedule);
-      
-  //     return { screen, schedule, theater };
-  //   } catch (error) {
-  //     throw new Error("Error fetching screen or schedules");
-  //   }
-  // };
-
-  public async getTheatersByMovieNameService(movieName: string) {
+  public async getTheatersByMovieNameService(movieName: string): Promise<any[]> {
     try {
-      return await ScreenRepository.getTheatersByMovieName(movieName);
+      return await this.screenRepository.getTheatersByMovieName(movieName);
     } catch (error) {
       throw new Error("Error fetching theaters by movie name");
     }
   }
 
-  public updateSeatAvailabilityHandler = async (
+  public async updateSeatAvailabilityHandler(
     scheduleId: string,
     selectedSeats: string[],
     holdSeat: boolean,
     showTime: string
-  ): Promise<any> => {
-    const schedule = await Schedule.findById(scheduleId).populate("screen");
-
-    if (!schedule) {
-      throw new Error("Schedule not found.");
-    }
-
-    const targetShowTime = schedule.showTimes.find(
-      (st) => String(st.time) === showTime
-    );
-
-    if (!targetShowTime) {
-      throw new Error("Show time not found.");
-    }
-
-    targetShowTime.layout.forEach((row) => {
-      row.forEach((seat) => {
-        if (selectedSeats.includes(seat.label)) {
-          seat.holdSeat = holdSeat;
-        }
-      });
-    });
-
-    await schedule.save();
-
-    return schedule;
-  };
+  ): Promise<ISchedule | null> {
+    return await this.screenRepository.updateSeatAvailability(scheduleId, showTime, selectedSeats, holdSeat);
+  }
 }
-
-export default new ScreenService();

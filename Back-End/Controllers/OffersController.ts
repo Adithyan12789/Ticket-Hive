@@ -1,15 +1,24 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { CustomRequest } from "../Middlewares/TheaterAuthMiddleware";
-import OffersService from "../Services/OffersService";
+import { inject, injectable } from "inversify"
+import { IOfferService } from "../Interface/IOffer/IService";
 
-class OffersController {
+@injectable()
+export class OfferController {
+  constructor(
+    @inject("IOfferService") private readonly offerService: IOfferService,
+  ) {}
+
   addOfferController = asyncHandler(
     async (req: CustomRequest, res: Response): Promise<void> => {
       const offerData = req.body;
 
+      console.log("offerData: ", offerData);
+      
+
       try {
-        const createdOffer = await OffersService.addOfferService(offerData);
+        const createdOffer = await this.offerService.addOfferService(offerData);
         res.status(201).json({
           message: "Offer created successfully",
           offer: createdOffer,
@@ -27,7 +36,7 @@ class OffersController {
       const offerData = req.body;
 
       try {
-        const updatedOffer = await OffersService.updateOfferService(offerId, offerData);
+        const updatedOffer = await this.offerService.updateOfferService(offerId, offerData);
         res.status(200).json({
           message: "Offer updated successfully",
           offer: updatedOffer,
@@ -44,7 +53,7 @@ class OffersController {
       const { offerId } = req.params;
 
       try {
-        const deletedOffer = await OffersService.deleteOfferHandler(offerId);
+        const deletedOffer = await this.offerService.deleteOfferService(offerId);
 
         if (!deletedOffer) {
           res.status(404).json({ message: "Offer not found for deletion" });
@@ -62,7 +71,7 @@ class OffersController {
   getOffersController = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
       try {
-        const offers = await OffersService.getOffersService();
+        const offers = await this.offerService.getOffersService();
         res.status(200).json(offers);
       } catch (error) {
         console.error("Error fetching offers:", error);
@@ -71,5 +80,3 @@ class OffersController {
     }
   );
 }
-
-export default new OffersController();

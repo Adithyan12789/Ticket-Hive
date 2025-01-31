@@ -1,14 +1,18 @@
 import { io } from "../Config/Socket";
-import { Notification } from "../Models/NotificationModel";
+import { INotificationRepository } from "../Interface/INotification/IRepository";
+import { inject, injectable } from "inversify";
+import { INotificationService } from "../Interface/INotification/IService";
 import { CustomError } from "../Utils/CustomError";
 
-class NotificationService {
-  public static async addNotification(
-    userId: string,
-    message: string
-  ): Promise<void> {
+@injectable()
+export class NotificationService implements INotificationService {
+  constructor(
+    @inject("INotificationRepository") private readonly notificationRepository: INotificationRepository
+  ) {}
+
+  async addNotification(userId: string, message: string): Promise<void> {
     try {
-      const notification = await Notification.create({ userId, message });
+      const notification = await this.notificationRepository.create({ userId, message });
       io.to(userId).emit("newNotification", { notification });
       console.log(`Real-time: Notification sent to user ${userId}: ${message}`);
     } catch (error) {
@@ -16,47 +20,35 @@ class NotificationService {
     }
   }
 
-  
-  public static async getUnreadNotifications(userId: string): Promise<any> {
+  async getUnreadNotifications(userId: string): Promise<any> {
     try {
-      const unreadNotifications = await Notification.find({ 
-        userId: userId, 
-        isRead: false 
-      }).sort({ createdAt: -1 });
-
-      console.log("unreadNotifications: ", unreadNotifications);
-      
-      console.log(`Fetched ${unreadNotifications.length} unread notifications for user ${userId}`);
-      return unreadNotifications;
-       
+      const notifications = await this.notificationRepository.findUnreadNotifications(userId);
+      return notifications;
     } catch (error) {
       console.error("Failed to fetch unread notifications:", error);
-      throw error;
+      throw new CustomError("Unable to fetch notifications", 500);
     }
   }
 
-  public static async markNotificationAsRead(
-    userId: string,
-    notificationId: string
-  ): Promise<string> {
+  async markNotificationAsRead(userId: string, notificationId: string): Promise<string> {
     try {
-      const notification = await Notification.findById(notificationId);
+      const notification = await this.notificationRepository.findNotificationById(notificationId);
       if (!notification) {
         throw new CustomError("Notification not found", 404);
       }
+
       if (notification.userId.toString() !== userId.toString()) {
         throw new CustomError("Not authorized", 401);
       }
 
       notification.isRead = true;
-      await notification.save();
+      await this.notificationRepository.updateNotification(notification);
 
       io.to(userId).emit("updateNotifications", {
         type: "markAsRead",
         notificationId,
       });
 
-      console.log(`Real-time: Notification marked as read for user ${userId}`);
       return "Notification marked as read";
     } catch (error) {
       console.error("Failed to mark notification as read:", error);
@@ -64,21 +56,15 @@ class NotificationService {
     }
   }
 
-  public static async deleteAllNotifications(userId: string): Promise<void> {
+  async deleteAllNotifications(userId: string): Promise<void> {
     try {
-      await Notification.deleteMany({ userId });
-
+      await this.notificationRepository.deleteAllNotificationsByUser(userId);
       io.to(userId).emit("updateNotifications", {
         type: "clearAll",
       });
-
-      console.log(`Real-time: All notifications cleared for user ${userId}`);
     } catch (error) {
       console.error("Failed to delete notifications:", error);
-      throw error;
+      throw new CustomError("Unable to clear notifications", 500);
     }
   }
-
 }
-
-export default NotificationService;

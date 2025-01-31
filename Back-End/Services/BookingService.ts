@@ -1,12 +1,16 @@
 import mongoose from "mongoose";
-import { Booking } from "../Models/bookingModel";
+import { Booking, IBooking } from "../Models/bookingModel";
 import BookingRepo from "../Repositories/BookingRepo";
-import WalletRepo from "../Repositories/WalletRepo";
+import { WalletRepository } from "../Repositories/WalletRepo";
 import { ITransaction } from "../Models/WalletModel";
 import { v4 as uuidv4 } from "uuid";
 import { Movie } from "../Models/MoviesModel";
 import { Schedule } from "../Models/ScheduleModel";
 import MovieRepo from "../Repositories/MovieRepo";
+import { inject, injectable } from "inversify";
+import { IBookingRepository } from "../Interface/IBooking/IRepository";
+import { IMovieRepository } from "../Interface/IMovie/IRepository";
+import { IWalletRepository } from "../Interface/IWallet/IRepository";
 
 export interface BookingDetails {
   totalPrice: number;
@@ -32,7 +36,15 @@ export async function getMovieTitleById(movieId: string): Promise<string> {
   return movie.title;
 }
 
-class BookingService {
+
+@injectable()
+export class BookingService {
+  constructor(
+    @inject("IBookingRepository") private bookingRepository: IBookingRepository,
+    @inject("IMovieRepository") private movieRepository: IMovieRepository,
+    @inject("IWalletRepository") private walletRepository: IWalletRepository,
+  ) {}
+
   public async createBookingService(
     movieId: string,
     scheduleId: string,
@@ -49,7 +61,6 @@ class BookingService {
     formattedBookingDate: string
   ) {
     const formattedDateOnly = formattedBookingDate.split("T")[0];
-    console.log("formattedDateOnly: ", formattedDateOnly);
 
     const startOfDay = new Date(formattedDateOnly + "T00:00:00.000Z");
     const endOfDay = new Date(formattedDateOnly + "T23:59:59.999Z");
@@ -61,12 +72,8 @@ class BookingService {
       "showTimes.time": showTime,
     });
 
-    console.log("schedule: ", schedule);
-
     if (!schedule) {
       const existingSchedule = await Schedule.findOne({ screen: screenId });
-      console.log("entered not schedule");
-
       if (!existingSchedule) {
         throw new Error(
           "No existing schedule found for the screen to use its layout."
@@ -121,7 +128,7 @@ class BookingService {
     await schedule.save();
 
     // Create the new booking record
-    const newBooking = await BookingRepo.createBooking({
+    const newBooking = await this.bookingRepository.createBooking({
       movie: new mongoose.Types.ObjectId(movieId),
       theater: new mongoose.Types.ObjectId(theaterId),
       screen: new mongoose.Types.ObjectId(screenId),
@@ -129,11 +136,10 @@ class BookingService {
       seats: seatIds,
       bookingDate: schedule.date,
       showTime,
-      paymentStatus: paymentStatus as
-        | "pending"
-        | "confirmed"
-        | "cancelled"
-        | "failed",
+      paymentStatus: paymentStatus as "pending" |
+        "confirmed" |
+        "cancelled" |
+        "failed",
       paymentMethod: paymentMethod || "default",
       convenienceFee,
       user: new mongoose.Types.ObjectId(userId),
@@ -144,10 +150,7 @@ class BookingService {
   }
 
   public async getAllTicketsService(userId: string) {
-    const bookings = await BookingRepo.findAllBookings(userId);
-
-    console.log("iiiiiiiiiii bookings: ", bookings);
-    
+    const bookings = await this.bookingRepository.findAllBookings(userId);
 
     if (!bookings.length) throw new Error("No tickets found");
 
@@ -174,7 +177,7 @@ class BookingService {
 
   public async cancelTicketService(bookingId: string, userId: string) {
     // Find the booking
-    const booking = await BookingRepo.findBookingById(bookingId);
+    const booking = await this.bookingRepository.findBookingById(bookingId);
     if (!booking) throw new Error("Booking not found");
 
     // Check if the booking belongs to the user
@@ -184,7 +187,7 @@ class BookingService {
 
     const { seats, showTime, totalPrice, bookingDate, screen, movie } = booking;
 
-    const movieDetails = await MovieRepo.findMovieById(movie);
+    const movieDetails = await this.movieRepository.findMovieById(movie.toString());
     if (!movieDetails) throw new Error("Movie details not found");
 
     // Find the relevant schedule
@@ -228,7 +231,7 @@ class BookingService {
     await booking.save();
 
     // Process the wallet refund
-    const wallet = await WalletRepo.findWalletByUserId(userId);
+    const wallet = await this.walletRepository.findWalletByUserId(userId);
     if (!wallet) throw new Error("Wallet not found");
 
     const transaction: ITransaction = {
@@ -253,15 +256,13 @@ class BookingService {
   }
 
   public async getTicketDetails(ticketId: string) {
-    const ticket = await BookingRepo.findTicketById(ticketId);
+    const ticket = await this.bookingRepository.findTicketById(ticketId);
     if (!ticket) throw new Error("Ticket not found");
     return ticket;
   }  
   
   public async getBookingDetails(bookingId: string) {
-    const booking = await BookingRepo.findBookingById(bookingId);
-
-    console.log("getBookingDetails service booking: ", booking);
+    const booking = await this.bookingRepository.findBookingById(bookingId);
     
     if (!booking) throw new Error("Booking not found");
     return booking;
@@ -270,9 +271,9 @@ class BookingService {
   public updateBookingStatusService = async (
     bookingId: string,
     status: string
-  ) => {
+  ): Promise<IBooking | null> => {
     try {
-      const updatedBooking = await BookingRepo.updateBookingStatus(
+      const updatedBooking = await this.bookingRepository.updateBookingStatus(
         bookingId,
         status
       );
@@ -287,7 +288,7 @@ class BookingService {
     ticketId: string,
     updatedData: Partial<typeof Booking>
   ) {
-    const updatedTicket = await BookingRepo.updateBooking(
+    const updatedTicket = await this.bookingRepository.updateBooking(
       ticketId,
       updatedData
     );
@@ -295,9 +296,9 @@ class BookingService {
     return updatedTicket;
   }
 
-  public async getUserBookings(userId: string) {
+  public async getUserBookings(userId: string): Promise<IBooking[]> {
     try {
-      return await BookingRepo.getUserBookings(userId);
+      return await this.bookingRepository.getUserBookings(userId);
     } catch (error) {
       if (error instanceof Error) {
         throw new Error(
@@ -311,9 +312,7 @@ class BookingService {
     }
   }
 
-  public async getTheaterBookings(theaterId: string) {
-    return await BookingRepo.getTheaterBookings(theaterId);
+  public async getTheaterBookings(theaterId: string): Promise<IBooking[]> {
+    return await this.bookingRepository.getTheaterBookings(theaterId);
   }
 }
-
-export default new BookingService();

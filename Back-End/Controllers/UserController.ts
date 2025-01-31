@@ -1,5 +1,5 @@
 import asyncHandler from "express-async-handler";
-import UserService from "../Services/UserService";
+import { UserService } from "../Services/UserService";
 import EmailUtil from "../Utils/EmailUtil";
 import User from "../Models/UserModel";
 import TokenService from "../Utils/GenerateToken";
@@ -8,43 +8,28 @@ import { IUser } from "../Models/UserModel";
 import { CustomRequest } from "../Middlewares/AuthMiddleware";
 import { Movie } from "../Models/MoviesModel";
 import { Booking } from "../Models/bookingModel";
+import { inject, injectable } from "inversify";
+import { IUserService } from "../Interface/IUser/IService";
 
-class UserController {
+@injectable()
+export class UserController {
+  constructor(
+    @inject("IUserService") private readonly userService: IUserService
+  ) {}
 
-  refreshToken = async (req: Request, res: Response) => {
+  refreshToken = asyncHandler(async (req: Request, res: Response) => {
+    const refreshToken = req.cookies["refreshToken"];
 
-    const refreshToken = req.cookies["refreshToken"]; // Ensure it's the correct name
-
-    // Check if refresh token exists
     if (!refreshToken) {
       res.status(401).json({ message: "No refresh token provided" });
       return;
     }
 
-    // Verify the refresh token using TokenService
-    const decoded = TokenService.verifyRefreshToken(refreshToken);
-
-    if (!decoded || typeof decoded === "string") {
-      res.status(401).json({ message: "Invalid or expired refresh token" });
-      return;
-    }
-
-    // Find the user using the userId from the decoded token
     try {
-      const user = await User.findById(decoded.userId);
-
-      if (!user) {
-        res.status(404).json({ message: "User not found" });
-        return;
-      }
-
-      // Generate new access token
-      const newAccessToken = TokenService.generateAccessToken(
-        user._id.toString()
-      );
+      const { accessToken } = await this.userService.refreshToken(refreshToken);
 
       // Set the new access token in cookies
-      res.cookie("jwt_access", newAccessToken, {
+      res.cookie("jwt_access", accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV !== "development",
         sameSite: "strict",
@@ -53,20 +38,14 @@ class UserController {
 
       res.status(200).json({ message: "Token refreshed successfully" });
     } catch (error) {
-      // Handle errors during user lookup (database issues, etc.)
-      console.error("Error finding user:", error);
-      res.status(500).json({ message: "Internal server error" });
+      console.error("Error refreshing token:", error);
+      res.status(401).json({ message: error });
     }
-  };
+  });
 
   authUser = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
-      console.log("entered auth controller function");
-      
-
       const { email, password } = req.body;
-
-      console.log("req.body: ", req.body);
 
       if (!email || !password) {
         res.status(400).json({ message: "Email and password are required" });
@@ -74,9 +53,7 @@ class UserController {
       }
 
       try {
-        const user = await UserService.authenticateUser(email, password);
-
-        console.log("controller user: " , user);
+        const user = await this.userService.authenticateUser(email, password);
         
         const accessToken = TokenService.generateAccessToken(
           user._id.toString()
@@ -122,68 +99,37 @@ class UserController {
   googleLogin = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
       const { googleName: name, googleEmail: email } = req.body;
-
+  
       if (!email || !name) {
         res.status(400).json({ message: "Google Name and Email are required" });
         return;
       }
-
-      try {
-        let user = await User.findOne({ email });
-
-        if (user) {
-          const accessToken = TokenService.generateAccessToken(
-            user._id.toString()
-          );
-          const refreshToken = TokenService.generateRefreshToken(
-            user._id.toString()
-          );
   
-          TokenService.setTokenCookies(res, accessToken, refreshToken);
-          res.status(200).json({
-            success: true,
-            data: {
-              _id: user._id,
-              name: user.name,
-              email: user.email,
-            },
-          });
-        } else {
-          user = await User.create({
-            name,
-            email,
-            otp: "",
-            phone: "",
-            password: "",
-          });
-          if (user) {
-            const accessToken = TokenService.generateAccessToken(
-              user._id.toString()
-            );
-            const refreshToken = TokenService.generateRefreshToken(
-              user._id.toString()
-            );
-    
-            TokenService.setTokenCookies(res, accessToken, refreshToken);
-            res.status(201).json({
-              success: true,
-              data: {
-                _id: user._id,
-                name: user.name,
-                email: user.email,
-              },
-            });
-          } else {
-            res.status(400).json({ message: "Invalid user data" });
-          }
-        }
+      try {
+        const user = await this.userService.handleGoogleLogin(name, email);
+  
+        const accessToken = TokenService.generateAccessToken(user._id.toString());
+        const refreshToken = TokenService.generateRefreshToken(user._id.toString());
+  
+        TokenService.setTokenCookies(res, accessToken, refreshToken);
+  
+        const statusCode = user.isNew ? 201 : 200;
+        res.status(statusCode).json({
+          success: true,
+          data: {
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+          },
+        });
       } catch (error: any) {
-        res
-          .status(500)
-          .json({ message: "Internal server error", error: error.message });
+        res.status(500).json({
+          message: "Internal server error",
+          error: error.message,
+        });
       }
     }
-  );
+  );  
 
 
   registerUser = asyncHandler(
@@ -191,7 +137,7 @@ class UserController {
       const { name, email, password, phone } = req.body;
 
       try {
-        const user = await UserService.registerUserService(
+        const user = await this.userService.registerUserService(
           name,
           email,
           password,
@@ -248,7 +194,7 @@ class UserController {
       const { email, otp } = req.body;
 
       try {
-        await UserService.verifyOtpService(email, otp);
+        await this.userService.verifyOtpService(email, otp);
         res.status(200).json({ message: "OTP verified successfully" });
       } catch (err: unknown) {
         if (err instanceof Error && err.message === "Incorrect OTP") {
@@ -271,7 +217,7 @@ class UserController {
       const { email } = req.body;
 
       try {
-        await UserService.resendOtpService(email);
+        await this.userService.resendOtpService(email);
         res.status(200).json({ message: "OTP resent successfully" });
       } catch (err: unknown) {
         if (err instanceof Error && err.message === "User not found") {
@@ -300,8 +246,8 @@ class UserController {
       }
 
       try {
-        const resetToken = await UserService.forgotPasswordService(email);
-        const resetUrl = `https://tickethive.fun/reset-password/${resetToken}`;
+        const resetToken = await this.userService.forgotPasswordService(email);
+        const resetUrl = `http://localhost:5000/reset-password/${resetToken}`;
         const message = `Password reset link: ${resetUrl}`;
 
         await EmailUtil.sendOtpEmail(email, message);
@@ -336,7 +282,7 @@ class UserController {
       }
 
       try {
-        await UserService.resetPasswordService(resetToken, password);
+        await this.userService.resetPasswordService(resetToken, password);
         res.status(200).json({ message: "Password reset successfully" });
       } catch (err: unknown) {
         if (
@@ -372,7 +318,7 @@ class UserController {
 
       try {
         // Call the service to update the location
-        const updatedUser = await UserService.updateLocation(
+        const updatedUser = await this.userService.updateLocation(
           req.user._id.toString(),
           city,
           latitude,
@@ -404,7 +350,7 @@ class UserController {
         return;
       }
 
-      const user = await UserService.getUserProfile(req.user._id);
+      const user = await this.userService.getUserProfile(req.user._id);
       res.status(200).json(user);
     }
   );
@@ -431,7 +377,7 @@ class UserController {
           }
         }
   
-        const updatedUser = await UserService.updateUserProfileService(
+        const updatedUser = await this.userService.updateUserProfileService(
           req.user._id,
           updateData,
           fileData
@@ -465,7 +411,7 @@ class UserController {
       const userId = req.user?._id;
 
       try {
-        const offers = await UserService.getOffersByTheaterIdService(theaterId);
+        const offers = await this.userService.getOffersByTheaterIdService(theaterId);
         if (!offers || offers.length === 0) {
           res.status(404).json({ message: "Offers not found" });
           return;
@@ -480,7 +426,7 @@ class UserController {
           .filter((offerId): offerId is string => !!offerId);
 
         const filteredOffers = offers.filter(
-          (offer) => !usedOfferIds.includes(offer.id.toString())
+          (offer: { id: { toString: () => string; }; }) => !usedOfferIds.includes(offer.id.toString())
         );
 
         res.status(200).json(filteredOffers);
@@ -495,7 +441,7 @@ class UserController {
   logoutUser = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
       // Optionally, you can perform any other cleanup actions related to the user session here
-      await UserService.logoutUserService();
+      await this.userService.logoutUserService();
 
       // Clear the access token cookie (jwt)
       res.cookie("jwt", "", {
@@ -518,4 +464,3 @@ class UserController {
   );
 }
 
-export default new UserController();

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import TheaterOwnerService from "../Services/TheaterService";
+import { TheaterService } from "../Services/TheaterService";
 import EmailUtil from "../Utils/EmailUtil";
 import Theater from "../Models/TheaterOwnerModel";
 import TheaterTokenService from "../Utils/GenerateTheaterToken";
@@ -14,8 +14,17 @@ import { Offer } from "../Models/OffersModel";
 import { Booking } from "../Models/bookingModel";
 import { ISchedule, Schedule } from "../Models/ScheduleModel";
 import { Notification } from "../Models/NotificationModel";
+import { inject, injectable } from "inversify";
+import { ITheaterService } from "../Interface/ITheater/IService";
+import { IOfferService } from "../Interface/IOffer/IService";
 
-class TheaterController {
+@injectable()
+export class TheaterController {
+  constructor(
+    @inject("ITheaterService") private readonly theaterService: ITheaterService,
+    @inject("IOfferService") private readonly offerService: IOfferService,
+  ) {}
+  
   authTheaterOwner = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
       const { email, password } = req.body;
@@ -26,7 +35,7 @@ class TheaterController {
       }
 
       try {
-        const theater = await TheaterOwnerService.authTheaterOwnerService(
+        const theater = await this.theaterService.authTheaterOwnerService(
           email,
           password
         );
@@ -70,52 +79,21 @@ class TheaterController {
       }
 
       try {
-        let theaterOwner = await Theater.findOne({ email });
+        const theaterOwner = await this.theaterService.googleLoginTheaterOwnerService(name, email);
 
-        if (theaterOwner) {
-          TheaterTokenService.generateTheaterToken(
-            res,
-            theaterOwner._id.toString()
-          );
-          res.status(200).json({
-            success: true,
-            data: {
-              _id: theaterOwner._id,
-              name: theaterOwner.name,
-              email: theaterOwner.email,
-            },
-          });
-        } else {
-          theaterOwner = await Theater.create({
-            name,
-            email,
-            otp: "",
-            phone: "",
-            password: "",
-          });
-
-          if (theaterOwner) {
-            TheaterTokenService.generateTheaterToken(
-              res,
-              theaterOwner._id.toString()
-            );
-            res.status(201).json({
-              success: true,
-              data: {
-                _id: theaterOwner._id,
-                name: theaterOwner.name,
-                email: theaterOwner.email,
-              },
-            });
-          } else {
-            res.status(400).json({ message: "Invalid theater Owner data" });
-          }
-        }
+        res.status(200).json({
+          success: true,
+          data: {
+            _id: theaterOwner._id,
+            name: theaterOwner.name,
+            email: theaterOwner.email,
+          },
+        });
       } catch (error: any) {
-        console.error("Error in google Login:", error.message);
+        console.error("Error in Google Login:", error.message);
         res
-          .status(500)
-          .json({ message: "Internal server error", error: error.message });
+          .status(error.statusCode || 500)
+          .json({ message: error.message || "Internal server error" });
       }
     }
   );
@@ -125,7 +103,7 @@ class TheaterController {
       const { name, email, password, phone } = req.body;
 
       try {
-        const theater = await TheaterOwnerService.registerTheaterOwnerService(
+        const theater = await this.theaterService.registerTheaterOwnerService(
           name,
           email,
           password,
@@ -170,7 +148,7 @@ class TheaterController {
       const { email, otp } = req.body;
 
       try {
-        await TheaterOwnerService.verifyTheaterOwnerOtpService(email, otp);
+        await this.theaterService.verifyTheaterOwnerOtpService(email, otp);
         res.status(200).json({ message: "OTP verified successfully" });
       } catch (err: unknown) {
         if (err instanceof Error && err.message === "Incorrect OTP") {
@@ -193,7 +171,7 @@ class TheaterController {
       const { email } = req.body;
 
       try {
-        await TheaterOwnerService.resendTheaterOwnerOtpService(email);
+        await this.theaterService.resendTheaterOwnerOtpService(email);
         res.status(200).json({ message: "OTP resent successfully" });
       } catch (err: unknown) {
         if (err instanceof Error && err.message === "Theater Owner not found") {
@@ -225,8 +203,8 @@ class TheaterController {
 
       try {
         const resetToken =
-          await TheaterOwnerService.forgotTheaterOwnerPasswordService(email);
-        const resetUrl = `https://tickethive.fun/theater-reset-password/${resetToken}`;
+          await this.theaterService.forgotTheaterOwnerPasswordService(email);
+        const resetUrl = `http://localhost:5000/theater-reset-password/${resetToken}`;
         const message = `Password reset link: ${resetUrl}`;
 
         await EmailUtil.sendOtpEmail(email, message);
@@ -263,7 +241,7 @@ class TheaterController {
       }
 
       try {
-        await TheaterOwnerService.resetTheaterOwnerPasswordService(
+        await this.theaterService.resetTheaterOwnerPasswordService(
           resetToken,
           password
         );
@@ -285,7 +263,7 @@ class TheaterController {
 
   getTheaterOwners = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
-      const admins = await TheaterOwnerService.getAllTheaterOwners();
+      const admins = await this.theaterService.getAllTheaterOwners();
 
       res.status(200).json(admins);
     }
@@ -293,13 +271,16 @@ class TheaterController {
 
   getTheaterProfile = asyncHandler(
     async (req: CustomRequest, res: Response): Promise<void> => {
-      if (!req.theaterOwner) {
+
+      const theaterOwnerId = req.theaterOwner?._id || null;
+      
+      if (!theaterOwnerId) {
         res.status(401).json({ message: "Unauthorized" });
         return;
       }
 
-      const theaterOwner = await TheaterOwnerService.getTheaterOwnerProfile(
-        req.theaterOwner._id
+      const theaterOwner = await this.theaterService.getTheaterOwnerProfile(
+        theaterOwnerId
       );
 
       res.status(200).json(theaterOwner);
@@ -307,7 +288,7 @@ class TheaterController {
   );
 
   updateTheaterProfile = asyncHandler(
-    async (req: CustomRequest, res: Response): Promise<void> => {
+    async (req: CustomRequest, res: Response): Promise<any> => {
       if (!req.theaterOwner) {
         res.status(401).json({ message: "Unauthorized" });
         return;
@@ -321,13 +302,13 @@ class TheaterController {
           : { filename: undefined };
 
         const updatedTheaterOwner =
-          await TheaterOwnerService.updateTheaterOwnerProfileService(
+          await this.theaterService.updateTheaterOwnerProfileService(
             req.theaterOwner._id,
             updateData,
             fileData
           );
 
-        res.status(200).json({
+        return res.status(200).json({
           _id: updatedTheaterOwner._id,
           name: updatedTheaterOwner.name,
           phone: updatedTheaterOwner.phone,
@@ -362,7 +343,7 @@ class TheaterController {
         .replace(/\\/g, "/");
 
       try {
-        await TheaterOwnerService.uploadCertificates(
+        await this.theaterService.uploadCertificates(
           theaterId,
           certificatePath
         );
@@ -419,7 +400,7 @@ class TheaterController {
           ? showTimes
           : [showTimes];
 
-        const response = await TheaterOwnerService.addTheaterService(
+        const response = await this.theaterService.addTheaterService(
           req.theaterOwner._id,
           {
             theaterOwnerId: new mongoose.Types.ObjectId(req.theaterOwner._id),
@@ -450,14 +431,14 @@ class TheaterController {
 
   getTheaters = asyncHandler(
     async (req: CustomRequest, res: Response): Promise<void> => {
-      const theaters = await TheaterOwnerService.getAllTheaters();
+      const theaters = await this.theaterService.getAllTheaters();
 
       res.status(200).json(theaters);
     }
   );
 
-  getTheaterByIdHandler = asyncHandler(
-    async (req: CustomRequest, res: Response): Promise<void> => {
+  public getTheaterByIdHandler = asyncHandler(
+    async (req: Request, res: Response): Promise<void> => {
       const theaterId = req.params.id;
 
       if (!mongoose.Types.ObjectId.isValid(theaterId)) {
@@ -466,14 +447,14 @@ class TheaterController {
       }
 
       try {
-        const theater = await TheaterDetails.findById(theaterId);
+        const theater = await this.theaterService.getTheaterById(theaterId);
 
         if (!theater) {
           res.status(404).json({ message: "Theater not found" });
           return;
         }
 
-        res.json(theater.toObject());
+        res.json(theater);
       } catch (error) {
         console.error("Error in handler:", error);
         res.status(500).json({ message: "Server error" });
@@ -481,16 +462,17 @@ class TheaterController {
     }
   );
 
-  updateTheaterHandler = asyncHandler(
-    async (req: CustomRequest, res: Response): Promise<void> => {
+    public updateTheaterHandler = asyncHandler(
+    async (req: Request, res: Response): Promise<void> => {
       const { id } = req.params;
       const updateData = req.body;
+      const files = req.files;
 
       try {
-        const updatedTheater = await TheaterOwnerService.updateTheaterData(
+        const updatedTheater = await this.theaterService.updateTheaterData(
           id,
           updateData,
-          req.files
+          files
         );
 
         if (!updatedTheater) {
@@ -501,27 +483,24 @@ class TheaterController {
         res.status(200).json(updatedTheater);
       } catch (error: any) {
         console.error("Error updating theater:", error);
-        res
-          .status(500)
-          .json({ message: "Error updating theater", error: error.message });
+        res.status(500).json({ message: "Error updating theater", error: error.message });
       }
     }
   );
 
   deleteTheaterHandler = asyncHandler(
     async (req: CustomRequest, res: Response): Promise<void> => {
+
       const { id } = req.params;
-
+  
       try {
-        const deletedTheater = await TheaterOwnerService.deleteTheaterService(
-          id
-        );
-
+        const deletedTheater = await this.theaterService.deleteTheaterService(id);
+  
         if (!deletedTheater) {
           res.status(404).json({ message: "Theater not found for deletion" });
           return;
         }
-
+  
         res
           .status(200)
           .json({ message: "Theater deleted successfully", deletedTheater });
@@ -533,6 +512,7 @@ class TheaterController {
       }
     }
   );
+  
 
   getTheatersByMovieTitle = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
@@ -684,136 +664,9 @@ class TheaterController {
   );  
   
 
-  addOfferController = asyncHandler(
-    async (req: CustomRequest, res: Response): Promise<void> => {
-
-      const {
-        ownerId,
-        offerName,
-        paymentMethod,
-        offerDescription,
-        discountValue,
-        minPurchaseAmount,
-        validityStart,
-        validityEnd,
-        applicableTheaters,
-      } = req.body;
-
-      if (
-        !ownerId ||
-        !offerName ||
-        !paymentMethod ||
-        !offerDescription ||
-        !discountValue ||
-        minPurchaseAmount === undefined ||
-        !validityStart ||
-        !validityEnd ||
-        !Array.isArray(applicableTheaters) ||
-        applicableTheaters.length === 0
-      ) {
-        res.status(400).json({ message: "All fields are required" });
-        return;
-      }
-
-      try {
-        const parsedValidityStart = new Date(validityStart);
-        const parsedValidityEnd = new Date(validityEnd);
-
-        const newOffer = new Offer({
-          createdBy: ownerId,
-          offerName,
-          paymentMethod,
-          description: offerDescription,
-          discountValue,
-          minPurchaseAmount,
-          validityStart: parsedValidityStart,
-          validityEnd: parsedValidityEnd,
-          applicableTheaters,
-        });
-
-        const createdOffer = await newOffer.save();
-
-        res.status(201).json({
-          message: "Offer created successfully",
-          offer: createdOffer,
-        });
-      } catch (error) {
-        console.error("Error creating offer:", error);
-        res.status(500).json({ message: "Server error. Please try again." });
-      }
-    }
-  );
-
-  updateOfferController = asyncHandler(
-    async (req: CustomRequest, res: Response): Promise<void> => {
-      const { offerId } = req.params;
-      const offerData = req.body;
-
-      if (!offerId) {
-        res.status(400).json({ message: "Offer ID is required" });
-        return;
-      }
-
-      try {
-        const updatedOffer = await TheaterOwnerService.updateOfferService(
-          offerId,
-          offerData
-        );
-        res.status(200).json({
-          message: "Offer updated successfully",
-          offer: updatedOffer,
-        });
-      } catch (error: any) {
-        console.error("Error updating offer:", error);
-        res
-          .status(error.statusCode || 500)
-          .json({ message: error.message || "Internal server error" });
-      }
-    }
-  );
-
-  deleteOfferController = asyncHandler(
-    async (req: CustomRequest, res: Response): Promise<void> => {
-      const { offerId } = req.params;
-
-      try {
-        const deletedOffer = await TheaterOwnerService.deleteOfferHandler(
-          offerId
-        );
-
-        if (!deletedOffer) {
-          res.status(404).json({ message: "Offer not found for deletion" });
-          return;
-        }
-
-        res
-          .status(200)
-          .json({ message: "Offer deleted successfully", deletedOffer });
-      } catch (error: any) {
-        console.error("Error deleting Offer:", error);
-        res
-          .status(500)
-          .json({ message: "Error deleting Offer", error: error.message });
-      }
-    }
-  );
-
-  getOffersController = asyncHandler(
-    async (req: Request, res: Response): Promise<void> => {
-      try {
-        const offers = await Offer.find();
-
-        res.status(200).json(offers);
-      } catch (error) {
-        console.error("Error fetching offers:", error);
-        res.status(500).json({ message: "Server error. Please try again." });
-      }
-    }
-  );
-
   logoutTheaterOwner = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
-      await TheaterOwnerService.logoutTheaterOwnerService();
+      await this.theaterService.logoutTheaterOwnerService();
       res.cookie("theaterOwnerJwt", "", {
         httpOnly: true,
         secure: process.env.NODE_ENV !== "development",
@@ -824,5 +677,3 @@ class TheaterController {
     }
   );
 }
-
-export default new TheaterController();

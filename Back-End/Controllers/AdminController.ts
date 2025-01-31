@@ -1,11 +1,17 @@
 import asyncHandler from "express-async-handler";
+import { inject, injectable } from "inversify";
 import { NextFunction, Request, Response } from "express";
-import adminService from "../Services/AdminService";
 import expressAsyncHandler from "express-async-handler";
 import { Movie } from "../Models/MoviesModel";
 import { Offer } from "../Models/OffersModel";
+import { IAdminService } from "../Interface/IAdmin/IService";
 
-class AdminController {
+@injectable()
+export class AdminController {
+  constructor(
+    @inject("IAdminService") private readonly adminService: IAdminService
+  ) {}
+
   adminLogin = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
       const { email, password } = req.body;
@@ -16,7 +22,7 @@ class AdminController {
       }
 
       try {
-        const adminData = await adminService.adminLoginService(
+        const adminData = await this.adminService.adminLoginService(
           email,
           password,
           res
@@ -30,31 +36,41 @@ class AdminController {
 
   getAllUsers = expressAsyncHandler(
     async (req: Request, res: Response): Promise<void> => {
-      const users = await adminService.getAllUsers();
+      const users = await this.adminService.getAllUsers();
       res.status(200).json(users);
     }
   );
 
   getAllTheaterOwners = expressAsyncHandler(
     async (req: Request, res: Response): Promise<void> => {
-      const theaterOwners = await adminService.getAllTheaterOwners();
+      const theaterOwners = await this.adminService.getAllTheaterOwners();
       res.status(200).json(theaterOwners);
     }
   );
 
-  blockUserController = expressAsyncHandler(
-    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  // AdminController.ts
+  public blockUserController = expressAsyncHandler(
+    async (req: Request, res: Response): Promise<void> => {
       try {
-        const user = await adminService.blockUser(req);
+        const { userId } = req.body;
+
+        if (!userId) {
+          res.status(400).json({ message: "userId is required" });
+          return;
+        }
+
+        const user = await this.adminService.blockUser(userId);
 
         if (user) {
           res.status(200).json({ message: "User blocked successfully", user });
         } else {
           res.status(404).json({ message: "User not found" });
         }
-      } catch (error) {
-        console.error("Error blocking user:", error);
-        res.status(500).json({ message: "Error blocking user" });
+      } catch (error: any) {
+        console.error("Error blocking user:", error.message);
+        res
+          .status(500)
+          .json({ message: error.message || "Internal Server Error" });
       }
     }
   );
@@ -62,7 +78,15 @@ class AdminController {
   unblockUserController = expressAsyncHandler(
     async (req: Request, res: Response, next: NextFunction): Promise<void> => {
       try {
-        const user = await adminService.unblockUser(req);
+
+        const { userId } = req.body;
+
+        if (!userId) {
+          res.status(400).json({ message: "userId is required" });
+          return;
+        }
+
+        const user = await this.adminService.unblockUser(userId);
 
         if (user) {
           res
@@ -81,7 +105,15 @@ class AdminController {
   blockTheaterOwnerController = expressAsyncHandler(
     async (req: Request, res: Response, next: NextFunction): Promise<void> => {
       try {
-        const theaterOwner = await adminService.blockTheaterOwner(req);
+
+        const { theaterOwnerId } = req.body;
+
+        if (!theaterOwnerId) {
+          res.status(400).json({ message: "TheaterOwnerId is required" });
+          return;
+        }
+
+        const theaterOwner = await this.adminService.blockTheaterOwner(theaterOwnerId);
 
         if (theaterOwner) {
           res.status(200).json({
@@ -101,7 +133,15 @@ class AdminController {
   unblockTheaterOwnerController = expressAsyncHandler(
     async (req: Request, res: Response, next: NextFunction): Promise<void> => {
       try {
-        const theaterOwner = await adminService.unblockTheaterOwner(req);
+        
+        const { theaterOwnerId } = req.body;
+
+        if (!theaterOwnerId) {
+          res.status(400).json({ message: "TheaterOwnerId is required" });
+          return;
+        }
+
+        const theaterOwner = await this.adminService.unblockTheaterOwner(theaterOwnerId);
 
         if (theaterOwner) {
           res.status(200).json({
@@ -119,13 +159,13 @@ class AdminController {
   );
 
   getVerificationDetails = expressAsyncHandler(async (req, res) => {
-    const theaters = await adminService.getVerificationDetails();
+    const theaters = await this.adminService.getVerificationDetails();
     res.status(200).json(theaters);
   });
 
   acceptVerification = expressAsyncHandler(async (req, res) => {
     try {
-      await adminService.acceptVerification(req.params.theaterId);
+      await this.adminService.acceptVerification(req.params.theaterId);
       res.json({ message: "Verification accepted" });
     } catch (error) {
       console.error("Error accepting verification:", error);
@@ -138,7 +178,7 @@ class AdminController {
       const { adminId } = req.params;
       const { reason } = req.body;
 
-      await adminService.rejectVerification(adminId, reason);
+      await this.adminService.rejectVerification(adminId, reason);
       res.json({ message: "Verification rejected" });
     } catch (error) {
       console.error("Error rejecting verification:", error);
@@ -149,13 +189,9 @@ class AdminController {
   getAllTickets = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
 
-      console.log("entered Admin getAllTickets function");
-
       try {
-        const tickets = await adminService.getAllTicketsService();
+        const tickets = await this.adminService.getAllTicketsService();
 
-        console.log("admin getAllTickets: ", tickets);
-        
         if (!tickets || tickets.length === 0) {
           res.status(404).json({ message: "No tickets found for this user" });
           return;
@@ -165,7 +201,7 @@ class AdminController {
           tickets.map(async (ticket: { movieId: string, offerId: string }) => {
             const movie = await Movie.findById(ticket.movieId).exec();
             const offer = await Offer.findById(ticket.offerId).exec();
-            
+
             return {
               ticket,
               movieDetails: movie
@@ -207,7 +243,7 @@ class AdminController {
 
   getAdmins = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
-      const admins = await adminService.getAllAdmins();
+      const admins = await this.adminService.getAllAdmins();
 
       res.status(200).json(admins);
     }
@@ -215,10 +251,8 @@ class AdminController {
 
   adminLogout = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
-      const result = adminService.adminLogoutService(res);
+      const result = this.adminService.adminLogoutService(res);
       res.status(200).json(result);
     }
   );
 }
-
-export default new AdminController();

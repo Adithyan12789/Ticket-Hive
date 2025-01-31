@@ -1,14 +1,25 @@
-import MovieRepository from "../Repositories/MovieRepo";
 import { IMovie, Movie } from "../Models/MoviesModel";
-import { Review } from "../Models/ReviewModel";
+import { inject, injectable } from "inversify"
+import { IMovieRepository } from "../Interface/IMovie/IRepository";
+import { IMovieService } from "../Interface/IMovie/IService";
 
-class MovieService {
+@injectable()
+export class MovieService implements IMovieService {
+  constructor(
+    @inject("IMovieRepository") private movieRepository: IMovieRepository
+  ) {}
+
   public async addMovie(movieData: Partial<IMovie>): Promise<IMovie> {
-    return await MovieRepository.addMovieRepo(movieData);
+    return await this.movieRepository.addMovieRepo(movieData);
   }
 
-  public async getAllMovies(): Promise<IMovie[]> {
-    return await MovieRepository.getAllMovies();
+  public async getAllMoviesService(): Promise<IMovie[]> {
+    const result = await this.movieRepository.getAllMovies();
+    return result;
+  }
+  
+  public async findMovieById(movieId: string): Promise<any> {
+    return await this.movieRepository.findMovieById(movieId);
   }
 
   public async updateMovieData(
@@ -19,7 +30,7 @@ class MovieService {
     castImageFiles: { filename: string }[]    
   ) {
     try {
-      const movie = await MovieRepository.findMovieById(id);
+      const movie = await this.movieRepository.findMovieById(id);
       
 
       if (!movie) {
@@ -66,50 +77,7 @@ class MovieService {
   }
 
   public async deleteMovieService(id: string): Promise<IMovie | null> {
-    const deletedMovie = await Movie.findByIdAndDelete(id);
+    const deletedMovie = await this.movieRepository.findByIdAndDelete(id);
     return deletedMovie;
   }
-
-  public async getAllReviewsService() {
-    return await Review.find({}).populate('user', 'name').populate('movie', 'title');
-  }  
-  
-  public async getReviewsByMovieId(movieId: string) {
-    return await Review.find({ movie: movieId }).populate("user", "name email");
-  }
-
-  public async addReview(data: { movieId: string; userId: string; rating: number; review: string }) {
-    const { movieId, userId, rating, review } = data;
-  
-    const newReview = new Review({
-      movie: movieId,
-      user: userId,
-      rating: rating,
-      comment: review,
-    });
-  
-    const savedReview = await newReview.save();
-  
-    await Movie.findByIdAndUpdate(movieId, {
-      $push: { reviews: savedReview._id },
-    });
-  
-    return savedReview;
-  }
-  
-  public async updateAverageRating(movieId: string) {
-    const reviews = await Review.find({ movie: movieId });
-  
-    if (reviews.length > 0) {
-      const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
-      const averageRating = totalRating / reviews.length;
-  
-      await Movie.findByIdAndUpdate(movieId, { averageRating });
-    } else {
-      await Movie.findByIdAndUpdate(movieId, { averageRating: 0 });
-    }
-  }
-  
 }
-
-export default new MovieService();

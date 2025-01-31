@@ -2,11 +2,13 @@ import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import TheaterRepository from "../Repositories/TheaterRepo";
 import EmailUtil from "../Utils/EmailUtil";
-import TheaterOwner from "../Models/TheaterOwnerModel";
+import TheaterOwner, { ITheaterOwner } from "../Models/TheaterOwnerModel";
 import TheaterDetails, { ITheaterDetails } from "../Models/TheaterDetailsModel";
 import { Movie } from "../Models/MoviesModel";
 import mongoose from "mongoose";
 import { IOffer, Offer } from "../Models/OffersModel";
+import { inject, injectable } from "inversify";
+import { ITheaterRepository } from "../Interface/ITheater/IRepository";
 
 export interface OfferData {
   offerName: string;
@@ -23,9 +25,14 @@ export interface CustomRequest extends Request {
   user?: any;
 }
 
-class TheaterOwnerService {
+@injectable()
+export class TheaterService {
+  constructor(
+    @inject("ITheaterRepository") private theaterRepository: ITheaterRepository
+  ) {}
+
   public async authTheaterOwnerService(email: string, password: string) {
-    const theater = await TheaterRepository.findTheaterOwnerByEmail(email);
+    const theater = await this.theaterRepository.findTheaterOwnerByEmail(email);
 
     if (theater && (await theater.matchPassword(password))) {
       if (theater.isBlocked) {
@@ -37,21 +44,45 @@ class TheaterOwnerService {
     throw new Error("Invalid Email or Password");
   }
 
+  public async googleLoginTheaterOwnerService(name: string, email: string): Promise<ITheaterOwner> {
+    let theaterOwner = await this.theaterRepository.findTheaterOwnerByEmail(email);
+
+    if (theaterOwner) {
+      return theaterOwner;
+    } else {
+      theaterOwner = await this.theaterRepository.saveTheaterOwner({
+        name,
+        email,
+        otp: "",
+        phone: "",
+        password: "",
+      });
+
+      if (!theaterOwner) {
+        throw new Error("Failed to create a new theater owner");
+      }
+
+      return theaterOwner;
+    }
+  }
+
   public async registerTheaterOwnerService(
     name: string,
     email: string,
     password: string,
     phone: string
   ) {
-    const existingTheaterOwner = await TheaterOwner.findOne({ email });
+    const existingTheaterOwner =
+      await this.theaterRepository.findTheaterOwnerByEmail(email);
 
     if (existingTheaterOwner) {
       if (!existingTheaterOwner.otpVerified) {
         const otp = crypto.randomInt(100000, 999999).toString();
-        existingTheaterOwner.otp = otp;
-        existingTheaterOwner.otpVerified = false;
-        existingTheaterOwner.otpGeneratedAt = new Date();
-        await existingTheaterOwner.save();
+        const id = existingTheaterOwner._id.toString();
+        await this.theaterRepository.updateOtpDetails(
+          id,
+          otp
+        );
 
         await EmailUtil.sendOtpEmail(existingTheaterOwner.email, otp);
         return existingTheaterOwner;
@@ -61,11 +92,10 @@ class TheaterOwnerService {
     }
 
     const otp = crypto.randomInt(100000, 999999).toString();
-
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    const newTheaterOwner = new TheaterOwner({
+    const newTheaterOwner = await this.theaterRepository.createTheaterOwner({
       name,
       email,
       phone,
@@ -74,14 +104,12 @@ class TheaterOwnerService {
       otpVerified: false,
     });
 
-    await newTheaterOwner.save();
     await EmailUtil.sendOtpEmail(newTheaterOwner.email, otp);
-
     return newTheaterOwner;
   }
 
   public async verifyTheaterOwnerOtpService(email: string, otp: string) {
-    const theater = await TheaterRepository.findTheaterOwnerByEmail(email);
+    const theater = await this.theaterRepository.findTheaterOwnerByEmail(email);
     if (!theater) {
       throw new Error("Theater owner not found");
     }
@@ -104,7 +132,7 @@ class TheaterOwnerService {
   }
 
   public async resendTheaterOwnerOtpService(email: string) {
-    const theater = await TheaterRepository.findTheaterOwnerByEmail(email);
+    const theater = await this.theaterRepository.findTheaterOwnerByEmail(email);
 
     if (!theater) {
       throw new Error("User not found");
@@ -116,7 +144,7 @@ class TheaterOwnerService {
     theater.otpExpires = new Date(Date.now() + 1 * 60 * 1000 + 59 * 1000);
 
     try {
-      await TheaterRepository.saveTheaterOwner(theater);
+      await this.theaterRepository.saveTheaterOwner(theater);
     } catch (err) {
       throw new Error("Failed to save user with new OTP");
     }
@@ -131,7 +159,7 @@ class TheaterOwnerService {
   }
 
   public async forgotTheaterOwnerPasswordService(email: string) {
-    const theater = await TheaterRepository.findTheaterOwnerByEmail(email);
+    const theater = await this.theaterRepository.findTheaterOwnerByEmail(email);
     if (!theater) {
       throw new Error("User not found");
     }
@@ -148,7 +176,7 @@ class TheaterOwnerService {
     resetToken: string,
     password: string
   ) {
-    const theater = await TheaterRepository.findTheaterOwnerByResetToken(
+    const theater = await this.theaterRepository.findTheaterOwnerByResetToken(
       resetToken
     );
     if (!theater) {
@@ -166,12 +194,12 @@ class TheaterOwnerService {
   }
 
   public async getAllTheaterOwners() {
-    let theaterOwners = await TheaterRepository.getAllTheaterOwners();
+    let theaterOwners = await this.theaterRepository.getAllTheaterOwners();
     return theaterOwners;
   }
 
-  public getTheaterOwnerProfile = async (theaterOwnerId: string) => {
-    const theaterOwner = await TheaterRepository.findTheaterOwnerById(
+  public async getTheaterOwnerProfile(theaterOwnerId: string): Promise<ITheaterOwner> {
+    const theaterOwner = await this.theaterRepository.findTheaterOwnerById(
       theaterOwnerId
     );
 
@@ -179,13 +207,7 @@ class TheaterOwnerService {
       throw new Error("theater Owner not found");
     }
 
-    return {
-      _id: theaterOwner._id,
-      name: theaterOwner.name,
-      email: theaterOwner.email,
-      phone: theaterOwner.phone,
-      profileImageName: theaterOwner.profileImageName,
-    };
+    return theaterOwner
   };
 
   public updateTheaterOwnerProfileService = async (
@@ -197,7 +219,7 @@ class TheaterOwnerService {
       password: string;
     },
     profileImage: { filename: string | undefined }
-  ) => {
+  ): Promise<any>  => {
     const theaterOwner = await TheaterRepository.findTheaterOwnerById(
       theaterOwnerId
     );
@@ -234,7 +256,7 @@ class TheaterOwnerService {
     theaterId: string,
     certificatePath: string
   ) => {
-    const theater = await TheaterRepository.findTheaterById(theaterId);
+    const theater = await this.theaterRepository.findTheaterById(theaterId);
     if (!theater) {
       throw new Error("Theater not found");
     }
@@ -248,7 +270,7 @@ class TheaterOwnerService {
     theaterId: string,
     theaterData: Partial<ITheaterDetails>
   ) => {
-    const createdTheater = await TheaterRepository.createTheater(
+    const createdTheater = await this.theaterRepository.createTheater(
       theaterId,
       theaterData
     );
@@ -256,20 +278,21 @@ class TheaterOwnerService {
   };
 
   public async getAllTheaters() {
-    return await TheaterRepository.getAllTheaters();
+    return await this.theaterRepository.getAllTheaters();
   }
+  
 
-  public async getTheaterById(theaterId: string) {
+  public async getTheaterById(theaterId: string): Promise<ITheaterDetails | null> {
     try {
-      const theater = await TheaterRepository.findTheaterById(theaterId);
+      const theater = await this.theaterRepository.findTheaterById(theaterId);
       if (!theater) {
-        return { status: 404, data: { message: "Theater not found" } };
+        throw { status: 404, data: { message: "Theater not found" } };
       }
 
-      return { status: 200, data: theater.toObject() };
+      return theater;
     } catch (error) {
       console.error("Error fetching theater details:", error);
-      return { status: 500, data: { message: "Server error" } };
+      throw { status: 500, data: { message: "Server error" } };
     }
   }
 
@@ -277,14 +300,15 @@ class TheaterOwnerService {
     theaterId: any,
     updateData: Partial<ITheaterDetails>,
     files: any
-  ) {
+  ): Promise<ITheaterDetails | null> {
     try {
-      const theater = await TheaterRepository.findTheaterById(theaterId);
-
+      const theater = await this.theaterRepository.findTheaterById(theaterId);
+  
       if (!theater) {
         throw new Error("Theater not found");
       }
-
+  
+      // Update the theater details as needed
       theater.name = updateData.name || theater.name;
       theater.city = updateData.city || theater.city;
       theater.address = updateData.address || theater.address;
@@ -294,17 +318,18 @@ class TheaterOwnerService {
         : theater.amenities;
       theater.latitude = updateData.latitude || theater.latitude;
       theater.longitude = updateData.longitude || theater.longitude;
-
+  
+      // Handling images and other fields
       if (files && files.length > 0) {
         const newImages = files
           .map((file: { path: string }) => {
             return file.path.split("\\").pop()?.split("/").pop();
           })
           .filter((image: string | undefined) => image !== undefined);
-
+  
         theater.images = newImages;
       }
-
+  
       if (
         Array.isArray(updateData.removeImages) &&
         updateData.removeImages.length > 0
@@ -313,20 +338,19 @@ class TheaterOwnerService {
           (image: string) => !updateData.removeImages!.includes(image)
         );
       }
-
+  
+      // Save the updated theater and return the updated theater
       const updatedTheater = await theater.save();
       return updatedTheater;
     } catch (error) {
       throw error;
     }
-  }
+  }  
 
-  public async deleteTheaterService(
-    id: string
-  ): Promise<ITheaterDetails | null> {
-    const deletedTheater = await TheaterDetails.findByIdAndDelete(id);
+  public async deleteTheaterService(id: string): Promise<boolean> {
+    const deletedTheater = await this.theaterRepository.deleteOneById(id);
     return deletedTheater;
-  }
+  }  
 
   public getTheatersByMovieTitle = async (movieTitle: string) => {
     try {
@@ -407,9 +431,7 @@ class TheaterOwnerService {
     return deletedOffer;
   }
 
-  public logoutTheaterOwnerService() {
+  public async logoutTheaterOwnerService(): Promise<any> {
     return true;
   }
 }
-
-export default new TheaterOwnerService();

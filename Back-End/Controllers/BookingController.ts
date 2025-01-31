@@ -1,16 +1,22 @@
 import asyncHandler from "express-async-handler";
-import { NextFunction, Request, Response } from "express";
-import bookingService, { getMovieTitleById } from "../Services/BookingService";
-import { parse, format } from "date-fns";
-import BookingService from "../Services/BookingService";
+import { Request, Response } from "express";
+import { getMovieTitleById } from "../Services/BookingService";
 import { Movie } from "../Models/MoviesModel";
 import { CustomRequest } from "../Middlewares/AuthMiddleware";
-import WalletService from "../Services/WalletService";
-import WalletRepo from "../Repositories/WalletRepo";
-import { Offer } from "../Models/OffersModel";
-import NotificationService from "../Services/NotificationService";
+import { WalletService } from "../Services/WalletService";
+import { inject, injectable } from "inversify";
+import { IBookingService } from "../Interface/IBooking/IService";
+import { INotificationService } from "../Interface/INotification/IService";
+import { IWalletService } from "../Interface/IWallet/IService";
 
-class BookingController {
+@injectable()
+export class BookingController {
+  constructor(
+    @inject("IBookingService") private readonly bookingService: IBookingService,
+    @inject("INotificationService") private readonly notificationService: INotificationService,
+    @inject("IWalletService") private readonly walletService: IWalletService,
+  ) {}
+
   public createBooking = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
       const {
@@ -55,14 +61,14 @@ class BookingController {
         }
 
         if (paymentMethod === "wallet") {
-          const walletBalance = await WalletService.getWalletBalance(userId);
+          const walletBalance = await this.walletService.getWalletBalance(userId);
           if (walletBalance < totalPrice) {
             res.status(400).json({ message: "Insufficient wallet balance" });
             return;
           }
 
           const description = `Payment for booking "${movieTitle}"`;
-          await WalletService.deductAmountFromWallet(
+          await this.walletService.deductAmountFromWallet(
             userId,
             totalPrice,
             description
@@ -72,10 +78,8 @@ class BookingController {
         const nextDay = new Date(bookingDate);
         nextDay.setDate(nextDay.getDate()+ 1);
         const formattedNextDay = nextDay.toISOString();
-        
-        console.log(formattedNextDay);
 
-        const booking = await BookingService.createBookingService(
+        const booking = await this.bookingService.createBookingService(
           movieId,
           scheduleId,
           theaterId,
@@ -91,7 +95,7 @@ class BookingController {
           formattedNextDay
         );
 
-        await NotificationService.addNotification(
+        await this.notificationService.addNotification(
           userId,
           `Your ticket for the movie "${movieTitle}" has been booked successfully.`
         );
@@ -100,13 +104,13 @@ class BookingController {
           const cashbackPercentage = 10;
           const cashbackAmount = (totalPrice * cashbackPercentage) / 100;
 
-          await WalletService.addCashbackToWallet(
+          await this.walletService.addCashbackToWallet(
             userId,
             cashbackAmount,
             `Cashback for booking "${movieTitle}"`
           );
 
-          await NotificationService.addNotification(
+          await this.notificationService.addNotification(
             userId,
             `You've received a cashback of ₹${cashbackAmount.toFixed(
               2
@@ -131,102 +135,17 @@ class BookingController {
     }
   );
 
-  getUnreadNotifications = asyncHandler(
-    async (req: CustomRequest, res: Response): Promise<void> => {
-      try {
-        const userId = req.user?._id;
-
-        console.log("getUnreadNotifications userId: ", userId);
-
-        if (!userId) {
-          res.status(400).json({ message: "User ID is required" });
-          return;
-        }
-
-        const notifications = await NotificationService.getUnreadNotifications(
-          userId
-        );
-
-        console.log("notifications: ", notifications);
-        
-        res.json(notifications);
-      } catch (error) {
-        res.status(500).json({ message: "Server error" });
-      }
-    }
-  );
-
-  markNotificationAsRead = asyncHandler(
-    async (req: CustomRequest, res: Response): Promise<void> => {
-
-      console.log("enetered mark");
-      
-      const { id: notificationId } = req.params;
-
-      console.log("req.params: ", req.params);
-
-      console.log("notificationId: ", notificationId);
-      
-
-      const userId = req.user?._id;
-
-      try {
-        if (!userId) {
-          res.status(400).json({ message: "User ID is required" });
-          return;
-        }
-
-        const message = await NotificationService.markNotificationAsRead(
-          userId,
-          notificationId
-        );
-
-        res.json({ message });
-      } catch (error: any) {
-        res
-          .status(error.statusCode || 500)
-          .json({ message: error.message || "Server error" });
-      }
-    }
-  );
-
-  clearNotifications = asyncHandler(
-    async (req: CustomRequest, res: Response): Promise<void> => {
-
-      const userId = req.user?._id;
-
-      console.log("userId: ", userId);
-
-      if (!userId) {
-        res.status(400).json({ message: "User ID is required" });
-        return;
-      }
-
-      try {
-        await NotificationService.deleteAllNotifications(userId);
-        res.json({ message: "All notifications cleared" });
-      } catch (error: any) {
-        res.status(500).json({ message: error.message || "Server error" });
-      }
-    }
-  );
-
   getAllTickets = asyncHandler(
     async (req: CustomRequest, res: Response): Promise<void> => {
-
-      console.log("entered getAllTickets function");
-      
       try {
         const { userId } = req.params;
-
-        console.log("hmghnjhgn userId: ", userId);
         
         if (!userId) {
           res.status(401).json({ message: "Unauthorized access" });
           return;
         }
   
-        const tickets = await BookingService.getAllTicketsService(userId);
+        const tickets = await this.bookingService.getAllTicketsService(userId);
 
         if (!tickets || tickets.length === 0) {
           res.status(404).json({ message: "No tickets found for this user" });
@@ -278,7 +197,7 @@ class BookingController {
       }
 
       try {
-        const cancellationResult = await BookingService.cancelTicketService(
+        const cancellationResult = await this.bookingService.cancelTicketService(
           bookingId,
           userId
         );
@@ -300,17 +219,10 @@ class BookingController {
 
   getBookingDetails = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
-
-      console.log("enter getBookingDetails admin");
-      
       try {
         const { bookingId } = req.params;
 
-        console.log("admin bookingId: ", bookingId);
-
-        const booking = await bookingService.getBookingDetails(bookingId);
-
-        console.log("getBookingDetails coontroller booking: ", booking);
+        const booking = await this.bookingService.getBookingDetails(bookingId);
 
         if (booking) {
           res.status(200).json(booking);
@@ -326,15 +238,10 @@ class BookingController {
   
   getTicketDetails = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
-
-      console.log("enter getTicketDetails admin");
-      
       try {
         const { ticketId } = req.params;
 
-        console.log("admin ticketId: ", ticketId);
-
-        const ticket = await bookingService.getTicketDetails(ticketId);
+        const ticket = await this.bookingService.getTicketDetails(ticketId);
 
         if (ticket) {
           res.status(200).json(ticket);
@@ -366,7 +273,7 @@ class BookingController {
           return;
         }
 
-        const updatedBooking = await BookingService.updateBookingStatusService(
+        const updatedBooking = await this.bookingService.updateBookingStatusService(
           bookingId,
           status
         );
@@ -395,7 +302,7 @@ class BookingController {
         const { ticketId } = req.params;
         const updatedData = req.body;
 
-        const updatedTicket = await bookingService.updateTicket(
+        const updatedTicket = await this.bookingService.updateTicket(
           ticketId,
           updatedData
         );
@@ -418,7 +325,7 @@ class BookingController {
     async (req: Request, res: Response): Promise<void> => {
       try {
         const { userId } = req.params;
-        const bookings = await bookingService.getUserBookings(userId);
+        const bookings = await this.bookingService.getUserBookings(userId);
 
         res.status(200).json(bookings);
       } catch (error: any) {
@@ -432,7 +339,7 @@ class BookingController {
     async (req: Request, res: Response): Promise<void> => {
       try {
         const { theaterId } = req.params;
-        const bookings = await bookingService.getTheaterBookings(theaterId);
+        const bookings = await this.bookingService.getTheaterBookings(theaterId);
 
         res.status(200).json(bookings);
       } catch (error: any) {
@@ -442,5 +349,3 @@ class BookingController {
     }
   );
 }
-
-export default new BookingController();

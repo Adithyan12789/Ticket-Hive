@@ -2,13 +2,22 @@ import { Movie } from "../Models/MoviesModel";
 import { IOffer, Offer } from "../Models/OffersModel";
 import TheaterDetails, { ITheaterDetails } from "../Models/TheaterDetailsModel";
 import TheaterOwner, { ITheaterOwner } from "../Models/TheaterOwnerModel";
+import { injectable } from "inversify";
+import { BaseRepository } from "./Base/BaseRepository";
+import { ITheaterRepository } from "../Interface/ITheater/IRepository";
 
-class TheaterRepository {
+    @injectable()
+    export class TheaterRepository extends BaseRepository<ITheaterOwner> implements ITheaterRepository {
+      
+    private readonly theaterOwnerModel = TheaterOwner;
 
-    public async getAllTheaterOwners(){
+    constructor() {
+        super(TheaterOwner);
+    }
+
+    public async getAllTheaterOwners(): Promise<void>{
         try {
-            const theaterOwner = await TheaterOwner.find({});  
-            return theaterOwner;
+            await TheaterOwner.find({});  
         } catch (error) {
             throw new Error("Error fetching theater owners");
         }
@@ -19,17 +28,17 @@ class TheaterRepository {
     }
     
     public async findTheaterById(theaterId: string): Promise<ITheaterDetails | null> {
-        return await TheaterDetails.findById(theaterId);
-    }
+      return await TheaterDetails.findById(theaterId);
+    }    
 
     public async findTheaterOwnerByEmail(email: string): Promise<ITheaterOwner | null> {
         return await TheaterOwner.findOne({ email });
     }
 
-    public async saveTheaterOwner(theaterOwnerData: ITheaterOwner): Promise<ITheaterOwner> {
-        const theater = new TheaterOwner(theaterOwnerData);
-        return await theater.save();
-    }
+    public async saveTheaterOwner(theaterOwnerData: Partial<ITheaterOwner>): Promise<ITheaterOwner> {
+        const theaterOwner = new TheaterOwner(theaterOwnerData);
+        return await theaterOwner.save();
+      }
 
     public async findTheaterOwnerByResetToken(resetToken: string): Promise<ITheaterOwner | null> {
         return await TheaterOwner.findOne({
@@ -42,6 +51,22 @@ class TheaterRepository {
         const theater = new TheaterDetails({ ...theaterData, theaterId });
         return await theater.save();
     };
+
+    public async updateOtpDetails(
+        theaterOwnerId: string,
+        otp: string
+      ): Promise<void> {
+        await TheaterOwner.findByIdAndUpdate(theaterOwnerId, {
+          otp,
+          otpVerified: false,
+          otpGeneratedAt: new Date(),
+        });
+      }
+    
+      public async createTheaterOwner(theaterOwnerDetails: Partial<ITheaterOwner>): Promise<ITheaterOwner> {
+        const theaterOwner = new TheaterOwner(theaterOwnerDetails);
+        return theaterOwner.save();
+      }
 
     public async getAllTheaters(): Promise<ITheaterDetails[]> {
         try {
@@ -86,8 +111,13 @@ class TheaterRepository {
           console.error("Error updating the offer:", error);
           throw { statusCode: 500, message: "Internal server error" };
         }
-      }      
-    
+      }   
+      
+      public async deleteOneById(id: string): Promise<boolean> {
+        const result = await TheaterDetails.findByIdAndDelete(id);
+        return result !== null;
+      }
+      
 }
 
 export default new TheaterRepository();

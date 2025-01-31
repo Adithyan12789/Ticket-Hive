@@ -6,6 +6,7 @@ import AdminRoutes from "./Routes/AdminRoutes";
 import TheaterRoutes from "./Routes/TheaterRoutes";
 import express from "express";
 import cors from "cors"; 
+import morgan from "morgan"; 
 import { app, server, io } from "./Config/Socket";
 
 app.set("io", io);
@@ -36,6 +37,7 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(morgan('dev'));
 
 // Configure cookie settings for cross-origin
 app.use((req, res, next) => {

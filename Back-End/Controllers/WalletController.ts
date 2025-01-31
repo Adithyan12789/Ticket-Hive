@@ -1,30 +1,26 @@
 import asyncHandler from "express-async-handler";
 import { Request, Response } from "express";
-import WalletService from "../Services/WalletService";
+import { inject, injectable } from "inversify";
+import { IWalletService } from "../Interface/IWallet/IService";
 
-class WalletController {
+@injectable()
+export class WalletController {
+  constructor(
+    @inject("IWalletService") private readonly walletService: IWalletService
+  ) {}
+
   addMoneyToWallet = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
-
       const { userId, amount, description } = req.body;
-      
 
       if (!userId || !amount) {
-        console.error("Missing required fields: userId or amount");
         res.status(400).json({ message: "User ID and amount are required" });
         return;
       }
 
       try {
-        await WalletService.addMoneyToWallet(
-          userId,
-          amount,
-          description
-        );
-
-        res.status(200).json({
-          message: "Money added to wallet successfully",
-        });
+        await this.walletService.addMoneyToWallet(userId, amount, description);
+        res.status(200).json({ message: "Money added to wallet successfully" });
       } catch (err: unknown) {
         console.error("Error adding money to wallet:", err);
         res
@@ -36,7 +32,6 @@ class WalletController {
 
   getTransactionHistory = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
-      
       const { userId } = req.params;
 
       if (!userId) {
@@ -45,8 +40,8 @@ class WalletController {
       }
 
       try {
-        const transactions = await WalletService.getTransactionHistory(
-          userId as string
+        const transactions = await this.walletService.getTransactionHistory(
+          userId
         );
         res.status(200).json({ transactions });
       } catch (err: unknown) {
@@ -60,5 +55,3 @@ class WalletController {
     }
   );
 }
-
-export default new WalletController();
