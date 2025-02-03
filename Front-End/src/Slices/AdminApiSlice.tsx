@@ -30,7 +30,7 @@ export const adminApiSlice = apiSlice.injectEndpoints({
 
     adminBlockUser: builder.mutation({
       query: (body) => ({
-        url: `${ADMIN_URL}/block-user`,
+        url: `${ADMIN_URL}/blockUser`,
         method: 'PUT',
         body,
       }),
