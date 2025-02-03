@@ -68,25 +68,25 @@ container.bind<IAdminRepository>("IAdminRepository").to(AdminRepository).inSingl
 
 // Theater Binding
 
-container.bind<TheaterController>("TheaterController").to(TheaterController).inSingletonScope();
-container.bind<ITheaterService>("ITheaterService").to(TheaterService).inSingletonScope();
-container.bind<ITheaterRepository>("ITheaterRepository").to(TheaterRepository).inSingletonScope();
+container.bind<TheaterController>("TheaterController").to(TheaterController)
+container.bind<ITheaterService>("ITheaterService").to(TheaterService)
+container.bind<ITheaterRepository>("ITheaterRepository").to(TheaterRepository)
 
 
 
 // User Bindings
 
-container.bind<UserController>("UserController").to(UserController).inSingletonScope();
-container.bind<IUserService>("IUserService").to(UserService).inSingletonScope();
-container.bind<IUserRepository>("IUserRepository").to(UserRepository).inSingletonScope();
+container.bind<UserController>("UserController").to(UserController)
+container.bind<IUserService>("IUserService").to(UserService)
+container.bind<IUserRepository>("IUserRepository").to(UserRepository)
 
 
 
 // Booking Bindings
 
-container.bind<BookingController>("BookingController").to(BookingController).inSingletonScope();
-container.bind<IBookingService>("IBookingService").to(BookingService).inSingletonScope();
-container.bind<IBookingRepository>("IBookingRepository").to(BookingRepository).inSingletonScope();
+container.bind<BookingController>("BookingController").to(BookingController)
+container.bind<IBookingService>("IBookingService").to(BookingService)
+container.bind<IBookingRepository>("IBookingRepository").to(BookingRepository)
 
 
 

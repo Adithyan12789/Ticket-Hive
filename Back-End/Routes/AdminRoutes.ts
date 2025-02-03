@@ -7,7 +7,7 @@ import { BookingController } from '../Controllers/BookingController';
 import { ChatController } from '../Controllers/ChatController';
 import { TheaterController } from '../Controllers/TheaterController';
 import { AdminController } from '../Controllers/AdminController';
-import { container } from '../Config/Container';
+import { container } from '../Config/container';
 
 const router = express.Router();
 

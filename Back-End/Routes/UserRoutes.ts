@@ -8,9 +8,9 @@ import { TheaterController } from '../Controllers/TheaterController';
 import { ScreenController } from '../Controllers/ScreenController';
 import { BookingController } from '../Controllers/BookingController';
 import { WalletController } from '../Controllers/WalletController';
-import { container } from '../Config/Container';
 import { NotificationController } from '../Controllers/NotificationController';
 import { ReviewController } from '../Controllers/ReviewController';
+import { container } from '../Config/container';
 
 const router = express.Router();
 
