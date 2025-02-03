@@ -61,6 +61,8 @@ const UserTable: React.FC<UsersTableProps> = ({ users, refetchData }) => {
   const handleBlock = async () => {
     if (!selectedUser) return;
     try {
+      console.log("User ID: ", selectedUser);
+      
       await blockUser({ userId: selectedUser._id }).unwrap();
       toast.success("User blocked successfully");
       refetchData();
@@ -165,7 +167,7 @@ const UserTable: React.FC<UsersTableProps> = ({ users, refetchData }) => {
                     )}
                   </tbody>
                 </Table>
-                <div className="d-flex justify-content-center mt-3">
+                <div className="mt-3 d-flex justify-content-center">
                   <Pagination>
                     {Array.from({
                       length: Math.ceil(filteredUsers.length / usersPerPage),
