@@ -20,7 +20,7 @@ const movieControllerr = container.get<MovieController>("MovieController");
 router.post('/admin-login', adminController.adminLogin);
 router.get('/get-user', AdminAuthMiddleware.protect, adminController.getAllUsers);
 router.get('/get-theaterOwners', AdminAuthMiddleware.protect, adminController.getAllTheaterOwners);
-router.post('/block-user', AdminAuthMiddleware.protect, adminController.blockUserController);
+router.post('/block-user', adminController.blockUserController);
 router.post('/unblock-user', AdminAuthMiddleware.protect, adminController.unblockUserController);
 router.post('/block-theaterOwner', AdminAuthMiddleware.protect, adminController.blockTheaterOwnerController);
 router.post('/unblock-theaterOwner', AdminAuthMiddleware.protect, adminController.unblockTheaterOwnerController);
