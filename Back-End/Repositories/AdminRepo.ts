@@ -74,7 +74,7 @@ export class AdminRepository extends BaseRepository<IAdmin> implements IAdminRep
     }
   }
 
-  public async updateUser(userId: string, userData: Partial<IUser>): Promise<IUser | null> {
+  public async updateUser(userId: string, userData: Partial<any>): Promise<any | null> {
     try {
       if (!mongoose.Types.ObjectId.isValid(userId)) {
         throw new Error("Invalid userId format");
@@ -91,7 +91,7 @@ export class AdminRepository extends BaseRepository<IAdmin> implements IAdminRep
     }
   }
 
-  public async updatedTheaterOwner(theaterOwnerId: string, data: Partial<ITheaterOwner>): Promise<ITheaterOwner | null> {
+  public async updatedTheaterOwner(theaterOwnerId: string, data: Partial<any>): Promise<any | null> {
     try {
       if (!mongoose.Types.ObjectId.isValid(theaterOwnerId)) {
         throw new Error("Invalid theaterOwnerId format");

@@ -8,10 +8,10 @@ export interface IAdminService {
   adminLoginService(email: string, password: string, res: any): Promise<AdminLogin>;
   getAllUsers(): Promise<IUser[]>;
   getAllTheaterOwners(): Promise<ITheaterOwner[]>;
-  blockUser(userId: string): Promise<IUser | null>;
-  unblockUser(userId: string): Promise<IUser | null>;
-  blockTheaterOwner(theaterOwnerId: string): Promise<ITheaterOwner | null>;
-  unblockTheaterOwner(theaterOwnerId: string): Promise<ITheaterOwner | null>;
+  blockUser(userId: string): Promise<any | null>;
+  unblockUser(userId: string): Promise<any | null>;
+  blockTheaterOwner(theaterOwnerId: string): Promise<any | null>;
+  unblockTheaterOwner(theaterOwnerId: string): Promise<any | null>;
   getVerificationDetails(): Promise<void>;
   acceptVerification(theaterId: string): Promise<{ message: string }>;
   rejectVerification(theaterId: string, reason: string): Promise<{ message: string }>;

@@ -68,17 +68,17 @@ container.bind<IAdminRepository>("IAdminRepository").to(AdminRepository).inSingl
 
 // Theater Binding
 
-container.bind<TheaterController>("TheaterController").to(TheaterController);
-container.bind<ITheaterService>("ITheaterService").to(TheaterService);
-container.bind<ITheaterRepository>("ITheaterRepository").to(TheaterRepository);
+container.bind<TheaterController>("TheaterController").to(TheaterController).inSingletonScope();
+container.bind<ITheaterService>("ITheaterService").to(TheaterService).inSingletonScope();
+container.bind<ITheaterRepository>("ITheaterRepository").to(TheaterRepository).inSingletonScope();
 
 
 
 // User Bindings
 
-container.bind<UserController>("UserController").to(UserController);
-container.bind<IUserService>("IUserService").to(UserService);
-container.bind<IUserRepository>("IUserRepository").to(UserRepository);
+container.bind<UserController>("UserController").to(UserController).inSingletonScope();
+container.bind<IUserService>("IUserService").to(UserService).inSingletonScope();
+container.bind<IUserRepository>("IUserRepository").to(UserRepository).inSingletonScope();
 
 
 
@@ -93,18 +93,18 @@ container.bind<IBookingRepository>("IBookingRepository").to(BookingRepository).i
 
 // Booking Bindings
 
-container.bind<NotificationController>("NotificationController").to(NotificationController);
-container.bind<INotificationService>("INotificationService").to(NotificationService);
-container.bind<INotificationRepository>("INotificationRepository").to(NotificationRepository);
+container.bind<NotificationController>("NotificationController").to(NotificationController).inSingletonScope();
+container.bind<INotificationService>("INotificationService").to(NotificationService).inSingletonScope();
+container.bind<INotificationRepository>("INotificationRepository").to(NotificationRepository).inSingletonScope();
 
 
 
 
 // ChatRoom Bindings
 
-container.bind<ChatController>("ChatController").to(ChatController);
-container.bind<IChatService>("IChatService").to(ChatService);
-container.bind<IChatRepository>("IChatRepository").to(ChatRepository);
+container.bind<ChatController>("ChatController").to(ChatController).inSingletonScope();
+container.bind<IChatService>("IChatService").to(ChatService).inSingletonScope();
+container.bind<IChatRepository>("IChatRepository").to(ChatRepository).inSingletonScope();
 
 
 
@@ -120,35 +120,35 @@ container.bind<IMovieRepository>("IMovieRepository").to(MovieRepository).inSingl
 
 // Review Bindings
 
-container.bind<ReviewController>("ReviewController").to(ReviewController);
-container.bind<IReviewService>("IReviewService").to(ReviewService);
-container.bind<IReviewRepository>("IReviewRepository").to(ReviewRepository);
+container.bind<ReviewController>("ReviewController").to(ReviewController).inSingletonScope();
+container.bind<IReviewService>("IReviewService").to(ReviewService).inSingletonScope();
+container.bind<IReviewRepository>("IReviewRepository").to(ReviewRepository).inSingletonScope();
 
 
 
 
 // Offer Bindings
 
-container.bind<OfferController>("OfferController").to(OfferController);
-container.bind<IOfferService>("IOfferService").to(OfferService);
-container.bind<IOfferRepository>("IOfferRepository").to(OfferRepository);
+container.bind<OfferController>("OfferController").to(OfferController).inSingletonScope();
+container.bind<IOfferService>("IOfferService").to(OfferService).inSingletonScope();
+container.bind<IOfferRepository>("IOfferRepository").to(OfferRepository).inSingletonScope();
 
 
 
 
 // Wallet Bindings
 
-container.bind<WalletController>("WalletController").to(WalletController);
-container.bind<IWalletService>("IWalletService").to(WalletService);
-container.bind<IWalletRepository>("IWalletRepository").to(WalletRepository);
+container.bind<WalletController>("WalletController").to(WalletController).inSingletonScope();
+container.bind<IWalletService>("IWalletService").to(WalletService).inSingletonScope();
+container.bind<IWalletRepository>("IWalletRepository").to(WalletRepository).inSingletonScope();
 
 
 
 
 // Screen Bindings
 
-container.bind<ScreenController>("ScreenController").to(ScreenController);
-container.bind<IScreenService>("IScreenService").to(ScreenService);
-container.bind<IScreenRepository>("IScreenRepository").to(ScreenRepository);
+container.bind<ScreenController>("ScreenController").to(ScreenController).inSingletonScope();
+container.bind<IScreenService>("IScreenService").to(ScreenService).inSingletonScope();
+container.bind<IScreenRepository>("IScreenRepository").to(ScreenRepository).inSingletonScope();
 
 export { container };

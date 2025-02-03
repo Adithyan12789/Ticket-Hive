@@ -84,7 +84,7 @@ export class AdminService {
   }
 
   // AdminService.ts
-  public async blockUser(userId: string): Promise<IUser | null> {
+  public async blockUser(userId: string): Promise<any | null> {
     if (!mongoose.Types.ObjectId.isValid(userId)) {
       throw new Error("Invalid userId format");
     }

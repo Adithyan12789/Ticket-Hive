@@ -8,8 +8,8 @@ export interface IAdminRepository {
   getAdminCredentials(): Promise<{ adminEmail: string; adminPassword: string }>;
   getAllUsers(): Promise<IUser[]>;
   getAllTheaterOwners(): Promise<ITheaterOwner[]>;
-  updateUser(userId: string, userData: Partial<IUser>): Promise<IUser | null>;
-  updatedTheaterOwner(theaterOwnerId: string, data: Partial<ITheaterOwner>): Promise<ITheaterOwner | null>;
+  updateUser(userId: string, userData: Partial<any>): Promise<any | null>;
+  updatedTheaterOwner(theaterOwnerId: string, data: Partial<any>): Promise<any | null>;
   getPendingTheaterOwnerVerifications(): Promise<void>;
   findTheaterById(id: string): Promise<any>;
   saveTheater(theater: string): Promise<any>;
