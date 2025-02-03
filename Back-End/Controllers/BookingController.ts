@@ -8,6 +8,7 @@ import { inject, injectable } from "inversify";
 import { IBookingService } from "../Interface/IBooking/IService";
 import { INotificationService } from "../Interface/INotification/IService";
 import { IWalletService } from "../Interface/IWallet/IService";
+
 @injectable()
 export class BookingController {
   constructor(
