@@ -17,7 +17,7 @@ Database.connectDB();
 const port = process.env.PORT || 5000;
 
 const allowedOrigins = [
-  'https://ticket-hive-adithyan-narayanans-projects.vercel.app/',
+  'https://ticket-hive-r7j9m6j0c-adithyan-narayanans-projects.vercel.app/',
   'https://www.tickethive.fun',
   'https://ticket-hive-dusky.vercel.app/',
   'http://localhost:3000'
