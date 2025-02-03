@@ -31,7 +31,7 @@ export const adminApiSlice = apiSlice.injectEndpoints({
     adminBlockUser: builder.mutation({
       query: (body) => ({
         url: `${ADMIN_URL}/block-user`,
-        method: 'PATCH',
+        method: 'PUT',
         body,
       }),
     }),
@@ -39,7 +39,7 @@ export const adminApiSlice = apiSlice.injectEndpoints({
     adminUnblockUser: builder.mutation({
       query: (body) => ({
         url: `${ADMIN_URL}/unblock-user`,
-        method: 'PATCH',
+        method: 'PUT',
         body,
       }),
     }),
@@ -47,7 +47,7 @@ export const adminApiSlice = apiSlice.injectEndpoints({
     adminBlockTheaterOwner: builder.mutation({
       query: (body) => ({
         url: `${ADMIN_URL}/block-theaterOwner`,
-        method: 'PATCH',
+        method: 'PUT',
         body,
       }),
     }),
@@ -55,7 +55,7 @@ export const adminApiSlice = apiSlice.injectEndpoints({
     adminUnblockTheaterOwner: builder.mutation({
       query: (body) => ({
         url: `${ADMIN_URL}/unblock-theaterOwner`,
-        method: 'PATCH',
+        method: 'PUT',
         body,
       }),
     }),
