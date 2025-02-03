@@ -6,7 +6,7 @@ import MulterConfig from '../Config/Multer/TheaterMulter';
 import { MovieController } from '../Controllers/MovieController';
 import { ChatController } from '../Controllers/ChatController';
 import { AdminController } from '../Controllers/AdminController';
-import { container } from '../Config/container';
+import { container } from '../Config/Container';
 import { OfferController } from '../Controllers/OffersController';
 import { BookingController } from '../Controllers/BookingController';
 

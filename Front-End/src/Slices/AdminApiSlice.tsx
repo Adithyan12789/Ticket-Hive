@@ -30,7 +30,7 @@ export const adminApiSlice = apiSlice.injectEndpoints({
 
     adminBlockUser: builder.mutation({
       query: (body) => ({
-        url: `${ADMIN_URL}/blockUser`,
+        url: `${ADMIN_URL}/block-user`,
         method: 'PATCH',
         body,
       }),
@@ -39,11 +39,10 @@ export const adminApiSlice = apiSlice.injectEndpoints({
     adminUnblockUser: builder.mutation({
       query: (body) => ({
         url: `${ADMIN_URL}/unblock-user`,
-        method: "PATCH",
+        method: 'PATCH',
         body,
       }),
     }),
-    
 
     adminBlockTheaterOwner: builder.mutation({
       query: (body) => ({

@@ -54,34 +54,34 @@ container.bind("UserController").to(UserController_1.UserController);
 container.bind("IUserService").to(UserService_1.UserService);
 container.bind("IUserRepository").to(UserRepo_1.UserRepository);
 // Booking Bindings
-container.bind("BookingController").to(BookingController_1.BookingController);
-container.bind("IBookingService").to(BookingService_1.BookingService);
-container.bind("IBookingRepository").to(BookingRepo_1.BookingRepository);
+container.bind("BookingController").to(BookingController_1.BookingController).inSingletonScope();
+container.bind("IBookingService").to(BookingService_1.BookingService).inSingletonScope();
+container.bind("IBookingRepository").to(BookingRepo_1.BookingRepository).inSingletonScope();
 // Booking Bindings
-container.bind("NotificationController").to(NotificationController_1.NotificationController).inSingletonScope();
-container.bind("INotificationService").to(NotificationService_1.NotificationService).inSingletonScope();
-container.bind("INotificationRepository").to(NotificationRepo_1.NotificationRepository).inSingletonScope();
+container.bind("NotificationController").to(NotificationController_1.NotificationController);
+container.bind("INotificationService").to(NotificationService_1.NotificationService);
+container.bind("INotificationRepository").to(NotificationRepo_1.NotificationRepository);
 // ChatRoom Bindings
-container.bind("ChatController").to(ChatController_1.ChatController).inSingletonScope();
-container.bind("IChatService").to(ChatService_1.ChatService).inSingletonScope();
-container.bind("IChatRepository").to(ChatRepository_1.ChatRepository).inSingletonScope();
+container.bind("ChatController").to(ChatController_1.ChatController);
+container.bind("IChatService").to(ChatService_1.ChatService);
+container.bind("IChatRepository").to(ChatRepository_1.ChatRepository);
 // Movie Bindings
 container.bind("MovieController").to(MovieController_1.MovieController).inSingletonScope();
 container.bind("IMovieService").to(MovieService_1.MovieService).inSingletonScope();
 container.bind("IMovieRepository").to(MovieRepo_1.default).inSingletonScope();
 // Review Bindings
-container.bind("ReviewController").to(ReviewController_1.ReviewController).inSingletonScope();
-container.bind("IReviewService").to(ReviewService_1.ReviewService).inSingletonScope();
-container.bind("IReviewRepository").to(ReviewRepo_1.ReviewRepository).inSingletonScope();
+container.bind("ReviewController").to(ReviewController_1.ReviewController);
+container.bind("IReviewService").to(ReviewService_1.ReviewService);
+container.bind("IReviewRepository").to(ReviewRepo_1.ReviewRepository);
 // Offer Bindings
-container.bind("OfferController").to(OffersController_1.OfferController).inSingletonScope();
-container.bind("IOfferService").to(OffersService_1.OfferService).inSingletonScope();
-container.bind("IOfferRepository").to(OffersRepo_1.OfferRepository).inSingletonScope();
+container.bind("OfferController").to(OffersController_1.OfferController);
+container.bind("IOfferService").to(OffersService_1.OfferService);
+container.bind("IOfferRepository").to(OffersRepo_1.OfferRepository);
 // Wallet Bindings
-container.bind("WalletController").to(WalletController_1.WalletController).inSingletonScope();
-container.bind("IWalletService").to(WalletService_1.WalletService).inSingletonScope();
-container.bind("IWalletRepository").to(WalletRepo_1.WalletRepository).inSingletonScope();
+container.bind("WalletController").to(WalletController_1.WalletController);
+container.bind("IWalletService").to(WalletService_1.WalletService);
+container.bind("IWalletRepository").to(WalletRepo_1.WalletRepository);
 // Screen Bindings
-container.bind("ScreenController").to(ScreenController_1.ScreenController).inSingletonScope();
-container.bind("IScreenService").to(ScreenService_1.ScreenService).inSingletonScope();
-container.bind("IScreenRepository").to(ScreenRepo_1.default).inSingletonScope();
+container.bind("ScreenController").to(ScreenController_1.ScreenController);
+container.bind("IScreenService").to(ScreenService_1.ScreenService);
+container.bind("IScreenRepository").to(ScreenRepo_1.default);

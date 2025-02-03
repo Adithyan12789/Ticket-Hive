@@ -7,7 +7,7 @@ import { BookingController } from '../Controllers/BookingController';
 import { ChatController } from '../Controllers/ChatController';
 import { TheaterController } from '../Controllers/TheaterController';
 import { AdminController } from '../Controllers/AdminController';
-import { container } from '../Config/container';
+import { container } from '../Config/Container';
 
 const router = express.Router();
 
@@ -20,7 +20,7 @@ const movieControllerr = container.get<MovieController>("MovieController");
 router.post('/admin-login', adminController.adminLogin);
 router.get('/get-user', AdminAuthMiddleware.protect, adminController.getAllUsers);
 router.get('/get-theaterOwners', AdminAuthMiddleware.protect, adminController.getAllTheaterOwners);
-router.patch('/blockUser', adminController.blockUserController);
+router.patch('/block-user', AdminAuthMiddleware.protect, adminController.blockUserController);
 router.patch('/unblock-user', AdminAuthMiddleware.protect, adminController.unblockUserController);
 router.patch('/block-theaterOwner', AdminAuthMiddleware.protect, adminController.blockTheaterOwnerController);
 router.patch('/unblock-theaterOwner', AdminAuthMiddleware.protect, adminController.unblockTheaterOwnerController);
