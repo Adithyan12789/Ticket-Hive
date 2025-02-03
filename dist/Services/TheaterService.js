@@ -1,32 +1,33 @@
 "use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.TheaterService = void 0;
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const crypto_1 = __importDefault(require("crypto"));
 const TheaterRepo_1 = __importDefault(require("../Repositories/TheaterRepo"));
 const EmailUtil_1 = __importDefault(require("../Utils/EmailUtil"));
-const TheaterOwnerModel_1 = __importDefault(require("../Models/TheaterOwnerModel"));
 const TheaterDetailsModel_1 = __importDefault(require("../Models/TheaterDetailsModel"));
 const MoviesModel_1 = require("../Models/MoviesModel");
 const mongoose_1 = __importDefault(require("mongoose"));
 const OffersModel_1 = require("../Models/OffersModel");
-class TheaterOwnerService {
-    constructor() {
-        this.getTheaterOwnerProfile = async (theaterOwnerId) => {
-            const theaterOwner = await TheaterRepo_1.default.findTheaterOwnerById(theaterOwnerId);
-            if (!theaterOwner) {
-                throw new Error("theater Owner not found");
-            }
-            return {
-                _id: theaterOwner._id,
-                name: theaterOwner.name,
-                email: theaterOwner.email,
-                phone: theaterOwner.phone,
-                profileImageName: theaterOwner.profileImageName,
-            };
-        };
+const inversify_1 = require("inversify");
+let TheaterService = class TheaterService {
+    constructor(theaterRepository) {
+        this.theaterRepository = theaterRepository;
         this.updateTheaterOwnerProfileService = async (theaterOwnerId, updateData, profileImage) => {
             const theaterOwner = await TheaterRepo_1.default.findTheaterOwnerById(theaterOwnerId);
             if (!theaterOwner) {
@@ -51,7 +52,7 @@ class TheaterOwnerService {
             return await TheaterRepo_1.default.saveTheaterOwner(theaterOwner);
         };
         this.uploadCertificates = async (theaterId, certificatePath) => {
-            const theater = await TheaterRepo_1.default.findTheaterById(theaterId);
+            const theater = await this.theaterRepository.findTheaterById(theaterId);
             if (!theater) {
                 throw new Error("Theater not found");
             }
@@ -60,7 +61,7 @@ class TheaterOwnerService {
             return await theater.save();
         };
         this.addTheaterService = async (theaterId, theaterData) => {
-            const createdTheater = await TheaterRepo_1.default.createTheater(theaterId, theaterData);
+            const createdTheater = await this.theaterRepository.createTheater(theaterId, theaterData);
             return { status: 201, data: createdTheater };
         };
         this.getTheatersByMovieTitle = async (movieTitle) => {
@@ -112,7 +113,7 @@ class TheaterOwnerService {
         };
     }
     async authTheaterOwnerService(email, password) {
-        const theater = await TheaterRepo_1.default.findTheaterOwnerByEmail(email);
+        const theater = await this.theaterRepository.findTheaterOwnerByEmail(email);
         if (theater && (await theater.matchPassword(password))) {
             if (theater.isBlocked) {
                 throw new Error("Your account has been blocked");
@@ -121,15 +122,32 @@ class TheaterOwnerService {
         }
         throw new Error("Invalid Email or Password");
     }
+    async googleLoginTheaterOwnerService(name, email) {
+        let theaterOwner = await this.theaterRepository.findTheaterOwnerByEmail(email);
+        if (theaterOwner) {
+            return theaterOwner;
+        }
+        else {
+            theaterOwner = await this.theaterRepository.saveTheaterOwner({
+                name,
+                email,
+                otp: "",
+                phone: "",
+                password: "",
+            });
+            if (!theaterOwner) {
+                throw new Error("Failed to create a new theater owner");
+            }
+            return theaterOwner;
+        }
+    }
     async registerTheaterOwnerService(name, email, password, phone) {
-        const existingTheaterOwner = await TheaterOwnerModel_1.default.findOne({ email });
+        const existingTheaterOwner = await this.theaterRepository.findTheaterOwnerByEmail(email);
         if (existingTheaterOwner) {
             if (!existingTheaterOwner.otpVerified) {
                 const otp = crypto_1.default.randomInt(100000, 999999).toString();
-                existingTheaterOwner.otp = otp;
-                existingTheaterOwner.otpVerified = false;
-                existingTheaterOwner.otpGeneratedAt = new Date();
-                await existingTheaterOwner.save();
+                const id = existingTheaterOwner._id.toString();
+                await this.theaterRepository.updateOtpDetails(id, otp);
                 await EmailUtil_1.default.sendOtpEmail(existingTheaterOwner.email, otp);
                 return existingTheaterOwner;
             }
@@ -138,7 +156,7 @@ class TheaterOwnerService {
         const otp = crypto_1.default.randomInt(100000, 999999).toString();
         const salt = await bcryptjs_1.default.genSalt(10);
         const hashedPassword = await bcryptjs_1.default.hash(password, salt);
-        const newTheaterOwner = new TheaterOwnerModel_1.default({
+        const newTheaterOwner = await this.theaterRepository.createTheaterOwner({
             name,
             email,
             phone,
@@ -146,12 +164,11 @@ class TheaterOwnerService {
             otp,
             otpVerified: false,
         });
-        await newTheaterOwner.save();
         await EmailUtil_1.default.sendOtpEmail(newTheaterOwner.email, otp);
         return newTheaterOwner;
     }
     async verifyTheaterOwnerOtpService(email, otp) {
-        const theater = await TheaterRepo_1.default.findTheaterOwnerByEmail(email);
+        const theater = await this.theaterRepository.findTheaterOwnerByEmail(email);
         if (!theater) {
             throw new Error("Theater owner not found");
         }
@@ -168,7 +185,7 @@ class TheaterOwnerService {
         throw new Error("Incorrect OTP");
     }
     async resendTheaterOwnerOtpService(email) {
-        const theater = await TheaterRepo_1.default.findTheaterOwnerByEmail(email);
+        const theater = await this.theaterRepository.findTheaterOwnerByEmail(email);
         if (!theater) {
             throw new Error("User not found");
         }
@@ -176,7 +193,7 @@ class TheaterOwnerService {
         theater.otp = otp;
         theater.otpExpires = new Date(Date.now() + 1 * 60 * 1000 + 59 * 1000);
         try {
-            await TheaterRepo_1.default.saveTheaterOwner(theater);
+            await this.theaterRepository.saveTheaterOwner(theater);
         }
         catch (err) {
             throw new Error("Failed to save user with new OTP");
@@ -190,7 +207,7 @@ class TheaterOwnerService {
         return theater;
     }
     async forgotTheaterOwnerPasswordService(email) {
-        const theater = await TheaterRepo_1.default.findTheaterOwnerByEmail(email);
+        const theater = await this.theaterRepository.findTheaterOwnerByEmail(email);
         if (!theater) {
             throw new Error("User not found");
         }
@@ -201,7 +218,7 @@ class TheaterOwnerService {
         return resetToken;
     }
     async resetTheaterOwnerPasswordService(resetToken, password) {
-        const theater = await TheaterRepo_1.default.findTheaterOwnerByResetToken(resetToken);
+        const theater = await this.theaterRepository.findTheaterOwnerByResetToken(resetToken);
         if (!theater) {
             throw new Error("Invalid or expired token");
         }
@@ -213,31 +230,40 @@ class TheaterOwnerService {
         return true;
     }
     async getAllTheaterOwners() {
-        let theaterOwners = await TheaterRepo_1.default.getAllTheaterOwners();
+        let theaterOwners = await this.theaterRepository.getAllTheaterOwners();
         return theaterOwners;
     }
+    async getTheaterOwnerProfile(theaterOwnerId) {
+        const theaterOwner = await this.theaterRepository.findTheaterOwnerById(theaterOwnerId);
+        if (!theaterOwner) {
+            throw new Error("theater Owner not found");
+        }
+        return theaterOwner;
+    }
+    ;
     async getAllTheaters() {
-        return await TheaterRepo_1.default.getAllTheaters();
+        return await this.theaterRepository.getAllTheaters();
     }
     async getTheaterById(theaterId) {
         try {
-            const theater = await TheaterRepo_1.default.findTheaterById(theaterId);
+            const theater = await this.theaterRepository.findTheaterById(theaterId);
             if (!theater) {
-                return { status: 404, data: { message: "Theater not found" } };
+                throw { status: 404, data: { message: "Theater not found" } };
             }
-            return { status: 200, data: theater.toObject() };
+            return theater;
         }
         catch (error) {
             console.error("Error fetching theater details:", error);
-            return { status: 500, data: { message: "Server error" } };
+            throw { status: 500, data: { message: "Server error" } };
         }
     }
     async updateTheaterData(theaterId, updateData, files) {
         try {
-            const theater = await TheaterRepo_1.default.findTheaterById(theaterId);
+            const theater = await this.theaterRepository.findTheaterById(theaterId);
             if (!theater) {
                 throw new Error("Theater not found");
             }
+            // Update the theater details as needed
             theater.name = updateData.name || theater.name;
             theater.city = updateData.city || theater.city;
             theater.address = updateData.address || theater.address;
@@ -247,6 +273,7 @@ class TheaterOwnerService {
                 : theater.amenities;
             theater.latitude = updateData.latitude || theater.latitude;
             theater.longitude = updateData.longitude || theater.longitude;
+            // Handling images and other fields
             if (files && files.length > 0) {
                 const newImages = files
                     .map((file) => {
@@ -259,6 +286,7 @@ class TheaterOwnerService {
                 updateData.removeImages.length > 0) {
                 theater.images = theater.images.filter((image) => !updateData.removeImages.includes(image));
             }
+            // Save the updated theater and return the updated theater
             const updatedTheater = await theater.save();
             return updatedTheater;
         }
@@ -267,15 +295,20 @@ class TheaterOwnerService {
         }
     }
     async deleteTheaterService(id) {
-        const deletedTheater = await TheaterDetailsModel_1.default.findByIdAndDelete(id);
+        const deletedTheater = await this.theaterRepository.deleteOneById(id);
         return deletedTheater;
     }
     async deleteOfferHandler(offerId) {
         const deletedOffer = await OffersModel_1.Offer.findByIdAndDelete(offerId);
         return deletedOffer;
     }
-    logoutTheaterOwnerService() {
+    async logoutTheaterOwnerService() {
         return true;
     }
-}
-exports.default = new TheaterOwnerService();
+};
+exports.TheaterService = TheaterService;
+exports.TheaterService = TheaterService = __decorate([
+    (0, inversify_1.injectable)(),
+    __param(0, (0, inversify_1.inject)("ITheaterRepository")),
+    __metadata("design:paramtypes", [Object])
+], TheaterService);

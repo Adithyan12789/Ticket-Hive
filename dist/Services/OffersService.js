@@ -1,18 +1,30 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const mongoose_1 = __importDefault(require("mongoose"));
-const OffersModel_1 = require("../Models/OffersModel");
-const OffersRepo_1 = __importDefault(require("../Repositories/OffersRepo"));
-class OffersService {
+exports.OfferService = void 0;
+const inversify_1 = require("inversify");
+let OfferService = class OfferService {
+    constructor(offerRepository) {
+        this.offerRepository = offerRepository;
+    }
     async addOfferService(offerData) {
-        const { ownerId, offerName, paymentMethod, offerDescription, discountValue, minPurchaseAmount, validityStart, validityEnd, applicableTheaters, } = offerData;
+        console.log("Offer data before validation:", offerData);
+        const { offerName, createdBy, paymentMethod, description, discountValue, minPurchaseAmount, validityStart, validityEnd, applicableTheaters } = offerData;
         if (!offerName ||
-            !ownerId ||
+            !createdBy ||
             !paymentMethod ||
-            !offerDescription ||
+            !description ||
             !discountValue ||
             minPurchaseAmount === undefined ||
             !validityStart ||
@@ -27,65 +39,28 @@ class OffersService {
             isNaN(parsedValidityEnd.getTime())) {
             throw { statusCode: 400, message: "Invalid date format" };
         }
-        const theaterObjectIds = applicableTheaters.map((id) => new mongoose_1.default.Types.ObjectId(id));
-        const newOffer = new OffersModel_1.Offer({
-            offerName,
-            createdBy: ownerId,
-            paymentMethod,
-            description: offerDescription,
-            discountValue,
-            minPurchaseAmount,
+        const createdOffer = await this.offerRepository.createOffer({
+            ...offerData,
             validityStart: parsedValidityStart,
             validityEnd: parsedValidityEnd,
-            applicableTheaters: theaterObjectIds,
         });
-        const createdOffer = await newOffer.save();
         return createdOffer;
     }
     async updateOfferService(offerId, offerData) {
-        const { offerName, paymentMethod, offerDescription, discountValue, minPurchaseAmount, validityStart, validityEnd, applicableTheaters, } = offerData;
-        // Validate required fields
-        if (!offerName ||
-            !paymentMethod ||
-            !offerDescription ||
-            !discountValue ||
-            minPurchaseAmount === undefined ||
-            !validityStart ||
-            !validityEnd ||
-            !Array.isArray(applicableTheaters) ||
-            applicableTheaters.length === 0) {
-            throw { statusCode: 400, message: "All fields are required" };
-        }
-        const parsedValidityStart = new Date(validityStart);
-        const parsedValidityEnd = new Date(validityEnd);
-        if (isNaN(parsedValidityStart.getTime()) ||
-            isNaN(parsedValidityEnd.getTime())) {
-            throw { statusCode: 400, message: "Invalid date format" };
-        }
-        const theaterObjectIds = applicableTheaters.map((id) => new mongoose_1.default.Types.ObjectId(id));
-        const updatedOffer = await OffersRepo_1.default.updateOffer(offerId, {
-            offerName,
-            paymentMethod,
-            description: offerDescription,
-            discountValue,
-            minPurchaseAmount,
-            validityStart: parsedValidityStart,
-            validityEnd: parsedValidityEnd,
-            applicableTheaters: theaterObjectIds,
-        });
-        if (!updatedOffer) {
-            throw { statusCode: 404, message: "Offer not found" };
-        }
-        return updatedOffer;
+        return this.offerRepository.updateOffer(offerId, offerData);
     }
-    async deleteOfferHandler(offerId) {
-        const deletedOffer = await OffersModel_1.Offer.findByIdAndDelete(offerId);
-        return deletedOffer;
+    async deleteOfferService(offerId) {
+        return this.offerRepository.deleteOffer(offerId);
     }
     async getOffersService() {
         const currentDate = new Date();
-        await OffersModel_1.Offer.deleteMany({ validUntil: { $lt: currentDate } });
-        return OffersModel_1.Offer.find();
+        await this.offerRepository.deleteExpiredOffers(currentDate);
+        return this.offerRepository.getAllOffers();
     }
-}
-exports.default = new OffersService();
+};
+exports.OfferService = OfferService;
+exports.OfferService = OfferService = __decorate([
+    (0, inversify_1.injectable)(),
+    __param(0, (0, inversify_1.inject)("IOfferRepository")),
+    __metadata("design:paramtypes", [Object])
+], OfferService);

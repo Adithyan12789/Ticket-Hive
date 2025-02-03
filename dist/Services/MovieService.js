@@ -1,21 +1,36 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const MovieRepo_1 = __importDefault(require("../Repositories/MovieRepo"));
-const MoviesModel_1 = require("../Models/MoviesModel");
-const ReviewModel_1 = require("../Models/ReviewModel");
-class MovieService {
-    async addMovie(movieData) {
-        return await MovieRepo_1.default.addMovieRepo(movieData);
+exports.MovieService = void 0;
+const inversify_1 = require("inversify");
+let MovieService = class MovieService {
+    constructor(movieRepository) {
+        this.movieRepository = movieRepository;
     }
-    async getAllMovies() {
-        return await MovieRepo_1.default.getAllMovies();
+    async addMovie(movieData) {
+        return await this.movieRepository.addMovieRepo(movieData);
+    }
+    async getAllMoviesService() {
+        const result = await this.movieRepository.getAllMovies();
+        return result;
+    }
+    async findMovieById(movieId) {
+        return await this.movieRepository.findMovieById(movieId);
     }
     async updateMovieData(id, updateData, posterFile, movieImageFiles, castImageFiles) {
         try {
-            const movie = await MovieRepo_1.default.findMovieById(id);
+            const movie = await this.movieRepository.findMovieById(id);
             if (!movie) {
                 throw new Error("Movie not found");
             }
@@ -54,39 +69,13 @@ class MovieService {
         }
     }
     async deleteMovieService(id) {
-        const deletedMovie = await MoviesModel_1.Movie.findByIdAndDelete(id);
+        const deletedMovie = await this.movieRepository.findByIdAndDelete(id);
         return deletedMovie;
     }
-    async getAllReviewsService() {
-        return await ReviewModel_1.Review.find({}).populate('user', 'name').populate('movie', 'title');
-    }
-    async getReviewsByMovieId(movieId) {
-        return await ReviewModel_1.Review.find({ movie: movieId }).populate("user", "name email");
-    }
-    async addReview(data) {
-        const { movieId, userId, rating, review } = data;
-        const newReview = new ReviewModel_1.Review({
-            movie: movieId,
-            user: userId,
-            rating: rating,
-            comment: review,
-        });
-        const savedReview = await newReview.save();
-        await MoviesModel_1.Movie.findByIdAndUpdate(movieId, {
-            $push: { reviews: savedReview._id },
-        });
-        return savedReview;
-    }
-    async updateAverageRating(movieId) {
-        const reviews = await ReviewModel_1.Review.find({ movie: movieId });
-        if (reviews.length > 0) {
-            const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
-            const averageRating = totalRating / reviews.length;
-            await MoviesModel_1.Movie.findByIdAndUpdate(movieId, { averageRating });
-        }
-        else {
-            await MoviesModel_1.Movie.findByIdAndUpdate(movieId, { averageRating: 0 });
-        }
-    }
-}
-exports.default = new MovieService();
+};
+exports.MovieService = MovieService;
+exports.MovieService = MovieService = __decorate([
+    (0, inversify_1.injectable)(),
+    __param(0, (0, inversify_1.inject)("IMovieRepository")),
+    __metadata("design:paramtypes", [Object])
+], MovieService);

@@ -40,17 +40,11 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(morgan('dev'));
 
-app.options("*", (req, res) => {
-  res.header("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS");
-  res.sendStatus(200);
-});
-
 // Configure cookie settings for cross-origin
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Credentials', 'true');
   next();
 });
-
 
 app.use(express.static('Back-End/public')); 
 

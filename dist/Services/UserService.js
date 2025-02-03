@@ -1,17 +1,31 @@
 "use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.UserService = void 0;
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const crypto_1 = __importDefault(require("crypto"));
-const UserRepo_1 = __importDefault(require("../Repositories/UserRepo"));
 const EmailUtil_1 = __importDefault(require("../Utils/EmailUtil"));
-const UserModel_1 = __importDefault(require("../Models/UserModel"));
-class UserService {
-    constructor() {
+const inversify_1 = require("inversify");
+const GenerateToken_1 = __importDefault(require("../Utils/GenerateToken"));
+let UserService = class UserService {
+    constructor(userRepository) {
+        this.userRepository = userRepository;
         this.getUserProfile = async (userId) => {
-            const user = await UserRepo_1.default.findUserById(userId);
+            const user = await this.userRepository.findUserById(userId);
             if (!user) {
                 throw new Error("User not found");
             }
@@ -25,7 +39,7 @@ class UserService {
             };
         };
         this.updateUserProfileService = async (userId, updateData, profileImage) => {
-            const user = await UserRepo_1.default.findUserById(userId);
+            const user = await this.userRepository.findUserById(userId);
             if (!user) {
                 throw new Error("User not found");
             }
@@ -47,19 +61,34 @@ class UserService {
             if (profileImage) {
                 user.profileImageName = profileImage.filename || user.profileImageName;
             }
-            return await UserRepo_1.default.saveUser(user);
+            return await this.userRepository.saveUser(user);
         };
         this.getOffersByTheaterIdService = async (theaterId) => {
             try {
-                return await UserRepo_1.default.getOffersByTheaterId(theaterId);
+                return await this.userRepository.getOffersByTheaterId(theaterId);
             }
             catch (error) {
                 throw new Error("Error fetching Offers");
             }
         };
     }
+    async refreshToken(refreshToken) {
+        // Verify the refresh token
+        const decoded = GenerateToken_1.default.verifyRefreshToken(refreshToken);
+        if (!decoded || typeof decoded === "string") {
+            throw new Error("Invalid or expired refresh token");
+        }
+        // Retrieve the user
+        const user = await this.userRepository.findUserById(decoded.userId);
+        if (!user) {
+            throw new Error("User not found");
+        }
+        // Generate a new access token
+        const newAccessToken = GenerateToken_1.default.generateAccessToken(user._id.toString());
+        return { accessToken: newAccessToken };
+    }
     async authenticateUser(email, password) {
-        const user = await UserRepo_1.default.findUserByEmail(email);
+        const user = await this.userRepository.findUserByEmail(email);
         console.log("user: ", user);
         if (user) {
             if (user.isBlocked) {
@@ -71,24 +100,39 @@ class UserService {
         }
         throw new Error("Invalid Email or Password");
     }
+    async handleGoogleLogin(name, email) {
+        let user = await this.userRepository.findUserByEmail(email);
+        if (user) {
+            return user;
+        }
+        user = await this.userRepository.createUser({
+            name,
+            email,
+            otp: "",
+            phone: "",
+            password: "",
+        });
+        if (!user) {
+            throw new Error("Invalid user data");
+        }
+        user.isNew = true;
+        return user;
+    }
     async registerUserService(name, email, password, phone) {
-        const existingUser = await UserModel_1.default.findOne({ email });
+        const existingUser = await this.userRepository.findUserByEmail(email);
         if (existingUser) {
             if (!existingUser.otpVerified) {
                 const otp = crypto_1.default.randomInt(100000, 999999).toString();
-                existingUser.otp = otp;
-                existingUser.otpVerified = false;
-                existingUser.otpGeneratedAt = new Date();
-                await existingUser.save();
-                await EmailUtil_1.default.sendOtpEmail(existingUser.email, otp);
-                return existingUser;
+                const updatedUser = await this.userRepository.updateUserOtp(email, otp);
+                await EmailUtil_1.default.sendOtpEmail(email, otp);
+                return updatedUser;
             }
             throw new Error("Email already exists.");
         }
         const otp = crypto_1.default.randomInt(100000, 999999).toString();
         const salt = await bcryptjs_1.default.genSalt(10);
         const hashedPassword = await bcryptjs_1.default.hash(password, salt);
-        const newUser = new UserModel_1.default({
+        const newUser = await this.userRepository.createUser({
             name,
             email,
             phone,
@@ -96,12 +140,11 @@ class UserService {
             otp,
             otpVerified: false,
         });
-        await newUser.save();
-        await EmailUtil_1.default.sendOtpEmail(newUser.email, otp);
+        await EmailUtil_1.default.sendOtpEmail(email, otp);
         return newUser;
     }
     async verifyOtpService(email, otp) {
-        const user = await UserRepo_1.default.findUserByEmail(email);
+        const user = await this.userRepository.findUserByEmail(email);
         if (!user) {
             throw new Error("User not found");
         }
@@ -121,7 +164,7 @@ class UserService {
         throw new Error("Incorrect OTP");
     }
     async resendOtpService(email) {
-        const user = await UserRepo_1.default.findUserByEmail(email);
+        const user = await this.userRepository.findUserByEmail(email);
         if (!user) {
             throw new Error("User not found");
         }
@@ -129,7 +172,7 @@ class UserService {
         user.otp = otp;
         user.otpExpires = new Date(Date.now() + 1 * 60 * 1000 + 59 * 1000);
         try {
-            await UserRepo_1.default.saveUser(user);
+            await this.userRepository.saveUser(user);
         }
         catch (err) {
             throw new Error("Failed to save user with new OTP");
@@ -143,7 +186,7 @@ class UserService {
         return user;
     }
     async forgotPasswordService(email) {
-        const user = await UserRepo_1.default.findUserByEmail(email);
+        const user = await this.userRepository.findUserByEmail(email);
         if (!user) {
             throw new Error("User not found");
         }
@@ -154,7 +197,7 @@ class UserService {
         return resetToken;
     }
     async resetPasswordService(resetToken, password) {
-        const user = await UserRepo_1.default.findUserByResetToken(resetToken);
+        const user = await this.userRepository.findUserByResetToken(resetToken);
         if (!user) {
             throw new Error("Invalid or expired token");
         }
@@ -168,14 +211,19 @@ class UserService {
     async updateLocation(userId, city, latitude, longitude) {
         try {
             // Call the repository method to update the location
-            return await UserRepo_1.default.updateLocation(userId, city, latitude, longitude);
+            return await this.userRepository.updateLocation(userId, city, latitude, longitude);
         }
         catch (error) {
             throw new Error("Service: Error updating location");
         }
     }
-    logoutUserService() {
+    async logoutUserService() {
         return true;
     }
-}
-exports.default = new UserService();
+};
+exports.UserService = UserService;
+exports.UserService = UserService = __decorate([
+    (0, inversify_1.injectable)(),
+    __param(0, (0, inversify_1.inject)("IUserRepository")),
+    __metadata("design:paramtypes", [Object])
+], UserService);

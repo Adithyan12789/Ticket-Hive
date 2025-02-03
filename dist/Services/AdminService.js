@@ -1,13 +1,26 @@
 "use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.AdminService = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
-const AdminRepo_1 = __importDefault(require("../Repositories/AdminRepo"));
 const GenerateAdminToken_1 = __importDefault(require("../Utils/GenerateAdminToken"));
 const nodemailer_1 = __importDefault(require("nodemailer"));
 const AdminModel_1 = __importDefault(require("../Models/AdminModel"));
+const inversify_1 = require("inversify");
 const transporter = nodemailer_1.default.createTransport({
     service: "Gmail",
     auth: {
@@ -15,64 +28,60 @@ const transporter = nodemailer_1.default.createTransport({
         pass: "phfa kacx ozkz ueig",
     },
 });
-class AdminService {
+let AdminService = class AdminService {
+    constructor(adminRepository) {
+        this.adminRepository = adminRepository;
+    }
     async adminLoginService(email, password, res) {
-        const { adminEmail, adminPassword } = AdminRepo_1.default.getAdminCredentials();
+        // Authenticate admin credentials via the repository
+        const { email: adminEmail, password: adminPassword } = await this.adminRepository.authenticateAdmin(email, password);
         let _id = "";
-        if (email === adminEmail && password === adminPassword) {
-            // Check if admin already exists in the database
-            const existingAdmin = await AdminModel_1.default.findOne({ email: adminEmail });
-            _id = existingAdmin?._id;
-            if (!existingAdmin) {
-                // If no existing admin, add to the database
-                const newAdmin = new AdminModel_1.default({
-                    name: "Admin",
-                    email: adminEmail,
-                    password: adminPassword,
-                });
-                _id = newAdmin._id;
-                await newAdmin.save();
-            }
-            const token = GenerateAdminToken_1.default.generateAdminToken(res, _id);
-            return {
-                _id: existingAdmin?._id,
+        let existingAdmin = await AdminModel_1.default.findOne({ email: adminEmail });
+        // If admin does not exist, create a new admin
+        if (!existingAdmin) {
+            const newAdmin = new AdminModel_1.default({
                 name: "Admin",
                 email: adminEmail,
-                token: token,
-                isAdmin: true,
-            };
+                password: adminPassword,
+            });
+            await newAdmin.save();
+            existingAdmin = newAdmin;
         }
-        throw new Error("Invalid Admin Email or Password");
+        _id = existingAdmin._id.toString();
+        const token = GenerateAdminToken_1.default.generateAdminToken(res, _id);
+        return {
+            _id,
+            name: "Admin",
+            email: adminEmail,
+            token,
+            isAdmin: true,
+        };
     }
     async getAllUsers() {
-        return await AdminRepo_1.default.getAllUsers();
+        return this.adminRepository.getAllUsers();
     }
     async getAllTheaterOwners() {
-        return await AdminRepo_1.default.getAllTheaterOwners();
+        return await this.adminRepository.getAllTheaterOwners();
     }
-    async blockUser(req) {
-        const userId = req.body.userId;
+    // AdminService.ts
+    async blockUser(userId) {
+        if (!mongoose_1.default.Types.ObjectId.isValid(userId)) {
+            throw new Error("Invalid userId format");
+        }
+        const updatedUser = await this.adminRepository.updateUser(userId, {
+            isBlocked: true,
+        });
+        if (!updatedUser) {
+            throw new Error("User not found");
+        }
+        return updatedUser;
+    }
+    async unblockUser(userId) {
         if (!mongoose_1.default.Types.ObjectId.isValid(userId)) {
             throw new Error("Invalid userId format");
         }
         try {
-            const updatedUser = await AdminRepo_1.default.updateUser(userId, {
-                isBlocked: true,
-            });
-            return updatedUser;
-        }
-        catch (error) {
-            console.error(`Error updating user: ${error}`);
-            throw new Error("Error updating user");
-        }
-    }
-    async unblockUser(req) {
-        const userId = req.body.userId;
-        if (!mongoose_1.default.Types.ObjectId.isValid(userId)) {
-            throw new Error("Invalid userId format");
-        }
-        try {
-            const updatedUser = await AdminRepo_1.default.updateUser(userId, {
+            const updatedUser = await this.adminRepository.updateUser(userId, {
                 isBlocked: false,
             });
             return updatedUser;
@@ -82,13 +91,14 @@ class AdminService {
             throw new Error("Error updating user");
         }
     }
-    async blockTheaterOwner(req) {
-        const theaterOwnerId = req.body.theaterOwnerId;
+    async blockTheaterOwner(theaterOwnerId) {
         if (!mongoose_1.default.Types.ObjectId.isValid(theaterOwnerId)) {
             throw new Error("Invalid theaterOwnerId format");
         }
         try {
-            const updatedTheaterOwner = await AdminRepo_1.default.updatedTheaterOwner(theaterOwnerId, { isBlocked: true });
+            const updatedTheaterOwner = await this.adminRepository.updatedTheaterOwner(theaterOwnerId, {
+                isBlocked: true,
+            });
             return updatedTheaterOwner;
         }
         catch (error) {
@@ -96,13 +106,14 @@ class AdminService {
             throw new Error("Error updating theater Owner");
         }
     }
-    async unblockTheaterOwner(req) {
-        const theaterOwnerId = req.body.theaterOwnerId;
+    async unblockTheaterOwner(theaterOwnerId) {
         if (!mongoose_1.default.Types.ObjectId.isValid(theaterOwnerId)) {
             throw new Error("Invalid theaterOwnerId format");
         }
         try {
-            const updatedTheaterOwner = await AdminRepo_1.default.updatedTheaterOwner(theaterOwnerId, { isBlocked: false });
+            const updatedTheaterOwner = await this.adminRepository.updatedTheaterOwner(theaterOwnerId, {
+                isBlocked: false,
+            });
             return updatedTheaterOwner;
         }
         catch (error) {
@@ -111,17 +122,17 @@ class AdminService {
         }
     }
     async getVerificationDetails() {
-        return await AdminRepo_1.default.getPendingTheaterOwnerVerifications();
+        return await this.adminRepository.getPendingTheaterOwnerVerifications();
     }
     async acceptVerification(theaterId) {
-        const theater = await AdminRepo_1.default.findTheaterById(theaterId);
+        const theater = await this.adminRepository.findTheaterById(theaterId);
         if (!theater) {
             throw new Error("Theater not found");
         }
         theater.verificationStatus = "accepted";
         theater.isVerified = true;
-        await AdminRepo_1.default.saveTheater(theater);
-        const theaterOwner = await AdminRepo_1.default.findTheaterOwnerById(theater.theaterOwnerId.toString());
+        await this.adminRepository.saveTheater(theater);
+        const theaterOwner = await this.adminRepository.findTheaterOwnerById(theater.theaterOwnerId.toString());
         if (!theaterOwner) {
             throw new Error("Theater Owner not found");
         }
@@ -129,14 +140,14 @@ class AdminService {
         return { message: "Verification accepted and email sent." };
     }
     async rejectVerification(theaterId, reason) {
-        const theater = await AdminRepo_1.default.findTheaterById(theaterId);
+        const theater = await this.adminRepository.findTheaterById(theaterId);
         if (!theater) {
             throw new Error("Theater not found");
         }
         theater.verificationStatus = "rejected";
         theater.isVerified = false;
-        await AdminRepo_1.default.saveTheater(theater);
-        const theaterOwner = await AdminRepo_1.default.findTheaterOwnerById(theater.theaterOwnerId.toString());
+        await this.adminRepository.saveTheater(theater);
+        const theaterOwner = await this.adminRepository.findTheaterOwnerById(theater.theaterOwnerId.toString());
         if (!theaterOwner) {
             throw new Error("Theater Owner not found");
         }
@@ -145,8 +156,7 @@ class AdminService {
         return { message: "Verification rejected and email sent." };
     }
     async getAllTicketsService() {
-        const bookings = await AdminRepo_1.default.findAllBookings();
-        console.log("getAllTicketsService bookings: ", bookings);
+        const bookings = await this.adminRepository.findAllBookings();
         if (!bookings.length)
             throw new Error("No tickets found");
         return bookings.map((booking) => ({
@@ -171,10 +181,10 @@ class AdminService {
         }));
     }
     async getAllAdmins() {
-        let admins = await AdminRepo_1.default.getAllAdmins();
+        let admins = await this.adminRepository.getAllAdmins();
         return admins;
     }
-    adminLogoutService(res) {
+    async adminLogoutService(res) {
         res.cookie("token", "", {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
@@ -197,5 +207,10 @@ class AdminService {
             throw error;
         }
     }
-}
-exports.default = new AdminService();
+};
+exports.AdminService = AdminService;
+exports.AdminService = AdminService = __decorate([
+    (0, inversify_1.injectable)(),
+    __param(0, (0, inversify_1.inject)("IAdminRepository")),
+    __metadata("design:paramtypes", [Object])
+], AdminService);

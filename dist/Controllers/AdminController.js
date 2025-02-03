@@ -1,15 +1,29 @@
 "use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.AdminController = void 0;
 const express_async_handler_1 = __importDefault(require("express-async-handler"));
-const AdminService_1 = __importDefault(require("../Services/AdminService"));
+const inversify_1 = require("inversify");
 const express_async_handler_2 = __importDefault(require("express-async-handler"));
 const MoviesModel_1 = require("../Models/MoviesModel");
 const OffersModel_1 = require("../Models/OffersModel");
-class AdminController {
-    constructor() {
+let AdminController = class AdminController {
+    constructor(adminService) {
+        this.adminService = adminService;
         this.adminLogin = (0, express_async_handler_1.default)(async (req, res) => {
             const { email, password } = req.body;
             if (!email || !password) {
@@ -17,7 +31,7 @@ class AdminController {
                 return;
             }
             try {
-                const adminData = await AdminService_1.default.adminLoginService(email, password, res);
+                const adminData = await this.adminService.adminLoginService(email, password, res);
                 res.status(200).json(adminData);
             }
             catch (error) {
@@ -25,16 +39,22 @@ class AdminController {
             }
         });
         this.getAllUsers = (0, express_async_handler_2.default)(async (req, res) => {
-            const users = await AdminService_1.default.getAllUsers();
+            const users = await this.adminService.getAllUsers();
             res.status(200).json(users);
         });
         this.getAllTheaterOwners = (0, express_async_handler_2.default)(async (req, res) => {
-            const theaterOwners = await AdminService_1.default.getAllTheaterOwners();
+            const theaterOwners = await this.adminService.getAllTheaterOwners();
             res.status(200).json(theaterOwners);
         });
-        this.blockUserController = (0, express_async_handler_2.default)(async (req, res, next) => {
+        // AdminController.ts
+        this.blockUserController = (0, express_async_handler_2.default)(async (req, res) => {
             try {
-                const user = await AdminService_1.default.blockUser(req);
+                const { userId } = req.body;
+                if (!userId) {
+                    res.status(400).json({ message: "userId is required" });
+                    return;
+                }
+                const user = await this.adminService.blockUser(userId);
                 if (user) {
                     res.status(200).json({ message: "User blocked successfully", user });
                 }
@@ -43,13 +63,20 @@ class AdminController {
                 }
             }
             catch (error) {
-                console.error("Error blocking user:", error);
-                res.status(500).json({ message: "Error blocking user" });
+                console.error("Error blocking user:", error.message);
+                res
+                    .status(500)
+                    .json({ message: error.message || "Internal Server Error" });
             }
         });
         this.unblockUserController = (0, express_async_handler_2.default)(async (req, res, next) => {
             try {
-                const user = await AdminService_1.default.unblockUser(req);
+                const { userId } = req.body;
+                if (!userId) {
+                    res.status(400).json({ message: "userId is required" });
+                    return;
+                }
+                const user = await this.adminService.unblockUser(userId);
                 if (user) {
                     res
                         .status(200)
@@ -66,7 +93,12 @@ class AdminController {
         });
         this.blockTheaterOwnerController = (0, express_async_handler_2.default)(async (req, res, next) => {
             try {
-                const theaterOwner = await AdminService_1.default.blockTheaterOwner(req);
+                const { theaterOwnerId } = req.body;
+                if (!theaterOwnerId) {
+                    res.status(400).json({ message: "TheaterOwnerId is required" });
+                    return;
+                }
+                const theaterOwner = await this.adminService.blockTheaterOwner(theaterOwnerId);
                 if (theaterOwner) {
                     res.status(200).json({
                         message: "Theater Owner blocked successfully",
@@ -84,7 +116,12 @@ class AdminController {
         });
         this.unblockTheaterOwnerController = (0, express_async_handler_2.default)(async (req, res, next) => {
             try {
-                const theaterOwner = await AdminService_1.default.unblockTheaterOwner(req);
+                const { theaterOwnerId } = req.body;
+                if (!theaterOwnerId) {
+                    res.status(400).json({ message: "TheaterOwnerId is required" });
+                    return;
+                }
+                const theaterOwner = await this.adminService.unblockTheaterOwner(theaterOwnerId);
                 if (theaterOwner) {
                     res.status(200).json({
                         message: "Theater Owner unblocked successfully",
@@ -101,12 +138,12 @@ class AdminController {
             }
         });
         this.getVerificationDetails = (0, express_async_handler_2.default)(async (req, res) => {
-            const theaters = await AdminService_1.default.getVerificationDetails();
+            const theaters = await this.adminService.getVerificationDetails();
             res.status(200).json(theaters);
         });
         this.acceptVerification = (0, express_async_handler_2.default)(async (req, res) => {
             try {
-                await AdminService_1.default.acceptVerification(req.params.theaterId);
+                await this.adminService.acceptVerification(req.params.theaterId);
                 res.json({ message: "Verification accepted" });
             }
             catch (error) {
@@ -118,7 +155,7 @@ class AdminController {
             try {
                 const { adminId } = req.params;
                 const { reason } = req.body;
-                await AdminService_1.default.rejectVerification(adminId, reason);
+                await this.adminService.rejectVerification(adminId, reason);
                 res.json({ message: "Verification rejected" });
             }
             catch (error) {
@@ -127,10 +164,8 @@ class AdminController {
             }
         });
         this.getAllTickets = (0, express_async_handler_1.default)(async (req, res) => {
-            console.log("entered Admin getAllTickets function");
             try {
-                const tickets = await AdminService_1.default.getAllTicketsService();
-                console.log("admin getAllTickets: ", tickets);
+                const tickets = await this.adminService.getAllTicketsService();
                 if (!tickets || tickets.length === 0) {
                     res.status(404).json({ message: "No tickets found for this user" });
                     return;
@@ -174,13 +209,18 @@ class AdminController {
             }
         });
         this.getAdmins = (0, express_async_handler_1.default)(async (req, res) => {
-            const admins = await AdminService_1.default.getAllAdmins();
+            const admins = await this.adminService.getAllAdmins();
             res.status(200).json(admins);
         });
         this.adminLogout = (0, express_async_handler_1.default)(async (req, res) => {
-            const result = AdminService_1.default.adminLogoutService(res);
+            const result = this.adminService.adminLogoutService(res);
             res.status(200).json(result);
         });
     }
-}
-exports.default = new AdminController();
+};
+exports.AdminController = AdminController;
+exports.AdminController = AdminController = __decorate([
+    (0, inversify_1.injectable)(),
+    __param(0, (0, inversify_1.inject)("IAdminService")),
+    __metadata("design:paramtypes", [Object])
+], AdminController);

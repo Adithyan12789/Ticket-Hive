@@ -1,14 +1,28 @@
 "use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.TheaterRepository = void 0;
 const MoviesModel_1 = require("../Models/MoviesModel");
 const OffersModel_1 = require("../Models/OffersModel");
 const TheaterDetailsModel_1 = __importDefault(require("../Models/TheaterDetailsModel"));
 const TheaterOwnerModel_1 = __importDefault(require("../Models/TheaterOwnerModel"));
-class TheaterRepository {
+const inversify_1 = require("inversify");
+const BaseRepository_1 = require("./Base/BaseRepository");
+let TheaterRepository = class TheaterRepository extends BaseRepository_1.BaseRepository {
     constructor() {
+        super(TheaterOwnerModel_1.default);
+        this.theaterOwnerModel = TheaterOwnerModel_1.default;
         this.createTheater = async (theaterId, theaterData) => {
             const theater = new TheaterDetailsModel_1.default({ ...theaterData, theaterId });
             return await theater.save();
@@ -16,8 +30,7 @@ class TheaterRepository {
     }
     async getAllTheaterOwners() {
         try {
-            const theaterOwner = await TheaterOwnerModel_1.default.find({});
-            return theaterOwner;
+            await TheaterOwnerModel_1.default.find({});
         }
         catch (error) {
             throw new Error("Error fetching theater owners");
@@ -33,14 +46,25 @@ class TheaterRepository {
         return await TheaterOwnerModel_1.default.findOne({ email });
     }
     async saveTheaterOwner(theaterOwnerData) {
-        const theater = new TheaterOwnerModel_1.default(theaterOwnerData);
-        return await theater.save();
+        const theaterOwner = new TheaterOwnerModel_1.default(theaterOwnerData);
+        return await theaterOwner.save();
     }
     async findTheaterOwnerByResetToken(resetToken) {
         return await TheaterOwnerModel_1.default.findOne({
             resetPasswordToken: resetToken,
             resetPasswordExpires: { $gt: Date.now() },
         });
+    }
+    async updateOtpDetails(theaterOwnerId, otp) {
+        await TheaterOwnerModel_1.default.findByIdAndUpdate(theaterOwnerId, {
+            otp,
+            otpVerified: false,
+            otpGeneratedAt: new Date(),
+        });
+    }
+    async createTheaterOwner(theaterOwnerDetails) {
+        const theaterOwner = new TheaterOwnerModel_1.default(theaterOwnerDetails);
+        return theaterOwner.save();
     }
     async getAllTheaters() {
         try {
@@ -82,5 +106,14 @@ class TheaterRepository {
             throw { statusCode: 500, message: "Internal server error" };
         }
     }
-}
+    async deleteOneById(id) {
+        const result = await TheaterDetailsModel_1.default.findByIdAndDelete(id);
+        return result !== null;
+    }
+};
+exports.TheaterRepository = TheaterRepository;
+exports.TheaterRepository = TheaterRepository = __decorate([
+    (0, inversify_1.injectable)(),
+    __metadata("design:paramtypes", [])
+], TheaterRepository);
 exports.default = new TheaterRepository();

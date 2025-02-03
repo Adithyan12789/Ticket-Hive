@@ -1,21 +1,34 @@
 "use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.MovieController = void 0;
 const express_async_handler_1 = __importDefault(require("express-async-handler"));
-const MovieService_1 = __importDefault(require("../Services/MovieService"));
-const MoviesModel_1 = require("../Models/MoviesModel");
+const inversify_1 = require("inversify");
 const mongoose_1 = __importDefault(require("mongoose"));
 const languageMapping = {
-    en: "Eng",
-    ta: "Tam",
-    ml: "Mal",
+    en: "English",
+    ta: "Tamil",
+    ml: "Malalayalam",
     hi: "Hindi",
     te: "Telugu",
 };
-class MovieController {
-    constructor() {
+let MovieController = class MovieController {
+    constructor(movieService) {
+        this.movieService = movieService;
         this.getMovieByIdHandler = (0, express_async_handler_1.default)(async (req, res) => {
             const movieId = req.params.id;
             if (!mongoose_1.default.Types.ObjectId.isValid(movieId)) {
@@ -23,7 +36,7 @@ class MovieController {
                 return;
             }
             try {
-                const movie = await MoviesModel_1.Movie.findById(movieId);
+                const movie = await this.movieService.findMovieById(movieId);
                 if (!movie) {
                     res.status(404).json({ message: "Movie not found" });
                     return;
@@ -42,7 +55,7 @@ class MovieController {
             const movieImageFiles = req.files["movieImages"] || [];
             const castImageFiles = req.files["castImages"] || [];
             try {
-                const updatedMovie = await MovieService_1.default.updateMovieData(id, updateData, posterFile, movieImageFiles, castImageFiles);
+                const updatedMovie = await this.movieService.updateMovieData(id, updateData, posterFile, movieImageFiles, castImageFiles);
                 if (!updatedMovie) {
                     res.status(404).json({ message: "Movie not found for updating" });
                     return;
@@ -59,7 +72,7 @@ class MovieController {
         this.deleteMovieHandler = (0, express_async_handler_1.default)(async (req, res) => {
             const { id } = req.params;
             try {
-                const deletedMovie = await MovieService_1.default.deleteMovieService(id);
+                const deletedMovie = await this.movieService.deleteMovieService(id);
                 if (!deletedMovie) {
                     res.status(404).json({ message: "Movie not found for deletion" });
                     return;
@@ -73,63 +86,6 @@ class MovieController {
                 res
                     .status(500)
                     .json({ message: "Error deleting Movie", error: error.message });
-            }
-        });
-        this.getAllReviewsController = (0, express_async_handler_1.default)(async (req, res) => {
-            try {
-                const reviews = await MovieService_1.default.getAllReviewsService();
-                if (!reviews.length) {
-                    res.status(404).json({ message: "No reviews found for this movie" });
-                    return;
-                }
-                res.status(200).json(reviews);
-            }
-            catch (error) {
-                console.error("Error fetching reviews:", error);
-                res.status(500).json({ message: "Error fetching reviews", error });
-            }
-        });
-        this.getReviewsController = (0, express_async_handler_1.default)(async (req, res) => {
-            const { movieId } = req.params;
-            if (!mongoose_1.default.Types.ObjectId.isValid(movieId)) {
-                res.status(400).json({ message: "Invalid Movie ID" });
-                return;
-            }
-            try {
-                const reviews = await MovieService_1.default.getReviewsByMovieId(movieId);
-                if (!reviews.length) {
-                    res.status(404).json({ message: "No reviews found for this movie" });
-                    return;
-                }
-                res.status(200).json(reviews);
-            }
-            catch (error) {
-                console.error("Error fetching reviews:", error);
-                res.status(500).json({ message: "Error fetching reviews", error });
-            }
-        });
-        this.addReviewsController = (0, express_async_handler_1.default)(async (req, res) => {
-            const { movieId, userId, rating, review } = req.body;
-            if (!mongoose_1.default.Types.ObjectId.isValid(movieId) || !mongoose_1.default.Types.ObjectId.isValid(userId)) {
-                res.status(400).json({ message: "Invalid Movie or User ID" });
-                return;
-            }
-            if (!rating || !review) {
-                res.status(400).json({ message: "Rating and comment are required" });
-                return;
-            }
-            try {
-                const newReview = await MovieService_1.default.addReview({ movieId, userId, rating, review });
-                // Recalculate and update average rating
-                await MovieService_1.default.updateAverageRating(movieId);
-                res.status(201).json({
-                    message: "Review added successfully",
-                    review: newReview,
-                });
-            }
-            catch (error) {
-                console.error("Error adding review:", error);
-                res.status(500).json({ message: "Error adding review", error });
             }
         });
     }
@@ -157,7 +113,7 @@ class MovieController {
                 images: movieImageFiles.map((file) => file.filename),
                 castsImages: castImageFiles.map((file) => file.filename),
             };
-            const newMovie = await MovieService_1.default.addMovie(movieData);
+            const newMovie = await this.movieService.addMovie(movieData);
             res
                 .status(201)
                 .json({ message: "Movie added successfully", movie: newMovie });
@@ -169,12 +125,21 @@ class MovieController {
     }
     async getAllMoviesController(req, res) {
         try {
-            const movies = await MovieService_1.default.getAllMovies();
+            if (!this.movieService) {
+                throw new Error("MovieService is undefined");
+            }
+            const movies = await this.movieService.getAllMoviesService();
             res.status(200).json({ movies });
         }
         catch (error) {
-            res.status(500).json({ message: "Failed to get movies", error });
+            console.error("Error fetching movies:", error instanceof Error ? error.message : error);
+            res.status(500).json({ message: "Failed to get movies" });
         }
     }
-}
-exports.default = new MovieController();
+};
+exports.MovieController = MovieController;
+exports.MovieController = MovieController = __decorate([
+    (0, inversify_1.injectable)(),
+    __param(0, (0, inversify_1.inject)("IMovieService")),
+    __metadata("design:paramtypes", [Object])
+], MovieController);

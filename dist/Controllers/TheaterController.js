@@ -1,23 +1,36 @@
 "use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.TheaterController = void 0;
 const express_async_handler_1 = __importDefault(require("express-async-handler"));
-const TheaterService_1 = __importDefault(require("../Services/TheaterService"));
 const EmailUtil_1 = __importDefault(require("../Utils/EmailUtil"));
-const TheaterOwnerModel_1 = __importDefault(require("../Models/TheaterOwnerModel"));
 const GenerateTheaterToken_1 = __importDefault(require("../Utils/GenerateTheaterToken"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const TheaterDetailsModel_1 = __importDefault(require("../Models/TheaterDetailsModel"));
 const MoviesModel_1 = require("../Models/MoviesModel");
 const ScreensModel_1 = require("../Models/ScreensModel");
 const UserModel_1 = __importDefault(require("../Models/UserModel"));
-const OffersModel_1 = require("../Models/OffersModel");
 const bookingModel_1 = require("../Models/bookingModel");
 const ScheduleModel_1 = require("../Models/ScheduleModel");
-class TheaterController {
-    constructor() {
+const inversify_1 = require("inversify");
+let TheaterController = class TheaterController {
+    constructor(theaterService, offerService) {
+        this.theaterService = theaterService;
+        this.offerService = offerService;
         this.authTheaterOwner = (0, express_async_handler_1.default)(async (req, res) => {
             const { email, password } = req.body;
             if (!email || !password) {
@@ -25,7 +38,7 @@ class TheaterController {
                 return;
             }
             try {
-                const theater = await TheaterService_1.default.authTheaterOwnerService(email, password);
+                const theater = await this.theaterService.authTheaterOwnerService(email, password);
                 GenerateTheaterToken_1.default.generateTheaterToken(res, theater._id.toString());
                 res.status(200).json({
                     id: theater._id,
@@ -63,53 +76,27 @@ class TheaterController {
                 return;
             }
             try {
-                let theaterOwner = await TheaterOwnerModel_1.default.findOne({ email });
-                if (theaterOwner) {
-                    GenerateTheaterToken_1.default.generateTheaterToken(res, theaterOwner._id.toString());
-                    res.status(200).json({
-                        success: true,
-                        data: {
-                            _id: theaterOwner._id,
-                            name: theaterOwner.name,
-                            email: theaterOwner.email,
-                        },
-                    });
-                }
-                else {
-                    theaterOwner = await TheaterOwnerModel_1.default.create({
-                        name,
-                        email,
-                        otp: "",
-                        phone: "",
-                        password: "",
-                    });
-                    if (theaterOwner) {
-                        GenerateTheaterToken_1.default.generateTheaterToken(res, theaterOwner._id.toString());
-                        res.status(201).json({
-                            success: true,
-                            data: {
-                                _id: theaterOwner._id,
-                                name: theaterOwner.name,
-                                email: theaterOwner.email,
-                            },
-                        });
-                    }
-                    else {
-                        res.status(400).json({ message: "Invalid theater Owner data" });
-                    }
-                }
+                const theaterOwner = await this.theaterService.googleLoginTheaterOwnerService(name, email);
+                res.status(200).json({
+                    success: true,
+                    data: {
+                        _id: theaterOwner._id,
+                        name: theaterOwner.name,
+                        email: theaterOwner.email,
+                    },
+                });
             }
             catch (error) {
-                console.error("Error in google Login:", error.message);
+                console.error("Error in Google Login:", error.message);
                 res
-                    .status(500)
-                    .json({ message: "Internal server error", error: error.message });
+                    .status(error.statusCode || 500)
+                    .json({ message: error.message || "Internal server error" });
             }
         });
         this.registerTheaterOwner = (0, express_async_handler_1.default)(async (req, res) => {
             const { name, email, password, phone } = req.body;
             try {
-                const theater = await TheaterService_1.default.registerTheaterOwnerService(name, email, password, phone);
+                const theater = await this.theaterService.registerTheaterOwnerService(name, email, password, phone);
                 const otpSent = !theater.otpVerified;
                 res.status(201).json({
                     id: theater._id.toString(),
@@ -147,7 +134,7 @@ class TheaterController {
         this.verifyTheaterOwnerOTP = (0, express_async_handler_1.default)(async (req, res) => {
             const { email, otp } = req.body;
             try {
-                await TheaterService_1.default.verifyTheaterOwnerOtpService(email, otp);
+                await this.theaterService.verifyTheaterOwnerOtpService(email, otp);
                 res.status(200).json({ message: "OTP verified successfully" });
             }
             catch (err) {
@@ -169,7 +156,7 @@ class TheaterController {
         this.resendTheaterOwnerOtp = (0, express_async_handler_1.default)(async (req, res) => {
             const { email } = req.body;
             try {
-                await TheaterService_1.default.resendTheaterOwnerOtpService(email);
+                await this.theaterService.resendTheaterOwnerOtpService(email);
                 res.status(200).json({ message: "OTP resent successfully" });
             }
             catch (err) {
@@ -196,8 +183,8 @@ class TheaterController {
                 return;
             }
             try {
-                const resetToken = await TheaterService_1.default.forgotTheaterOwnerPasswordService(email);
-                const resetUrl = `https://tickethive.fun/theater-reset-password/${resetToken}`;
+                const resetToken = await this.theaterService.forgotTheaterOwnerPasswordService(email);
+                const resetUrl = `http://localhost:5000/theater-reset-password/${resetToken}`;
                 const message = `Password reset link: ${resetUrl}`;
                 await EmailUtil_1.default.sendOtpEmail(email, message);
                 res.status(200).json({ message: "Password reset email sent" });
@@ -229,7 +216,7 @@ class TheaterController {
                 return;
             }
             try {
-                await TheaterService_1.default.resetTheaterOwnerPasswordService(resetToken, password);
+                await this.theaterService.resetTheaterOwnerPasswordService(resetToken, password);
                 res.status(200).json({ message: "Password reset successfully" });
             }
             catch (err) {
@@ -245,15 +232,16 @@ class TheaterController {
             }
         });
         this.getTheaterOwners = (0, express_async_handler_1.default)(async (req, res) => {
-            const admins = await TheaterService_1.default.getAllTheaterOwners();
+            const admins = await this.theaterService.getAllTheaterOwners();
             res.status(200).json(admins);
         });
         this.getTheaterProfile = (0, express_async_handler_1.default)(async (req, res) => {
-            if (!req.theaterOwner) {
+            const theaterOwnerId = req.theaterOwner?._id || null;
+            if (!theaterOwnerId) {
                 res.status(401).json({ message: "Unauthorized" });
                 return;
             }
-            const theaterOwner = await TheaterService_1.default.getTheaterOwnerProfile(req.theaterOwner._id);
+            const theaterOwner = await this.theaterService.getTheaterOwnerProfile(theaterOwnerId);
             res.status(200).json(theaterOwner);
         });
         this.updateTheaterProfile = (0, express_async_handler_1.default)(async (req, res) => {
@@ -266,8 +254,8 @@ class TheaterController {
                 const fileData = req.file
                     ? { filename: req.file.filename }
                     : { filename: undefined };
-                const updatedTheaterOwner = await TheaterService_1.default.updateTheaterOwnerProfileService(req.theaterOwner._id, updateData, fileData);
-                res.status(200).json({
+                const updatedTheaterOwner = await this.theaterService.updateTheaterOwnerProfileService(req.theaterOwner._id, updateData, fileData);
+                return res.status(200).json({
                     _id: updatedTheaterOwner._id,
                     name: updatedTheaterOwner.name,
                     phone: updatedTheaterOwner.phone,
@@ -296,7 +284,7 @@ class TheaterController {
                 .replace(/.*public[\\/]/, "")
                 .replace(/\\/g, "/");
             try {
-                await TheaterService_1.default.uploadCertificates(theaterId, certificatePath);
+                await this.theaterService.uploadCertificates(theaterId, certificatePath);
                 res
                     .status(200)
                     .json({ message: "Verification details submitted successfully" });
@@ -331,7 +319,7 @@ class TheaterController {
                 const showTimesArray = Array.isArray(showTimes)
                     ? showTimes
                     : [showTimes];
-                const response = await TheaterService_1.default.addTheaterService(req.theaterOwner._id, {
+                const response = await this.theaterService.addTheaterService(req.theaterOwner._id, {
                     theaterOwnerId: new mongoose_1.default.Types.ObjectId(req.theaterOwner._id),
                     name,
                     city,
@@ -357,7 +345,7 @@ class TheaterController {
             }
         });
         this.getTheaters = (0, express_async_handler_1.default)(async (req, res) => {
-            const theaters = await TheaterService_1.default.getAllTheaters();
+            const theaters = await this.theaterService.getAllTheaters();
             res.status(200).json(theaters);
         });
         this.getTheaterByIdHandler = (0, express_async_handler_1.default)(async (req, res) => {
@@ -367,12 +355,12 @@ class TheaterController {
                 return;
             }
             try {
-                const theater = await TheaterDetailsModel_1.default.findById(theaterId);
+                const theater = await this.theaterService.getTheaterById(theaterId);
                 if (!theater) {
                     res.status(404).json({ message: "Theater not found" });
                     return;
                 }
-                res.json(theater.toObject());
+                res.json(theater);
             }
             catch (error) {
                 console.error("Error in handler:", error);
@@ -382,8 +370,9 @@ class TheaterController {
         this.updateTheaterHandler = (0, express_async_handler_1.default)(async (req, res) => {
             const { id } = req.params;
             const updateData = req.body;
+            const files = req.files;
             try {
-                const updatedTheater = await TheaterService_1.default.updateTheaterData(id, updateData, req.files);
+                const updatedTheater = await this.theaterService.updateTheaterData(id, updateData, files);
                 if (!updatedTheater) {
                     res.status(404).json({ message: "Theater not found for updating" });
                     return;
@@ -392,15 +381,13 @@ class TheaterController {
             }
             catch (error) {
                 console.error("Error updating theater:", error);
-                res
-                    .status(500)
-                    .json({ message: "Error updating theater", error: error.message });
+                res.status(500).json({ message: "Error updating theater", error: error.message });
             }
         });
         this.deleteTheaterHandler = (0, express_async_handler_1.default)(async (req, res) => {
             const { id } = req.params;
             try {
-                const deletedTheater = await TheaterService_1.default.deleteTheaterService(id);
+                const deletedTheater = await this.theaterService.deleteTheaterService(id);
                 if (!deletedTheater) {
                     res.status(404).json({ message: "Theater not found for deletion" });
                     return;
@@ -519,98 +506,8 @@ class TheaterController {
                 res.status(500).json({ message: "Error fetching data", error: error });
             }
         });
-        this.addOfferController = (0, express_async_handler_1.default)(async (req, res) => {
-            const { ownerId, offerName, paymentMethod, offerDescription, discountValue, minPurchaseAmount, validityStart, validityEnd, applicableTheaters, } = req.body;
-            if (!ownerId ||
-                !offerName ||
-                !paymentMethod ||
-                !offerDescription ||
-                !discountValue ||
-                minPurchaseAmount === undefined ||
-                !validityStart ||
-                !validityEnd ||
-                !Array.isArray(applicableTheaters) ||
-                applicableTheaters.length === 0) {
-                res.status(400).json({ message: "All fields are required" });
-                return;
-            }
-            try {
-                const parsedValidityStart = new Date(validityStart);
-                const parsedValidityEnd = new Date(validityEnd);
-                const newOffer = new OffersModel_1.Offer({
-                    createdBy: ownerId,
-                    offerName,
-                    paymentMethod,
-                    description: offerDescription,
-                    discountValue,
-                    minPurchaseAmount,
-                    validityStart: parsedValidityStart,
-                    validityEnd: parsedValidityEnd,
-                    applicableTheaters,
-                });
-                const createdOffer = await newOffer.save();
-                res.status(201).json({
-                    message: "Offer created successfully",
-                    offer: createdOffer,
-                });
-            }
-            catch (error) {
-                console.error("Error creating offer:", error);
-                res.status(500).json({ message: "Server error. Please try again." });
-            }
-        });
-        this.updateOfferController = (0, express_async_handler_1.default)(async (req, res) => {
-            const { offerId } = req.params;
-            const offerData = req.body;
-            if (!offerId) {
-                res.status(400).json({ message: "Offer ID is required" });
-                return;
-            }
-            try {
-                const updatedOffer = await TheaterService_1.default.updateOfferService(offerId, offerData);
-                res.status(200).json({
-                    message: "Offer updated successfully",
-                    offer: updatedOffer,
-                });
-            }
-            catch (error) {
-                console.error("Error updating offer:", error);
-                res
-                    .status(error.statusCode || 500)
-                    .json({ message: error.message || "Internal server error" });
-            }
-        });
-        this.deleteOfferController = (0, express_async_handler_1.default)(async (req, res) => {
-            const { offerId } = req.params;
-            try {
-                const deletedOffer = await TheaterService_1.default.deleteOfferHandler(offerId);
-                if (!deletedOffer) {
-                    res.status(404).json({ message: "Offer not found for deletion" });
-                    return;
-                }
-                res
-                    .status(200)
-                    .json({ message: "Offer deleted successfully", deletedOffer });
-            }
-            catch (error) {
-                console.error("Error deleting Offer:", error);
-                res
-                    .status(500)
-                    .json({ message: "Error deleting Offer", error: error.message });
-            }
-        });
-        this.getOffersController = (0, express_async_handler_1.default)(async (req, res) => {
-            try {
-                const offers = await OffersModel_1.Offer.find();
-                res.status(200).json(offers);
-            }
-            catch (error) {
-                console.error("Error fetching offers:", error);
-                res.status(500).json({ message: "Server error. Please try again." });
-            }
-        });
         this.logoutTheaterOwner = (0, express_async_handler_1.default)(async (req, res) => {
-            await TheaterService_1.default.logoutTheaterOwnerService();
+            await this.theaterService.logoutTheaterOwnerService();
             res.cookie("theaterOwnerJwt", "", {
                 httpOnly: true,
                 secure: process.env.NODE_ENV !== "development",
@@ -620,5 +517,11 @@ class TheaterController {
             res.status(200).json({ message: "Theater Owner Logged out" });
         });
     }
-}
-exports.default = new TheaterController();
+};
+exports.TheaterController = TheaterController;
+exports.TheaterController = TheaterController = __decorate([
+    (0, inversify_1.injectable)(),
+    __param(0, (0, inversify_1.inject)("ITheaterService")),
+    __param(1, (0, inversify_1.inject)("IOfferService")),
+    __metadata("design:paramtypes", [Object, Object])
+], TheaterController);

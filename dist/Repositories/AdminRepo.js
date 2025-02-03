@@ -1,8 +1,18 @@
 "use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.AdminRepository = void 0;
 const dotenv_1 = __importDefault(require("dotenv"));
 const UserModel_1 = __importDefault(require("../Models/UserModel"));
 const TheaterOwnerModel_1 = __importDefault(require("../Models/TheaterOwnerModel"));
@@ -10,9 +20,22 @@ const TheaterDetailsModel_1 = __importDefault(require("../Models/TheaterDetailsM
 const mongoose_1 = __importDefault(require("mongoose"));
 const bookingModel_1 = require("../Models/bookingModel");
 const AdminModel_1 = __importDefault(require("../Models/AdminModel"));
+const inversify_1 = require("inversify");
+const BaseRepository_1 = require("./Base/BaseRepository");
 dotenv_1.default.config();
-class AdminRepository {
-    static getAdminCredentials() {
+let AdminRepository = class AdminRepository extends BaseRepository_1.BaseRepository {
+    constructor() {
+        super(AdminModel_1.default);
+        this.adminModel = AdminModel_1.default;
+    }
+    async authenticateAdmin(email, password) {
+        const { ADMIN_EMAIL, ADMIN_PASSWORD } = process.env;
+        if (email !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
+            throw new Error("Invalid Admin Email or Password");
+        }
+        return { email: ADMIN_EMAIL, password: ADMIN_PASSWORD };
+    }
+    async getAdminCredentials() {
         const adminEmail = process.env.ADMIN_EMAIL;
         const adminPassword = process.env.ADMIN_PASSWORD;
         if (!adminEmail || !adminPassword) {
@@ -20,7 +43,7 @@ class AdminRepository {
         }
         return { adminEmail, adminPassword };
     }
-    static async getAllUsers() {
+    async getAllUsers() {
         try {
             return await UserModel_1.default.find({}, { name: 1, email: 1, phone: 1, isBlocked: 1 });
         }
@@ -29,7 +52,7 @@ class AdminRepository {
             throw new Error("Error fetching users");
         }
     }
-    static async getAllTheaterOwners() {
+    async getAllTheaterOwners() {
         try {
             return await TheaterOwnerModel_1.default.find({}, { name: 1, email: 1, phone: 1, isBlocked: 1 });
         }
@@ -38,57 +61,64 @@ class AdminRepository {
             throw new Error("Error fetching theater owners");
         }
     }
-    static async findAllBookings() {
-        return await bookingModel_1.Booking.find({})
-            .populate("user", "name email")
-            .populate("movie theater screen offer")
-            .lean();
-    }
-    static async updateUser(userId, userData) {
+    async findAllBookings() {
         try {
-            if (!mongoose_1.default.Types.ObjectId.isValid(userId)) {
-                console.error(`Invalid userId format: ${userId}`);
-                throw new Error("Invalid userId format");
-            }
-            const user = await UserModel_1.default.findById(userId);
-            if (!user)
-                throw new Error("User not found");
-            Object.assign(user, userData);
-            return await user.save();
+            return await bookingModel_1.Booking.find({})
+                .populate("user", "name email")
+                .populate("movie theater screen offer")
+                .lean();
         }
         catch (error) {
-            console.error("Error in updateUser:", error);
-            throw new Error(error.message);
+            console.error("Error fetching bookings:", error);
+            throw new Error("Error fetching bookings");
         }
     }
-    static async updatedTheaterOwner(theaterOwnerId, theaterOwnerData) {
+    async updateUser(userId, userData) {
+        try {
+            if (!mongoose_1.default.Types.ObjectId.isValid(userId)) {
+                throw new Error("Invalid userId format");
+            }
+            const user = await UserModel_1.default.findByIdAndUpdate(userId, userData, {
+                new: true, // Return the updated document
+            });
+            return user;
+        }
+        catch (error) {
+            console.error("Error in updateUser:", error.message);
+            throw new Error("Error updating user");
+        }
+    }
+    async updatedTheaterOwner(theaterOwnerId, data) {
         try {
             if (!mongoose_1.default.Types.ObjectId.isValid(theaterOwnerId)) {
-                console.error(`Invalid theaterOwnerId format: ${theaterOwnerId}`);
                 throw new Error("Invalid theaterOwnerId format");
             }
             const theaterOwner = await TheaterOwnerModel_1.default.findById(theaterOwnerId);
-            if (!theaterOwner)
-                throw new Error("Theater Owner not found");
-            Object.assign(theaterOwner, theaterOwnerData);
+            if (!theaterOwner) {
+                throw new Error("Theater owner not found");
+            }
+            Object.assign(theaterOwner, data);
             return await theaterOwner.save();
         }
         catch (error) {
-            console.error("Error in updatedTheaterOwner:", error);
-            throw new Error(error.message);
+            console.error("Error updating theater owner:", error.message);
+            throw new Error("Error updating theater owner");
         }
     }
-    static async getPendingTheaterOwnerVerifications() {
+    async getPendingTheaterOwnerVerifications() {
         try {
-            return await TheaterDetailsModel_1.default.find({ verificationStatus: "pending" }).select("-password");
+            await TheaterDetailsModel_1.default.find({ verificationStatus: "pending" }).select("-password");
         }
         catch (error) {
             console.error("Error fetching pending theater verifications:", error);
             throw new Error("Error fetching pending theater verifications");
         }
     }
-    static async findTheaterOwnerById(id) {
+    async findTheaterOwnerById(id) {
         try {
+            if (!mongoose_1.default.Types.ObjectId.isValid(id)) {
+                throw new Error("Invalid ID format");
+            }
             return await TheaterOwnerModel_1.default.findById(id);
         }
         catch (error) {
@@ -96,8 +126,11 @@ class AdminRepository {
             throw new Error("Error finding Theater Owner");
         }
     }
-    static async findTheaterById(id) {
+    async findTheaterById(id) {
         try {
+            if (!mongoose_1.default.Types.ObjectId.isValid(id)) {
+                throw new Error("Invalid ID format");
+            }
             return await TheaterDetailsModel_1.default.findById(id);
         }
         catch (error) {
@@ -105,7 +138,7 @@ class AdminRepository {
             throw new Error("Error finding Theater");
         }
     }
-    static async saveTheater(theater) {
+    async saveTheater(theater) {
         try {
             return await theater.save();
         }
@@ -114,14 +147,19 @@ class AdminRepository {
             throw new Error("Error saving Theater");
         }
     }
-    static async getAllAdmins() {
+    async getAllAdmins() {
         try {
-            const admins = await AdminModel_1.default.find({});
-            return admins;
+            return await AdminModel_1.default.find({});
         }
         catch (error) {
+            console.error("Error fetching admins:", error);
             throw new Error("Error fetching admins");
         }
     }
-}
+};
+exports.AdminRepository = AdminRepository;
+exports.AdminRepository = AdminRepository = __decorate([
+    (0, inversify_1.injectable)(),
+    __metadata("design:paramtypes", [])
+], AdminRepository);
 exports.default = AdminRepository;

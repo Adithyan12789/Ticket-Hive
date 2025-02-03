@@ -1,49 +1,30 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.BookingController = void 0;
 const express_async_handler_1 = __importDefault(require("express-async-handler"));
-const BookingService_1 = __importStar(require("../Services/BookingService"));
-const BookingService_2 = __importDefault(require("../Services/BookingService"));
+const BookingService_1 = require("../Services/BookingService");
 const MoviesModel_1 = require("../Models/MoviesModel");
-const WalletService_1 = __importDefault(require("../Services/WalletService"));
-const NotificationService_1 = __importDefault(require("../Services/NotificationService"));
-class BookingController {
-    constructor() {
+const inversify_1 = require("inversify");
+let BookingController = class BookingController {
+    constructor(bookingService, notificationService, walletService) {
+        this.bookingService = bookingService;
+        this.notificationService = notificationService;
+        this.walletService = walletService;
         this.createBooking = (0, express_async_handler_1.default)(async (req, res) => {
             const { userId, scheduleId, theaterId, seatIds, screenId, bookingDate, showTime, totalPrice, paymentStatus, paymentMethod, convenienceFee, offerId, movieId, } = req.body;
             if (!movieId ||
@@ -68,25 +49,24 @@ class BookingController {
                     return;
                 }
                 if (paymentMethod === "wallet") {
-                    const walletBalance = await WalletService_1.default.getWalletBalance(userId);
+                    const walletBalance = await this.walletService.getWalletBalance(userId);
                     if (walletBalance < totalPrice) {
                         res.status(400).json({ message: "Insufficient wallet balance" });
                         return;
                     }
                     const description = `Payment for booking "${movieTitle}"`;
-                    await WalletService_1.default.deductAmountFromWallet(userId, totalPrice, description);
+                    await this.walletService.deductAmountFromWallet(userId, totalPrice, description);
                 }
                 const nextDay = new Date(bookingDate);
                 nextDay.setDate(nextDay.getDate() + 1);
                 const formattedNextDay = nextDay.toISOString();
-                console.log(formattedNextDay);
-                const booking = await BookingService_2.default.createBookingService(movieId, scheduleId, theaterId, screenId, seatIds, userId, offerId, totalPrice, showTime, paymentStatus, paymentMethod, convenienceFee, formattedNextDay);
-                await NotificationService_1.default.addNotification(userId, `Your ticket for the movie "${movieTitle}" has been booked successfully.`);
+                const booking = await this.bookingService.createBookingService(movieId, scheduleId, theaterId, screenId, seatIds, userId, offerId, totalPrice, showTime, paymentStatus, paymentMethod, convenienceFee, formattedNextDay);
+                await this.notificationService.addNotification(userId, `Your ticket for the movie "${movieTitle}" has been booked successfully.`);
                 if (paymentMethod === "wallet") {
                     const cashbackPercentage = 10;
                     const cashbackAmount = (totalPrice * cashbackPercentage) / 100;
-                    await WalletService_1.default.addCashbackToWallet(userId, cashbackAmount, `Cashback for booking "${movieTitle}"`);
-                    await NotificationService_1.default.addNotification(userId, `You've received a cashback of ₹${cashbackAmount.toFixed(2)} for your booking of "${movieTitle}".`);
+                    await this.walletService.addCashbackToWallet(userId, cashbackAmount, `Cashback for booking "${movieTitle}"`);
+                    await this.notificationService.addNotification(userId, `You've received a cashback of ₹${cashbackAmount.toFixed(2)} for your booking of "${movieTitle}".`);
                 }
                 res.status(201).json({
                     message: "Booking successful",
@@ -105,67 +85,14 @@ class BookingController {
                 }
             }
         });
-        this.getUnreadNotifications = (0, express_async_handler_1.default)(async (req, res) => {
-            try {
-                const userId = req.user?._id;
-                console.log("getUnreadNotifications userId: ", userId);
-                if (!userId) {
-                    res.status(400).json({ message: "User ID is required" });
-                    return;
-                }
-                const notifications = await NotificationService_1.default.getUnreadNotifications(userId);
-                console.log("notifications: ", notifications);
-                res.json(notifications);
-            }
-            catch (error) {
-                res.status(500).json({ message: "Server error" });
-            }
-        });
-        this.markNotificationAsRead = (0, express_async_handler_1.default)(async (req, res) => {
-            console.log("enetered mark");
-            const { id: notificationId } = req.params;
-            console.log("req.params: ", req.params);
-            console.log("notificationId: ", notificationId);
-            const userId = req.user?._id;
-            try {
-                if (!userId) {
-                    res.status(400).json({ message: "User ID is required" });
-                    return;
-                }
-                const message = await NotificationService_1.default.markNotificationAsRead(userId, notificationId);
-                res.json({ message });
-            }
-            catch (error) {
-                res
-                    .status(error.statusCode || 500)
-                    .json({ message: error.message || "Server error" });
-            }
-        });
-        this.clearNotifications = (0, express_async_handler_1.default)(async (req, res) => {
-            const userId = req.user?._id;
-            console.log("userId: ", userId);
-            if (!userId) {
-                res.status(400).json({ message: "User ID is required" });
-                return;
-            }
-            try {
-                await NotificationService_1.default.deleteAllNotifications(userId);
-                res.json({ message: "All notifications cleared" });
-            }
-            catch (error) {
-                res.status(500).json({ message: error.message || "Server error" });
-            }
-        });
         this.getAllTickets = (0, express_async_handler_1.default)(async (req, res) => {
-            console.log("entered getAllTickets function");
             try {
                 const { userId } = req.params;
-                console.log("hmghnjhgn userId: ", userId);
                 if (!userId) {
                     res.status(401).json({ message: "Unauthorized access" });
                     return;
                 }
-                const tickets = await BookingService_2.default.getAllTicketsService(userId);
+                const tickets = await this.bookingService.getAllTicketsService(userId);
                 if (!tickets || tickets.length === 0) {
                     res.status(404).json({ message: "No tickets found for this user" });
                     return;
@@ -207,7 +134,7 @@ class BookingController {
                 return;
             }
             try {
-                const cancellationResult = await BookingService_2.default.cancelTicketService(bookingId, userId);
+                const cancellationResult = await this.bookingService.cancelTicketService(bookingId, userId);
                 res.status(200).json({
                     success: true,
                     message: "Booking canceled successfully",
@@ -223,12 +150,9 @@ class BookingController {
             }
         });
         this.getBookingDetails = (0, express_async_handler_1.default)(async (req, res) => {
-            console.log("enter getBookingDetails admin");
             try {
                 const { bookingId } = req.params;
-                console.log("admin bookingId: ", bookingId);
-                const booking = await BookingService_1.default.getBookingDetails(bookingId);
-                console.log("getBookingDetails coontroller booking: ", booking);
+                const booking = await this.bookingService.getBookingDetails(bookingId);
                 if (booking) {
                     res.status(200).json(booking);
                 }
@@ -242,11 +166,9 @@ class BookingController {
             }
         });
         this.getTicketDetails = (0, express_async_handler_1.default)(async (req, res) => {
-            console.log("enter getTicketDetails admin");
             try {
                 const { ticketId } = req.params;
-                console.log("admin ticketId: ", ticketId);
-                const ticket = await BookingService_1.default.getTicketDetails(ticketId);
+                const ticket = await this.bookingService.getTicketDetails(ticketId);
                 if (ticket) {
                     res.status(200).json(ticket);
                 }
@@ -272,7 +194,7 @@ class BookingController {
                     res.status(400).json({ message: "Invalid status" });
                     return;
                 }
-                const updatedBooking = await BookingService_2.default.updateBookingStatusService(bookingId, status);
+                const updatedBooking = await this.bookingService.updateBookingStatusService(bookingId, status);
                 if (!updatedBooking) {
                     res.status(404).json({ message: "Booking not found" });
                     return;
@@ -293,7 +215,7 @@ class BookingController {
             try {
                 const { ticketId } = req.params;
                 const updatedData = req.body;
-                const updatedTicket = await BookingService_1.default.updateTicket(ticketId, updatedData);
+                const updatedTicket = await this.bookingService.updateTicket(ticketId, updatedData);
                 if (updatedTicket) {
                     res
                         .status(200)
@@ -311,7 +233,7 @@ class BookingController {
         this.getUserBookings = (0, express_async_handler_1.default)(async (req, res) => {
             try {
                 const { userId } = req.params;
-                const bookings = await BookingService_1.default.getUserBookings(userId);
+                const bookings = await this.bookingService.getUserBookings(userId);
                 res.status(200).json(bookings);
             }
             catch (error) {
@@ -322,7 +244,7 @@ class BookingController {
         this.getTheaterBookings = (0, express_async_handler_1.default)(async (req, res) => {
             try {
                 const { theaterId } = req.params;
-                const bookings = await BookingService_1.default.getTheaterBookings(theaterId);
+                const bookings = await this.bookingService.getTheaterBookings(theaterId);
                 res.status(200).json(bookings);
             }
             catch (error) {
@@ -331,5 +253,12 @@ class BookingController {
             }
         });
     }
-}
-exports.default = new BookingController();
+};
+exports.BookingController = BookingController;
+exports.BookingController = BookingController = __decorate([
+    (0, inversify_1.injectable)(),
+    __param(0, (0, inversify_1.inject)("IBookingService")),
+    __param(1, (0, inversify_1.inject)("INotificationService")),
+    __param(2, (0, inversify_1.inject)("IWalletService")),
+    __metadata("design:paramtypes", [Object, Object, Object])
+], BookingController);

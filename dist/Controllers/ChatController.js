@@ -1,212 +1,129 @@
 "use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ChatController = void 0;
+const inversify_1 = require("inversify");
 const express_async_handler_1 = __importDefault(require("express-async-handler"));
-const ChatRoomModel_1 = require("../Models/ChatRoomModel");
-const MessageModel_1 = require("../Models/MessageModel");
-const TheaterDetailsModel_1 = __importDefault(require("../Models/TheaterDetailsModel"));
 const Socket_1 = require("../Config/Socket");
-class ChatRoomController {
-    constructor() {
+const mongoose_1 = __importDefault(require("mongoose"));
+let ChatController = class ChatController {
+    constructor(chatService) {
+        this.chatService = chatService;
         this.getChatRooms = (0, express_async_handler_1.default)(async (req, res) => {
             const theaterOwnerId = req.theaterOwner._id;
-            console.log("getChatRooms theaterOwnerId: ", theaterOwnerId);
-            const chatRooms = await ChatRoomModel_1.ChatRoom.find({ theaterOwnerId }).populate('adminId', 'name');
-            console.log("getChatRooms chatRooms: ", chatRooms);
-            const chatRoomsWithUnreadCount = await Promise.all(chatRooms.map(async (room) => {
-                const unreadMessagesCount = await MessageModel_1.Message.countDocuments({
-                    chatRoomId: room._id,
-                    senderType: 'Admin',
-                    read: false,
-                });
-                console.log("getChatRooms unreadMessagesCount: ", unreadMessagesCount);
-                // Emit the unread count update through socket.io
-                Socket_1.io.in(room._id.toString()).emit("unreadMessage", {
-                    roomId: room._id,
-                    count: unreadMessagesCount
-                });
-                return {
-                    ...room.toObject(),
-                    unreadMessagesCount,
-                };
-            }));
-            console.log("getChatRooms chatRoomsWithUnreadCount: ", chatRoomsWithUnreadCount);
-            res.json(chatRoomsWithUnreadCount);
+            const chatRooms = await this.chatService.getChatRooms(theaterOwnerId);
+            res.json(chatRooms);
         });
         this.createChatRoom = (0, express_async_handler_1.default)(async (req, res) => {
-            console.log("llll");
             const { adminId } = req.body;
             const theaterOwnerId = req.theaterOwner._id;
-            console.log("body: ", req.body);
-            console.log("theaterOwnerId: ", theaterOwnerId);
-            let chatRoom = await ChatRoomModel_1.ChatRoom.findOne({ adminId, theaterOwnerId });
-            console.log("chatRoom: ", chatRoom);
-            if (!chatRoom) {
-                chatRoom = await ChatRoomModel_1.ChatRoom.create({ adminId, theaterOwnerId });
-                console.log("created chatRoom: ", chatRoom);
-            }
+            const chatRoom = await this.chatService.createChatRoom(adminId, theaterOwnerId);
             res.status(201).json(chatRoom);
         });
         this.getMessages = (0, express_async_handler_1.default)(async (req, res) => {
-            const messages = await MessageModel_1.Message.find({ chatRoomId: req.params.chatRoomId }).sort('timestamp');
+            const chatRoomId = req.params.chatRoomId;
+            console.log("ChatRoomId received in Controller for THeaterOwner:", chatRoomId);
+            if (!mongoose_1.default.Types.ObjectId.isValid(chatRoomId)) {
+                res.status(400).json({ error: "Invalid chatRoomId format" });
+                return;
+            }
+            const messages = await this.chatService.getMessages(chatRoomId);
             res.json(messages);
         });
         this.sendMessage = (0, express_async_handler_1.default)(async (req, res) => {
             const chatRoomId = req.params.chatRoomId;
             const { content, senderType } = req.body;
             const file = req.file;
-            const newMessageData = {
+            const messageData = {
                 chatRoomId,
                 createdAt: Date.now(),
+                content,
+                senderType,
+                sender: senderType === "Admin" ? req.admin._id : req.theaterOwner._id,
             };
             if (file) {
-                newMessageData.fileUrl = `/MessageFiles/${file.filename}`;
-                newMessageData.fileName = file.originalname;
+                messageData.fileUrl = `/MessageFiles/${file.filename}`;
+                messageData.fileName = file.originalname;
             }
-            if (content) {
-                newMessageData.content = content;
-            }
-            if (senderType === "Admin") {
-                if (!req.admin) {
-                    throw new Error("Admin data is missing in the request.");
-                }
-                newMessageData.sender = req.admin._id;
-                newMessageData.senderType = "Admin";
-            }
-            else if (senderType === "TheaterOwner") {
-                if (!req.theaterOwner) {
-                    throw new Error("Theater data is missing in the request.");
-                }
-                newMessageData.sender = req.theaterOwner._id;
-                newMessageData.senderType = "TheaterOwner";
-            }
-            else {
-                throw new Error("Invalid senderType provided.");
-            }
-            const newMessage = await MessageModel_1.Message.create(newMessageData);
-            await ChatRoomModel_1.ChatRoom.findByIdAndUpdate(chatRoomId, {
-                lastMessage: content,
-                lastMessageTime: Date.now(),
-            });
-            const io = req.app.get("io");
-            io.to(chatRoomId).emit("message", newMessage);
+            const newMessage = await this.chatService.sendMessage(chatRoomId, messageData);
+            Socket_1.io.to(chatRoomId).emit("message", newMessage);
             res.status(201).json(newMessage);
         });
         this.getUnreadMessages = (0, express_async_handler_1.default)(async (req, res) => {
             const theaterOwnerId = req.theaterOwner._id;
-            console.log("getUnreadMessages theaterOwnerId: ", theaterOwnerId);
-            const chatRooms = await ChatRoomModel_1.ChatRoom.find({ theaterOwnerId });
-            console.log("getUnreadMessages chatRooms: ", chatRooms);
-            const chatRoomIds = chatRooms.map((room) => room._id);
-            const unreadMessages = await MessageModel_1.Message.find({
-                chatRoomId: { $in: chatRoomIds },
-                senderType: 'TheaterOwner',
-                read: false,
-            });
+            const unreadMessages = await this.chatService.getUnreadMessages(theaterOwnerId);
             res.json(unreadMessages);
         });
         this.getAdminUnreadMessages = (0, express_async_handler_1.default)(async (req, res) => {
             const theaterOwnerId = req.theaterOwner._id;
-            const theaters = await TheaterDetailsModel_1.default.find({ theaterOwnerId });
-            const theaterIds = theaters.map((theater) => theater._id);
-            const chatRooms = await ChatRoomModel_1.ChatRoom.find({ theaterId: { $in: theaterIds } });
-            const chatRoomIds = chatRooms.map((room) => room._id);
-            const unreadMessages = await MessageModel_1.Message.find({
-                chatRoomId: { $in: chatRoomIds },
-                senderType: 'Admin',
-                read: false,
-            });
+            const unreadMessages = await this.chatService.getAdminUnreadMessages(theaterOwnerId);
             res.json(unreadMessages);
         });
         this.markMessagesAsRead = (0, express_async_handler_1.default)(async (req, res) => {
             const { chatRoomId } = req.body;
-            console.log("theater owner chatRoomId: ", chatRoomId);
-            await MessageModel_1.Message.updateMany({ chatRoomId, senderType: { $ne: 'TheaterOwner' }, read: false }, { $set: { read: true } });
-            res.status(200).json({ message: 'Messages marked as read' });
+            await this.chatService.markMessagesAsRead(chatRoomId, "TheaterOwner");
+            res.status(200).json({ message: "Messages marked as read" });
         });
         this.getAdminChatRooms = (0, express_async_handler_1.default)(async (req, res) => {
             const adminId = req.params.adminId;
-            console.log("getAdminChatRooms adminId: ", adminId);
-            const chatRooms = await ChatRoomModel_1.ChatRoom.find({ adminId }).populate('theaterOwnerId', 'name');
-            console.log("getAdminChatRooms chatRooms: ", chatRooms);
-            const chatRoomsWithUnreadCount = await Promise.all(chatRooms.map(async (room) => {
-                const unreadMessagesCount = await MessageModel_1.Message.countDocuments({
-                    chatRoomId: room._id,
-                    senderType: 'TheaterOwner',
-                    read: false,
-                });
-                console.log("unreadMessagesCount: ", unreadMessagesCount);
-                Socket_1.io.in(room._id.toString()).emit("unreadMessage", {
-                    roomId: room._id,
-                    count: unreadMessagesCount
-                });
-                return {
-                    ...room.toObject(),
-                    unreadMessagesCount,
-                };
-            }));
-            console.log("chatRoomsWithUnreadCount: ", chatRoomsWithUnreadCount);
-            res.json(chatRoomsWithUnreadCount);
+            const chatRooms = await this.chatService.getAdminChatRooms(adminId);
+            console.log("ChatRooms: ", chatRooms);
+            res.json(chatRooms);
         });
         this.getAdminMessages = (0, express_async_handler_1.default)(async (req, res) => {
-            const messages = await MessageModel_1.Message.find({ chatRoomId: req.params.chatRoomId }).sort('timestamp');
+            const chatRoomId = req.params.chatRoomId;
+            console.log("ChatRoomId received in Controller for Admin:", chatRoomId);
+            if (!mongoose_1.default.Types.ObjectId.isValid(chatRoomId)) {
+                res.status(400).json({ error: "Invalid chatRoomId format" });
+                return;
+            }
+            const messages = await this.chatService.getAdminMessages(chatRoomId);
             res.json(messages);
         });
-        this.sendAdminMessages = (0, express_async_handler_1.default)(async (req, res) => {
+        this.sendAdminMessage = (0, express_async_handler_1.default)(async (req, res) => {
+            const chatRoomId = req.params.chatRoomId;
             const { content, senderType, theaterOwnerId } = req.body;
-            const newMessageData = {
-                chatRoomId: req.params.chatRoomId,
+            const file = req.file;
+            const messageData = {
+                chatRoomId,
                 createdAt: Date.now(),
+                content,
+                senderType,
+                sender: senderType === "Admin" ? req.admin?._id : theaterOwnerId,
                 read: false,
             };
-            if (req.file) {
-                newMessageData.fileUrl = `/MessageFiles/${req.file.filename}`;
-                newMessageData.fileName = req.file.originalname;
+            if (file) {
+                messageData.fileUrl = `/MessageFiles/${file.filename}`;
+                messageData.fileName = file.originalname;
             }
-            if (content) {
-                newMessageData.content = content;
-            }
-            // Determine sender based on senderType
-            if (senderType === "Admin") {
-                if (!req.admin) {
-                    throw new Error("Admin data is missing in the request.");
-                }
-                newMessageData.sender = req.admin._id;
-                newMessageData.senderType = "Admin";
-            }
-            else if (senderType === "TheaterOwner") {
-                if (!theaterOwnerId) {
-                    throw new Error("TheaterOwner ID is missing in the request.");
-                }
-                newMessageData.sender = theaterOwnerId;
-                newMessageData.senderType = "TheaterOwner";
-            }
-            else {
-                throw new Error("Invalid senderType provided.");
-            }
-            try {
-                const newMessage = await MessageModel_1.Message.create(newMessageData);
-                await ChatRoomModel_1.ChatRoom.findByIdAndUpdate(req.params.chatRoomId, {
-                    lastMessage: content,
-                    lastMessageTime: Date.now(),
-                });
-                const io = req.app.get("io");
-                io.to(req.params.chatRoomId).emit("message", newMessage);
-                res.status(201).json(newMessage);
-            }
-            catch (error) {
-                console.error("Error creating message:", error);
-                res.status(500).json({ error: "Failed to create message" });
-            }
+            const newMessage = await this.chatService.sendAdminMessage(chatRoomId, messageData);
+            Socket_1.io.to(chatRoomId).emit("message", newMessage);
+            res.status(201).json(newMessage);
         });
         this.markAdminMessagesAsRead = (0, express_async_handler_1.default)(async (req, res) => {
             const { chatRoomId } = req.body;
-            console.log("admin chatRoomId: ", chatRoomId);
-            await MessageModel_1.Message.updateMany({ chatRoomId, senderType: { $ne: 'Admin' }, read: false }, { $set: { read: true } });
-            res.status(200).json({ message: 'Messages marked as read' });
+            await this.chatService.markMessagesAsRead(chatRoomId, "Admin");
+            res.status(200).json({ message: "Messages marked as read" });
         });
     }
-}
-exports.default = new ChatRoomController();
+};
+exports.ChatController = ChatController;
+exports.ChatController = ChatController = __decorate([
+    (0, inversify_1.injectable)(),
+    __param(0, (0, inversify_1.inject)("IChatService")),
+    __metadata("design:paramtypes", [Object])
+], ChatController);

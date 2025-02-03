@@ -1,16 +1,27 @@
 "use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.BookingService = void 0;
 exports.getMovieTitleById = getMovieTitleById;
 const mongoose_1 = __importDefault(require("mongoose"));
-const BookingRepo_1 = __importDefault(require("../Repositories/BookingRepo"));
-const WalletRepo_1 = __importDefault(require("../Repositories/WalletRepo"));
 const uuid_1 = require("uuid");
 const MoviesModel_1 = require("../Models/MoviesModel");
 const ScheduleModel_1 = require("../Models/ScheduleModel");
-const MovieRepo_1 = __importDefault(require("../Repositories/MovieRepo"));
+const inversify_1 = require("inversify");
 async function getMovieTitleById(movieId) {
     const movie = await MoviesModel_1.Movie.findById(movieId);
     if (!movie) {
@@ -18,11 +29,14 @@ async function getMovieTitleById(movieId) {
     }
     return movie.title;
 }
-class BookingService {
-    constructor() {
+let BookingService = class BookingService {
+    constructor(bookingRepository, movieRepository, walletRepository) {
+        this.bookingRepository = bookingRepository;
+        this.movieRepository = movieRepository;
+        this.walletRepository = walletRepository;
         this.updateBookingStatusService = async (bookingId, status) => {
             try {
-                const updatedBooking = await BookingRepo_1.default.updateBookingStatus(bookingId, status);
+                const updatedBooking = await this.bookingRepository.updateBookingStatus(bookingId, status);
                 return updatedBooking;
             }
             catch (error) {
@@ -32,7 +46,6 @@ class BookingService {
     }
     async createBookingService(movieId, scheduleId, theaterId, screenId, seatIds, userId, offerId, totalPrice, showTime, paymentStatus, paymentMethod, convenienceFee, formattedBookingDate) {
         const formattedDateOnly = formattedBookingDate.split("T")[0];
-        console.log("formattedDateOnly: ", formattedDateOnly);
         const startOfDay = new Date(formattedDateOnly + "T00:00:00.000Z");
         const endOfDay = new Date(formattedDateOnly + "T23:59:59.999Z");
         // Try to find the existing schedule based on the date and show time
@@ -41,10 +54,8 @@ class BookingService {
             date: { $gte: startOfDay, $lte: endOfDay },
             "showTimes.time": showTime,
         });
-        console.log("schedule: ", schedule);
         if (!schedule) {
             const existingSchedule = await ScheduleModel_1.Schedule.findOne({ screen: screenId });
-            console.log("entered not schedule");
             if (!existingSchedule) {
                 throw new Error("No existing schedule found for the screen to use its layout.");
             }
@@ -80,7 +91,7 @@ class BookingService {
         // Save the updated schedule
         await schedule.save();
         // Create the new booking record
-        const newBooking = await BookingRepo_1.default.createBooking({
+        const newBooking = await this.bookingRepository.createBooking({
             movie: new mongoose_1.default.Types.ObjectId(movieId),
             theater: new mongoose_1.default.Types.ObjectId(theaterId),
             screen: new mongoose_1.default.Types.ObjectId(screenId),
@@ -97,8 +108,7 @@ class BookingService {
         return newBooking;
     }
     async getAllTicketsService(userId) {
-        const bookings = await BookingRepo_1.default.findAllBookings(userId);
-        console.log("iiiiiiiiiii bookings: ", bookings);
+        const bookings = await this.bookingRepository.findAllBookings(userId);
         if (!bookings.length)
             throw new Error("No tickets found");
         return bookings.map((booking) => ({
@@ -123,7 +133,7 @@ class BookingService {
     }
     async cancelTicketService(bookingId, userId) {
         // Find the booking
-        const booking = await BookingRepo_1.default.findBookingById(bookingId);
+        const booking = await this.bookingRepository.findBookingById(bookingId);
         if (!booking)
             throw new Error("Booking not found");
         // Check if the booking belongs to the user
@@ -131,7 +141,7 @@ class BookingService {
             throw new Error("You are not authorized to cancel this ticket");
         }
         const { seats, showTime, totalPrice, bookingDate, screen, movie } = booking;
-        const movieDetails = await MovieRepo_1.default.findMovieById(movie);
+        const movieDetails = await this.movieRepository.findMovieById(movie.toString());
         if (!movieDetails)
             throw new Error("Movie details not found");
         // Find the relevant schedule
@@ -163,7 +173,7 @@ class BookingService {
         booking.paymentStatus = "cancelled";
         await booking.save();
         // Process the wallet refund
-        const wallet = await WalletRepo_1.default.findWalletByUserId(userId);
+        const wallet = await this.walletRepository.findWalletByUserId(userId);
         if (!wallet)
             throw new Error("Wallet not found");
         const transaction = {
@@ -180,27 +190,26 @@ class BookingService {
         return { message: "Booking canceled successfully", booking };
     }
     async getTicketDetails(ticketId) {
-        const ticket = await BookingRepo_1.default.findTicketById(ticketId);
+        const ticket = await this.bookingRepository.findTicketById(ticketId);
         if (!ticket)
             throw new Error("Ticket not found");
         return ticket;
     }
     async getBookingDetails(bookingId) {
-        const booking = await BookingRepo_1.default.findBookingById(bookingId);
-        console.log("getBookingDetails service booking: ", booking);
+        const booking = await this.bookingRepository.findBookingById(bookingId);
         if (!booking)
             throw new Error("Booking not found");
         return booking;
     }
     async updateTicket(ticketId, updatedData) {
-        const updatedTicket = await BookingRepo_1.default.updateBooking(ticketId, updatedData);
+        const updatedTicket = await this.bookingRepository.updateBooking(ticketId, updatedData);
         if (!updatedTicket)
             throw new Error("Failed to update ticket");
         return updatedTicket;
     }
     async getUserBookings(userId) {
         try {
-            return await BookingRepo_1.default.getUserBookings(userId);
+            return await this.bookingRepository.getUserBookings(userId);
         }
         catch (error) {
             if (error instanceof Error) {
@@ -212,7 +221,14 @@ class BookingService {
         }
     }
     async getTheaterBookings(theaterId) {
-        return await BookingRepo_1.default.getTheaterBookings(theaterId);
+        return await this.bookingRepository.getTheaterBookings(theaterId);
     }
-}
-exports.default = new BookingService();
+};
+exports.BookingService = BookingService;
+exports.BookingService = BookingService = __decorate([
+    (0, inversify_1.injectable)(),
+    __param(0, (0, inversify_1.inject)("IBookingRepository")),
+    __param(1, (0, inversify_1.inject)("IMovieRepository")),
+    __param(2, (0, inversify_1.inject)("IWalletRepository")),
+    __metadata("design:paramtypes", [Object, Object, Object])
+], BookingService);

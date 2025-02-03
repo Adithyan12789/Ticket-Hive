@@ -1,12 +1,28 @@
 "use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.NotificationService = void 0;
 const Socket_1 = require("../Config/Socket");
-const NotificationModel_1 = require("../Models/NotificationModel");
+const inversify_1 = require("inversify");
 const CustomError_1 = require("../Utils/CustomError");
-class NotificationService {
-    static async addNotification(userId, message) {
+let NotificationService = class NotificationService {
+    constructor(notificationRepository) {
+        this.notificationRepository = notificationRepository;
+    }
+    async addNotification(userId, message) {
         try {
-            const notification = await NotificationModel_1.Notification.create({ userId, message });
+            const notification = await this.notificationRepository.create({ userId, message });
             Socket_1.io.to(userId).emit("newNotification", { notification });
             console.log(`Real-time: Notification sent to user ${userId}: ${message}`);
         }
@@ -14,24 +30,19 @@ class NotificationService {
             console.error("Failed to add notification:", error);
         }
     }
-    static async getUnreadNotifications(userId) {
+    async getUnreadNotifications(userId) {
         try {
-            const unreadNotifications = await NotificationModel_1.Notification.find({
-                userId: userId,
-                isRead: false
-            }).sort({ createdAt: -1 });
-            console.log("unreadNotifications: ", unreadNotifications);
-            console.log(`Fetched ${unreadNotifications.length} unread notifications for user ${userId}`);
-            return unreadNotifications;
+            const notifications = await this.notificationRepository.findUnreadNotifications(userId);
+            return notifications;
         }
         catch (error) {
             console.error("Failed to fetch unread notifications:", error);
-            throw error;
+            throw new CustomError_1.CustomError("Unable to fetch notifications", 500);
         }
     }
-    static async markNotificationAsRead(userId, notificationId) {
+    async markNotificationAsRead(userId, notificationId) {
         try {
-            const notification = await NotificationModel_1.Notification.findById(notificationId);
+            const notification = await this.notificationRepository.findNotificationById(notificationId);
             if (!notification) {
                 throw new CustomError_1.CustomError("Notification not found", 404);
             }
@@ -39,12 +50,11 @@ class NotificationService {
                 throw new CustomError_1.CustomError("Not authorized", 401);
             }
             notification.isRead = true;
-            await notification.save();
+            await this.notificationRepository.updateNotification(notification);
             Socket_1.io.to(userId).emit("updateNotifications", {
                 type: "markAsRead",
                 notificationId,
             });
-            console.log(`Real-time: Notification marked as read for user ${userId}`);
             return "Notification marked as read";
         }
         catch (error) {
@@ -52,18 +62,22 @@ class NotificationService {
             throw error;
         }
     }
-    static async deleteAllNotifications(userId) {
+    async deleteAllNotifications(userId) {
         try {
-            await NotificationModel_1.Notification.deleteMany({ userId });
+            await this.notificationRepository.deleteAllNotificationsByUser(userId);
             Socket_1.io.to(userId).emit("updateNotifications", {
                 type: "clearAll",
             });
-            console.log(`Real-time: All notifications cleared for user ${userId}`);
         }
         catch (error) {
             console.error("Failed to delete notifications:", error);
-            throw error;
+            throw new CustomError_1.CustomError("Unable to clear notifications", 500);
         }
     }
-}
-exports.default = NotificationService;
+};
+exports.NotificationService = NotificationService;
+exports.NotificationService = NotificationService = __decorate([
+    (0, inversify_1.injectable)(),
+    __param(0, (0, inversify_1.inject)("INotificationRepository")),
+    __metadata("design:paramtypes", [Object])
+], NotificationService);
