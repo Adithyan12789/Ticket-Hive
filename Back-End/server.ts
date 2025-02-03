@@ -23,15 +23,16 @@ const allowedOrigins = [
 ];
 
 app.use(cors({
-  origin: function(origin, callback) {
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      callback(new Error("Not allowed by CORS"));
     }
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: "GET,POST,PATCH,PUT,DELETE,OPTIONS", // Ensure PATCH is included
+  allowedHeaders: "Content-Type,Authorization",
 }));
 
 app.use(express.json());
@@ -39,11 +40,17 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(morgan('dev'));
 
+app.options("*", (req, res) => {
+  res.header("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS");
+  res.sendStatus(200);
+});
+
 // Configure cookie settings for cross-origin
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Credentials', 'true');
   next();
 });
+
 
 app.use(express.static('Back-End/public')); 
 
