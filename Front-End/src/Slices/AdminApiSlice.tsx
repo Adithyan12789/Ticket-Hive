@@ -39,11 +39,8 @@ export const adminApiSlice = apiSlice.injectEndpoints({
     adminUnblockUser: builder.mutation({
       query: (body) => ({
         url: `${ADMIN_URL}/unblock-user`,
-        method: "POST", // ✅ Change PATCH → POST
-        body: JSON.stringify(body),
-        headers: {
-          "Content-Type": "application/json",
-        },
+        method: "POST",
+        body,
       }),
     }),
     
