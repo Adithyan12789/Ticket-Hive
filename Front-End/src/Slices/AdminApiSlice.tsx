@@ -40,9 +40,12 @@ export const adminApiSlice = apiSlice.injectEndpoints({
       query: (body) => ({
         url: `${ADMIN_URL}/unblock-user`,
         method: 'PATCH',
-        body,
+        body: JSON.stringify(body),
+        headers: {
+          "Content-Type": "application/json", // ✅ Ensures proper request format
+        },
       }),
-    }),
+    }),    
 
     adminBlockTheaterOwner: builder.mutation({
       query: (body) => ({
