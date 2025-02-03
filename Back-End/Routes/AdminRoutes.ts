@@ -20,10 +20,10 @@ const movieControllerr = container.get<MovieController>("MovieController");
 router.post('/admin-login', adminController.adminLogin);
 router.get('/get-user', AdminAuthMiddleware.protect, adminController.getAllUsers);
 router.get('/get-theaterOwners', AdminAuthMiddleware.protect, adminController.getAllTheaterOwners);
-router.post('/blockUser', adminController.blockUserController);
-router.post('/unblock-user', AdminAuthMiddleware.protect, adminController.unblockUserController);
-router.post('/block-theaterOwner', AdminAuthMiddleware.protect, adminController.blockTheaterOwnerController);
-router.post('/unblock-theaterOwner', AdminAuthMiddleware.protect, adminController.unblockTheaterOwnerController);
+router.put('/blockUser', adminController.blockUserController);
+router.put('/unblock-user', AdminAuthMiddleware.protect, adminController.unblockUserController);
+router.put('/block-theaterOwner', AdminAuthMiddleware.protect, adminController.blockTheaterOwnerController);
+router.put('/unblock-theaterOwner', AdminAuthMiddleware.protect, adminController.unblockTheaterOwnerController);
 router.get('/verification',AdminAuthMiddleware.protect,adminController.getVerificationDetails) 
 router.put('/verification/:theaterId/accept',AdminAuthMiddleware.protect,adminController.acceptVerification) 
 router.put('/verification/:adminId/reject', AdminAuthMiddleware.protect,adminController.rejectVerification); 
