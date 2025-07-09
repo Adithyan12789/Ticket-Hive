@@ -19,7 +19,8 @@ const port = process.env.PORT || 5000;
 const allowedOrigins = [
   'https://www.tickethive.fun',
   'https://ticket-hive-dusky.vercel.app/',
-  'http://localhost:3000'
+  'http://localhost:3000',
+  'https://ticket-hive-p2hi.onrender.com' // Added Render frontend URL
 ];
 
 app.use(cors({
