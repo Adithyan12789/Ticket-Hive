@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 const baseQuery = fetchBaseQuery({ 
-  baseUrl: process.env.NEXT_PUBLIC_API_URL || 'https://api.tickethive.fun/',
+  baseUrl: process.env.NEXT_PUBLIC_API_URL || 'https://ticket-hive-twk0.onrender.com/',
   credentials: 'include',
 });
 

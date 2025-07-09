@@ -21,7 +21,7 @@ import { backendUrl } from "../../url";
 const PROFILE_IMAGE_DIR_PATH = `${backendUrl}/UserProfileImages/`;
 const DEFAULT_PROFILE_IMAGE = "/profileImage_1729749713837.jpg";
 
-const socket = io("https://api.tickethive.fun");
+const socket = io("https://ticket-hive-twk0.onrender.com");
 
 interface Notification {
   _id: number;

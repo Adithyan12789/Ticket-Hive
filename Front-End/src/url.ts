@@ -1,1 +1,1 @@
-export const backendUrl = "https://api.tickethive.fun";
+export const backendUrl = "https://ticket-hive-twk0.onrender.com";

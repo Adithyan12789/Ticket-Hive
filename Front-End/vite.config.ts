@@ -8,11 +8,11 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target: "https://api.tickethive.fun",
+        target: "https://ticket-hive-twk0.onrender.com",
         changeOrigin: true,
       },
       '/socket.io': {
-        target: "https://api.tickethive.fun",
+        target: "https://ticket-hive-twk0.onrender.com",
         ws: true,
         changeOrigin: true,
       },
