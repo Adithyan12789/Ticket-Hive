@@ -28,12 +28,12 @@ export const usersApiSlice = apiSlice.injectEndpoints({
 
     register: builder.mutation<UserResponse, RegisterCredentials>({
       query: (data) => ({
-        url: `${USERS_URL}/signup`,
+        url: `${USERS_URL}/signup`, // resolves to /api/users/signup
         method: "POST",
         body: data,
       }),
     }),
-
+    
     verifyOtp: builder.mutation<UserResponse, OtpCredentials>({
       query: (data) => ({
         url: `${USERS_URL}/verifyotp`,
