@@ -12,7 +12,7 @@ const io = new Server(server, {
       "http://localhost:3000", 
       "https://www.tickethive.fun", 
       "https://ticket-hive-dusky.vercel.app/",
-      "https://ticket-hive-p2hi.onrender.com" // Added Render frontend URL
+      "https://ticket-hive-c2cf.onrender.com/" // Added Render frontend URL
     ],
     methods: ["GET", "POST"],
     credentials: true,
