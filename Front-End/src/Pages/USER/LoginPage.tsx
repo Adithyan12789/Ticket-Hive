@@ -177,7 +177,7 @@ const LoginPage = () => {
 
           <div className="pt-5 user-login-now">
             <p>
-              Already a User? <a href="/signup">Sign Up</a>
+              Already a User? <a href="/sign-up">Sign Up</a>
             </p>
           </div>
         </form>

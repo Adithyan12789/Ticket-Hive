@@ -20,7 +20,7 @@ export const UserRoutes = (
   <>
     <Route index element={<HomePage />} />
     <Route path="/login" element={<LoginPage />} />
-    <Route path="/signup" element={<RegisterPage />} />
+    <Route path="/sign-up" element={<RegisterPage />} />
     <Route path="/verifyotp" element={<RegisterPage />} />
     <Route path="/forgot-password" element={<ForgotPassword />} />
     <Route path="/reset-password/:token" element={<ResetPassword />} />

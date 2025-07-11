@@ -225,7 +225,7 @@ const Header: React.FC = () => {
                   <LinkContainer to="/login">
                     <Nav.Link className="text-light me-3">Sign In</Nav.Link>
                   </LinkContainer>
-                  <LinkContainer to="/signup">
+                  <LinkContainer to="/sign-up">
                     <Nav.Link className="text-light">Sign Up</Nav.Link>
                   </LinkContainer>
                 </>

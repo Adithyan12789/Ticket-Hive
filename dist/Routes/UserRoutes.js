@@ -19,7 +19,7 @@ const walletControllerr = container_1.container.get("WalletController");
 const screenControllerr = container_1.container.get("ScreenController");
 router.post('/auth', userControllerr.authUser);
 router.post('/googleLogin', userControllerr.googleLogin);
-router.post('/signup', userControllerr.registerUser);
+router.post('/sign-up', userControllerr.registerUser);
 router.post('/verifyotp', userControllerr.verifyOTP);
 router.post('/resend-otp', userControllerr.resendOtp);
 router.post('/forgot-password', userControllerr.forgotPassword);

@@ -12,7 +12,7 @@ const App: React.FC = () => {
   const location = useLocation();
 
   const isSignInPage = location.pathname === "/login";
-  const isSignUpPage = location.pathname === "/signup";
+  const isSignUpPage = location.pathname === "/sign-up";
   const isAdminSignInPage = location.pathname === "/admin-login";
   const isForgotPasswordPage = location.pathname === "/forgot-password";
   const isResetPasswordPage = /^\/reset-password\/.+$/.test(location.pathname);
