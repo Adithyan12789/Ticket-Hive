@@ -20,7 +20,7 @@ const allowedOrigins = [
   'https://www.tickethive.fun',
   'https://ticket-hive-dusky.vercel.app/',
   'http://localhost:3000',
-  'https://ticket-hive-c2cf.onrender.com/' // Added Render frontend URL
+  'https://ticket-hive-c2cf.onrender.com' // Added Render frontend URL
 ];
 
 app.use(cors({

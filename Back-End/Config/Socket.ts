@@ -1,4 +1,4 @@
-// Previous imports remain the same
+
 import { Server, Socket } from "socket.io";
 import express from "express";
 import http from "http";
@@ -12,7 +12,7 @@ const io = new Server(server, {
       "http://localhost:3000", 
       "https://www.tickethive.fun", 
       "https://ticket-hive-dusky.vercel.app/",
-      "https://ticket-hive-c2cf.onrender.com/" // Added Render frontend URL
+      "https://ticket-hive-c2cf.onrender.com" // Added Render frontend URL
     ],
     methods: ["GET", "POST"],
     credentials: true,
