@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Row, Col, Card, Form, InputGroup } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { useGetMoviesQuery } from "../../Store/UserApiSlice";
-import Loader from "./Loader";
 import { MovieManagement } from "../../Core/MoviesTypes";
 import { backendUrl } from "../../url";
 
@@ -13,7 +12,7 @@ const AllMoviesPage: React.FC = () => {
   const [selectedGenre, setSelectedGenre] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState<string>("");
 
-  const { data, isLoading } = useGetMoviesQuery(undefined);
+  const { data } = useGetMoviesQuery(undefined);
   const movies = data?.movies || [];
 
   const languages = [

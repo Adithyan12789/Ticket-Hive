@@ -3,7 +3,7 @@ import { useGetAllBookingDetailsQuery } from "../../Store/TheaterApiSlice";
 import TheaterOwnerLayout from "./TheaterLayout";
 import Loader from "../../Features/User/Loader";
 import { FaInfoCircle, FaSearch } from "react-icons/fa";
-import { BookingDetails } from "../../Types/BookingTypes";
+import { BookingDetails } from "../../Core/BookingTypes";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 
@@ -145,7 +145,7 @@ const TheaterBookingScreen: React.FC = () => {
                       </td>
                       <td className="p-4 text-center">
                         <button
-                          onClick={() => navigate(`${booking.bookingId}`)}
+                          onClick={() => navigate(booking.bookingId)}
                           className="px-4 py-2 bg-blue-600/20 text-blue-400 border border-blue-600/30 rounded-lg hover:bg-blue-600 hover:text-white transition-all text-sm font-medium flex items-center justify-center gap-2 mx-auto"
                         >
                           <FaInfoCircle />

@@ -18,7 +18,7 @@ const AdminHeader: React.FC = () => {
 
   const logoutHandler = async () => {
     try {
-      await logoutApiCall().unwrap();
+      await logoutApiCall(undefined).unwrap();
       dispatch(logout());
       navigate("/admin-login");
     } catch (err) {

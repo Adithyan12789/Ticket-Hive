@@ -1,6 +1,6 @@
 import React from 'react';
 import TheaterSidebar from './TheaterSideBar';
-import { TheaterOwnerLayoutProps } from '../../Types/TheaterTypes';
+import { TheaterOwnerLayoutProps } from "../../Core/TheaterTypes";
 
 const TheaterOwnerLayout: React.FC<TheaterOwnerLayoutProps> = ({ children }) => {
   return (

@@ -11,7 +11,6 @@ import {
   FaMapMarkerAlt,
   FaFileAlt,
   FaCogs,
-  FaTheaterMasks,
   FaPlus,
   FaArrowLeft,
   FaVideo

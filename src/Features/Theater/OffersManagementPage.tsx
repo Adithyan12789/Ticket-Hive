@@ -17,7 +17,7 @@ import {
   useUpdateOfferMutation,
   useDeleteOfferMutation,
 } from "../../Store/TheaterApiSlice";
-import { Offer, Theater } from "../../Types/TheaterTypes";
+import { Offer, Theater } from "../../Core/TheaterTypes";
 import TheaterSidebar from "./TheaterSideBar";
 import Select, { MultiValue } from "react-select";
 import { RootState } from "../../Store";
@@ -51,7 +51,7 @@ const OfferManagementPage: React.FC = () => {
     isLoading: offersLoading,
     refetch,
   } = useGetOffersQuery({});
-  
+
   const [addOffer, { isLoading: addOfferLoading }] = useAddOfferMutation();
   const [updateOffer] = useUpdateOfferMutation();
   const [deleteOffer] = useDeleteOfferMutation();
@@ -65,11 +65,11 @@ const OfferManagementPage: React.FC = () => {
       console.error("Error fetching theaters", err);
     }
   }, [getTheaters]);
-  
+
   useEffect(() => {
     fetchData();
   }, [fetchData]);
-  
+
   useEffect(() => {
     document.title = "Ticket Hive - Offer Management";
   }, []);

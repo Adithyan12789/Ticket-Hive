@@ -7,7 +7,7 @@ import {
   useGetTheaterOwnerProfileQuery,
   useUpdateTheaterOwnerMutation,
 } from "../../Store/TheaterApiSlice";
-import { TheaterInfo } from "../../Types/TheaterTypes";
+import { TheaterInfo } from "../../Core/TheaterTypes";
 import TheaterProfileSidebar from "./TheaterProfileSidebar";
 import { backendUrl } from "../../url";
 import { motion, AnimatePresence } from "framer-motion";
