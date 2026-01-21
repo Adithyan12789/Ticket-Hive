@@ -29,7 +29,28 @@ import { Admin, Message, MessageData } from "../../Core/ChatTypes";
 import { backendUrl } from "../../url";
 import { motion, AnimatePresence } from "framer-motion";
 
-const socket = io(backendUrl);
+const socket = io(backendUrl, {
+  reconnection: true,
+  reconnectionAttempts: 5,
+  reconnectionDelay: 1000,
+  reconnectionDelayMax: 5000,
+  timeout: 20000,
+  transports: ['websocket', 'polling'],
+  autoConnect: true,
+});
+
+// Add connection error handling
+socket.on('connect_error', (error) => {
+  console.warn('Socket connection error:', error.message);
+});
+
+socket.on('connect', () => {
+  console.log('Socket connected successfully');
+});
+
+socket.on('disconnect', (reason) => {
+  console.log('Socket disconnected:', reason);
+});
 
 const defaultProfileImage =
   "https://media.istockphoto.com/id/1495088043/vector/user-profile-icon-avatar-or-person-icon-profile-picture-portrait-symbol-default-portrait.jpg?s=612x612&w=0&k=20&c=dhV2p1JwmloBTOaGAtaA3AW1KSnjsdMt7-U_3EZElZ0=";

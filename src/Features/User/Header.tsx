@@ -29,7 +29,28 @@ const PROFILE_IMAGE_DIR_PATH = `${backendUrl}/UserProfileImages/`;
 const DEFAULT_PROFILE_IMAGE = "/profileImage_1729749713837.jpg";
 
 // Initialize socket outside component to prevent multiple connections
-const socket = io(backendUrl);
+const socket = io(backendUrl, {
+  reconnection: true,
+  reconnectionAttempts: 5,
+  reconnectionDelay: 1000,
+  reconnectionDelayMax: 5000,
+  timeout: 20000,
+  transports: ['websocket', 'polling'],
+  autoConnect: true,
+});
+
+// Add connection error handling
+socket.on('connect_error', (error) => {
+  console.warn('Socket connection error:', error.message);
+});
+
+socket.on('connect', () => {
+  console.log('Socket connected successfully');
+});
+
+socket.on('disconnect', (reason) => {
+  console.log('Socket disconnected:', reason);
+});
 
 interface Notification {
   _id: string;
