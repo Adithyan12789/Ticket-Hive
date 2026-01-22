@@ -62,13 +62,22 @@ const AdminLoginPage = () => {
         console.warn("User is not an admin", res);
         toast.error('You do not have admin access');
       }
-    } catch (err: unknown) {
-      console.error("Admin Login Error:", err);
-      if (typeof err === 'object' && err !== null && 'data' in err) {
-        const error = err as { data?: { message?: string } };
-        toast.error(error.data?.message || 'An error occurred');
+    } catch (err: any) {
+      console.error("Admin Login Error Details:", {
+        status: err?.status,
+        data: err?.data,
+        error: err?.error,
+        message: err?.message
+      });
+
+      if (err?.data?.message) {
+        toast.error(err.data.message);
+      } else if (err?.status === 400) {
+        toast.error('Bad Request: Please check your credentials or server configuration');
+      } else if (err?.status === 'FETCH_ERROR') {
+        toast.error('Cannot connect to server. Please check if backend is running.');
       } else {
-        toast.error('An error occurred');
+        toast.error('An unexpected error occurred during login');
       }
     }
   };
