@@ -10,12 +10,18 @@ const baseQuery = fetchBaseQuery({
     const adminInfo = state.adminAuth?.adminInfo;
     const adminToken = adminInfo?.token;
 
+    const theaterInfo = state.theaterAuth?.theaterInfo;
+    const theaterToken = theaterInfo?.token;
+
     if (adminToken) {
       headers.set("Authorization", `Bearer ${adminToken}`);
+    } else if (theaterToken) {
+      headers.set("Authorization", `Bearer ${theaterToken}`);
     }
 
     return headers;
   },
+  credentials: "include",
 });
 
 export const apiSlice = createApi({
