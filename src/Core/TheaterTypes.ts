@@ -6,7 +6,7 @@ export interface Theater {
   _id: string;
   name: string;
   email: string;
-  phone: number;
+  phone: string;
   isBlocked?: boolean;
 }
 
@@ -14,7 +14,7 @@ export interface Theater {
 export interface RegisterCredentials {
   name: string;
   email: string;
-  phone: number;
+  phone: string;
   password: string;
 }
 
@@ -87,7 +87,7 @@ export interface TheaterVerification {
   verificationStatus: string;
   certificate?: string;
   email?: string;
-  phone?: number;
+  phone?: string;
 }
 
 export interface TheaterOwnersTableProps {

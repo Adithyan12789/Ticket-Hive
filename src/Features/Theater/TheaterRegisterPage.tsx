@@ -104,7 +104,7 @@ const SignUpPage = () => {
         name,
         email,
         password,
-        phone: Number(phone),
+        phone,
       }).unwrap();
 
       console.log(response);
@@ -338,7 +338,7 @@ const SignUpPage = () => {
         </form>
 
         <div className="text-center my-4 flex justify-center">
-          <GoogleOAuthProvider clientId="677515594917-egtbr0hasoe3pf9j7npt2sk1s3v0e5e2.apps.googleusercontent.com">
+          <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || "677515594917-egtbr0hasoe3pf9j7npt2sk1s3v0e5e2.apps.googleusercontent.com"}>
             <GoogleLogin
               onSuccess={handleGoogleSuccess}
               onError={() => toast.error("Google login failed.")}

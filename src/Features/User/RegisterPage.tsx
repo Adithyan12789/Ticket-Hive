@@ -63,7 +63,7 @@ const SignUpPage = () => {
     }
 
     try {
-      await register({ name, email, password, phone: Number(phone) }).unwrap();
+      await register({ name, email, password, phone }).unwrap();
       toast.success("Registration successful, please verify your OTP");
       const expiresAt = new Date(Date.now() + 1 * 60 * 1000 + 59 * 1000);
       setOtpExpires(expiresAt);
