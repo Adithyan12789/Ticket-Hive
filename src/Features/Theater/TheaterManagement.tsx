@@ -10,11 +10,34 @@ import {
   useUploadTheaterCertificateMutation,
 } from "../../Store/TheaterApiSlice";
 import { toast } from "react-toastify";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import TheaterOwnerLayout from "./TheaterLayout";
 import Loader from "../../Features/User/Loader";
 import { TheaterManagement } from "../../Core/TheaterTypes";
 import { backendUrl } from "../../url";
+import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
+
+// Leaflet icon fix
+import markerIcon from "leaflet/dist/images/marker-icon.png";
+import markerShadow from "leaflet/dist/images/marker-shadow.png";
+
+const DefaultIcon = L.icon({
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+});
+L.Marker.prototype.options.icon = DefaultIcon;
+
+const ChangeView = ({ center }: { center: [number, number] }) => {
+  const map = useMap();
+  useEffect(() => {
+    map.setView(center, 13);
+  }, [center, map]);
+  return null;
+};
 
 const THEATER_IMAGES_DIR_PATH = `${backendUrl}/TheatersImages/`;
 const DEFAULT_THEATER_IMAGE = "/profileImage_1729749713837.jpg";
@@ -26,7 +49,11 @@ const AddTheaterScreen: React.FC = () => {
     useState<TheaterManagement | null>(null);
   const [name, setName] = useState<string>("");
   const [city, setCity] = useState<string>("");
-  const [address, setAddress] = useState<string>("");
+  const [addressLine1, setAddressLine1] = useState<string>("");
+  const [addressLine2, setAddressLine2] = useState<string>("");
+  const [pincode, setPincode] = useState<string>("");
+  const [state, setState] = useState<string>("");
+  const [country, setCountry] = useState<string>("");
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [showTimes, setShowTimes] = useState([
     { hour: "01", minute: "00", ampm: "AM" },
@@ -61,7 +88,6 @@ const AddTheaterScreen: React.FC = () => {
   const [updateTheater] = useUpdateTheaterMutation();
   const [deleteTheater] = useDeleteTheaterMutation();
   const [uploadTheaterCertificate] = useUploadTheaterCertificateMutation();
-  const navigate = useNavigate();
   const [getTheaters, { isLoading }] = useGetTheatersMutation();
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [itemsPerPage] = useState<number>(3);
@@ -79,7 +105,11 @@ const AddTheaterScreen: React.FC = () => {
   const resetFormFields = () => {
     setName("");
     setCity("");
-    setAddress("");
+    setAddressLine1("");
+    setAddressLine2("");
+    setPincode("");
+    setState("");
+    setCountry("");
     setDescription("");
     setAmenities([""]);
     setLatitude(0);
@@ -92,7 +122,11 @@ const AddTheaterScreen: React.FC = () => {
     setSelectedTheater(theater);
     setName(theater.name);
     setCity(theater.city);
-    setAddress(theater.address);
+    setAddressLine1(theater.addressLine1 || "");
+    setAddressLine2(theater.addressLine2 || "");
+    setPincode(theater.pincode || "");
+    setState(theater.state || "");
+    setCountry(theater.country || "");
     setDescription(theater.description);
     setAmenities(theater.amenities);
     setLatitude(theater.latitude);
@@ -201,6 +235,30 @@ const AddTheaterScreen: React.FC = () => {
   const validateTicketPrice = (value: string) =>
     /^[0-9]+(\.[0-9]{1,2})?$/.test(value);
 
+  const fetchCoordinates = async () => {
+    const fullAddress = `${addressLine1}, ${city}, ${state}, ${pincode}, ${country}`;
+    try {
+      setLoading(true);
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+          fullAddress
+        )}`
+      );
+      const data = await response.json();
+      if (data && data.length > 0) {
+        setLatitude(parseFloat(data[0].lat));
+        setLongitude(parseFloat(data[0].lon));
+        toast.success("Location found on map!");
+      } else {
+        toast.error("Could not find location. Please check the address details.");
+      }
+    } catch (error) {
+      toast.error("Error fetching coordinates");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -210,17 +268,24 @@ const AddTheaterScreen: React.FC = () => {
 
     const trimmedName = name.trim();
     const trimmedCity = city.trim();
-    const trimmedAddress = address.trim();
+    const trimmedAddressLine1 = addressLine1.trim();
+    const trimmedAddressLine2 = addressLine2.trim();
+    const trimmedPincode = pincode.trim();
+    const trimmedState = state.trim();
+    const trimmedCountry = country.trim();
     const trimmedDescription = description.trim();
-    const trimmedAmenities = amenities.map((item) => item.trim()).join(", ");
-    const trimmedLatitude = latitude; // Keep as number
-    const trimmedLongitude = longitude; // Keep as number
+    const trimmedAmenities = amenities.map((item) => item.trim()).filter(a => a).join(", ");
+    const trimmedLatitude = latitude;
+    const trimmedLongitude = longitude;
     const trimmedPrice = String(ticketPrice).trim();
 
     if (
       !trimmedName ||
       !trimmedCity ||
-      !trimmedAddress ||
+      !trimmedAddressLine1 ||
+      !trimmedPincode ||
+      !trimmedState ||
+      !trimmedCountry ||
       !selectedImages.length ||
       !trimmedDescription ||
       !trimmedAmenities ||
@@ -230,7 +295,7 @@ const AddTheaterScreen: React.FC = () => {
         (time) => !time.hour.trim() || !time.minute.trim() || !time.ampm.trim()
       )
     ) {
-      toast.error("All fields are required");
+      toast.error("All fields (except Address Line 2) are required. Please check if you found the location on map.");
       return;
     }
 
@@ -245,12 +310,7 @@ const AddTheaterScreen: React.FC = () => {
     }
 
     if (!validateCoordinates(trimmedLatitude, trimmedLongitude)) {
-      toast.error("Invalid latitude or longitude");
-      return;
-    }
-
-    if (formattedShowTimes.some((time) => !time)) {
-      toast.error("All show times are required");
+      toast.error("Invalid latitude or longitude. Please click 'Find on Map'");
       return;
     }
 
@@ -264,12 +324,16 @@ const AddTheaterScreen: React.FC = () => {
       const formData = new FormData();
       formData.append("name", trimmedName);
       formData.append("city", trimmedCity);
-      formData.append("address", trimmedAddress);
+      formData.append("addressLine1", trimmedAddressLine1);
+      formData.append("addressLine2", trimmedAddressLine2);
+      formData.append("pincode", trimmedPincode);
+      formData.append("state", trimmedState);
+      formData.append("country", trimmedCountry);
       formData.append("ticketPrice", trimmedPrice);
       formData.append("description", trimmedDescription);
       formData.append("amenities", trimmedAmenities);
-      formData.append("latitude", trimmedLatitude.toString()); // Sending as number, converting to string for FormData
-      formData.append("longitude", trimmedLongitude.toString()); // Sending as number, converting to string for FormData
+      formData.append("latitude", trimmedLatitude.toString());
+      formData.append("longitude", trimmedLongitude.toString());
 
       selectedImages.forEach((image) => formData.append("images", image));
 
@@ -280,57 +344,43 @@ const AddTheaterScreen: React.FC = () => {
       await addTheater(formData).unwrap();
       toast.success("Theater added successfully");
       handleModalClose();
-      navigate("/theater/management");
       fetchData();
-    }// eslint-disable-next-line @typescript-eslint/no-explicit-any
-    catch (err: any) {
+    } catch (err: any) {
       toast.error(err?.data?.message || err.error);
     } finally {
       setLoading(false);
     }
   };
 
-
   const handleEditSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const lat = typeof latitude === "string" ? latitude : 0;
-    const long = typeof longitude === "string" ? longitude : 0;
+    const lat = typeof latitude === "string" ? parseFloat(latitude) : latitude;
+    const long = typeof longitude === "string" ? parseFloat(longitude) : longitude;
     const trimmedPrice = String(ticketPrice).trim();
 
-    const formData = new FormData();
-    formData.append("name", name.trim());
-    formData.append("city", city.trim());
-    formData.append("address", address.trim());
-    formData.append("description", description.trim());
-    formData.append("amenities", amenities.join(", "));
-    formData.append("latitude", lat.toString());
-    formData.append("longitude", long.toString());
-    formData.append("ticketPrice", trimmedPrice);
-
-    showTimes.forEach((time) => {
-      formData.append(
-        "showTimes[]",
-        `${time.hour}:${time.minute} ${time.ampm}`
-      );
-    });
-
-    if (selectedImages.length) {
-      selectedImages.forEach((image) => formData.append("images", image));
-    }
-
-    if (!validateTicketPrice(ticketPrice.trim())) {
+    if (!validateTicketPrice(trimmedPrice)) {
       toast.error("Please enter a valid ticket price");
       return;
     }
 
+    if (!validateCoordinates(lat, long)) {
+      toast.error("Invalid latitude or longitude. Please click 'Find on Map'");
+      return;
+    }
+
     try {
+      setLoading(true);
       const data = {
         name: name.trim(),
         city: city.trim(),
-        address: address.trim(),
+        addressLine1: addressLine1.trim(),
+        addressLine2: addressLine2.trim(),
+        pincode: pincode.trim(),
+        state: state.trim(),
+        country: country.trim(),
         description: description.trim(),
-        ticketPrice: ticketPrice.trim(),
+        ticketPrice: trimmedPrice,
         amenities: amenities,
         latitude: lat,
         longitude: long,
@@ -339,13 +389,34 @@ const AddTheaterScreen: React.FC = () => {
         ),
       };
 
-      await updateTheater({ id: selectedTheater?._id, data }).unwrap();
+      if (selectedImages.length) {
+        // For updates with images, you might need FormData depending on how your API is set up.
+        // Assuming updateTheater takes the object directly if no files, but let's check.
+        // If files are present, the current updateTheater call might need adjustment.
+        // Looking at the controller, it handles files.
+
+        const formData = new FormData();
+        Object.keys(data).forEach(key => {
+          if (key === 'amenities' || key === 'showTimes') {
+            (data as any)[key].forEach((item: string) => formData.append(`${key}[]`, item));
+          } else {
+            formData.append(key, (data as any)[key]);
+          }
+        });
+        selectedImages.forEach((image) => formData.append("images", image));
+
+        await updateTheater({ id: selectedTheater?._id, data: formData }).unwrap();
+      } else {
+        await updateTheater({ id: selectedTheater?._id, data }).unwrap();
+      }
+
       toast.success("Theater updated successfully");
       handleEditModalClose();
       fetchData();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       toast.error(err?.data?.message || err.error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -684,47 +755,85 @@ const AddTheaterScreen: React.FC = () => {
                           <h3 className="text-white font-bold flex items-center gap-2 text-lg border-b border-white/10 pb-2">
                             <FaMap className="text-red-500" /> Location Details
                           </h3>
-                          <div>
-                            <label className="block text-gray-400 text-sm font-semibold mb-2 ml-1">Full Address</label>
-                            <textarea
-                              value={address}
-                              onChange={(e) => setAddress(e.target.value)}
-                              placeholder="Enter the complete street address..."
-                              rows={3}
-                              className="w-full px-4 py-3 bg-dark-bg border border-gray-700 rounded-xl focus:border-red-500 focus:ring-1 focus:ring-red-500 outline-none text-white transition-all resize-none placeholder-gray-600"
-                            />
-                          </div>
-
-                          <div className="bg-dark-bg/50 p-4 rounded-xl border border-white/5">
-                            <label className="block text-gray-300 text-sm font-semibold mb-3">Map Coordinates</label>
+                          <div className="space-y-4">
+                            <div>
+                              <label className="block text-gray-400 text-sm font-semibold mb-2 ml-1">Address Line 1</label>
+                              <input
+                                type="text"
+                                value={addressLine1}
+                                onChange={(e) => setAddressLine1(e.target.value)}
+                                placeholder="Street address, P.O. box"
+                                className="w-full px-4 py-3 bg-dark-bg border border-gray-700 rounded-xl focus:border-red-500 focus:ring-1 focus:ring-red-500 outline-none text-white transition-all placeholder-gray-600"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-gray-400 text-sm font-semibold mb-2 ml-1">Address Line 2 (Optional)</label>
+                              <input
+                                type="text"
+                                value={addressLine2}
+                                onChange={(e) => setAddressLine2(e.target.value)}
+                                placeholder="Apartment, suite, unit, etc."
+                                className="w-full px-4 py-3 bg-dark-bg border border-gray-700 rounded-xl focus:border-red-500 focus:ring-1 focus:ring-red-500 outline-none text-white transition-all placeholder-gray-600"
+                              />
+                            </div>
                             <div className="grid grid-cols-2 gap-4">
                               <div>
-                                <label className="block text-gray-500 text-xs mb-1 ml-1">Latitude</label>
+                                <label className="block text-gray-400 text-sm font-semibold mb-2 ml-1">State</label>
                                 <input
-                                  type="number"
-                                  value={latitude}
-                                  onChange={(e) => setLatitude(parseFloat(e.target.value) || 0)}
-                                  placeholder="0.000000"
-                                  step="0.000001"
-                                  className="w-full px-3 py-2 bg-dark-surface border border-gray-700 rounded-lg focus:border-red-500 outline-none text-white text-sm"
+                                  type="text"
+                                  value={state}
+                                  onChange={(e) => setState(e.target.value)}
+                                  placeholder="e.g. California"
+                                  className="w-full px-4 py-3 bg-dark-bg border border-gray-700 rounded-xl focus:border-red-500 focus:ring-1 focus:ring-red-500 outline-none text-white transition-all placeholder-gray-600"
                                 />
                               </div>
                               <div>
-                                <label className="block text-gray-500 text-xs mb-1 ml-1">Longitude</label>
+                                <label className="block text-gray-400 text-sm font-semibold mb-2 ml-1">Country</label>
                                 <input
-                                  type="number"
-                                  value={longitude}
-                                  onChange={(e) => setLongitude(parseFloat(e.target.value) || 0)}
-                                  placeholder="0.000000"
-                                  step="0.000001"
-                                  className="w-full px-3 py-2 bg-dark-surface border border-gray-700 rounded-lg focus:border-red-500 outline-none text-white text-sm"
+                                  type="text"
+                                  value={country}
+                                  onChange={(e) => setCountry(e.target.value)}
+                                  placeholder="e.g. USA"
+                                  className="w-full px-4 py-3 bg-dark-bg border border-gray-700 rounded-xl focus:border-red-500 focus:ring-1 focus:ring-red-500 outline-none text-white transition-all placeholder-gray-600"
                                 />
                               </div>
                             </div>
-                            <p className="text-xs text-gray-500 mt-3 flex items-start gap-1">
-                              <FaInfoCircle className="mt-0.5 flex-shrink-0" size={10} />
-                              <span>Tip: Right-click a location on Google Maps and select the coordinates (e.g., 12.9716, 77.5946) to copy them.</span>
-                            </p>
+                            <div>
+                              <label className="block text-gray-400 text-sm font-semibold mb-2 ml-1">Pincode</label>
+                              <input
+                                type="text"
+                                value={pincode}
+                                onChange={(e) => setPincode(e.target.value)}
+                                placeholder="e.g. 10001"
+                                className="w-full px-4 py-3 bg-dark-bg border border-gray-700 rounded-xl focus:border-red-500 focus:ring-1 focus:ring-red-500 outline-none text-white transition-all placeholder-gray-600"
+                              />
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={fetchCoordinates}
+                              className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all shadow-lg shadow-blue-600/25 flex items-center justify-center gap-2 mt-2"
+                            >
+                              <FaMapMarkerAlt /> {loading ? "Finding..." : "Find location on Map"}
+                            </button>
+
+                            {(latitude !== 0 || longitude !== 0) && (
+                              <div className="h-48 w-full rounded-xl overflow-hidden border border-gray-700 mt-4 relative z-0">
+                                <MapContainer
+                                  center={[latitude, longitude]}
+                                  zoom={13}
+                                  scrollWheelZoom={false}
+                                  style={{ height: "100%", width: "100%" }}
+                                >
+                                  <ChangeView center={[latitude, longitude]} />
+                                  <TileLayer
+                                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                                  />
+                                  <Marker position={[latitude, longitude]} />
+                                </MapContainer>
+                              </div>
+                            )}
                           </div>
                         </div>
 

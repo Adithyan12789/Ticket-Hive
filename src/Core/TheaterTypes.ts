@@ -31,7 +31,11 @@ export interface TheaterManagement {
   id: string;
   name: string;
   city: string;
-  address: string;
+  addressLine1: string;
+  addressLine2?: string;
+  pincode: string;
+  state: string;
+  country: string;
   showTimes: string[];
   description: string;
   ticketPrice: string;
