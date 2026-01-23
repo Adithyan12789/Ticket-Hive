@@ -2,11 +2,11 @@
 export interface ScreenDetails {
   screen: Screen;
   schedule: Schedule[];
-  theater: Theater; 
+  theater: Theater;
 }
 
 export interface Screen {
-  theater: Theater; 
+  theater: Theater;
   _id: string;
   screenNumber: number;
   capacity: number;
@@ -18,7 +18,11 @@ export interface Screen {
 export interface Theater {
   name: string;
   _id: string;
-  address: string;
+  addressLine1: string;
+  addressLine2?: string;
+  pincode: string;
+  state: string;
+  country: string;
   city: string;
   ticketPrice: number;
 }

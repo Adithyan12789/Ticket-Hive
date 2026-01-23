@@ -192,7 +192,7 @@ const TheaterDetailScreen: React.FC = () => {
               <p className="text-gray-300 text-lg flex items-center gap-2 drop-shadow-md">
                 <FaMapMarkerAlt className="text-red-500" /> {theater.city}
                 <span className="text-gray-500 mx-2">|</span>
-                <span className="text-sm opacity-80">{theater.address}</span>
+                <span className="text-sm opacity-80">{theater.addressLine1}, {theater.city}, {theater.state} - {theater.pincode}</span>
               </p>
             </div>
 

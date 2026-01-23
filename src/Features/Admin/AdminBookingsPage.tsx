@@ -28,6 +28,7 @@ export interface Ticket {
     images: string[];
     showTime: string;
     paymentMethod: string;
+    address: string;
     totalPrice: number;
   };
   movieDetails: {

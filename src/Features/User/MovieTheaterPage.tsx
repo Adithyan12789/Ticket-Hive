@@ -386,7 +386,7 @@ const MovieTheaterScreen: React.FC = () => {
 
                       <p className="text-gray-400 text-sm flex items-start leading-relaxed">
                         <FaMapMarkerAlt className="mr-2 mt-1 text-gray-500 shrink-0 group-hover:text-blue-500 transition-colors" />
-                        {theater.address}
+                        {theater.addressLine1}, {theater.city}, {theater.state} - {theater.pincode}
                       </p>
                     </div>
 
@@ -520,7 +520,7 @@ const MovieTheaterScreen: React.FC = () => {
                     <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">Location</h3>
                     <p className="text-gray-300 mb-4 flex items-start">
                       <FaMapMarkerAlt className="mr-2 mt-1 text-primary-500 shrink-0" />
-                      {selectedTheater?.address}
+                      {selectedTheater?.addressLine1}, {selectedTheater?.city}, {selectedTheater?.state} - {selectedTheater?.pincode}
                     </p>
                     {selectedTheater && (
                       <div className="h-64 rounded-xl overflow-hidden border border-gray-700">
