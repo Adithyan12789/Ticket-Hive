@@ -221,7 +221,7 @@ const CastCard = ({ person, onDelete, onEdit }: { person: ICast; onDelete: (id: 
     >
         <div className="aspect-[2/3] w-full overflow-hidden">
             <img
-                src={`${backendUrl}/CastImages/${person.image}`}
+                src={`${backendUrl}/CastsImages/${person.image}`}
                 alt={person.name}
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
             />

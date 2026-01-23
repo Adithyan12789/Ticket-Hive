@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 import Loader from "../../Features/User/Loader";
 import { backendUrl } from "../../url";
 
-const THEATER_IMAGES_DIR_PATH = `${backendUrl}/MovieImages/`;
+const THEATER_IMAGES_DIR_PATH = `${backendUrl}/movieImages/`;
 
 const MovieDetailScreen: React.FC = () => {
   const { id } = useParams();
