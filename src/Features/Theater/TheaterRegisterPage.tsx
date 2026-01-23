@@ -110,7 +110,7 @@ const SignUpPage = () => {
       console.log(response);
       toast.success("Registration successful, please verify your OTP");
 
-      const expiresAt = new Date(Date.now() + 1 * 60 * 1000 + 59 * 1000);
+      const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
       setOtpExpires(expiresAt);
       setTimeLeft(Math.floor((expiresAt.getTime() - Date.now()) / 1000));
 
@@ -210,7 +210,7 @@ const SignUpPage = () => {
       await resendOtpTheater({ email }).unwrap();
       toast.success("OTP resent successfully");
 
-      const expiresAt = new Date(Date.now() + 1 * 60 * 1000 + 59 * 1000);
+      const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
       setOtpExpires(expiresAt);
       setTimeLeft(Math.floor((expiresAt.getTime() - Date.now()) / 1000));
     } catch (err: unknown) {
