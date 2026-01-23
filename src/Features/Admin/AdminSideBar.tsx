@@ -13,8 +13,31 @@ import {
 import { MdMovie } from "react-icons/md";
 import { AdminSidebarProps } from "../../Core/AdminTypes";
 import { motion } from "framer-motion";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { logout } from "../../Store/AdminAuthSlice";
+import { useAdminLogoutMutation } from "../../Store/AdminApiSlice";
+import { FaSignOutAlt } from "react-icons/fa";
+import { toast } from "react-toastify";
 
 const AdminSidebar: React.FC<AdminSidebarProps> = ({ adminName }) => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const [adminLogout] = useAdminLogoutMutation();
+
+  const handleLogout = async () => {
+    try {
+      await adminLogout({}).unwrap();
+      dispatch(logout());
+      toast.success("Logged out successfully");
+      navigate("/admin-login");
+    } catch (err) {
+      console.error("Logout failed:", err);
+      // Even if API fails, clear local state
+      dispatch(logout());
+      navigate("/admin-login");
+    }
+  };
 
   const navItems = [
     { path: "/admin/dashboard", label: "Dashboard", icon: FaHome },
@@ -86,9 +109,16 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ adminName }) => {
         </ul>
       </nav>
 
-      {/* Footer / Version Info */}
-      <div className="p-4 border-t border-gray-200 dark:border-gray-700/30 bg-gray-50 dark:bg-gray-900/50 text-center transition-colors duration-300">
-        <p className="text-xs text-gray-500 dark:text-gray-500 font-medium">Ticket Hive v1.0.0</p>
+      {/* Footer / Logout Section */}
+      <div className="p-4 border-t border-gray-200 dark:border-gray-700/30 bg-gray-50 dark:bg-gray-900/50 flex flex-col gap-2 transition-colors duration-300">
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-3 px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all duration-200 group"
+        >
+          <FaSignOutAlt className="text-lg transition-transform group-hover:scale-110" />
+          <span>Logout</span>
+        </button>
+        <p className="text-xs text-gray-500 dark:text-gray-500 font-medium text-center">Ticket Hive v1.0.0</p>
       </div>
     </aside>
   );
