@@ -236,21 +236,44 @@ const AddTheaterScreen: React.FC = () => {
     /^[0-9]+(\.[0-9]{1,2})?$/.test(value);
 
   const fetchCoordinates = async () => {
-    const fullAddress = `${addressLine1}, ${city}, ${state}, ${pincode}, ${country}`;
+    if (!addressLine1 || !city || !state || !country) {
+      toast.error("Please fill in Address Line 1, City, State, and Country first.");
+      return;
+    }
+
+    const combinations = [
+      `${addressLine1}, ${city}, ${state}, ${pincode}, ${country}`,
+      `${addressLine1}, ${city}, ${state}, ${country}`,
+      `${city}, ${state}, ${pincode}, ${country}`,
+      `${city}, ${state}, ${country}`
+    ];
+
     try {
       setLoading(true);
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-          fullAddress
-        )}`
-      );
-      const data = await response.json();
-      if (data && data.length > 0) {
-        setLatitude(parseFloat(data[0].lat));
-        setLongitude(parseFloat(data[0].lon));
-        toast.success("Location found on map!");
-      } else {
-        toast.error("Could not find location. Please check the address details.");
+      let found = false;
+
+      for (const query of combinations) {
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`,
+          {
+            headers: {
+              'Accept-Language': 'en'
+            }
+          }
+        );
+        const data = await response.json();
+
+        if (data && data.length > 0) {
+          setLatitude(parseFloat(data[0].lat));
+          setLongitude(parseFloat(data[0].lon));
+          toast.success(`Location found using: ${query}`);
+          found = true;
+          break;
+        }
+      }
+
+      if (!found) {
+        toast.error("Could not find location. Please check the address details or try a nearby landmark.");
       }
     } catch (error) {
       toast.error("Error fetching coordinates");
@@ -773,6 +796,16 @@ const AddTheaterScreen: React.FC = () => {
                                 value={addressLine2}
                                 onChange={(e) => setAddressLine2(e.target.value)}
                                 placeholder="Apartment, suite, unit, etc."
+                                className="w-full px-4 py-3 bg-dark-bg border border-gray-700 rounded-xl focus:border-red-500 focus:ring-1 focus:ring-red-500 outline-none text-white transition-all placeholder-gray-600"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-gray-400 text-sm font-semibold mb-2 ml-1">City</label>
+                              <input
+                                type="text"
+                                value={city}
+                                onChange={(e) => setCity(e.target.value)}
+                                placeholder="e.g. Los Angeles"
                                 className="w-full px-4 py-3 bg-dark-bg border border-gray-700 rounded-xl focus:border-red-500 focus:ring-1 focus:ring-red-500 outline-none text-white transition-all placeholder-gray-600"
                               />
                             </div>
