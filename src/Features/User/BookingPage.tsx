@@ -166,13 +166,15 @@ const BookingPage: React.FC = () => {
         seatIds: selectedSeats,
         screenId: screenId,
         offerId: offerId,
-        bookingDate: formattedDate,
+        bookingDate: date, // Send the actual date, not the formatted string
         showTime,
         totalPrice,
         paymentStatus: "pending",
         paymentMethod: method,
         convenienceFee,
       };
+
+      console.log("📤 Sending booking data:", bookingData);
 
       await createBooking(bookingData).unwrap();
       Swal.fire(

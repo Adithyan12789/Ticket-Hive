@@ -215,10 +215,15 @@ const MovieTheaterScreen: React.FC = () => {
       ))
     );
 
+  useEffect(() => {
+    if (errorTheaters) {
+      toast.error("Error fetching theaters");
+    }
+  }, [errorTheaters]);
+
   if (loading || loadingTheaters) return <Loader />;
 
   if (errorTheaters) {
-    toast.error("Error fetching theaters");
     return <div className="min-h-screen bg-dark-bg text-white flex items-center justify-center">Error fetching theaters</div>;
   }
 

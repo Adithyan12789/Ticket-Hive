@@ -170,7 +170,7 @@ const SelectSeatPage: React.FC = () => {
                           ? "bg-primary-500 border-primary-700 text-white shadow-lg shadow-primary-500/30"
                           : seat.isAvailable && !seat.holdSeat
                             ? "bg-dark-surface border-gray-700 text-gray-400 hover:bg-gray-700 hover:border-gray-500 hover:text-white"
-                            : "bg-gray-800 border-gray-900 text-gray-600 cursor-not-allowed opacity-50"
+                            : "bg-red-900/30 border-red-800/50 text-red-600/50 cursor-not-allowed"
                         }
                         `}
                       onClick={() =>
@@ -205,7 +205,7 @@ const SelectSeatPage: React.FC = () => {
             <span className="text-sm text-gray-400">Selected</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-5 h-5 bg-gray-800 border-b-4 border-gray-900 rounded-t-md opacity-50"></div>
+            <div className="w-5 h-5 bg-red-900/30 border-b-4 border-red-800/50 rounded-t-md"></div>
             <span className="text-sm text-gray-400">Sold</span>
           </div>
         </div>
